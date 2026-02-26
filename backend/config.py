@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from pydantic import PostgresDsn, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,10 +11,10 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # База данных
-    database_dsn: PostgresDsn = "postgresql+asyncpg://user:password@localhost:5432/kursach_checker"  # type: ignore[assignment]
+    database_dsn: str = "postgresql+asyncpg://user:password@localhost:5432/kursach_checker"
 
     # Redis / очередь задач
-    redis_dsn: RedisDsn = "redis://localhost:6379/0"  # type: ignore[assignment]
+    redis_dsn: str = "redis://localhost:6379/0"
 
     # CORS для Mini App / админки
     allowed_origins: list[str] = ["*"]
