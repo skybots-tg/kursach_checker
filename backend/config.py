@@ -10,6 +10,12 @@ class Settings(BaseSettings):
     app_name: str = "Kursach Checker"
     debug: bool = False
 
+    # Тестовый режим Mini App (без авторизации через Telegram).
+    # При включении появляется тестовый эндпоинт /api/miniapp/auth/test,
+    # а защищённые ручки могут использовать тестового пользователя.
+    miniapp_test_mode: bool = False
+    miniapp_test_user_telegram_id: int | None = None
+
     # База данных
     database_dsn: str = "postgresql+asyncpg://user:password@localhost:5432/kursach_checker"
 

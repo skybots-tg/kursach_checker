@@ -51,11 +51,28 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
     session: AsyncSession = Depends(get_session),
 ) -> User:
-    """Извлекает текущего пользователя из JWT‑токена."""
+    """
+    Извлекает текущего пользователя из JWT‑токена.
+
+    В тестовом режиме (miniapp_test_mode=True) при отсутствии токена
+    используется/создаётся тестовый пользователь.
+    """
+    settings = get_settings()
+
+    # Тестовый режим: позволяем работать без JWT.
+    if credentials is None and settings.miniapp_test_mode:
+        user_service = UserService(session)
+        telegram_id = settings.miniapp_test_user_telegram_id or 999_999_999
+        user = await user_service.get_or_create_telegram_user(
+            telegram_id=telegram_id,
+            first_name="Test",
+            username="test_user",
+        )
+        return user
+
     if credentials is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
-    settings = get_settings()
     token = credentials.credentials
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
@@ -111,6 +128,44 @@ async def auth_telegram(
         telegram_id=telegram_id,
         first_name=first_name,
         username=username,
+    )
+
+    now = datetime.utcnow()
+    expires_delta = timedelta(seconds=settings.jwt_ttl_seconds)
+    payload_jwt = {
+        "sub": user.id,
+        "telegram_id": telegram_id,
+        "exp": now + expires_delta,
+        "iat": now,
+    }
+    token = jwt.encode(payload_jwt, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+    return SessionResponse(
+        access_token=token,
+        expires_in=settings.jwt_ttl_seconds,
+    )
+
+
+@router.post("/auth/test", response_model=SessionResponse)
+async def auth_test(
+    session: AsyncSession = Depends(get_session),
+) -> SessionResponse:
+    """
+    Тестовая авторизация без Telegram.
+
+    Включается флагом miniapp_test_mode=True в .env.
+    Создаёт/использует тестового пользователя и возвращает JWT, как /auth/telegram.
+    """
+    settings = get_settings()
+    if not settings.miniapp_test_mode:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Test auth disabled")
+
+    user_service = UserService(session)
+    telegram_id = settings.miniapp_test_user_telegram_id or 999_999_999
+    user = await user_service.get_or_create_telegram_user(
+        telegram_id=telegram_id,
+        first_name="Test",
+        username="test_user",
     )
 
     now = datetime.utcnow()

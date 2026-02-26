@@ -41,3 +41,4 @@ def verify_init_data(init_data: str, bot_token: str) -> dict[str, str]:
 
 
 
+

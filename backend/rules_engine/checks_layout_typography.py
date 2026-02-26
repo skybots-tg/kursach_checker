@@ -84,3 +84,4 @@ def _check_typography_config(rules: TemplateRulesConfig) -> list[Finding]:
 
 
 
+
