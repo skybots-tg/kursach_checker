@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from pydantic import BaseSettings, PostgresDsn, RedisDsn
+from pydantic import PostgresDsn, RedisDsn
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -31,9 +32,10 @@ class Settings(BaseSettings):
     # Демо‑отчёт для Mini App (предзагруженный JSON CheckReport).
     demo_report_path: str | None = "rules_specs/demo_report_hse_journalism_2024_25.json"
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+    )
 
 
 @lru_cache()
