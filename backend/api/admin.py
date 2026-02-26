@@ -496,7 +496,7 @@ async def update_bot_content(
     )
 
 
-@router.delete("/bot_content/{content_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/bot_content/{content_id}", status_code=status.HTTP_200_OK)
 async def delete_bot_content(
     content_id: int,
     session: AsyncSession = Depends(get_session),
