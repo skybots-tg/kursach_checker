@@ -1,0 +1,62 @@
+{
+  "template_profile_id": "hse_journalism_2024_25",
+  "template_version_id": 1,
+  "summary_errors": 2,
+  "summary_warnings": 1,
+  "summary_autofixed": 0,
+  "findings": [
+    {
+      "rule_id": "layout.margins.left",
+      "title": "Поле страницы (left) не соответствует шаблону",
+      "category": "page_layout",
+      "severity": "error",
+      "expected": "30.0 мм (допуск 1 мм)",
+      "actual": "25.0 мм",
+      "recommendation": "Измените левое поле страницы в настройках Word согласно требованиям вуза.",
+      "location": {
+        "section_id": null,
+        "section_title": null,
+        "page": null,
+        "paragraph_index": null
+      },
+      "auto_fixed": false,
+      "auto_fix_description": null
+    },
+    {
+      "rule_id": "bibliography.min_total_sources",
+      "title": "Недостаточно источников в списке литературы",
+      "category": "bibliography",
+      "severity": "warning",
+      "expected": "Не менее 20 источников.",
+      "actual": "Обнаружено примерно 12 источников.",
+      "recommendation": "Добавьте недостающие источники согласно методическим требованиям.",
+      "location": {
+        "section_id": "bibliography",
+        "section_title": null,
+        "page": null,
+        "paragraph_index": null
+      },
+      "auto_fixed": false,
+      "auto_fix_description": null
+    },
+    {
+      "rule_id": "integrity.track_changes",
+      "title": "Включён режим правок",
+      "category": "integrity",
+      "severity": "error",
+      "expected": "В документе должен быть отключён режим правок (track changes).",
+      "actual": "Обнаружены вставки/удаления или маркеры track revisions.",
+      "recommendation": "Примите или отклоните все правки и отключите режим правок в Word.",
+      "location": {
+        "section_id": null,
+        "section_title": null,
+        "page": null,
+        "paragraph_index": null
+      },
+      "auto_fixed": false,
+      "auto_fix_description": null
+    }
+  ]
+}
+
+

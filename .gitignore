@@ -1,0 +1,66 @@
+### OS / общие ###
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+*.orig
+
+### Python / backend / bot ###
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Виртуальные окружения
+.venv/
+venv/
+env/
+.env/
+
+# Кэш / метаданные
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+.hypothesis/
+
+# IDE / редакторы
+.idea/
+.vscode/
+.vs/
+*.code-workspace
+
+### Node / фронтенды (Vite, React) ###
+node_modules/
+frontend-admin/node_modules/
+frontend-miniapp/node_modules/
+
+# Билды Vite / React
+dist/
+build/
+frontend-admin/dist/
+frontend-miniapp/dist/
+
+# Логи и отчёты
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+vite.config.timestamp-*.mjs
+
+### Разное ###
+# окружения / секреты
+*.env
+*.env.*
+
+# локальные данные / временные файлы
+*.sqlite3
+*.db
+*.db-journal
+
+
