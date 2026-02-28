@@ -10,9 +10,13 @@ export const DashboardPage: React.FC = () => {
     const loadData = async () => {
       try {
         setLoading(true);
+        setError(null);
+        console.log("[Dashboard] Loading dashboard data...");
         const dashboardData = await api.getDashboard();
+        console.log("[Dashboard] Data loaded:", dashboardData);
         setData(dashboardData);
       } catch (err) {
+        console.error("[Dashboard] Error loading data:", err);
         setError(err instanceof Error ? err.message : "Ошибка загрузки данных");
       } finally {
         setLoading(false);

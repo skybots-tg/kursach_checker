@@ -1,19 +1,33 @@
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8343/api/admin";
+const API_BASE = import.meta.env.VITE_API_BASE || "/api/admin";
 
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-  });
+  const url = `${API_BASE}${endpoint}`;
+  console.log(`[API] Fetching: ${url}`);
   
-  if (!response.ok) {
-    throw new Error(`API error: ${response.statusText}`);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+      },
+    });
+    
+    console.log(`[API] Response status: ${response.status} for ${url}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[API] Error response:`, errorText);
+      throw new Error(`API error (${response.status}): ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    console.log(`[API] Success for ${url}`);
+    return data;
+  } catch (error) {
+    console.error(`[API] Fetch error for ${url}:`, error);
+    throw error;
   }
-  
-  return response.json();
 }
 
 export interface DashboardStats {
