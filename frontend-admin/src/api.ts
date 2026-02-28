@@ -1,4 +1,26 @@
-const API_BASE = import.meta.env.VITE_API_BASE || "/api/admin";
+// Определяем базовый URL API
+// В dev режиме используем proxy через vite, в production - абсолютный URL
+// Можно переопределить через переменную окружения VITE_API_BASE при сборке
+function getApiBase(): string {
+  // Если задана переменная окружения - используем её
+  if (import.meta.env.VITE_API_BASE) {
+    return import.meta.env.VITE_API_BASE;
+  }
+  
+  // В dev режиме используем относительный путь (работает через vite proxy)
+  if (import.meta.env.MODE === 'development' || import.meta.env.DEV) {
+    return '/api/admin';
+  }
+  
+  // В production используем абсолютный URL
+  // Если фронтенд и бэкенд на одном домене, можно использовать относительный путь
+  // Но если на разных портах - нужен абсолютный URL
+  const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+  const port = '8343';
+  return `http://${host}:${port}/api/admin`;
+}
+
+const API_BASE = getApiBase();
 
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
