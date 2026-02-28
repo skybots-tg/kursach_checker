@@ -92,6 +92,8 @@ class CheckDetailResponse(BaseModel):
     status: str
     report: dict[str, Any] | None
     output_file_id: int | None
+    # Идентификатор файла JSON‑отчёта (для скачивания из Mini App).
+    report_file_id: int | None = None
 
 
 class FileUploadResponse(BaseModel):

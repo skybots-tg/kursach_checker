@@ -465,6 +465,7 @@ async def get_check_detail(
         status=check.status,
         report=report_data,
         output_file_id=check.output_file_id,
+        report_file_id=check.result_report_id,
     )
 
 
@@ -497,6 +498,7 @@ async def get_demo_check() -> CheckDetailResponse:
         status="demo",
         report=data,
         output_file_id=None,
+        report_file_id=None,
     )
 
 

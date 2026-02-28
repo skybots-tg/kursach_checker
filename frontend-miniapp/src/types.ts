@@ -96,6 +96,7 @@ export interface CheckDetailResponse {
   status: string;
   report: CheckReport | null;
   output_file_id: number | null;
+  report_file_id: number | null;
 }
 
 export interface FileUploadResponse {

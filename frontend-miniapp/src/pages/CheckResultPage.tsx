@@ -87,6 +87,34 @@ export const CheckResultPage: React.FC = () => {
             </div>
           </div>
 
+          {data.output_file_id || data.report_file_id ? (
+            <>
+              <div className="spacer-12" />
+              <div style={{ display: "flex", gap: 8 }}>
+                {data.output_file_id && (
+                  <a
+                    href={`/api/miniapp/files/${data.output_file_id}/download`}
+                    style={{ flex: 1, textDecoration: "none" }}
+                  >
+                    <button className="primary-btn" style={{ width: "100%" }}>
+                      Скачать исправленный документ
+                    </button>
+                  </a>
+                )}
+                {data.report_file_id && (
+                  <a
+                    href={`/api/miniapp/files/${data.report_file_id}/download`}
+                    style={{ flex: 1, textDecoration: "none" }}
+                  >
+                    <button className="secondary-btn" style={{ width: "100%" }}>
+                      Скачать отчёт (JSON)
+                    </button>
+                  </a>
+                )}
+              </div>
+            </>
+          ) : null}
+
           <div className="spacer-12" />
 
           <div className="filters-row">
