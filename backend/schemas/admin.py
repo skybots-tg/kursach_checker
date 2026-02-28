@@ -159,3 +159,33 @@ class CheckItemAdmin(BaseModel):
     input_file_id: int
     result_report_id: int | None
     output_file_id: int | None
+
+
+class UserItemAdmin(BaseModel):
+    id: int
+    telegram_id: int
+    username: str | None
+    first_name: str | None
+    credits_balance: int
+    created_at: datetime
+    last_login_at: datetime | None
+
+
+class DashboardStats(BaseModel):
+    checks_today: int
+    checks_7days: int
+    payments_today: int
+    payments_7days: int
+    avg_processing_time_seconds: float | None
+    worker_errors_recent: int
+
+
+class DashboardEvent(BaseModel):
+    time: str
+    event: str
+    status: str
+
+
+class DashboardData(BaseModel):
+    stats: DashboardStats
+    recent_events: list[DashboardEvent]

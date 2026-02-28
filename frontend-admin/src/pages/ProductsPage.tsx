@@ -1,6 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { api, ProductItem } from "../api";
 
 export const ProductsPage: React.FC = () => {
+  const [products, setProducts] = useState<ProductItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await api.getProducts();
+        setProducts(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Ошибка загрузки данных");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProducts();
+  }, []);
+
   return (
     <div className="page-card">
       <div className="section-title-row">
@@ -13,37 +33,48 @@ export const ProductsPage: React.FC = () => {
         <button className="primary-btn">Добавить продукт</button>
       </div>
 
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Название</th>
-            <th>Цена</th>
-            <th>Кредитов</th>
-            <th>Описание</th>
-            <th>Активность</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1 проверка</td>
-            <td>299 ₽</td>
-            <td>1</td>
-            <td>Одна техническая проверка документа</td>
-            <td>
-              <span className="badge badge-success">активен</span>
-            </td>
-          </tr>
-          <tr>
-            <td>5 проверок</td>
-            <td>1190 ₽</td>
-            <td>5</td>
-            <td>Пакет для нескольких работ или перепроверок</td>
-            <td>
-              <span className="badge badge-success">активен</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      {loading ? (
+        <div>Загрузка...</div>
+      ) : error ? (
+        <div style={{ color: "red" }}>Ошибка: {error}</div>
+      ) : (
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Название</th>
+              <th>Цена</th>
+              <th>Кредитов</th>
+              <th>Описание</th>
+              <th>Активность</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.length === 0 ? (
+              <tr>
+                <td colSpan={5} style={{ textAlign: "center", color: "#999" }}>
+                  Нет продуктов
+                </td>
+              </tr>
+            ) : (
+              products.map((product) => (
+                <tr key={product.id}>
+                  <td>{product.name}</td>
+                  <td>
+                    {product.price} {product.currency}
+                  </td>
+                  <td>{product.credits_amount}</td>
+                  <td>{product.description || "—"}</td>
+                  <td>
+                    <span className={`badge ${product.active ? "badge-success" : "badge-muted"}`}>
+                      {product.active ? "активен" : "неактивен"}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };

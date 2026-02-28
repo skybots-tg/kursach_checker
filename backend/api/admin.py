@@ -1,17 +1,22 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, func
+from datetime import datetime, timedelta, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select, func, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.db import get_session
 from backend.db.models_domain import BotContent, Check, Template, TemplateVersion, University, Gost
-from backend.db.models_users import AuditLog, Order, Product, ProdamusPayment
+from backend.db.models_users import AuditLog, Order, Product, ProdamusPayment, User, CreditsBalance
 from backend.schemas.admin import (
     AuditLogItem,
     BotContentCreateUpdate,
     BotContentItem,
     CheckItemAdmin,
+    DashboardData,
+    DashboardEvent,
+    DashboardStats,
     GostCreateUpdate,
     GostItem,
     OrderItemAdmin,
@@ -26,6 +31,7 @@ from backend.schemas.admin import (
     TemplateVersionUpdate,
     UniversityCreateUpdate,
     UniversityItem,
+    UserItemAdmin,
 )
 from backend.rules_engine.schemas import TemplateRulesConfig
 
@@ -676,8 +682,27 @@ async def list_payments_prodamus_admin(
 @router.get("/checks", response_model=list[CheckItemAdmin])
 async def list_checks_admin(
     session: AsyncSession = Depends(get_session),
+    search: str | None = Query(None, description="Поиск по user_id или id проверки"),
+    status_filter: str | None = Query(None, description="Фильтр по статусу"),
 ) -> list[CheckItemAdmin]:
-    stmt = select(Check).order_by(Check.created_at.desc())
+    stmt = select(Check)
+    
+    if search:
+        try:
+            search_id = int(search)
+            stmt = stmt.where(
+                or_(
+                    Check.id == search_id,
+                    Check.user_id == search_id,
+                )
+            )
+        except ValueError:
+            pass
+    
+    if status_filter and status_filter != "Все":
+        stmt = stmt.where(Check.status == status_filter)
+    
+    stmt = stmt.order_by(Check.created_at.desc())
     result = await session.execute(stmt)
     rows = result.scalars().all()
     return [
@@ -695,4 +720,167 @@ async def list_checks_admin(
         )
         for row in rows
     ]
+
+
+@router.get("/users", response_model=list[UserItemAdmin])
+async def list_users_admin(
+    session: AsyncSession = Depends(get_session),
+    search: str | None = Query(None, description="Поиск по telegram_id, username или email"),
+) -> list[UserItemAdmin]:
+    stmt = select(User, CreditsBalance).outerjoin(CreditsBalance, User.id == CreditsBalance.user_id)
+    
+    if search:
+        try:
+            telegram_id = int(search)
+            stmt = stmt.where(User.telegram_id == telegram_id)
+        except ValueError:
+            stmt = stmt.where(
+                or_(
+                    User.username.ilike(f"%{search}%"),
+                    User.first_name.ilike(f"%{search}%"),
+                )
+            )
+    
+    stmt = stmt.order_by(User.created_at.desc())
+    result = await session.execute(stmt)
+    rows = result.all()
+    
+    return [
+        UserItemAdmin(
+            id=user.id,
+            telegram_id=user.telegram_id,
+            username=user.username,
+            first_name=user.first_name,
+            credits_balance=balance.credits_available if balance else 0,
+            created_at=user.created_at,
+            last_login_at=user.last_login_at,
+        )
+        for user, balance in rows
+    ]
+
+
+@router.get("/dashboard", response_model=DashboardData)
+async def get_dashboard_data(
+    session: AsyncSession = Depends(get_session),
+) -> DashboardData:
+    now = datetime.now(timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = today_start - timedelta(days=7)
+    
+    # Проверки за сегодня
+    stmt_checks_today = select(func.count(Check.id)).where(Check.created_at >= today_start)
+    result_checks_today = await session.execute(stmt_checks_today)
+    checks_today = result_checks_today.scalar() or 0
+    
+    # Проверки за 7 дней
+    stmt_checks_7days = select(func.count(Check.id)).where(Check.created_at >= week_start)
+    result_checks_7days = await session.execute(stmt_checks_7days)
+    checks_7days = result_checks_7days.scalar() or 0
+    
+    # Оплаты за сегодня (успешные)
+    stmt_payments_today = (
+        select(func.count(Order.id))
+        .where(and_(Order.created_at >= today_start, Order.status == "paid"))
+    )
+    result_payments_today = await session.execute(stmt_payments_today)
+    payments_today = result_payments_today.scalar() or 0
+    
+    # Оплаты за 7 дней (успешные)
+    stmt_payments_7days = (
+        select(func.count(Order.id))
+        .where(and_(Order.created_at >= week_start, Order.status == "paid"))
+    )
+    result_payments_7days = await session.execute(stmt_payments_7days)
+    payments_7days = result_payments_7days.scalar() or 0
+    
+    # Среднее время обработки (завершенные проверки за последние 7 дней)
+    stmt_avg_time = (
+        select(func.avg(func.extract("epoch", Check.finished_at - Check.created_at)))
+        .where(
+            and_(
+                Check.finished_at.isnot(None),
+                Check.created_at >= week_start,
+                Check.status == "done",
+            )
+        )
+    )
+    result_avg_time = await session.execute(stmt_avg_time)
+    avg_time = result_avg_time.scalar()
+    
+    # Ошибки воркера (проверки со статусом error за последние 7 дней)
+    stmt_errors = (
+        select(func.count(Check.id))
+        .where(and_(Check.created_at >= week_start, Check.status == "error"))
+    )
+    result_errors = await session.execute(stmt_errors)
+    worker_errors = result_errors.scalar() or 0
+    
+    # Последние события (оплаты и проверки)
+    stmt_orders_recent = (
+        select(Order.id, Order.created_at, Order.status, Order.amount)
+        .order_by(Order.created_at.desc())
+        .limit(10)
+    )
+    result_orders = await session.execute(stmt_orders_recent)
+    orders_recent = result_orders.all()
+    
+    stmt_checks_recent = (
+        select(Check.id, Check.created_at, Check.status)
+        .order_by(Check.created_at.desc())
+        .limit(10)
+    )
+    result_checks = await session.execute(stmt_checks_recent)
+    checks_recent = result_checks.all()
+    
+    # Объединяем события и сортируем по времени
+    events_raw = []
+    for order_id, created_at, status, amount in orders_recent:
+        events_raw.append(
+            (
+                created_at,
+                DashboardEvent(
+                    time=created_at.strftime("%H:%M"),
+                    event=f"Оплата #{order_id} ({int(amount)} ₽)",
+                    status="paid" if status == "paid" else status,
+                ),
+            )
+        )
+    
+    for check_id, created_at, status in checks_recent:
+        if status == "done":
+            event_text = f"Проверка #{check_id} — готово"
+            event_status = "done"
+        elif status == "error":
+            event_text = f"Проверка #{check_id} — ошибка воркера"
+            event_status = "error"
+        else:
+            event_text = f"Проверка #{check_id} — {status}"
+            event_status = status
+        
+        events_raw.append(
+            (
+                created_at,
+                DashboardEvent(
+                    time=created_at.strftime("%H:%M"),
+                    event=event_text,
+                    status=event_status,
+                ),
+            )
+        )
+    
+    # Сортируем по времени (новые сверху) и берем первые 10
+    events_raw.sort(key=lambda x: x[0], reverse=True)
+    events = [event for _, event in events_raw[:10]]
+    
+    return DashboardData(
+        stats=DashboardStats(
+            checks_today=checks_today,
+            checks_7days=checks_7days,
+            payments_today=payments_today,
+            payments_7days=payments_7days,
+            avg_processing_time_seconds=float(avg_time) if avg_time else None,
+            worker_errors_recent=worker_errors,
+        ),
+        recent_events=events,
+    )
 

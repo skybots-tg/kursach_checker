@@ -1,6 +1,41 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { api, OrderItem, ProdamusPaymentItem } from "../api";
 
 export const PaymentsPage: React.FC = () => {
+  const [orders, setOrders] = useState<OrderItem[]>([]);
+  const [payments, setPayments] = useState<ProdamusPaymentItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [ordersData, paymentsData] = await Promise.all([
+          api.getOrders(),
+          api.getPaymentsProdamus(),
+        ]);
+        setOrders(ordersData);
+        setPayments(paymentsData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Ошибка загрузки данных");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  const getStatusBadgeClass = (status: string): string => {
+    if (status === "paid") return "badge badge-success";
+    if (status === "failed" || status === "cancelled") return "badge badge-muted";
+    return "badge";
+  };
+
+  const getPaymentForOrder = (orderId: number): ProdamusPaymentItem | undefined => {
+    return payments.find((p) => p.order_id === orderId);
+  };
+
   return (
     <div className="page-card">
       <div className="section-title-row">
@@ -12,48 +47,51 @@ export const PaymentsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="field-row" style={{ marginBottom: 10 }}>
-        <div style={{ flex: 1 }}>
-          <div className="field-label">Поиск по пользователю или invoice_id</div>
-          <input className="field-input" placeholder="telegram_id, email или invoice_id" />
-        </div>
-        <div>
-          <div className="field-label">Статус</div>
-          <select className="field-select">
-            <option>Все</option>
-            <option>created</option>
-            <option>paid</option>
-            <option>failed</option>
-            <option>cancelled</option>
-            <option>refund</option>
-          </select>
-        </div>
-      </div>
-
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Дата</th>
-            <th>Пользователь</th>
-            <th>Продукт</th>
-            <th>Сумма</th>
-            <th>Статус</th>
-            <th>invoice_id</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>12.02.2025 10:24</td>
-            <td>@student123</td>
-            <td>1 проверка</td>
-            <td>299 ₽</td>
-            <td>
-              <span className="badge badge-success">paid</span>
-            </td>
-            <td>inv_1042</td>
-          </tr>
-        </tbody>
-      </table>
+      {loading ? (
+        <div>Загрузка...</div>
+      ) : error ? (
+        <div style={{ color: "red" }}>Ошибка: {error}</div>
+      ) : (
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Пользователь</th>
+              <th>Продукт</th>
+              <th>Сумма</th>
+              <th>Статус</th>
+              <th>invoice_id</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: "center", color: "#999" }}>
+                  Нет заказов
+                </td>
+              </tr>
+            ) : (
+              orders.map((order) => {
+                const payment = getPaymentForOrder(order.id);
+                return (
+                  <tr key={order.id}>
+                    <td>{new Date(order.created_at).toLocaleString("ru-RU")}</td>
+                    <td>User #{order.user_id}</td>
+                    <td>Product #{order.product_id}</td>
+                    <td>
+                      {order.amount} ₽
+                    </td>
+                    <td>
+                      <span className={getStatusBadgeClass(order.status)}>{order.status}</span>
+                    </td>
+                    <td>{payment?.prodamus_invoice_id || "—"}</td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };
