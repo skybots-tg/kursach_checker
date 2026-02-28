@@ -49,13 +49,13 @@ export const CheckResultPage: React.FC = () => {
     data?.report?.summary_autofixed ?? findings.filter((f) => f.auto_fixed && f.severity !== "error").length;
 
   return (
-    <div className="glass-card" style={{ padding: 16 }}>
+    <div className="glass-card" style={{ padding: "var(--spacing-lg)" }}>
       {loading ? (
-        <div style={{ fontSize: 13 }}>Загружаем результат проверки…</div>
+        <div style={{ fontSize: "var(--font-size-sm)" }}>Загружаем результат проверки…</div>
       ) : error ? (
-        <div style={{ fontSize: 13, color: "#b91c1c" }}>{error}</div>
+        <div style={{ fontSize: "var(--font-size-sm)", color: "var(--accent-error)" }}>{error}</div>
       ) : !data ? (
-        <div style={{ fontSize: 13 }}>Результат не найден.</div>
+        <div style={{ fontSize: "var(--font-size-sm)" }}>Результат не найден.</div>
       ) : (
         <>
           <div className="page-section-title">Результат проверки #{data.id}</div>
@@ -75,22 +75,22 @@ export const CheckResultPage: React.FC = () => {
           <div className="kpi-row">
             <div className="kpi-card">
               <div className="kpi-label">Ошибки</div>
-              <div className="kpi-value" style={{ color: "#b91c1c" }}>{errorsCount}</div>
+              <div className="kpi-value" style={{ color: "var(--accent-error)" }}>{errorsCount}</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Предупреждения</div>
-              <div className="kpi-value" style={{ color: "#92400e" }}>{warningsCount}</div>
+              <div className="kpi-value" style={{ color: "var(--accent-warning)" }}>{warningsCount}</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Автоисправлено</div>
-              <div className="kpi-value" style={{ color: "#065f46" }}>{autofixedCount}</div>
+              <div className="kpi-value" style={{ color: "var(--accent-success)" }}>{autofixedCount}</div>
             </div>
           </div>
 
           {data.output_file_id || data.report_file_id ? (
             <>
               <div className="spacer-12" />
-              <div style={{ display: "flex", gap: 8 }}>
+              <div style={{ display: "flex", gap: "var(--spacing-sm)" }}>
                 {data.output_file_id && (
                   <a
                     href={`/api/miniapp/files/${data.output_file_id}/download`}
@@ -186,7 +186,7 @@ export const CheckResultPage: React.FC = () => {
                   </div>
                 )}
                 {f.recommendation && (
-                  <div className="finding-text" style={{ marginTop: 4 }}>
+                  <div className="finding-text" style={{ marginTop: "var(--spacing-xs)" }}>
                     <strong>Рекомендация:</strong> {f.recommendation}
                   </div>
                 )}

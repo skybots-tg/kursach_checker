@@ -32,11 +32,11 @@ export const HistoryPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="glass-card" style={{ padding: 16 }}>
+    <div className="glass-card" style={{ padding: "var(--spacing-lg)" }}>
       {loading ? (
-        <div style={{ fontSize: 13 }}>Загружаем историю…</div>
+        <div style={{ fontSize: "var(--font-size-sm)" }}>Загружаем историю…</div>
       ) : error ? (
-        <div style={{ fontSize: 13, color: "#b91c1c" }}>{error}</div>
+        <div style={{ fontSize: "var(--font-size-sm)", color: "var(--accent-error)" }}>{error}</div>
       ) : (
         <>
           <div className="page-section-title">Проверки</div>

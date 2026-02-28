@@ -1,0 +1,88 @@
+/* Главный файл стилей - импортирует все модули */
+@import './variables.css';
+@import './base.css';
+@import './layout.css';
+@import './components.css';
+
+/* Дополнительные улучшения для iOS стиля */
+.app-shell {
+  background: linear-gradient(
+    180deg,
+    var(--bg-secondary) 0%,
+    var(--bg-secondary) 50%,
+    var(--bg-tertiary) 100%
+  );
+}
+
+/* Плавные переходы для всех интерактивных элементов */
+button,
+a,
+.select-card,
+.finding-card,
+.filter-pill,
+.bottom-nav-item {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Улучшенная доступность */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Поддержка высокого DPI */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .glass-card,
+  .top-bar,
+  .bottom-nav,
+  .finding-card,
+  .kpi-card {
+    border-width: 0.5px;
+  }
+}
+
+/* Улучшения для iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .app-shell {
+    /* Исправление для safe-area в iOS */
+    padding-left: max(var(--spacing-md), env(safe-area-inset-left));
+    padding-right: max(var(--spacing-md), env(safe-area-inset-right));
+  }
+  
+  .page-scroll {
+    /* Плавная прокрутка в iOS */
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Анимация появления для карточек */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.glass-card {
+  animation: fadeIn var(--transition-base) ease-out;
+}
+
+/* Улучшенная типографика для iOS */
+@media (max-width: 420px) {
+  .page-section-title {
+    font-size: var(--font-size-md);
+  }
+  
+  .kpi-value {
+    font-size: var(--font-size-lg);
+  }
+}

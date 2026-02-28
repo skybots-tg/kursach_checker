@@ -53,11 +53,11 @@ export const DemoPage: React.FC = () => {
     data?.report?.summary_autofixed ?? findings.filter((f) => f.auto_fixed && f.severity !== "error").length;
 
   return (
-    <div className="glass-card" style={{ padding: 16 }}>
+    <div className="glass-card" style={{ padding: "var(--spacing-lg)" }}>
       {loading ? (
-        <div style={{ fontSize: 13 }}>Загружаем пример отчёта…</div>
+        <div style={{ fontSize: "var(--font-size-sm)" }}>Загружаем пример отчёта…</div>
       ) : error ? (
-        <div style={{ fontSize: 13, color: "#b91c1c" }}>{error}</div>
+        <div style={{ fontSize: "var(--font-size-sm)", color: "var(--accent-error)" }}>{error}</div>
       ) : (
         <>
           <div className="page-section-title">Демо‑проверка</div>
@@ -68,15 +68,15 @@ export const DemoPage: React.FC = () => {
           <div className="kpi-row">
             <div className="kpi-card">
               <div className="kpi-label">Ошибки</div>
-              <div className="kpi-value" style={{ color: "#b91c1c" }}>{errorsCount}</div>
+              <div className="kpi-value" style={{ color: "var(--accent-error)" }}>{errorsCount}</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Предупреждения</div>
-              <div className="kpi-value" style={{ color: "#92400e" }}>{warningsCount}</div>
+              <div className="kpi-value" style={{ color: "var(--accent-warning)" }}>{warningsCount}</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Автоисправлено</div>
-              <div className="kpi-value" style={{ color: "#065f46" }}>{autofixedCount}</div>
+              <div className="kpi-value" style={{ color: "var(--accent-success)" }}>{autofixedCount}</div>
             </div>
           </div>
 
@@ -151,7 +151,7 @@ export const DemoPage: React.FC = () => {
                   </div>
                 )}
                 {f.recommendation && (
-                  <div className="finding-text" style={{ marginTop: 4 }}>
+                  <div className="finding-text" style={{ marginTop: "var(--spacing-xs)" }}>
                     <strong>Рекомендация:</strong> {f.recommendation}
                   </div>
                 )}
@@ -161,7 +161,7 @@ export const DemoPage: React.FC = () => {
 
           <div className="spacer-16" />
 
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: "var(--spacing-sm)" }}>
             <button className="secondary-btn" style={{ flex: 1 }} disabled>
               <Icon name="file-text" className="bottom-nav-icon" /> Скачать пример отчёта
             </button>

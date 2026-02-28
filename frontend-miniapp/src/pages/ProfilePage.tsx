@@ -45,7 +45,7 @@ export const ProfilePage: React.FC<Props> = ({ me }) => {
   }
 
   return (
-    <div className="glass-card" style={{ padding: 16 }}>
+    <div className="glass-card" style={{ padding: "var(--spacing-lg)" }}>
       <div className="page-section-title">Профиль</div>
       <div className="page-section-description">
         {me.first_name && (
@@ -67,16 +67,16 @@ export const ProfilePage: React.FC<Props> = ({ me }) => {
 
       <div className="page-section-title">Пополнить баланс</div>
       {loading ? (
-        <div style={{ fontSize: 13 }}>Загружаем тарифы…</div>
+        <div style={{ fontSize: "var(--font-size-sm)" }}>Загружаем тарифы…</div>
       ) : error ? (
-        <div style={{ fontSize: 13, color: "#b91c1c" }}>{error}</div>
+        <div style={{ fontSize: "var(--font-size-sm)", color: "var(--accent-error)" }}>{error}</div>
       ) : (
         <div className="card-list">
           {products.map((p) => (
             <div key={p.id} className="finding-card">
               <div className="finding-title-row">
                 <div className="finding-title">{p.name}</div>
-                <div style={{ fontSize: 13, fontWeight: 600 }}>
+                <div style={{ fontSize: "var(--font-size-sm)", fontWeight: 600, color: "var(--accent-primary)" }}>
                   {p.price} {p.currency}
                 </div>
               </div>

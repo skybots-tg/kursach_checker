@@ -15,6 +15,15 @@ declare global {
     Telegram?: {
       WebApp?: {
         initData?: string;
+        colorScheme?: "light" | "dark";
+        themeParams?: {
+          bg_color?: string;
+          text_color?: string;
+          hint_color?: string;
+          link_color?: string;
+          button_color?: string;
+          button_text_color?: string;
+        };
       };
     };
   }
@@ -105,7 +114,7 @@ function TopBar() {
         <div className="top-bar-title">{title}</div>
         {subtitle && <div className="top-bar-subtitle">{subtitle}</div>}
       </div>
-      <div style={{ marginLeft: "auto", fontSize: 11, color: "#6b7280" }}>
+      <div style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-tertiary)" }}>
         <Link to="/profile" style={{ textDecoration: "none", color: "inherit" }}>
           Mini App
         </Link>
@@ -146,22 +155,52 @@ function BottomNav() {
   );
 }
 
+function useTheme() {
+  useEffect(() => {
+    const webApp = window.Telegram?.WebApp;
+    if (webApp) {
+      const theme = webApp.colorScheme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+      
+      // Слушаем изменения темы
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleChange = () => {
+        const newTheme = webApp.colorScheme || (mediaQuery.matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", newTheme);
+      };
+      
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    } else {
+      // Fallback для браузера
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleChange = () => {
+        document.documentElement.setAttribute("data-theme", mediaQuery.matches ? "dark" : "light");
+      };
+      handleChange();
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+  }, []);
+}
+
 export const App: React.FC = () => {
   const { me, loading, error } = useMiniAppAuth();
+  useTheme();
 
   return (
     <div className="app-shell">
       <TopBar />
       <main className="page-scroll">
         {loading && !me ? (
-          <div className="glass-card" style={{ padding: 16, fontSize: 13 }}>
+          <div className="glass-card" style={{ padding: "var(--spacing-lg)", fontSize: "var(--font-size-sm)" }}>
             Авторизация через Telegram…
           </div>
         ) : error && !me ? (
-          <div className="glass-card" style={{ padding: 16, fontSize: 13 }}>
+          <div className="glass-card" style={{ padding: "var(--spacing-lg)" }}>
             <div className="page-section-title">Не удалось авторизоваться</div>
             <div className="page-section-description">{error}</div>
-            <div style={{ fontSize: 12, marginTop: 8 }}>
+            <div style={{ fontSize: "var(--font-size-xs)", marginTop: "var(--spacing-sm)", color: "var(--text-tertiary)" }}>
               Откройте Mini App из Telegram‑бота, чтобы мы получили initData.
             </div>
           </div>

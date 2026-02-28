@@ -105,7 +105,7 @@ export const CheckPage: React.FC<Props> = ({ me }) => {
   }
 
   return (
-    <div className="glass-card" style={{ padding: 16 }}>
+    <div className="glass-card" style={{ padding: "var(--spacing-lg)" }}>
       <div className="page-section-title">Настройки проверки</div>
       <div className="page-section-description">
         Сначала выберите вуз и шаблон проверки, затем загрузите документ в формате DOCX.
@@ -121,7 +121,7 @@ export const CheckPage: React.FC<Props> = ({ me }) => {
           setUniversityId(value ? Number(value) : undefined);
           setTemplateVersionId(undefined);
         }}
-        style={{ width: "100%", minHeight: 40, borderRadius: 12, padding: "6px 10px" }}
+        style={{ width: "100%", minHeight: 50, borderRadius: "var(--radius-md)", padding: "var(--spacing-md) var(--spacing-lg)" }}
       >
         <option value="">Выберите вуз</option>
         {universities.map((u) => (
@@ -137,7 +137,7 @@ export const CheckPage: React.FC<Props> = ({ me }) => {
       <select
         value={templateVersionId ?? ""}
         onChange={(e) => setTemplateVersionId(e.target.value ? Number(e.target.value) : undefined)}
-        style={{ width: "100%", minHeight: 40, borderRadius: 12, padding: "6px 10px" }}
+        style={{ width: "100%", minHeight: 50, borderRadius: "var(--radius-md)", padding: "var(--spacing-md) var(--spacing-lg)" }}
       >
         <option value="">Выберите шаблон</option>
         {templates.map((t) => (
@@ -153,7 +153,7 @@ export const CheckPage: React.FC<Props> = ({ me }) => {
       <select
         value={gostId ?? ""}
         onChange={(e) => setGostId(e.target.value ? Number(e.target.value) : null)}
-        style={{ width: "100%", minHeight: 40, borderRadius: 12, padding: "6px 10px" }}
+        style={{ width: "100%", minHeight: 50, borderRadius: "var(--radius-md)", padding: "var(--spacing-md) var(--spacing-lg)" }}
       >
         <option value="">Автоматически по шаблону</option>
         {gosts.map((g) => (
@@ -169,13 +169,13 @@ export const CheckPage: React.FC<Props> = ({ me }) => {
       <label className="upload-zone">
         <div>Перетащите файл сюда или нажмите, чтобы выбрать</div>
         <div className="upload-zone-button">
-          <span className="secondary-btn">
-            <Icon name="file-text" className="bottom-nav-icon" /> Выбрать файл
-          </span>
+            <button type="button" className="secondary-btn">
+              <Icon name="file-text" className="bottom-nav-icon" /> Выбрать файл
+            </button>
         </div>
         <input type="file" accept=".doc,.docx" onChange={handleFileChange} />
         {file && (
-          <div style={{ marginTop: 8, fontSize: 12 }}>
+          <div style={{ marginTop: "var(--spacing-sm)", fontSize: "var(--font-size-xs)" }}>
             Выбран файл: <strong>{file.name}</strong>{" "}
             <span className="text-muted">({(file.size / (1024 * 1024)).toFixed(1)} МБ)</span>
           </div>
@@ -190,7 +190,7 @@ export const CheckPage: React.FC<Props> = ({ me }) => {
       </div>
 
       {error && (
-        <div style={{ marginTop: 10, fontSize: 12, color: "#b91c1c" }}>
+        <div style={{ marginTop: "var(--spacing-md)", fontSize: "var(--font-size-xs)", color: "var(--accent-error)" }}>
           <strong>Ошибка:</strong> {error}
         </div>
       )}
