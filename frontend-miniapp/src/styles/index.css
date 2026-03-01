@@ -1,10 +1,5 @@
-/* Главный файл стилей - импортирует все модули */
-@import './variables.css';
-@import './base.css';
-@import './layout.css';
-@import './components.css';
-
-/* Дополнительные улучшения для iOS стиля */
+/* Главный файл стилей - дополнительные улучшения для iOS стиля */
+/* Примечание: CSS модули импортируются напрямую в main.tsx для лучшей совместимости с Vite */
 .app-shell {
   background: linear-gradient(
     180deg,
