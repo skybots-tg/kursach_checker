@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     app_host: str = "0.0.0.0"
     app_port: int = 8343
     app_reload: bool = False
+    app_base_url: str = "https://example.com"
 
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/kursach"
     redis_url: str = "redis://localhost:6379/0"
@@ -20,10 +21,12 @@ class Settings(BaseSettings):
 
     prodamus_secret_key: str = ""
     prodamus_shop_id: str = ""
+    prodamus_payform_url: str = "https://payform.prodamus.ru"
+    prodamus_sys: str = ""
+    prodamus_timeout_sec: int = 30
 
     admin_jwt_secret: str = "change-admin-me"
     init_db_on_startup: bool = False
 
 
 settings = Settings()
-
