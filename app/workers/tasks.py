@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 
 from arq import create_pool
 from arq.connections import RedisSettings
@@ -7,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.integrations.telegram_notify import notify_check_ready
-from app.models import Check, CheckStatus, File, TemplateVersion, User
-from app.rules_engine.runner import run_document_checks
+from app.models import Check, CheckStatus, CheckWorkerLog, File, TemplateVersion, User
+from app.services.check_pipeline import run_check_pipeline
 from app.storage.files import save_json_report
 
 
@@ -19,11 +20,19 @@ async def process_check_task(ctx: dict, check_id: int) -> dict:
             return {"error": "check_not_found", "check_id": check_id}
 
         check.status = CheckStatus.running
+        session.add(CheckWorkerLog(check_id=check.id, level="info", message="Check started"))
         await session.commit()
 
         result = await _run_pipeline(session, check)
 
         check.status = CheckStatus.done if result.get("ok") else CheckStatus.error
+        session.add(
+            CheckWorkerLog(
+                check_id=check.id,
+                level="info" if result.get("ok") else "error",
+                message="Check completed" if result.get("ok") else "Check failed",
+            )
+        )
         check.finished_at = datetime.utcnow()
         await session.commit()
 
@@ -40,7 +49,11 @@ async def _run_pipeline(session: AsyncSession, check: Check) -> dict:
     if not input_file or not template_version:
         return {"ok": False}
 
-    report = await run_document_checks(input_file.storage_path, template_version.rules_json)
+    pipeline_result = await run_check_pipeline(input_file.storage_path, template_version.rules_json)
+    if not pipeline_result.get("ok"):
+        return {"ok": False}
+
+    report = pipeline_result.get("report") or {}
     report_path, report_size = save_json_report(report)
     report_file = File(
         storage_path=report_path,
@@ -50,8 +63,22 @@ async def _run_pipeline(session: AsyncSession, check: Check) -> dict:
     )
     session.add(report_file)
     await session.flush()
-
     check.result_report_id = report_file.id
+
+    output_docx_path = pipeline_result.get("output_docx_path")
+    if output_docx_path:
+        output_path = Path(output_docx_path)
+        if output_path.exists():
+            output_file = File(
+                storage_path=str(output_path),
+                original_name=f"check_{check.id}_fixed.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                size=output_path.stat().st_size,
+            )
+            session.add(output_file)
+            await session.flush()
+            check.output_file_id = output_file.id
+
     return {"ok": True}
 
 

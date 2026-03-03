@@ -2,6 +2,12 @@ from fastapi import APIRouter
 
 from app.api.v1 import (
     admin,
+    admin_checks,
+    admin_content,
+    admin_demo,
+    admin_orders,
+    admin_products,
+    admin_users,
     auth,
     checks,
     content,
@@ -24,3 +30,9 @@ api_router.include_router(orders.router, prefix="/orders", tags=["orders"])
 api_router.include_router(files.router, prefix="/files", tags=["files"])
 api_router.include_router(content.router, prefix="/content", tags=["content"])
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
+api_router.include_router(admin_products.router, prefix="/admin/products", tags=["admin-products"])
+api_router.include_router(admin_orders.router, prefix="/admin/orders", tags=["admin-orders"])
+api_router.include_router(admin_checks.router, prefix="/admin/checks", tags=["admin-checks"])
+api_router.include_router(admin_users.router, prefix="/admin/users", tags=["admin-users"])
+api_router.include_router(admin_demo.router, prefix="/admin/demo", tags=["admin-demo"])
+api_router.include_router(admin_content.router, prefix="/admin/content", tags=["admin-content"])

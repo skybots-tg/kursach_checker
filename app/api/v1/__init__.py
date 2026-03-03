@@ -1,7 +1,30 @@
-from app.api.v1 import admin, auth, checks, content, files, gosts, orders, payments, templates, universities
+from app.api.v1 import (
+    admin,
+    admin_checks,
+    admin_content,
+    admin_demo,
+    admin_orders,
+    admin_products,
+    admin_users,
+    auth,
+    checks,
+    content,
+    files,
+    gosts,
+    orders,
+    payments,
+    templates,
+    universities,
+)
 
 __all__ = [
     "admin",
+    "admin_products",
+    "admin_orders",
+    "admin_checks",
+    "admin_users",
+    "admin_demo",
+    "admin_content",
     "auth",
     "checks",
     "content",

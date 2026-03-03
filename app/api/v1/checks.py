@@ -86,12 +86,14 @@ async def get_check(
         raise HTTPException(status_code=404, detail="Проверка не найдена")
 
     report = await db.get(File, check.result_report_id) if check.result_report_id else None
+    output = await db.get(File, check.output_file_id) if check.output_file_id else None
     return {
         "id": check.id,
         "status": check.status.value,
         "created_at": check.created_at,
         "finished_at": check.finished_at,
         "result_report_file_id": report.id if report else None,
+        "output_file_id": output.id if output else None,
     }
 
 
@@ -108,6 +110,8 @@ async def list_checks(
             "created_at": r.created_at,
             "finished_at": r.finished_at,
             "template_version_id": r.template_version_id,
+            "result_report_file_id": r.result_report_id,
+            "output_file_id": r.output_file_id,
         }
         for r in rows
     ]

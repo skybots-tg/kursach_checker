@@ -28,5 +28,8 @@ class Settings(BaseSettings):
     admin_jwt_secret: str = "change-admin-me"
     init_db_on_startup: bool = False
 
+    doc_to_docx_converter: str = ""
+    # Пример: soffice --headless --convert-to docx --outdir "{outdir}" "{input}"
+
 
 settings = Settings()
