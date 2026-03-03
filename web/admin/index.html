@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Админка — Курсач Чекер</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/lucide.min.js"></script>
+    <style>
+      .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+      aside { padding: 16px; background: #f6f9ff; }
+      main { padding: 16px; }
+      .menu a { display: block; padding: 10px 12px; border-radius: 12px; text-decoration: none; color: #1f2a44; }
+      .menu a:hover { background: #e8f1ff; }
+      @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside>
+        <h3>Админка</h3>
+        <nav class="menu">
+          <a href="#">Дашборд</a>
+          <a href="#">ВУЗы и программы</a>
+          <a href="#">ГОСТы / стили</a>
+          <a href="#">Шаблоны проверок</a>
+          <a href="#">Библиотека правил</a>
+          <a href="#">Автоисправления</a>
+          <a href="#">Продукты и цены</a>
+          <a href="#">Заказы и платежи</a>
+          <a href="#">Проверки</a>
+          <a href="#">Контент бота</a>
+          <a href="#">Демо-пример</a>
+          <a href="#">Логи и аудит</a>
+        </nav>
+      </aside>
+      <main>
+        <section class="glass">
+          <h2>Конструктор шаблона (универсальный)</h2>
+          <p>Блоки включаются/выключаются, параметры расширяются без изменения схемы БД.</p>
+        </section>
+        <section class="glass">
+          <h3>Блоки</h3>
+          <ul>
+            <li>Паспорт шаблона</li>
+            <li>Приём файлов</li>
+            <li>Контекст работы</li>
+            <li>Структура и разделы</li>
+            <li>Объём и правила подсчёта</li>
+            <li>Источники</li>
+            <li>Страница и поля</li>
+            <li>Основной текст</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+    <script>
+      if (window.lucide) window.lucide.createIcons();
+    </script>
+  </body>
+</html>
+

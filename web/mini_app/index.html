@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini App — Проверка документа</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/lucide.min.js"></script>
+  </head>
+  <body>
+    <main class="app">
+      <section class="glass">
+        <h2>Как это работает</h2>
+        <p>Загрузите документ, запустите проверку, получите отчёт и исправленный файл.</p>
+        <button class="btn btn-primary">Посмотреть демо</button>
+      </section>
+
+      <section class="glass">
+        <h3>Проверка</h3>
+        <p>Доступно проверок: <strong>0</strong></p>
+        <div class="chips">
+          <span class="chip error">Ошибка</span>
+          <span class="chip warning">Предупреждение</span>
+          <span class="chip fixed">Исправлено</span>
+        </div>
+      </section>
+
+      <section class="glass">
+        <h3>Демо-результат</h3>
+        <p><strong>Поля слева 30 мм</strong> — найдено 25 мм.</p>
+        <button class="btn btn-secondary">Скачать пример отчёта</button>
+      </section>
+    </main>
+
+    <nav class="glass bottom-nav">
+      <a href="#">Главная</a>
+      <a href="#">Проверка</a>
+      <a href="#">История</a>
+      <a href="#">Профиль</a>
+    </nav>
+
+    <script>
+      if (window.lucide) window.lucide.createIcons();
+    </script>
+  </body>
+</html>
+
