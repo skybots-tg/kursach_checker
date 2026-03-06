@@ -1,10 +1,12 @@
 from app.api.v1 import (
     admin,
+    admin_autofix,
     admin_checks,
     admin_content,
     admin_demo,
     admin_orders,
     admin_products,
+    admin_settings,
     admin_users,
     auth,
     checks,
@@ -19,9 +21,11 @@ from app.api.v1 import (
 
 __all__ = [
     "admin",
+    "admin_autofix",
     "admin_products",
     "admin_orders",
     "admin_checks",
+    "admin_settings",
     "admin_users",
     "admin_demo",
     "admin_content",

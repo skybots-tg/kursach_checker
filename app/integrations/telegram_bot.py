@@ -29,3 +29,4 @@ async def run_bot() -> None:
 
     await dp.start_polling(bot)
 
+

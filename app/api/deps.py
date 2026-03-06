@@ -28,3 +28,4 @@ async def get_user_credits(db: AsyncSession, user_id: int) -> int:
     )
     return int(credits or 0)
 
+

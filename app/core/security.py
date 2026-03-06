@@ -52,3 +52,4 @@ def validate_prodamus_signature(raw_body: bytes, signature: str | None, secret_k
     expected = hmac.new(secret_key.encode(), raw_body, hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected, signature)
 
+

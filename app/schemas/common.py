@@ -14,3 +14,4 @@ class IdResponse(BaseModel):
 class TimestampedModel(BaseModel):
     created_at: datetime
 
+

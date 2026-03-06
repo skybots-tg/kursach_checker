@@ -168,3 +168,4 @@ def build_snapshot(file_path: str) -> DocumentSnapshot:
         revisions_present=_guess_revisions(doc),
     )
 
+

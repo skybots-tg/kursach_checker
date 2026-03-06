@@ -1,0 +1,107 @@
+from __future__ import annotations
+
+from pydantic import BaseModel, Field
+
+
+class AutofixRuleInfo(BaseModel):
+    """Описание одного типа автоисправления."""
+
+    rule_id: str
+    title: str
+    description: str
+    safe: bool = True
+    default_enabled: bool = True
+
+
+class AutofixDefaultsIn(BaseModel):
+    """Глобальные дефолты автоисправлений (перезаписываются шаблоном)."""
+
+    enabled: bool = True
+    normalize_alignment: bool = True
+    normalize_line_spacing: bool = True
+    normalize_first_line_indent: bool = True
+    normalize_spacing_before_after: bool = True
+    normalize_font: bool = True
+    space_before_pt: float = Field(0.0, ge=0)
+    space_after_pt: float = Field(0.0, ge=0)
+
+
+class AutofixSafetyLimits(BaseModel):
+    """Пределы безопасности — что нельзя трогать."""
+
+    skip_headings: bool = True
+    skip_tables: bool = True
+    skip_toc: bool = True
+    skip_footnotes: bool = False
+    max_changes_per_document: int = Field(500, ge=1)
+
+
+class AutofixGlobalConfig(BaseModel):
+    defaults: AutofixDefaultsIn = Field(default_factory=AutofixDefaultsIn)
+    safety_limits: AutofixSafetyLimits = Field(default_factory=AutofixSafetyLimits)
+
+
+class AutofixStatsOut(BaseModel):
+    total_checks_with_autofix: int
+    total_autofixed_items: int
+    avg_fixes_per_check: float
+
+
+AUTOFIX_RULES_CATALOG: list[AutofixRuleInfo] = [
+    AutofixRuleInfo(
+        rule_id="normalize_alignment",
+        title="Выравнивание абзацев",
+        description="Устанавливает выравнивание по ширине для абзацев основного текста",
+    ),
+    AutofixRuleInfo(
+        rule_id="normalize_line_spacing",
+        title="Межстрочный интервал",
+        description="Приводит межстрочный интервал к значению из шаблона (по умолчанию 1,5)",
+    ),
+    AutofixRuleInfo(
+        rule_id="normalize_first_line_indent",
+        title="Отступ первой строки",
+        description="Устанавливает красную строку по значению из шаблона (по умолчанию 12,5 мм)",
+    ),
+    AutofixRuleInfo(
+        rule_id="normalize_spacing_before_after",
+        title="Интервалы до/после абзаца",
+        description="Устанавливает интервалы «до» и «после» для абзацев основного текста",
+    ),
+    AutofixRuleInfo(
+        rule_id="normalize_font",
+        title="Шрифт и кегль",
+        description="Приводит шрифт и размер к значениям из шаблона (Times New Roman 14 по умолчанию)",
+    ),
+]
+
+NOT_AUTOFIXABLE_INFO: list[AutofixRuleInfo] = [
+    AutofixRuleInfo(
+        rule_id="structure_sections",
+        title="Структура разделов",
+        description="Автоисправление структуры невозможно — только подсказки",
+        safe=False,
+        default_enabled=False,
+    ),
+    AutofixRuleInfo(
+        rule_id="bibliography_gost",
+        title="Библиография по ГОСТ",
+        description="Формат библиографии слишком сложен для автоисправления",
+        safe=False,
+        default_enabled=False,
+    ),
+    AutofixRuleInfo(
+        rule_id="foreign_recent_sources",
+        title="Иноязычные/свежие источники",
+        description="Содержание источников не подлежит автоматическому изменению",
+        safe=False,
+        default_enabled=False,
+    ),
+    AutofixRuleInfo(
+        rule_id="complex_objects",
+        title="Таблицы, формулы, рисунки",
+        description="Сложные объекты не модифицируются из соображений безопасности",
+        safe=False,
+        default_enabled=False,
+    ),
+]

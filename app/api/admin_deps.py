@@ -40,3 +40,4 @@ def require_role(admin: AdminUser, allowed: set[str]) -> None:
 async def get_admin_by_login(db: AsyncSession, login: str) -> AdminUser | None:
     return await db.scalar(select(AdminUser).where(AdminUser.login == login))
 
+

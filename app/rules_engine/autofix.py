@@ -158,3 +158,4 @@ def _is_heading(style_name: str) -> bool:
     lower = style_name.lower()
     return "heading" in lower or "заголов" in lower
 
+

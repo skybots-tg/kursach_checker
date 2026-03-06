@@ -54,3 +54,4 @@ class RulesConfig:
     def blocks_count(self) -> int:
         return len(self._blocks)
 
+

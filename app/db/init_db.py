@@ -27,3 +27,4 @@ async def seed_defaults(session: AsyncSession) -> None:
     )
     await session.commit()
 
+

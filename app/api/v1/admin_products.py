@@ -109,3 +109,4 @@ async def delete_product(
     await db.commit()
     return {"ok": True}
 
+

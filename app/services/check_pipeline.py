@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from app.rules_engine.runner import run_document_checks
-from app.services.doc_conversion import convert_doc_to_docx
+from app.services.doc_conversion import convert_doc_to_docx, get_converter_settings_from_db
 
 
 def resolve_doc_policy(rules: dict | None) -> str:
@@ -28,25 +28,16 @@ async def run_check_pipeline(input_path: str, rules: dict | None) -> dict:
     if source.suffix.lower() == ".doc":
         policy = resolve_doc_policy(rules)
         if policy == "reject":
-            return {
-                "ok": False,
-                "error": "DOC-файлы запрещены политикой шаблона. Загрузите DOCX",
-                "report": None,
-                "output_docx_path": None,
-                "source_docx_path": None,
-                "pipeline_notices": notices,
-            }
+            return _error_result("DOC-файлы запрещены политикой шаблона. Загрузите DOCX", notices)
         if policy == "convert":
-            converted_path, err = convert_doc_to_docx(str(source))
+            cmd, timeout, enabled = await get_converter_settings_from_db()
+            if not enabled or not cmd:
+                return _error_result("DOC-конвертация отключена или не настроена администратором", notices)
+            converted_path, err = convert_doc_to_docx(
+                str(source), command_template=cmd, timeout_sec=timeout,
+            )
             if err:
-                return {
-                    "ok": False,
-                    "error": err,
-                    "report": None,
-                    "output_docx_path": None,
-                    "source_docx_path": None,
-                    "pipeline_notices": notices,
-                }
+                return _error_result(err, notices)
             if converted_path:
                 working_path = converted_path
                 notices.append("DOC конвертирован в DOCX согласно политике шаблона")
@@ -60,4 +51,16 @@ async def run_check_pipeline(input_path: str, rules: dict | None) -> dict:
         "source_docx_path": working_path if working_path.lower().endswith(".docx") else None,
         "pipeline_notices": notices,
     }
+
+
+def _error_result(error: str, notices: list[str]) -> dict:
+    return {
+        "ok": False,
+        "error": error,
+        "report": None,
+        "output_docx_path": None,
+        "source_docx_path": None,
+        "pipeline_notices": notices,
+    }
+
 

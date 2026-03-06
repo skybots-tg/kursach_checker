@@ -30,3 +30,4 @@ def save_json_report(data: dict) -> tuple[str, int]:
     target.write_bytes(raw)
     return str(target), len(raw)
 
+

@@ -19,6 +19,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(api_router)
     app.mount("/static", StaticFiles(directory="web/static"), name="static")
+    app.mount("/admin/assets", StaticFiles(directory="web/admin"), name="admin-assets")
 
     @app.on_event("startup")
     async def on_startup() -> None:

@@ -18,3 +18,4 @@ async def notify_check_ready(telegram_id: int, check_id: int) -> None:
     finally:
         await bot.session.close()
 
+
