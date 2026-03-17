@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.admin_deps import get_current_admin
 from app.db.session import get_db
-from app.models import AdminUser, BotContent, ContentMenuItem, ContentVersion
+from app.models import AdminUser, BotContent, ContentMenuItem, ContentVersion, MenuItemMessage
 from app.services.audit import log_admin_action
 
 router = APIRouter()
@@ -23,12 +23,13 @@ class MenuItemIn(BaseModel):
     icon: str | None = None
     item_type: str = "text"
     payload: str | None = None
-    position: int = 0
+    row: int = 0
+    col: int = 0
     active: bool = True
 
 
 class MenuReorderIn(BaseModel):
-    ids_in_order: list[int]
+    items: list[dict]
 
 
 @router.get("/texts")
@@ -66,11 +67,7 @@ async def upsert_text(
         )
     )
     await log_admin_action(
-        db,
-        current_admin.id,
-        "content.text.upsert",
-        "bot_content",
-        key,
+        db, current_admin.id, "content.text.upsert", "bot_content", key,
         {"before": before, "after": payload.value},
     )
     await db.commit()
@@ -83,7 +80,11 @@ async def list_menu(
     db: AsyncSession = Depends(get_db),
 ) -> list[dict]:
     _ = current_admin
-    rows = await db.scalars(select(ContentMenuItem).order_by(ContentMenuItem.position.asc(), ContentMenuItem.id.asc()))
+    rows = await db.scalars(
+        select(ContentMenuItem).order_by(
+            ContentMenuItem.row.asc(), ContentMenuItem.col.asc(), ContentMenuItem.id.asc(),
+        )
+    )
     return [
         {
             "id": m.id,
@@ -93,6 +94,8 @@ async def list_menu(
             "item_type": m.item_type,
             "payload": m.payload,
             "position": m.position,
+            "row": m.row,
+            "col": m.col,
             "active": m.active,
         }
         for m in rows
@@ -105,10 +108,19 @@ async def create_menu_item(
     current_admin: AdminUser = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    item = ContentMenuItem(**payload.model_dump())
+    data = payload.model_dump()
+    data["position"] = data["row"] * 100 + data["col"]
+    item = ContentMenuItem(**data)
     db.add(item)
     await db.flush()
-    await log_admin_action(db, current_admin.id, "content.menu.create", "content_menu_item", str(item.id), payload.model_dump())
+
+    if item.item_type == "text" and not item.payload:
+        item.payload = f"menu_{item.id}"
+
+    await log_admin_action(
+        db, current_admin.id, "content.menu.create", "content_menu_item",
+        str(item.id), payload.model_dump(),
+    )
     await db.commit()
     return {"id": item.id}
 
@@ -125,25 +137,32 @@ async def update_menu_item(
         raise HTTPException(status_code=404, detail="Пункт меню не найден")
 
     before = {
-        "parent_id": item.parent_id,
-        "title": item.title,
-        "icon": item.icon,
-        "item_type": item.item_type,
-        "payload": item.payload,
-        "position": item.position,
-        "active": item.active,
+        "parent_id": item.parent_id, "title": item.title, "icon": item.icon,
+        "item_type": item.item_type, "payload": item.payload,
+        "row": item.row, "col": item.col, "active": item.active,
     }
+
+    content_changed = False
     for k, v in payload.model_dump().items():
+        if k == "payload" and item.item_type == "text":
+            continue
+        old_val = getattr(item, k, None)
         setattr(item, k, v)
+        if k in ("title", "icon") and old_val != v:
+            content_changed = True
+
+    item.position = item.row * 100 + item.col
     item.updated_at = datetime.utcnow()
 
+    if item.item_type == "text" and not item.payload:
+        item.payload = f"menu_{item.id}"
+
+    if content_changed:
+        await _invalidate_message_cache(db, item_id)
+
     await log_admin_action(
-        db,
-        current_admin.id,
-        "content.menu.update",
-        "content_menu_item",
-        str(item.id),
-        {"before": before, "after": payload.model_dump()},
+        db, current_admin.id, "content.menu.update", "content_menu_item",
+        str(item.id), {"before": before, "after": payload.model_dump()},
     )
     await db.commit()
     return {"ok": True}
@@ -155,29 +174,30 @@ async def reorder_menu(
     current_admin: AdminUser = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    rows = await db.scalars(select(ContentMenuItem).where(ContentMenuItem.id.in_(payload.ids_in_order)))
+    ids = [it["id"] for it in payload.items]
+    rows = await db.scalars(select(ContentMenuItem).where(ContentMenuItem.id.in_(ids)))
     item_map = {r.id: r for r in rows}
-    if len(item_map) != len(payload.ids_in_order):
+    if len(item_map) != len(ids):
         raise HTTPException(status_code=400, detail="Некоторые id меню не найдены")
 
-    for pos, item_id in enumerate(payload.ids_in_order):
-        item_map[item_id].position = pos
-        item_map[item_id].updated_at = datetime.utcnow()
+    now = datetime.utcnow()
+    for entry in payload.items:
+        m = item_map[entry["id"]]
+        m.row = entry.get("row", 0)
+        m.col = entry.get("col", 0)
+        m.position = m.row * 100 + m.col
+        m.updated_at = now
 
     db.add(
         ContentVersion(
             key="menu_order",
-            value={"ids_in_order": payload.ids_in_order},
+            value={"items": payload.items},
             created_by_admin_id=current_admin.id,
         )
     )
     await log_admin_action(
-        db,
-        current_admin.id,
-        "content.menu.reorder",
-        "content_menu",
-        "root",
-        {"ids_in_order": payload.ids_in_order},
+        db, current_admin.id, "content.menu.reorder", "content_menu", "root",
+        {"items": payload.items},
     )
     await db.commit()
     return {"ok": True}
@@ -193,7 +213,10 @@ async def delete_menu_item(
     if not item:
         raise HTTPException(status_code=404, detail="Пункт меню не найден")
     await db.delete(item)
-    await log_admin_action(db, current_admin.id, "content.menu.delete", "content_menu_item", str(item_id), {"deleted": True})
+    await log_admin_action(
+        db, current_admin.id, "content.menu.delete", "content_menu_item",
+        str(item_id), {"deleted": True},
+    )
     await db.commit()
     return {"ok": True}
 
@@ -211,13 +234,17 @@ async def list_content_versions(
     rows = await db.scalars(stmt.limit(200))
     return [
         {
-            "id": v.id,
-            "key": v.key,
-            "value": v.value,
-            "created_at": v.created_at,
-            "created_by_admin_id": v.created_by_admin_id,
+            "id": v.id, "key": v.key, "value": v.value,
+            "created_at": v.created_at, "created_by_admin_id": v.created_by_admin_id,
         }
         for v in rows
     ]
 
 
+async def _invalidate_message_cache(db: AsyncSession, menu_item_id: int) -> None:
+    msgs = await db.scalars(
+        select(MenuItemMessage).where(MenuItemMessage.menu_item_id == menu_item_id)
+    )
+    for msg in msgs:
+        msg.cached_chat_id = None
+        msg.cached_message_id = None

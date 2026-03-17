@@ -164,6 +164,8 @@ class ContentMenuItem(Base):
     item_type: Mapped[str] = mapped_column(String(32), default="text")
     payload: Mapped[str | None] = mapped_column(Text, nullable=True)
     position: Mapped[int] = mapped_column(Integer, default=0)
+    row: Mapped[int] = mapped_column(Integer, default=0)
+    col: Mapped[int] = mapped_column(Integer, default=0)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
@@ -177,6 +179,24 @@ class ContentVersion(Base):
     value: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     created_by_admin_id: Mapped[int | None] = mapped_column(ForeignKey("admin_users.id"), nullable=True)
+
+
+class MenuItemMessage(Base):
+    __tablename__ = "menu_item_messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    menu_item_id: Mapped[int] = mapped_column(ForeignKey("content_menu_items.id", ondelete="CASCADE"), index=True)
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    message_type: Mapped[str] = mapped_column(String(32), default="text")
+    text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    parse_mode: Mapped[str] = mapped_column(String(16), default="HTML")
+    file_path: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    file_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    mime_type: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    cached_chat_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    cached_message_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
 class CheckWorkerLog(Base):

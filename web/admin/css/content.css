@@ -1,0 +1,195 @@
+/* ============================================================
+   Content page — Menu grid, context menu, messages, rich-text
+   ============================================================ */
+
+/* ---- Menu Visual Grid ---- */
+.menu-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+.menu-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 44px;
+  padding: 4px 6px;
+  border-radius: var(--radius);
+  transition: background 0.15s;
+}
+.menu-row.drag-over { background: var(--accent-soft); }
+.menu-row.menu-new-row { justify-content: center; }
+.menu-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--accent);
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: grab;
+  user-select: none;
+  position: relative;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  min-width: 0;
+}
+.menu-btn:hover { box-shadow: 0 2px 8px rgba(59,130,246,0.35); }
+.menu-btn.dragging { opacity: 0.4; transform: scale(0.95); }
+.menu-btn-inactive {
+  background: #94a3b8;
+  opacity: 0.6;
+}
+.menu-btn-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.menu-btn-grip {
+  flex-shrink: 0;
+  opacity: 0.5;
+  display: flex;
+  align-items: center;
+}
+.menu-btn-grip svg { stroke: white; }
+.menu-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 40px;
+  min-height: 40px;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+}
+.menu-dropzone:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.menu-add-new-row { flex: 1; }
+
+/* ---- Context Menu ---- */
+.context-menu {
+  position: fixed;
+  z-index: 250;
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  padding: 4px;
+  min-width: 180px;
+  animation: fadeIn 0.12s ease;
+}
+.ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  border-radius: 6px;
+  transition: background 0.1s;
+  text-align: left;
+}
+.ctx-item:hover { background: #f1f5f9; }
+.ctx-item.ctx-danger { color: var(--danger); }
+.ctx-item.ctx-danger:hover { background: var(--danger-soft); }
+
+/* ---- Section Headings ---- */
+.section-heading {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 24px 0 12px;
+}
+.section-heading-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ---- Message Cards ---- */
+.msg-card { padding: 0; overflow: hidden; }
+.msg-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.msg-card-header:hover { background: #f8fafc; }
+.msg-card-title { flex: 1; font-size: 14px; }
+.msg-card-count { font-size: 12px; color: var(--text-muted); }
+.msg-card-arrow {
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+.msg-card-body { padding: 0 18px 18px; }
+.msg-list { display: flex; flex-direction: column; gap: 6px; }
+.msg-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.msg-item-info { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.msg-preview {
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.msg-item-actions { display: flex; gap: 2px; flex-shrink: 0; }
+
+/* ---- Rich-text Toolbar ---- */
+.rt-toolbar {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 4px;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  padding: 4px;
+  background: #f8fafc;
+}
+.rt-toolbar + .form-textarea {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.rt-btn {
+  width: 30px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--text);
+  transition: background 0.1s;
+}
+.rt-btn:hover { background: #e2e8f0; }
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .menu-grid { max-width: 100%; }
+}

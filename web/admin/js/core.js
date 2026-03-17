@@ -231,8 +231,22 @@ document.addEventListener('DOMContentLoaded', () => {
   else navigateTo('dashboard');
 });
 
+async function apiUpload(method, path, formData) {
+  const opts = {
+    method,
+    headers: { Authorization: 'Bearer ' + getToken() },
+    body: formData,
+  };
+  const res = await fetch(API + path, opts);
+  if (res.status === 401) { clearToken(); showLoginModal(); throw new Error('Требуется авторизация'); }
+  if (!res.ok) { const text = await res.text(); throw new Error(text || res.statusText); }
+  if (res.headers.get('content-length') === '0') return {};
+  return res.json();
+}
+
 /* expose globally */
 window.api = api;
+window.apiUpload = apiUpload;
 window.navigateTo = navigateTo;
 window.openSidebar = openSidebar;
 window.closeSidebar = closeSidebar;
