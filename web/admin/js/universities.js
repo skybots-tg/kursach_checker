@@ -1,48 +1,63 @@
-/* Universities — list + create + edit + delete */
+/* Universities — list + create + edit + delete, pagination */
 
 registerPage('universities', loadUniversities);
+
+let _universitiesData = [];
+let _universitiesPage = 1;
 
 async function loadUniversities() {
   const page = $('page-universities');
   page.innerHTML = loadingHtml();
   try {
-    const list = await api('GET', '/universities');
-    renderUniversities(list);
+    _universitiesData = await api('GET', '/universities');
+    _universitiesPage = 1;
+    renderUniversities();
   } catch (err) {
     page.innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
   }
 }
 
-function renderUniversities(list) {
+function renderUniversities() {
   $('page-universities').innerHTML = `
     <div class="page-header">
       <div>
         <h1 class="page-title">ВУЗы и программы</h1>
-        <p class="page-subtitle">Управление списком университетов</p>
+        <p class="page-subtitle">Управление списком университетов (${_universitiesData.length})</p>
       </div>
       <button class="btn btn-primary" onclick="showAddUniversity()">
         ${iconSvg('plus', 16)} Добавить ВУЗ
       </button>
     </div>
-    ${list.length ? universityTable(list) : emptyHtml('Нет университетов', 'Добавьте первый ВУЗ')}`;
+    <div id="universities-table-area"></div>`;
+  renderUniversitiesTable();
 }
+
+function renderUniversitiesTable() {
+  const paged = paginate(_universitiesData, _universitiesPage);
+  _universitiesPage = paged.page;
+  const area = $('universities-table-area');
+  if (!area) return;
+  area.innerHTML = paged.items.length
+    ? universityTable(paged.items) + paginationHtml(paged, 'universitiesGoPage')
+    : emptyHtml('Нет университетов', 'Добавьте первый ВУЗ');
+}
+
+function universitiesGoPage(p) { _universitiesPage = p; renderUniversitiesTable(); }
 
 function universityTable(list) {
   return `<div class="card" style="padding:0;overflow:hidden">
     <div class="table-wrap">
       <table class="data-table">
         <thead><tr>
-          <th>ID</th>
-          <th>Название</th>
-          <th>Статус</th>
+          <th>ID</th><th>Название</th><th>Статус</th>
           <th style="text-align:right">Действия</th>
         </tr></thead>
         <tbody>
           ${list.map(u => `<tr>
-            <td>${u.id}</td>
-            <td><strong>${escHtml(u.name)}</strong></td>
-            <td>${u.active ? '<span class="badge badge-success">Активен</span>' : '<span class="badge badge-gray">Неактивен</span>'}</td>
-            <td class="actions-cell">
+            <td data-label="ID">${u.id}</td>
+            <td data-label="Название"><strong>${escHtml(u.name)}</strong></td>
+            <td data-label="Статус">${u.active ? '<span class="badge badge-success">Активен</span>' : '<span class="badge badge-gray">Неактивен</span>'}</td>
+            <td data-label="" class="actions-cell">
               <button class="btn btn-icon btn-sm" title="Редактировать" onclick="showEditUniversity(${u.id}, '${escHtml(u.name).replace(/'/g, "\\'")}', ${u.active})">
                 ${iconSvg('edit', 15)}
               </button>
@@ -125,6 +140,7 @@ async function deleteUniversity(id) {
   }
 }
 
+window.universitiesGoPage = universitiesGoPage;
 window.showAddUniversity = showAddUniversity;
 window.showEditUniversity = showEditUniversity;
 window.createUniversity = createUniversity;

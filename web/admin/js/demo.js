@@ -1,52 +1,66 @@
-/* Demo samples — CRUD */
+/* Demo samples — CRUD, pagination */
 
 registerPage('demo', loadDemo);
+
+let _demoData = [];
+let _demoPage = 1;
 
 async function loadDemo() {
   const page = $('page-demo');
   page.innerHTML = loadingHtml();
   try {
-    const list = await api('GET', '/admin/demo');
-    renderDemo(list);
+    _demoData = await api('GET', '/admin/demo');
+    _demoPage = 1;
+    renderDemo();
   } catch (err) {
     page.innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
   }
 }
 
-function renderDemo(list) {
+function renderDemo() {
   $('page-demo').innerHTML = `
     <div class="page-header">
       <div>
         <h1 class="page-title">Демо-примеры</h1>
-        <p class="page-subtitle">Управление демонстрационными образцами проверки</p>
+        <p class="page-subtitle">Управление демонстрационными образцами проверки (${_demoData.length})</p>
       </div>
       <button class="btn btn-primary" onclick="showDemoModal()">
         ${iconSvg('plus', 16)} Новый демо
       </button>
     </div>
-    ${list.length ? demoTable(list) : emptyHtml('Нет демо-примеров', 'Создайте первый демонстрационный пример')}`;
+    <div id="demo-table-area"></div>`;
+  renderDemoTable();
 }
+
+function renderDemoTable() {
+  const paged = paginate(_demoData, _demoPage);
+  _demoPage = paged.page;
+  const area = $('demo-table-area');
+  if (!area) return;
+  area.innerHTML = paged.items.length
+    ? demoTable(paged.items) + paginationHtml(paged, 'demoGoPage')
+    : emptyHtml('Нет демо-примеров', 'Создайте первый демонстрационный пример');
+}
+
+function demoGoPage(p) { _demoPage = p; renderDemoTable(); }
 
 function demoTable(list) {
   return `<div class="card" style="padding:0;overflow:hidden">
     <div class="table-wrap">
       <table class="data-table">
         <thead><tr>
-          <th>ID</th>
-          <th>Название</th>
-          <th>Файл ID</th>
-          <th>Статус</th>
-          <th>Создано</th>
+          <th>ID</th><th>Название</th><th>Файл ID</th>
+          <th>Статус</th><th>Создано</th>
           <th style="text-align:right">Действия</th>
         </tr></thead>
         <tbody>
           ${list.map(d => `<tr>
-            <td>${d.id}</td>
-            <td><strong>${escHtml(d.name)}</strong></td>
-            <td><code>${d.document_file_id ?? '—'}</code></td>
-            <td>${d.active ? '<span class="badge badge-success">Активен</span>' : '<span class="badge badge-gray">Скрыт</span>'}</td>
-            <td style="white-space:nowrap">${formatDate(d.created_at)}</td>
-            <td class="actions-cell">
+            <td data-label="ID">${d.id}</td>
+            <td data-label="Название"><strong>${escHtml(d.name)}</strong></td>
+            <td data-label="Файл ID"><code>${d.document_file_id ?? '—'}</code></td>
+            <td data-label="Статус">${d.active ? '<span class="badge badge-success">Активен</span>' : '<span class="badge badge-gray">Скрыт</span>'}</td>
+            <td data-label="Создано" style="white-space:nowrap">${formatDate(d.created_at)}</td>
+            <td data-label="" class="actions-cell">
               <button class="btn btn-icon btn-sm" title="Подробнее" onclick="viewDemoDetail(${d.id})">
                 ${iconSvg('eye', 15)}
               </button>
@@ -138,6 +152,7 @@ async function deleteDemo(id) {
   }
 }
 
+window.demoGoPage = demoGoPage;
 window.showDemoModal = showDemoModal;
 window.viewDemoDetail = viewDemoDetail;
 window.saveDemo = saveDemo;

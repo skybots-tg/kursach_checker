@@ -6,103 +6,15 @@
     <meta name="color-scheme" content="light dark" />
     <title>Проверка оформления</title>
     <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="/static/pages.css" />
     <script src="/static/telegram-web-app.js"></script>
     <script src="/static/lucide.min.js"></script>
   </head>
   <body>
-    <main class="app" id="app">
-      <!-- Hero -->
-      <section class="glass hero">
-        <div class="hero-icon">
-          <i data-lucide="file-search"></i>
-        </div>
-        <h1>Проверка оформления</h1>
-        <p>Загрузите DOCX — получите подробный отчёт по ГОСТу и методичке вуза за секунды</p>
-      </section>
+    <main class="app" id="app"></main>
 
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-card accent">
-          <div class="stat-icon"><i data-lucide="zap"></i></div>
-          <div class="stat-value" id="credits-count">—</div>
-          <div class="stat-label">Доступно проверок</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon"><i data-lucide="user"></i></div>
-          <div class="stat-value stat-value-sm" id="user-name">—</div>
-          <div class="stat-label">Telegram</div>
-        </div>
-      </div>
-
-      <!-- Steps -->
-      <div class="section-label">Как это работает</div>
-      <section class="glass steps-list">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-body">
-            <div class="step-title">Загрузите файл</div>
-            <div class="step-desc">Курсовая или ВКР в формате DOCX</div>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-body">
-            <div class="step-title">Автопроверка</div>
-            <div class="step-desc">Система проверяет оформление по правилам</div>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-body">
-            <div class="step-title">Получите отчёт</div>
-            <div class="step-desc">Подробный список замечаний с рекомендациями</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- CTA -->
-      <div class="btn-group">
-        <a href="/check" class="btn btn-primary">
-          <i data-lucide="sparkles"></i>
-          Начать проверку
-          <i data-lucide="arrow-right" style="opacity:0.6"></i>
-        </a>
-        <a href="/demo" class="btn btn-secondary">
-          <i data-lucide="play"></i>
-          Посмотреть демо-отчёт
-        </a>
-      </div>
-
-      <!-- Features -->
-      <div class="section-label">Преимущества</div>
-      <section class="glass features-list">
-        <div class="feature-row">
-          <div class="feature-icon blue"><i data-lucide="shield-check"></i></div>
-          <div class="feature-text">
-            <div class="feature-title">По ГОСТу</div>
-            <div class="feature-desc">Проверка по актуальным стандартам</div>
-          </div>
-        </div>
-        <div class="feature-row">
-          <div class="feature-icon green"><i data-lucide="zap"></i></div>
-          <div class="feature-text">
-            <div class="feature-title">Быстро</div>
-            <div class="feature-desc">Результат за несколько секунд</div>
-          </div>
-        </div>
-        <div class="feature-row">
-          <div class="feature-icon purple"><i data-lucide="graduation-cap"></i></div>
-          <div class="feature-text">
-            <div class="feature-title">По методичке</div>
-            <div class="feature-desc">Правила именно вашего вуза</div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <!-- Bottom nav -->
-    <nav class="glass bottom-nav">
-      <a href="/" class="active">
+    <nav class="glass bottom-nav" id="bottom-nav">
+      <a href="/">
         <i data-lucide="home"></i>
         <span>Главная</span>
       </a>
@@ -120,41 +32,6 @@
       </a>
     </nav>
 
-    <script>
-      if (window.lucide) lucide.createIcons();
-
-      (async function init() {
-        try {
-          const tg = window.Telegram?.WebApp;
-          let token = localStorage.getItem('miniapp_token');
-
-          if (!token && tg?.initData) {
-            const res = await fetch('/api/auth/telegram', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ init_data: tg.initData }),
-            });
-            if (res.ok) {
-              const data = await res.json();
-              token = data.access_token;
-              localStorage.setItem('miniapp_token', token);
-            }
-          }
-
-          if (token) {
-            const res = await fetch('/api/me', {
-              headers: { Authorization: 'Bearer ' + token },
-            });
-            if (res.ok) {
-              const me = await res.json();
-              const el = document.getElementById('credits-count');
-              if (el) el.textContent = me.credits_available ?? 0;
-              const nameEl = document.getElementById('user-name');
-              if (nameEl) nameEl.textContent = me.username || me.first_name || ('ID ' + me.telegram_id);
-            }
-          }
-        } catch (_) {}
-      })();
-    </script>
+    <script src="/static/app.js"></script>
   </body>
 </html>

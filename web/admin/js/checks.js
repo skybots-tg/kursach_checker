@@ -1,6 +1,9 @@
-/* Checks — journal with stats, list, detail */
+/* Checks — journal with stats, entity tags, pagination, detail */
 
 registerPage('checks', loadChecks);
+
+let _checksData = [];
+let _checksPage = 1;
 
 async function loadChecks() {
   const page = $('page-checks');
@@ -10,13 +13,15 @@ async function loadChecks() {
       api('GET', '/admin/checks'),
       api('GET', '/admin/checks/stats/summary'),
     ]);
-    renderChecks(list, stats);
+    _checksData = list;
+    _checksPage = 1;
+    renderChecks(stats);
   } catch (err) {
     page.innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
   }
 }
 
-function renderChecks(list, stats) {
+function renderChecks(stats) {
   $('page-checks').innerHTML = `
     <div class="page-header">
       <div>
@@ -62,31 +67,44 @@ function renderChecks(list, stats) {
       </button>
     </div>
 
-    ${list.length ? checksTable(list) : emptyHtml('Нет проверок', 'Проверки появятся после первого запуска')}`;
+    <div id="checks-table-area"></div>`;
+  renderChecksTable();
 }
+
+function renderChecksTable() {
+  const paged = paginate(_checksData, _checksPage);
+  _checksPage = paged.page;
+  const area = $('checks-table-area');
+  if (!area) return;
+  area.innerHTML = paged.items.length
+    ? checksTable(paged.items) + paginationHtml(paged, 'checksGoPage')
+    : emptyHtml('Нет проверок', 'Проверки появятся после первого запуска');
+}
+
+function checksGoPage(p) { _checksPage = p; renderChecksTable(); }
 
 function checksTable(list) {
   return `<div class="card" style="padding:0;overflow:hidden">
     <div class="table-wrap">
       <table class="data-table">
         <thead><tr>
-          <th>ID</th>
-          <th>Пользователь</th>
-          <th>ГОСТ</th>
-          <th>Статус</th>
-          <th>Создано</th>
-          <th>Завершено</th>
+          <th>ID</th><th>Пользователь</th><th>ГОСТ</th>
+          <th>Статус</th><th>Создано</th><th>Завершено</th>
           <th style="text-align:right">Действия</th>
         </tr></thead>
         <tbody>
           ${list.map(c => `<tr>
-            <td>${c.id}</td>
-            <td>${c.user ? `@${escHtml(c.user.username || '')}` : '—'}</td>
-            <td>${c.gost ? escHtml(c.gost.name) : '—'}</td>
-            <td>${statusBadge(c.status)}</td>
-            <td style="white-space:nowrap">${formatDate(c.created_at)}</td>
-            <td style="white-space:nowrap">${formatDate(c.finished_at)}</td>
-            <td class="actions-cell">
+            <td data-label="ID">${c.id}</td>
+            <td data-label="Пользователь">${c.user
+              ? entityTag('user', c.user_id || c.user.id, c.user.username ? '@' + c.user.username : c.user.first_name || 'user')
+              : '—'}</td>
+            <td data-label="ГОСТ">${c.gost
+              ? entityTag('gost', c.gost.id, c.gost.name)
+              : '—'}</td>
+            <td data-label="Статус">${statusBadge(c.status)}</td>
+            <td data-label="Создано" style="white-space:nowrap">${formatDate(c.created_at)}</td>
+            <td data-label="Завершено" style="white-space:nowrap">${formatDate(c.finished_at)}</td>
+            <td data-label="" class="actions-cell">
               <button class="btn btn-icon btn-sm" title="Подробнее" onclick="viewCheck(${c.id})">
                 ${iconSvg('eye', 15)}
               </button>
@@ -106,7 +124,9 @@ async function filterChecks() {
       api('GET', url),
       api('GET', '/admin/checks/stats/summary'),
     ]);
-    renderChecks(list, stats);
+    _checksData = list;
+    _checksPage = 1;
+    renderChecks(stats);
     if (status) setVal('checks-filter', status);
   } catch (err) {
     toast('Ошибка: ' + err.message, 'error');
@@ -131,6 +151,14 @@ async function viewCheck(id) {
           <div><div class="form-label">Статус</div>${statusBadge(c.status)}</div>
           <div><div class="form-label">Создано</div>${formatDate(c.created_at)}</div>
         </div>
+        ${c.user_id ? `<div>
+          <div class="form-label">Пользователь</div>
+          <div>${entityTag('user', c.user_id, '#' + c.user_id)}</div>
+        </div>` : ''}
+        ${c.gost_id || c.gost ? `<div>
+          <div class="form-label">ГОСТ</div>
+          <div>${c.gost ? entityTag('gost', c.gost.id || c.gost_id, c.gost.name) : entityTag('gost', c.gost_id, '#' + c.gost_id)}</div>
+        </div>` : ''}
         <div>
           <div class="form-label" style="margin-bottom:6px">Файлы</div>
           ${fileRow('Исходный', files.input)}
@@ -155,5 +183,6 @@ async function viewCheck(id) {
   }
 }
 
+window.checksGoPage = checksGoPage;
 window.filterChecks = filterChecks;
 window.viewCheck = viewCheck;

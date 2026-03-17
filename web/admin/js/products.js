@@ -1,54 +1,67 @@
-/* Products — full CRUD */
+/* Products — full CRUD, pagination */
 
 registerPage('products', loadProducts);
+
+let _productsData = [];
+let _productsPage = 1;
 
 async function loadProducts() {
   const page = $('page-products');
   page.innerHTML = loadingHtml();
   try {
-    const list = await api('GET', '/admin/products');
-    renderProducts(list);
+    _productsData = await api('GET', '/admin/products');
+    _productsPage = 1;
+    renderProducts();
   } catch (err) {
     page.innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
   }
 }
 
-function renderProducts(list) {
+function renderProducts() {
   $('page-products').innerHTML = `
     <div class="page-header">
       <div>
         <h1 class="page-title">Продукты и цены</h1>
-        <p class="page-subtitle">Управление тарифами и кредитами</p>
+        <p class="page-subtitle">Управление тарифами и кредитами (${_productsData.length})</p>
       </div>
       <button class="btn btn-primary" onclick="showProductModal()">
         ${iconSvg('plus', 16)} Добавить продукт
       </button>
     </div>
-    ${list.length ? productTable(list) : emptyHtml('Нет продуктов', 'Создайте первый продукт')}`;
+    <div id="products-table-area"></div>`;
+  renderProductsTable();
 }
+
+function renderProductsTable() {
+  const paged = paginate(_productsData, _productsPage);
+  _productsPage = paged.page;
+  const area = $('products-table-area');
+  if (!area) return;
+  area.innerHTML = paged.items.length
+    ? productTable(paged.items) + paginationHtml(paged, 'productsGoPage')
+    : emptyHtml('Нет продуктов', 'Создайте первый продукт');
+}
+
+function productsGoPage(p) { _productsPage = p; renderProductsTable(); }
 
 function productTable(list) {
   return `<div class="card" style="padding:0;overflow:hidden">
     <div class="table-wrap">
       <table class="data-table">
         <thead><tr>
-          <th>ID</th>
-          <th>Название</th>
-          <th>Цена</th>
-          <th>Валюта</th>
-          <th>Кредитов</th>
-          <th>Статус</th>
+          <th>ID</th><th>Название</th><th>Цена</th>
+          <th>Валюта</th><th>Кредитов</th><th>Статус</th>
           <th style="text-align:right">Действия</th>
         </tr></thead>
         <tbody>
           ${list.map(p => `<tr>
-            <td>${p.id}</td>
-            <td><strong>${escHtml(p.name)}</strong></td>
-            <td>${p.price}</td>
-            <td>${escHtml(p.currency || 'RUB')}</td>
-            <td><span class="badge badge-primary">${p.credits_amount}</span></td>
-            <td>${p.active ? '<span class="badge badge-success">Активен</span>' : '<span class="badge badge-gray">Неактивен</span>'}</td>
-            <td class="actions-cell">
+            <td data-label="ID">${p.id}</td>
+            <td data-label="Название"><strong>${escHtml(p.name)}</strong></td>
+            <td data-label="Цена">${p.price}</td>
+            <td data-label="Валюта">${escHtml(p.currency || 'RUB')}</td>
+            <td data-label="Кредитов"><span class="badge badge-primary">${p.credits_amount}</span></td>
+            <td data-label="Статус">${p.active ? '<span class="badge badge-success">Активен</span>' : '<span class="badge badge-gray">Неактивен</span>'}</td>
+            <td data-label="" class="actions-cell">
               <button class="btn btn-icon btn-sm" title="Редактировать" onclick='showProductModal(${JSON.stringify(p)})'>
                 ${iconSvg('edit', 15)}
               </button>
@@ -128,6 +141,7 @@ async function deleteProduct(id) {
   }
 }
 
+window.productsGoPage = productsGoPage;
 window.showProductModal = showProductModal;
 window.saveProduct = saveProduct;
 window.deleteProduct = deleteProduct;

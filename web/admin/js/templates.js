@@ -1,9 +1,11 @@
-/* Templates — list, create, publish */
+/* Templates — list, create, publish, entity tags, pagination */
 
 registerPage('templates', loadTemplates);
 
 let _universities = [];
 let _gosts = [];
+let _templatesData = [];
+let _templatesPage = 1;
 
 async function loadTemplates() {
   const page = $('page-templates');
@@ -16,57 +18,71 @@ async function loadTemplates() {
     ]);
     _universities = unis;
     _gosts = gosts;
-    renderTemplates(list);
+    _templatesData = list;
+    _templatesPage = 1;
+    renderTemplates();
   } catch (err) {
     page.innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
   }
 }
 
-function renderTemplates(list) {
+function renderTemplates() {
   $('page-templates').innerHTML = `
     <div class="page-header">
       <div>
         <h1 class="page-title">Шаблоны проверок</h1>
-        <p class="page-subtitle">Конструктор шаблонов для различных типов работ</p>
+        <p class="page-subtitle">Конструктор шаблонов для различных типов работ (${_templatesData.length})</p>
       </div>
       <button class="btn btn-primary" onclick="showAddTemplate()">
         ${iconSvg('plus', 16)} Новый шаблон
       </button>
     </div>
-    ${list.length ? templateTable(list) : emptyHtml('Нет шаблонов', 'Создайте первый шаблон проверки')}`;
+    <div id="templates-table-area"></div>`;
+  renderTemplatesTable();
 }
+
+function renderTemplatesTable() {
+  const paged = paginate(_templatesData, _templatesPage);
+  _templatesPage = paged.page;
+  const area = $('templates-table-area');
+  if (!area) return;
+  area.innerHTML = paged.items.length
+    ? templateTable(paged.items) + paginationHtml(paged, 'templatesGoPage')
+    : emptyHtml('Нет шаблонов', 'Создайте первый шаблон проверки');
+}
+
+function templatesGoPage(p) { _templatesPage = p; renderTemplatesTable(); }
 
 function templateTable(list) {
   const uniMap = {};
-  _universities.forEach(u => uniMap[u.id] = u.name);
+  _universities.forEach(u => uniMap[u.id] = u);
 
   return `<div class="card" style="padding:0;overflow:hidden">
     <div class="table-wrap">
       <table class="data-table">
         <thead><tr>
-          <th>ID</th>
-          <th>Название</th>
-          <th>ВУЗ</th>
-          <th>Тип работы</th>
-          <th>Год</th>
-          <th>Статус</th>
+          <th>ID</th><th>Название</th><th>ВУЗ</th>
+          <th>Тип работы</th><th>Год</th><th>Статус</th>
           <th style="text-align:right">Действия</th>
         </tr></thead>
         <tbody>
-          ${list.map(t => `<tr>
-            <td>${t.id}</td>
-            <td><strong>${escHtml(t.name)}</strong></td>
-            <td>${escHtml(uniMap[t.university_id] || '—')}</td>
-            <td>${escHtml(t.type_work || '—')}</td>
-            <td>${escHtml(t.year || '—')}</td>
-            <td>${statusBadge(t.status)}</td>
-            <td class="actions-cell">
-              <button class="btn btn-icon btn-sm" title="Редактировать" onclick="openTemplateEditor(${t.id})">
-                ${iconSvg('edit', 15)}
-              </button>
-              ${t.status === 'draft' ? `<button class="btn btn-sm btn-success" onclick="publishTemplate(${t.id})">Опубликовать</button>` : ''}
-            </td>
-          </tr>`).join('')}
+          ${list.map(t => {
+            const uni = uniMap[t.university_id];
+            return `<tr>
+              <td data-label="ID">${t.id}</td>
+              <td data-label="Название"><strong>${escHtml(t.name)}</strong></td>
+              <td data-label="ВУЗ">${uni ? entityTag('university', uni.id, uni.name) : '—'}</td>
+              <td data-label="Тип работы">${escHtml(t.type_work || '—')}</td>
+              <td data-label="Год">${escHtml(t.year || '—')}</td>
+              <td data-label="Статус">${statusBadge(t.status)}</td>
+              <td data-label="" class="actions-cell">
+                <button class="btn btn-icon btn-sm" title="Редактировать" onclick="openTemplateEditor(${t.id})">
+                  ${iconSvg('edit', 15)}
+                </button>
+                ${t.status === 'draft' ? `<button class="btn btn-sm btn-success" onclick="publishTemplate(${t.id})">Опубликовать</button>` : ''}
+              </td>
+            </tr>`;
+          }).join('')}
         </tbody>
       </table>
     </div>
@@ -132,6 +148,7 @@ async function publishTemplate(id) {
   }
 }
 
+window.templatesGoPage = templatesGoPage;
 window.showAddTemplate = showAddTemplate;
 window.createTemplate = createTemplate;
 window.publishTemplate = publishTemplate;

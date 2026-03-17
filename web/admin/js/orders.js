@@ -1,24 +1,28 @@
-/* Orders — list, detail, status update */
+/* Orders — list with entity tags, pagination, detail, status update */
 
 registerPage('orders', loadOrders);
+
+let _ordersData = [];
+let _ordersPage = 1;
 
 async function loadOrders() {
   const page = $('page-orders');
   page.innerHTML = loadingHtml();
   try {
-    const list = await api('GET', '/admin/orders');
-    renderOrders(list);
+    _ordersData = await api('GET', '/admin/orders');
+    _ordersPage = 1;
+    renderOrders();
   } catch (err) {
     page.innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
   }
 }
 
-function renderOrders(list) {
+function renderOrders() {
   $('page-orders').innerHTML = `
     <div class="page-header">
       <div>
         <h1 class="page-title">Заказы и платежи</h1>
-        <p class="page-subtitle">Все заказы пользователей (${list.length})</p>
+        <p class="page-subtitle">Все заказы пользователей (${_ordersData.length})</p>
       </div>
     </div>
     <div class="toolbar">
@@ -33,31 +37,44 @@ function renderOrders(list) {
         ${iconSvg('refresh', 14)} Обновить
       </button>
     </div>
-    ${list.length ? ordersTable(list) : emptyHtml('Нет заказов', 'Пока нет ни одного заказа')}`;
+    <div id="orders-table-area"></div>`;
+  renderOrdersTable();
 }
+
+function renderOrdersTable() {
+  const paged = paginate(_ordersData, _ordersPage);
+  _ordersPage = paged.page;
+  const area = $('orders-table-area');
+  if (!area) return;
+  area.innerHTML = paged.items.length
+    ? ordersTable(paged.items) + paginationHtml(paged, 'ordersGoPage')
+    : emptyHtml('Нет заказов', 'Пока нет ни одного заказа');
+}
+
+function ordersGoPage(p) { _ordersPage = p; renderOrdersTable(); }
 
 function ordersTable(list) {
   return `<div class="card" style="padding:0;overflow:hidden">
     <div class="table-wrap">
       <table class="data-table">
         <thead><tr>
-          <th>ID</th>
-          <th>Пользователь</th>
-          <th>Продукт</th>
-          <th>Сумма</th>
-          <th>Статус</th>
-          <th>Дата</th>
+          <th>ID</th><th>Пользователь</th><th>Продукт</th>
+          <th>Сумма</th><th>Статус</th><th>Дата</th>
           <th style="text-align:right">Действия</th>
         </tr></thead>
         <tbody>
           ${list.map(o => `<tr>
-            <td>${o.id}</td>
-            <td>${o.user ? `@${escHtml(o.user.username || '')}` : '—'}</td>
-            <td>${o.product ? escHtml(o.product.name) : '—'}</td>
-            <td><strong>${o.amount ?? '—'}</strong></td>
-            <td>${statusBadge(o.status)}</td>
-            <td style="white-space:nowrap">${formatDate(o.created_at)}</td>
-            <td class="actions-cell">
+            <td data-label="ID">${o.id}</td>
+            <td data-label="Пользователь">${o.user
+              ? entityTag('user', o.user_id || o.user.id, o.user.username ? '@' + o.user.username : o.user.first_name || 'user')
+              : '—'}</td>
+            <td data-label="Продукт">${o.product
+              ? entityTag('product', o.product.id, o.product.name)
+              : '—'}</td>
+            <td data-label="Сумма"><strong>${o.amount ?? '—'}</strong></td>
+            <td data-label="Статус">${statusBadge(o.status)}</td>
+            <td data-label="Дата" style="white-space:nowrap">${formatDate(o.created_at)}</td>
+            <td data-label="" class="actions-cell">
               <button class="btn btn-icon btn-sm" title="Подробнее" onclick="viewOrder(${o.id})">
                 ${iconSvg('eye', 15)}
               </button>
@@ -71,12 +88,11 @@ function ordersTable(list) {
 
 async function filterOrders() {
   const status = getVal('orders-filter');
-  const page = $('page-orders');
-  const tableArea = page.querySelector('.card') || page;
   try {
     const url = status ? `/admin/orders?status=${status}` : '/admin/orders';
-    const list = await api('GET', url);
-    renderOrders(list);
+    _ordersData = await api('GET', url);
+    _ordersPage = 1;
+    renderOrders();
     if (status) setVal('orders-filter', status);
   } catch (err) {
     toast('Ошибка фильтрации: ' + err.message, 'error');
@@ -103,11 +119,11 @@ async function viewOrder(id) {
         </div>
         <div>
           <div class="form-label">Пользователь</div>
-          <div>@${escHtml(u.username || '—')} (TG: ${u.telegram_id || '—'})</div>
+          <div>${u.id ? entityTag('user', u.id, u.username ? '@' + u.username : u.first_name || '#' + u.id) : '—'}</div>
         </div>
         <div>
           <div class="form-label">Продукт</div>
-          <div>${escHtml(p.name || '—')}</div>
+          <div>${p.id ? entityTag('product', p.id, p.name) : escHtml(p.name || '—')}</div>
         </div>
         ${logs.length ? `
           <div>
@@ -149,6 +165,7 @@ async function updateOrderStatus(id) {
   }
 }
 
+window.ordersGoPage = ordersGoPage;
 window.filterOrders = filterOrders;
 window.viewOrder = viewOrder;
 window.updateOrderStatus = updateOrderStatus;

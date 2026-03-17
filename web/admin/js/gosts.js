@@ -1,8 +1,10 @@
-/* GOSTs — list + create + edit + delete (linked to university) */
+/* GOSTs — list + create + edit + delete, entity tags, pagination */
 
 registerPage('gosts', loadGosts);
 
 let _gostUniversities = [];
+let _gostsData = [];
+let _gostsPage = 1;
 
 async function loadGosts() {
   const page = $('page-gosts');
@@ -13,57 +15,72 @@ async function loadGosts() {
       api('GET', '/universities'),
     ]);
     _gostUniversities = unis;
-    renderGosts(list);
+    _gostsData = list;
+    _gostsPage = 1;
+    renderGosts();
   } catch (err) {
     page.innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
   }
 }
 
-function renderGosts(list) {
+function renderGosts() {
   $('page-gosts').innerHTML = `
     <div class="page-header">
       <div>
         <h1 class="page-title">ГОСТы / стили</h1>
-        <p class="page-subtitle">Стандарты оформления документов</p>
+        <p class="page-subtitle">Стандарты оформления документов (${_gostsData.length})</p>
       </div>
       <button class="btn btn-primary" onclick="showAddGost()">
         ${iconSvg('plus', 16)} Добавить ГОСТ
       </button>
     </div>
-    ${list.length ? gostTable(list) : emptyHtml('Нет ГОСТов', 'Добавьте первый стандарт')}`;
+    <div id="gosts-table-area"></div>`;
+  renderGostsTable();
 }
+
+function renderGostsTable() {
+  const paged = paginate(_gostsData, _gostsPage);
+  _gostsPage = paged.page;
+  const area = $('gosts-table-area');
+  if (!area) return;
+  area.innerHTML = paged.items.length
+    ? gostTable(paged.items) + paginationHtml(paged, 'gostsGoPage')
+    : emptyHtml('Нет ГОСТов', 'Добавьте первый стандарт');
+}
+
+function gostsGoPage(p) { _gostsPage = p; renderGostsTable(); }
 
 function gostTable(list) {
   const uniMap = {};
-  _gostUniversities.forEach(u => uniMap[u.id] = u.name);
+  _gostUniversities.forEach(u => uniMap[u.id] = u);
 
   return `<div class="card" style="padding:0;overflow:hidden">
     <div class="table-wrap">
       <table class="data-table">
         <thead><tr>
-          <th>ID</th>
-          <th>Название</th>
-          <th>ВУЗ</th>
-          <th>Описание</th>
-          <th>Статус</th>
+          <th>ID</th><th>Название</th><th>ВУЗ</th>
+          <th>Описание</th><th>Статус</th>
           <th style="text-align:right">Действия</th>
         </tr></thead>
         <tbody>
-          ${list.map(g => `<tr>
-            <td>${g.id}</td>
-            <td><strong>${escHtml(g.name)}</strong></td>
-            <td>${escHtml(uniMap[g.university_id] || '— Общий —')}</td>
-            <td style="color:var(--text-muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(g.description || '—')}</td>
-            <td>${g.active ? '<span class="badge badge-success">Активен</span>' : '<span class="badge badge-gray">Неактивен</span>'}</td>
-            <td class="actions-cell">
-              <button class="btn btn-icon btn-sm" title="Редактировать" onclick="showEditGost(${g.id})">
-                ${iconSvg('edit', 15)}
-              </button>
-              <button class="btn btn-icon btn-sm" title="Удалить" onclick="deleteGost(${g.id})">
-                ${iconSvg('trash', 15)}
-              </button>
-            </td>
-          </tr>`).join('')}
+          ${list.map(g => {
+            const uni = uniMap[g.university_id];
+            return `<tr>
+              <td data-label="ID">${g.id}</td>
+              <td data-label="Название"><strong>${escHtml(g.name)}</strong></td>
+              <td data-label="ВУЗ">${uni ? entityTag('university', uni.id, uni.name) : '— Общий —'}</td>
+              <td data-label="Описание" style="color:var(--text-muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(g.description || '—')}</td>
+              <td data-label="Статус">${g.active ? '<span class="badge badge-success">Активен</span>' : '<span class="badge badge-gray">Неактивен</span>'}</td>
+              <td data-label="" class="actions-cell">
+                <button class="btn btn-icon btn-sm" title="Редактировать" onclick="showEditGost(${g.id})">
+                  ${iconSvg('edit', 15)}
+                </button>
+                <button class="btn btn-icon btn-sm" title="Удалить" onclick="deleteGost(${g.id})">
+                  ${iconSvg('trash', 15)}
+                </button>
+              </td>
+            </tr>`;
+          }).join('')}
         </tbody>
       </table>
     </div>
@@ -170,6 +187,7 @@ async function deleteGost(id) {
   }
 }
 
+window.gostsGoPage = gostsGoPage;
 window.showAddGost = showAddGost;
 window.showEditGost = showEditGost;
 window.createGost = createGost;

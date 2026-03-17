@@ -449,3 +449,78 @@
   .stats-grid { grid-template-columns: 1fr; }
   .stat-val { font-size: 24px; }
 }
+
+/* ---- Detail Grid ---- */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+.detail-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px;
+}
+.detail-value { font-size: 14px; color: var(--text); }
+
+/* ---- Entity Tags ---- */
+.entity-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all var(--transition);
+  border: 1px solid var(--border); background: white; white-space: nowrap;
+}
+.entity-tag:hover { border-color: var(--accent-muted); background: var(--accent-soft); color: var(--accent); }
+.entity-tag-user { border-color: #bfdbfe; background: #eff6ff; color: #1d4ed8; }
+.entity-tag-university { border-color: #c4b5fd; background: #f5f3ff; color: #6d28d9; }
+.entity-tag-gost { border-color: #fcd34d; background: #fffbeb; color: #92400e; }
+.entity-tag-product { border-color: #fbcfe8; background: #fdf2f8; color: #9d174d; }
+.entity-tag-order { border-color: #a7f3d0; background: #f0fdf4; color: #15803d; }
+.entity-tag-check { border-color: #a5f3fc; background: #ecfeff; color: #0e7490; }
+.entity-tag-user:hover { background: #dbeafe; } .entity-tag-university:hover { background: #ede9fe; }
+.entity-tag-gost:hover { background: #fef3c7; } .entity-tag-product:hover { background: #fce7f3; }
+.entity-tag-order:hover { background: #dcfce7; } .entity-tag-check:hover { background: #cffafe; }
+
+/* ---- Pagination ---- */
+.pagination { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 16px 0 4px; }
+.pg-btn {
+  min-width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-secondary);
+  cursor: pointer; transition: all var(--transition); border: none; background: none; font-family: var(--font);
+}
+.pg-btn:hover:not(:disabled):not(.active) { background: #f1f5f9; }
+.pg-btn.active { background: var(--accent); color: white; font-weight: 600; }
+.pg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.pg-dots { color: var(--text-muted); font-size: 14px; padding: 0 4px; }
+.pg-info { font-size: 12px; color: var(--text-muted); margin-left: 12px; }
+
+/* ---- Mobile Card Table ---- */
+@media (max-width: 768px) {
+  .data-table thead { display: none; }
+  .data-table, .data-table tbody { display: block; }
+  .data-table tr {
+    display: block; padding: 14px; margin-bottom: 2px; position: relative;
+  }
+  .data-table tr:hover td { background: none; }
+  .data-table td {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 0; border-bottom: none !important; text-align: right;
+  }
+  .data-table td::before {
+    content: attr(data-label);
+    font-weight: 600; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-muted);
+    text-align: left; flex-shrink: 0; margin-right: 12px;
+  }
+  .data-table td[data-label=""]::before { display: none; }
+  .data-table .actions-cell {
+    justify-content: flex-end; padding-top: 10px; margin-top: 6px;
+    border-top: 1px solid var(--border) !important;
+  }
+  .detail-grid { grid-template-columns: repeat(2, 1fr); }
+  .pagination { flex-wrap: wrap; }
+  .pg-info { width: 100%; text-align: center; margin: 8px 0 0; }
+}
+
+@media (max-width: 480px) {
+  .detail-grid { grid-template-columns: 1fr; }
+}

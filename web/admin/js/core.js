@@ -211,6 +211,12 @@ const ENTITY_LABELS = {
   'template':            'Шаблон',
   'product':             'Продукт',
   'system_settings':     'Системные настройки',
+  'user':                'Пользователь',
+  'university':          'ВУЗ',
+  'gost':                'ГОСТ',
+  'order':               'Заказ',
+  'check':               'Проверка',
+  'demo':                'Демо',
 };
 
 function humanAction(action) {
@@ -261,11 +267,65 @@ const ICONS = {
   save: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>',
   refresh: '<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>',
   download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  chevronLeft: '<polyline points="15 18 9 12 15 6"/>',
+  chevronRight: '<polyline points="9 18 15 12 9 6"/>',
+  fileCheck: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/>',
 };
 
 function iconSvg(name, size = 18) {
   const inner = ICONS[name] || '';
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+}
+
+/* ---- Pagination ---- */
+const DEFAULT_PER_PAGE = 20;
+
+function paginate(list, page, perPage) {
+  perPage = perPage || DEFAULT_PER_PAGE;
+  const total = list.length;
+  const totalPages = Math.ceil(total / perPage) || 1;
+  const safePage = Math.max(1, Math.min(page, totalPages));
+  const start = (safePage - 1) * perPage;
+  return { items: list.slice(start, start + perPage), total, totalPages, page: safePage, perPage };
+}
+
+function paginationHtml(paged, callbackName) {
+  if (paged.totalPages <= 1) return '';
+  const { page, totalPages, total } = paged;
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= page - 2 && i <= page + 2)) {
+      pages.push(i);
+    } else if (pages.length && pages[pages.length - 1] !== '…') {
+      pages.push('…');
+    }
+  }
+  return `<div class="pagination">
+    <button class="pg-btn" ${page <= 1 ? 'disabled' : `onclick="${callbackName}(${page - 1})"`}>${iconSvg('chevronLeft', 14)}</button>
+    ${pages.map(p => p === '…'
+      ? '<span class="pg-dots">…</span>'
+      : `<button class="pg-btn${p === page ? ' active' : ''}" onclick="${callbackName}(${p})">${p}</button>`
+    ).join('')}
+    <button class="pg-btn" ${page >= totalPages ? 'disabled' : `onclick="${callbackName}(${page + 1})"`}>${iconSvg('chevronRight', 14)}</button>
+    <span class="pg-info">${total} записей</span>
+  </div>`;
+}
+
+/* ---- Entity Tag ---- */
+function entityTag(type, id, label) {
+  if (!id && !label) return '—';
+  const display = label || '#' + id;
+  if (!id) return `<span class="entity-tag entity-tag-${escHtml(type)}">${escHtml(display)}</span>`;
+  return `<span class="entity-tag entity-tag-${escHtml(type)}" onclick="goToEntity('${escHtml(type)}',${id})" title="${escHtml(humanEntity(type))} #${id}">${escHtml(display)}</span>`;
+}
+
+function goToEntity(type, id) {
+  const map = { user:'users', university:'universities', gost:'gosts', order:'orders', check:'checks', product:'products', template:'templates' };
+  if (!map[type]) return;
+  navigateTo(map[type]);
+  if (!id) return;
+  const fn = { user: 'viewUserDetail', order: 'viewOrder', check: 'viewCheck' };
+  if (fn[type] && window[fn[type]]) setTimeout(() => window[fn[type]](id), 150);
 }
 
 /* ---- Init ---- */
@@ -322,3 +382,7 @@ window.emptyHtml = emptyHtml;
 window.iconSvg = iconSvg;
 window.humanAction = humanAction;
 window.humanEntity = humanEntity;
+window.paginate = paginate;
+window.paginationHtml = paginationHtml;
+window.entityTag = entityTag;
+window.goToEntity = goToEntity;

@@ -26,10 +26,6 @@ def create_app() -> FastAPI:
         if settings.init_db_on_startup:
             await create_tables()
 
-    @app.get("/", tags=["web"])
-    async def mini_app() -> FileResponse:
-        return FileResponse("web/mini_app/index.html")
-
     @app.get("/admin", tags=["web"])
     async def admin_app() -> FileResponse:
         return FileResponse("web/admin/index.html")
@@ -37,6 +33,10 @@ def create_app() -> FastAPI:
     @app.get("/health", tags=["system"])
     async def health() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/{path:path}", tags=["web"], include_in_schema=False)
+    async def mini_app_spa(path: str) -> FileResponse:
+        return FileResponse("web/mini_app/index.html")
 
     return app
 
