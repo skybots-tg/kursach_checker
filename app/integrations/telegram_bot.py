@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
@@ -16,13 +17,20 @@ from sqlalchemy import select
 
 from app.core.config import settings
 from app.db.session import SessionLocal
+from app.integrations.analytics_middleware import AnalyticsMiddleware
 from app.models import ContentMenuItem, CreditsBalance, MenuItemMessage, User
 
 logger = logging.getLogger(__name__)
 
+# chat_id → list of bot-sent message_ids (for cleanup on navigation)
+_chat_messages: dict[int, list[int]] = defaultdict(list)
+
+
+# ---------------------------------------------------------------------------
+#  User helpers
+# ---------------------------------------------------------------------------
 
 async def _ensure_user(tg_user: TgUser) -> None:
-    """Create or update the User record from a Telegram user object."""
     async with SessionLocal() as db:
         user = await db.scalar(
             select(User).where(User.telegram_id == tg_user.id)
@@ -44,12 +52,114 @@ async def _ensure_user(tg_user: TgUser) -> None:
         await db.commit()
 
 
+# ---------------------------------------------------------------------------
+#  Message tracking & cleanup
+# ---------------------------------------------------------------------------
+
+async def _delete_tracked(bot: Bot, chat_id: int) -> None:
+    """Delete all previously tracked bot messages for a chat."""
+    msg_ids = _chat_messages.pop(chat_id, [])
+    for mid in msg_ids:
+        try:
+            await bot.delete_message(chat_id, mid)
+        except Exception:
+            pass
+
+
+def _track(chat_id: int, *message_ids: int) -> None:
+    _chat_messages[chat_id].extend(message_ids)
+
+
+# ---------------------------------------------------------------------------
+#  Keyboard building
+# ---------------------------------------------------------------------------
+
+def _make_button(m: ContentMenuItem) -> InlineKeyboardButton | None:
+    label = f"{m.icon} {m.title}" if m.icon else m.title
+    if m.item_type == "link" and m.payload:
+        return InlineKeyboardButton(text=label, url=m.payload)
+    callback = m.payload or f"menu_{m.id}"
+    return InlineKeyboardButton(text=label, callback_data=callback)
+
+
+def _fallback_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Начать", callback_data="nav_home")],
+    ])
+
+
+async def _get_item_depth(db, item: ContentMenuItem) -> int:
+    """Count the number of ancestors (0 = root item)."""
+    depth = 0
+    current_parent_id = item.parent_id
+    while current_parent_id is not None:
+        depth += 1
+        parent = await db.get(ContentMenuItem, current_parent_id)
+        if parent is None:
+            break
+        current_parent_id = parent.parent_id
+    return depth
+
+
+async def _build_children_rows(
+    db, parent_id: int,
+) -> list[list[InlineKeyboardButton]]:
+    """Build inline-keyboard rows from active children of *parent_id*."""
+    rows = await db.scalars(
+        select(ContentMenuItem)
+        .where(
+            ContentMenuItem.active.is_(True),
+            ContentMenuItem.parent_id == parent_id,
+        )
+        .order_by(ContentMenuItem.row.asc(), ContentMenuItem.col.asc())
+    )
+    items = list(rows)
+    if not items:
+        return []
+
+    keyboard_rows: dict[int, list[InlineKeyboardButton]] = {}
+    for m in items:
+        btn = _make_button(m)
+        if btn:
+            keyboard_rows.setdefault(m.row, []).append(btn)
+
+    return [keyboard_rows[r] for r in sorted(keyboard_rows.keys())]
+
+
+def _nav_row(parent_id: int | None, depth: int) -> list[InlineKeyboardButton]:
+    """Build the navigation row (back / main menu) based on depth."""
+    row: list[InlineKeyboardButton] = []
+
+    if parent_id is not None:
+        row.append(
+            InlineKeyboardButton(
+                text="◀️ Назад", callback_data=f"menu_{parent_id}",
+            ),
+        )
+    else:
+        row.append(
+            InlineKeyboardButton(text="◀️ Назад", callback_data="nav_home"),
+        )
+
+    if depth >= 2:
+        row.append(
+            InlineKeyboardButton(
+                text="🏠 Главное меню", callback_data="nav_home",
+            ),
+        )
+
+    return row
+
+
 async def build_main_keyboard() -> InlineKeyboardMarkup:
-    """Build the main inline keyboard from DB menu items, grouped by row/col."""
+    """Build the root-level inline keyboard (only top-level items)."""
     async with SessionLocal() as db:
         rows = await db.scalars(
             select(ContentMenuItem)
-            .where(ContentMenuItem.active.is_(True))
+            .where(
+                ContentMenuItem.active.is_(True),
+                ContentMenuItem.parent_id.is_(None),
+            )
             .order_by(ContentMenuItem.row.asc(), ContentMenuItem.col.asc())
         )
         items = list(rows)
@@ -66,29 +176,114 @@ async def build_main_keyboard() -> InlineKeyboardMarkup:
     if not keyboard_rows:
         return _fallback_keyboard()
 
-    inline_keyboard = [
-        keyboard_rows[r]
-        for r in sorted(keyboard_rows.keys())
-    ]
-    return InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
+    return InlineKeyboardMarkup(
+        inline_keyboard=[keyboard_rows[r] for r in sorted(keyboard_rows.keys())],
+    )
 
 
-def _make_button(m: ContentMenuItem) -> InlineKeyboardButton | None:
-    label = f"{m.icon} {m.title}" if m.icon else m.title
-    if m.item_type == "link" and m.payload:
-        return InlineKeyboardButton(text=label, url=m.payload)
-    callback = m.payload or f"menu_{m.id}"
-    return InlineKeyboardButton(text=label, callback_data=callback)
+# ---------------------------------------------------------------------------
+#  Message sending
+# ---------------------------------------------------------------------------
+
+async def _try_cached_send(
+    bot: Bot,
+    chat_id: int,
+    msg: MenuItemMessage,
+    reply_markup: InlineKeyboardMarkup | None = None,
+) -> int | None:
+    """Try copy_message from cache. Returns sent message_id or None."""
+    if not msg.cached_chat_id or not msg.cached_message_id:
+        return None
+    try:
+        result = await bot.copy_message(
+            chat_id=chat_id,
+            from_chat_id=msg.cached_chat_id,
+            message_id=msg.cached_message_id,
+            reply_markup=reply_markup,
+        )
+        return result.message_id
+    except Exception:
+        logger.debug("copy_message cache miss for msg %d", msg.id)
+        msg.cached_chat_id = None
+        msg.cached_message_id = None
+        return None
 
 
-def _fallback_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Начать", callback_data="start")],
-    ])
+async def _send_new_message(
+    bot: Bot,
+    chat_id: int,
+    msg: MenuItemMessage,
+    reply_markup: InlineKeyboardMarkup | None = None,
+) -> Message | None:
+    """Send a message from scratch and return the sent Message for caching."""
+    try:
+        mtype = msg.message_type
+        text = msg.text or ""
+        parse_mode = msg.parse_mode if msg.text else None
+        file_input = (
+            FSInputFile(msg.file_path)
+            if msg.file_path and Path(msg.file_path).exists()
+            else None
+        )
+
+        kw: dict = {}
+        if reply_markup:
+            kw["reply_markup"] = reply_markup
+
+        if mtype == "text":
+            if not text:
+                return None
+            return await bot.send_message(
+                chat_id, text, parse_mode=parse_mode, **kw,
+            )
+        if mtype == "photo" and file_input:
+            return await bot.send_photo(
+                chat_id, file_input, caption=text or None,
+                parse_mode=parse_mode, **kw,
+            )
+        if mtype == "video" and file_input:
+            return await bot.send_video(
+                chat_id, file_input, caption=text or None,
+                parse_mode=parse_mode, **kw,
+            )
+        if mtype == "audio" and file_input:
+            return await bot.send_audio(
+                chat_id, file_input, caption=text or None,
+                parse_mode=parse_mode, **kw,
+            )
+        if mtype == "document" and file_input:
+            return await bot.send_document(
+                chat_id, file_input, caption=text or None,
+                parse_mode=parse_mode, **kw,
+            )
+        if mtype == "animation" and file_input:
+            return await bot.send_animation(
+                chat_id, file_input, caption=text or None,
+                parse_mode=parse_mode, **kw,
+            )
+        if text:
+            return await bot.send_message(
+                chat_id, text, parse_mode=parse_mode, **kw,
+            )
+        return None
+    except Exception:
+        logger.exception("Failed to send message %d to chat %d", msg.id, chat_id)
+        return None
 
 
-async def _send_menu_messages(bot: Bot, chat_id: int, menu_item_id: int) -> None:
-    """Send all messages linked to a menu item, using copy_message cache."""
+async def _send_content_messages(
+    bot: Bot,
+    chat_id: int,
+    menu_item_id: int,
+    reply_markup: InlineKeyboardMarkup | None = None,
+) -> list[int]:
+    """Send all messages for a menu item.
+
+    *reply_markup* is attached to the **last** content message.
+    Returns list of sent message_ids.
+    """
+    sent_ids: list[int] = []
+
     async with SessionLocal() as db:
         rows = await db.scalars(
             select(MenuItemMessage)
@@ -97,80 +292,101 @@ async def _send_menu_messages(bot: Bot, chat_id: int, menu_item_id: int) -> None
         )
         messages = list(rows)
 
-        for msg in messages:
-            sent = await _try_cached_send(bot, chat_id, msg)
-            if sent:
+        if not messages:
+            return sent_ids
+
+        for idx, msg in enumerate(messages):
+            is_last = idx == len(messages) - 1
+            markup = reply_markup if is_last else None
+
+            cached_mid = await _try_cached_send(
+                bot, chat_id, msg, reply_markup=markup,
+            )
+            if cached_mid is not None:
+                sent_ids.append(cached_mid)
                 continue
-            sent_msg = await _send_new_message(bot, chat_id, msg)
+
+            sent_msg = await _send_new_message(
+                bot, chat_id, msg, reply_markup=markup,
+            )
             if sent_msg:
                 msg.cached_chat_id = sent_msg.chat.id
                 msg.cached_message_id = sent_msg.message_id
+                sent_ids.append(sent_msg.message_id)
 
         await db.commit()
 
+    return sent_ids
 
-async def _try_cached_send(bot: Bot, chat_id: int, msg: MenuItemMessage) -> bool:
-    """Try sending via copy_message from cache. Returns True on success."""
-    if not msg.cached_chat_id or not msg.cached_message_id:
-        return False
-    try:
-        await bot.copy_message(
-            chat_id=chat_id,
-            from_chat_id=msg.cached_chat_id,
-            message_id=msg.cached_message_id,
+
+# ---------------------------------------------------------------------------
+#  Navigation
+# ---------------------------------------------------------------------------
+
+async def _navigate_home(bot: Bot, chat_id: int) -> None:
+    """Delete tracked messages and show the main (root) menu."""
+    await _delete_tracked(bot, chat_id)
+    kb = await build_main_keyboard()
+    sent = await bot.send_message(
+        chat_id,
+        "Добро пожаловать в сервис технической проверки документов.",
+        reply_markup=kb,
+    )
+    _track(chat_id, sent.message_id)
+
+
+async def _navigate_to_item(bot: Bot, chat_id: int, menu_item_id: int) -> None:
+    """Full navigation: delete old messages → send content → attach keyboard."""
+    await _delete_tracked(bot, chat_id)
+
+    async with SessionLocal() as db:
+        item = await db.get(ContentMenuItem, menu_item_id)
+        if not item or not item.active:
+            await _navigate_home(bot, chat_id)
+            return
+
+        depth = await _get_item_depth(db, item)
+        parent_id = item.parent_id
+        item_title = item.title
+        children_rows = await _build_children_rows(db, menu_item_id)
+
+    inline_keyboard = list(children_rows)
+    inline_keyboard.append(_nav_row(parent_id, depth))
+    keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
+
+    sent_ids = await _send_content_messages(
+        bot, chat_id, menu_item_id, reply_markup=keyboard,
+    )
+
+    if not sent_ids:
+        sent = await bot.send_message(
+            chat_id, f"📋 {item_title}", reply_markup=keyboard,
         )
-        return True
-    except Exception:
-        logger.debug("copy_message cache miss for msg %d, falling back", msg.id)
-        msg.cached_chat_id = None
-        msg.cached_message_id = None
-        return False
+        sent_ids.append(sent.message_id)
+
+    _track(chat_id, *sent_ids)
 
 
-async def _send_new_message(bot: Bot, chat_id: int, msg: MenuItemMessage) -> Message | None:
-    """Send a message from scratch and return the sent Message for caching."""
-    try:
-        mtype = msg.message_type
-        text = msg.text or ""
-        parse_mode = msg.parse_mode if msg.text else None
-        file_input = FSInputFile(msg.file_path) if msg.file_path and Path(msg.file_path).exists() else None
-
-        if mtype == "text":
-            if not text:
-                return None
-            return await bot.send_message(chat_id, text, parse_mode=parse_mode)
-        if mtype == "photo" and file_input:
-            return await bot.send_photo(chat_id, file_input, caption=text or None, parse_mode=parse_mode)
-        if mtype == "video" and file_input:
-            return await bot.send_video(chat_id, file_input, caption=text or None, parse_mode=parse_mode)
-        if mtype == "audio" and file_input:
-            return await bot.send_audio(chat_id, file_input, caption=text or None, parse_mode=parse_mode)
-        if mtype == "document" and file_input:
-            return await bot.send_document(chat_id, file_input, caption=text or None, parse_mode=parse_mode)
-        if mtype == "animation" and file_input:
-            return await bot.send_animation(chat_id, file_input, caption=text or None, parse_mode=parse_mode)
-
-        if text:
-            return await bot.send_message(chat_id, text, parse_mode=parse_mode)
-        return None
-    except Exception:
-        logger.exception("Failed to send message %d to chat %d", msg.id, chat_id)
-        return None
-
+# ---------------------------------------------------------------------------
+#  Bot setup & handlers
+# ---------------------------------------------------------------------------
 
 async def run_bot() -> None:
     bot = Bot(token=settings.telegram_bot_token)
     dp = Dispatcher()
+    dp.message.middleware(AnalyticsMiddleware())
+    dp.callback_query.middleware(AnalyticsMiddleware())
 
     @dp.message(CommandStart())
     async def start_handler(message: Message) -> None:
         if message.from_user:
             await _ensure_user(message.from_user)
-        kb = await build_main_keyboard()
-        await message.answer(
-            "Добро пожаловать в сервис технической проверки документов.",
-            reply_markup=kb,
-        )
+        await _navigate_home(bot, message.chat.id)
+
+    @dp.callback_query(F.data == "nav_home")
+    async def home_callback_handler(callback: CallbackQuery) -> None:
+        await callback.answer()
+        await _navigate_home(bot, callback.message.chat.id)
 
     @dp.callback_query(F.data.startswith("menu_"))
     async def menu_callback_handler(callback: CallbackQuery) -> None:
@@ -180,27 +396,21 @@ async def run_bot() -> None:
             menu_item_id = int(data.split("_", 1)[1])
         except (ValueError, IndexError):
             return
-        await _send_menu_messages(bot, callback.message.chat.id, menu_item_id)
+        await _navigate_to_item(bot, callback.message.chat.id, menu_item_id)
 
     @dp.callback_query()
     async def custom_callback_handler(callback: CallbackQuery) -> None:
-        """Handle callback queries with custom payload (not menu_*)."""
         await callback.answer()
         data = callback.data or ""
         item = await _find_menu_item_by_payload(data)
         if item:
-            await _send_menu_messages(bot, callback.message.chat.id, item.id)
+            await _navigate_to_item(bot, callback.message.chat.id, item.id)
 
     @dp.message()
     async def fallback_message_handler(message: Message) -> None:
-        """Handle any message that wasn't caught by specific handlers."""
         if message.from_user:
             await _ensure_user(message.from_user)
-        kb = await build_main_keyboard()
-        await message.answer(
-            "Добро пожаловать в сервис технической проверки документов.",
-            reply_markup=kb,
-        )
+        await _navigate_home(bot, message.chat.id)
 
     await dp.start_polling(bot)
 

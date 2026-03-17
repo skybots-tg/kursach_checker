@@ -1,0 +1,190 @@
+/* ============================================================
+   Analytics Page — charts, heatmap, user timeline
+   ============================================================ */
+
+/* ---- Chart containers ---- */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.chart-card { padding: 20px; }
+.chart-card canvas { width: 100% !important; max-height: 280px; }
+.chart-card .card-header { margin-bottom: 12px; }
+
+/* ---- KPI row with mini-change indicator ---- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.kpi-val {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+.kpi-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ---- Analytics tabs ---- */
+.analytics-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.analytics-tab {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.analytics-tab:hover { color: var(--text); }
+.analytics-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---- Heatmap bars ---- */
+.heatmap-list { display: flex; flex-direction: column; gap: 6px; }
+.heatmap-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 80px 60px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  transition: background var(--transition);
+}
+.heatmap-row:hover { background: #f8fafc; }
+.heatmap-title {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.heatmap-bar-wrap {
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.heatmap-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+.heatmap-count {
+  text-align: right;
+  font-weight: 600;
+  font-size: 13px;
+}
+.heatmap-users {
+  text-align: right;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ---- User status badges ---- */
+.status-active { background: var(--success-soft); color: var(--success-text); }
+.status-blocked { background: var(--danger-soft); color: var(--danger-text); }
+.status-deleted { background: #f1f5f9; color: var(--text-muted); }
+.status-inactive { background: var(--warn-soft); color: var(--warn-text); }
+
+/* ---- Event timeline ---- */
+.timeline { padding: 8px 0; }
+.timeline-item {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  position: relative;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 28px;
+  bottom: -8px;
+  width: 2px;
+  background: var(--border);
+}
+.timeline-item:last-child::before { display: none; }
+.timeline-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  z-index: 1;
+}
+.timeline-dot.lifecycle { background: var(--success-soft); color: var(--success); }
+.timeline-dot.navigation { background: var(--info-soft); color: var(--info-text); }
+.timeline-dot.action { background: var(--warn-soft); color: var(--warn-text); }
+.timeline-dot.message { background: #f5f3ff; color: #6d28d9; }
+.timeline-content { flex: 1; min-width: 0; }
+.timeline-type { font-size: 13px; font-weight: 600; }
+.timeline-data { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.timeline-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* ---- Retention table ---- */
+.retention-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.retention-table th,
+.retention-table td {
+  padding: 10px 14px;
+  text-align: center;
+  border-bottom: 1px solid #f1f5f9;
+}
+.retention-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  background: #f8fafc;
+  font-weight: 600;
+}
+.retention-cell {
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .chart-grid { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .heatmap-row { grid-template-columns: 140px 1fr 60px; }
+  .heatmap-users { display: none; }
+  .analytics-tabs { gap: 0; }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+}

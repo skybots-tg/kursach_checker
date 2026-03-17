@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.v1 import (
     admin,
+    admin_analytics,
     admin_autofix,
     admin_checks,
     admin_content,
@@ -46,3 +47,4 @@ api_router.include_router(admin_content.router, prefix="/admin/content", tags=["
 api_router.include_router(admin_content_messages.router, prefix="/admin/content", tags=["admin-content-messages"])
 api_router.include_router(admin_autofix.router, prefix="/admin/autofix", tags=["admin-autofix"])
 api_router.include_router(admin_settings.router, prefix="/admin/settings", tags=["admin-settings"])
+api_router.include_router(admin_analytics.router, prefix="/admin/analytics", tags=["admin-analytics"])

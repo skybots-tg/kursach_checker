@@ -1,3 +1,10 @@
+from app.models.analytics import (
+    DailyAnalytics,
+    EventCategory,
+    UserEvent,
+    UserSession,
+    UserStatus,
+)
 from app.models.entities import (
     AdminUser,
     AuditLog,
@@ -48,5 +55,10 @@ __all__ = [
     "OrderStatus",
     "CheckStatus",
     "TemplateStatus",
+    "UserEvent",
+    "UserSession",
+    "UserStatus",
+    "DailyAnalytics",
+    "EventCategory",
 ]
 
