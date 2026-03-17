@@ -3,6 +3,14 @@ import { fetchChecks, fetchOrders } from "../api";
 import type { CheckItem, OrderItem } from "../types";
 import { Link } from "react-router-dom";
 
+function fmtDate(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleString("ru-RU", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  });
+}
+
 export const HistoryPage: React.FC = () => {
   const [checks, setChecks] = useState<CheckItem[]>([]);
   const [orders, setOrders] = useState<OrderItem[]>([]);
@@ -67,8 +75,8 @@ export const HistoryPage: React.FC = () => {
                     </span>
                   </div>
                   <div className="finding-meta">
-                    Создано: {new Date(c.created_at).toLocaleString()}{" "}
-                    {c.finished_at ? `· Завершено: ${new Date(c.finished_at).toLocaleString()}` : ""}
+                    Создано: {fmtDate(c.created_at)}{" "}
+                    {c.finished_at ? `· Завершено: ${fmtDate(c.finished_at)}` : ""}
                   </div>
                 </div>
               </Link>
@@ -97,8 +105,8 @@ export const HistoryPage: React.FC = () => {
                   </span>
                 </div>
                 <div className="finding-meta">
-                  Сумма: {o.amount} · Создано: {new Date(o.created_at).toLocaleString()}
-                  {o.paid_at ? ` · Оплачено: ${new Date(o.paid_at).toLocaleString()}` : ""}
+                  Сумма: {o.amount} · Создано: {fmtDate(o.created_at)}
+                  {o.paid_at ? ` · Оплачено: ${fmtDate(o.paid_at)}` : ""}
                 </div>
               </div>
             ))}

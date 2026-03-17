@@ -72,8 +72,8 @@ function renderEventList(events) {
     <div class="event-item">
       <div class="event-dot"></div>
       <div class="event-text">
-        <strong>${escHtml(e.action || '')}</strong>
-        ${e.entity_type ? ` — ${escHtml(e.entity_type)}` : ''}
+        <strong>${escHtml(humanAction(e.action))}</strong>
+        ${e.entity_type ? ` — ${escHtml(humanEntity(e.entity_type))}` : ''}
         ${e.entity_id ? ` #${escHtml(String(e.entity_id))}` : ''}
       </div>
       <span class="event-time">${formatDate(e.created_at)}</span>

@@ -176,8 +176,46 @@ function escHtml(s) {
 function formatDate(iso) {
   if (!iso) return '—';
   const d = new Date(iso);
-  return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    + ' ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour12: false })
+    + ' ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+const ACTION_LABELS = {
+  'content.menu.create':    'Создание пункта меню',
+  'content.menu.update':    'Обновление пункта меню',
+  'content.menu.delete':    'Удаление пункта меню',
+  'content.menu.reorder':   'Изменение порядка меню',
+  'content.text.upsert':    'Обновление текста бота',
+  'content.upsert':         'Обновление контента',
+  'content.message.create': 'Создание сообщения',
+  'content.message.update': 'Обновление сообщения',
+  'content.message.delete': 'Удаление сообщения',
+  'content.message.reorder':'Изменение порядка сообщений',
+  'template.create':        'Создание шаблона',
+  'template.version.create':'Новая версия шаблона',
+  'template.publish':       'Публикация шаблона',
+  'product.create':         'Создание продукта',
+  'product.update':         'Обновление продукта',
+  'product.delete':         'Удаление продукта',
+  'update':                 'Обновление настроек',
+};
+
+const ENTITY_LABELS = {
+  'content_menu_item':   'Пункт меню',
+  'content_menu':        'Меню',
+  'bot_content':         'Контент бота',
+  'menu_item_message':   'Сообщение',
+  'template':            'Шаблон',
+  'product':             'Продукт',
+  'system_settings':     'Системные настройки',
+};
+
+function humanAction(action) {
+  return ACTION_LABELS[action] || action;
+}
+
+function humanEntity(entityType) {
+  return ENTITY_LABELS[entityType] || entityType;
 }
 
 function statusBadge(status) {
@@ -268,3 +306,5 @@ window.statusBadge = statusBadge;
 window.loadingHtml = loadingHtml;
 window.emptyHtml = emptyHtml;
 window.iconSvg = iconSvg;
+window.humanAction = humanAction;
+window.humanEntity = humanEntity;

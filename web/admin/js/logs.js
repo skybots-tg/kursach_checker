@@ -34,15 +34,15 @@ function logsTable(events) {
         <thead><tr>
           <th>ID</th>
           <th>Действие</th>
-          <th>Тип сущности</th>
-          <th>ID сущности</th>
+          <th>Объект</th>
+          <th>ID</th>
           <th>Дата</th>
         </tr></thead>
         <tbody>
           ${events.map(e => `<tr>
             <td>${e.id}</td>
-            <td><strong>${escHtml(e.action || '—')}</strong></td>
-            <td>${escHtml(e.entity_type || '—')}</td>
+            <td><strong>${escHtml(humanAction(e.action))}</strong></td>
+            <td>${escHtml(humanEntity(e.entity_type))}</td>
             <td><code>${escHtml(String(e.entity_id || '—'))}</code></td>
             <td style="white-space:nowrap">${formatDate(e.created_at)}</td>
           </tr>`).join('')}
