@@ -97,7 +97,7 @@
     appEl.innerHTML =
       '<section class="glass hero">' +
         '<div class="hero-icon"><i data-lucide="file-search"></i></div>' +
-        '<h1>Проверка оформления</h1>' +
+        '<h1 class="gradient-text">Проверка оформления</h1>' +
         '<p>Загрузите DOCX \u2014 получите подробный отчёт по ГОСТу и методичке вуза за секунды</p>' +
       '</section>' +
       '<div class="stats-row">' +
