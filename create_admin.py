@@ -13,7 +13,7 @@ import sys
 from passlib.context import CryptContext
 from sqlalchemy import select
 
-from app.db.session import async_session, engine
+from app.db.session import SessionLocal, engine
 from app.db.base import Base
 from app.models import AdminUser
 
@@ -28,7 +28,7 @@ async def ensure_tables() -> None:
 async def create_owner(login: str, password: str) -> None:
     await ensure_tables()
 
-    async with async_session() as db:
+    async with SessionLocal() as db:
         existing = await db.scalar(
             select(AdminUser).where(AdminUser.login == login)
         )
