@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, Enum, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -54,7 +54,7 @@ class Order(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
-    status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus), default=OrderStatus.created)
+    status: Mapped[OrderStatus] = mapped_column(String(20), default=OrderStatus.created)
     amount: Mapped[float] = mapped_column(Numeric(10, 2))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     paid_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
@@ -104,7 +104,7 @@ class Template(Base):
     name: Mapped[str] = mapped_column(String(255))
     type_work: Mapped[str] = mapped_column(String(100))
     year: Mapped[str] = mapped_column(String(32))
-    status: Mapped[TemplateStatus] = mapped_column(Enum(TemplateStatus), default=TemplateStatus.draft)
+    status: Mapped[TemplateStatus] = mapped_column(String(20), default=TemplateStatus.draft)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
 
 
@@ -137,7 +137,7 @@ class Check(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     template_version_id: Mapped[int] = mapped_column(ForeignKey("template_versions.id"))
     gost_id: Mapped[int] = mapped_column(ForeignKey("gosts.id"))
-    status: Mapped[CheckStatus] = mapped_column(Enum(CheckStatus), default=CheckStatus.queued)
+    status: Mapped[CheckStatus] = mapped_column(String(20), default=CheckStatus.queued)
     input_file_id: Mapped[int] = mapped_column(ForeignKey("files.id"))
     result_report_id: Mapped[int | None] = mapped_column(ForeignKey("files.id"), nullable=True)
     output_file_id: Mapped[int | None] = mapped_column(ForeignKey("files.id"), nullable=True)
