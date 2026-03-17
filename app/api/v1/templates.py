@@ -21,6 +21,14 @@ class TemplateCreateRequest(BaseModel):
     year: str
 
 
+class TemplateUpdateRequest(BaseModel):
+    name: str | None = None
+    university_id: int | None = None
+    type_work: str | None = None
+    year: str | None = None
+    active: bool | None = None
+
+
 class TemplateVersionCreateRequest(BaseModel):
     rules: TemplateRules
 
@@ -163,3 +171,69 @@ async def publish_template(
     )
     await db.commit()
     return {"template_id": template_id, "status": after}
+
+
+@router.get("/{template_id}")
+async def get_template(template_id: int, db: AsyncSession = Depends(get_db)) -> dict:
+    template = await db.get(Template, template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Шаблон не найден")
+    return {
+        "id": template.id,
+        "university_id": template.university_id,
+        "name": template.name,
+        "type_work": template.type_work,
+        "year": template.year,
+        "status": template.status.value if hasattr(template.status, "value") else template.status,
+        "active": template.active,
+    }
+
+
+@router.put("/{template_id}")
+async def update_template(
+    template_id: int,
+    payload: TemplateUpdateRequest,
+    current_admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    template = await db.get(Template, template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Шаблон не найден")
+
+    before = {
+        "name": template.name,
+        "university_id": template.university_id,
+        "type_work": template.type_work,
+        "year": template.year,
+        "active": template.active,
+    }
+
+    if payload.name is not None:
+        template.name = payload.name
+    if payload.university_id is not None:
+        template.university_id = payload.university_id
+    if payload.type_work is not None:
+        template.type_work = payload.type_work
+    if payload.year is not None:
+        template.year = payload.year
+    if payload.active is not None:
+        template.active = payload.active
+
+    after = {
+        "name": template.name,
+        "university_id": template.university_id,
+        "type_work": template.type_work,
+        "year": template.year,
+        "active": template.active,
+    }
+
+    await log_admin_action(
+        db=db,
+        admin_user_id=current_admin.id,
+        action="template.update",
+        entity_type="template",
+        entity_id=str(template_id),
+        diff={"before": before, "after": after},
+    )
+    await db.commit()
+    return {"id": template.id, "status": "updated"}

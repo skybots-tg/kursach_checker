@@ -1,4 +1,4 @@
-/* Templates — list, create, view blocks, new version, publish */
+/* Templates — list, create, publish */
 
 registerPage('templates', loadTemplates);
 
@@ -61,8 +61,8 @@ function templateTable(list) {
             <td>${escHtml(t.year || '—')}</td>
             <td>${statusBadge(t.status)}</td>
             <td class="actions-cell">
-              <button class="btn btn-icon btn-sm" title="Блоки" onclick="viewTemplateBlocks(${t.id})">
-                ${iconSvg('eye', 15)}
+              <button class="btn btn-icon btn-sm" title="Редактировать" onclick="openTemplateEditor(${t.id})">
+                ${iconSvg('edit', 15)}
               </button>
               ${t.status === 'draft' ? `<button class="btn btn-sm btn-success" onclick="publishTemplate(${t.id})">Опубликовать</button>` : ''}
             </td>
@@ -121,27 +121,6 @@ async function createTemplate() {
   }
 }
 
-async function viewTemplateBlocks(id) {
-  try {
-    const data = await api('GET', `/templates/${id}/blocks`);
-    const blocks = data.blocks || [];
-    const body = blocks.length
-      ? `<div class="rule-list">${blocks.map(b => `
-          <div class="rule-item">
-            <div class="ri-info">
-              <div class="ri-title">${escHtml(b.title || b.key)}</div>
-              <div class="ri-desc">Ключ: ${escHtml(b.key)}</div>
-            </div>
-            <span class="badge ${b.enabled ? 'badge-success' : 'badge-gray'}">${b.enabled ? 'Вкл' : 'Выкл'}</span>
-            <span class="badge badge-${b.severity === 'error' ? 'danger' : b.severity === 'warning' ? 'warn' : 'info'}">${escHtml(b.severity)}</span>
-          </div>`).join('')}</div>`
-      : emptyHtml('Нет блоков', 'Версия не содержит блоков');
-    openModal(`Блоки шаблона #${id} (v${data.version_number})`, body, '');
-  } catch (err) {
-    toast('Ошибка: ' + err.message, 'error');
-  }
-}
-
 async function publishTemplate(id) {
   if (!confirm('Опубликовать шаблон #' + id + '?')) return;
   try {
@@ -155,5 +134,4 @@ async function publishTemplate(id) {
 
 window.showAddTemplate = showAddTemplate;
 window.createTemplate = createTemplate;
-window.viewTemplateBlocks = viewTemplateBlocks;
 window.publishTemplate = publishTemplate;
