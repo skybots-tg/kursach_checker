@@ -1,3 +1,5 @@
+import json
+import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -10,6 +12,8 @@ from app.db.session import get_db
 from app.models import Check, CheckStatus, CreditsBalance, File, TemplateVersion, User
 from app.storage.files import save_upload_file
 from app.workers.tasks import enqueue_check
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -40,8 +44,8 @@ async def upload_file(
 @router.post("/start")
 async def start_check(
     template_version_id: int,
-    gost_id: int,
     input_file_id: int,
+    gost_id: int | None = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
@@ -53,6 +57,16 @@ async def start_check(
     if not file_obj:
         raise HTTPException(status_code=404, detail="Файл не найден")
 
+    resolved_gost_id = gost_id
+    if resolved_gost_id is None:
+        from app.models import Gost
+        first_gost = await db.scalar(
+            select(Gost).where(Gost.active.is_(True)).order_by(Gost.id).limit(1)
+        )
+        if not first_gost:
+            raise HTTPException(status_code=400, detail="Нет доступных ГОСТов")
+        resolved_gost_id = first_gost.id
+
     credits = await db.get(CreditsBalance, current_user.id)
     if not credits or credits.credits_available < 1:
         raise HTTPException(status_code=402, detail="Недостаточно кредитов")
@@ -63,7 +77,7 @@ async def start_check(
     check = Check(
         user_id=current_user.id,
         template_version_id=template_version_id,
-        gost_id=gost_id,
+        gost_id=resolved_gost_id,
         status=CheckStatus.queued,
         input_file_id=input_file_id,
     )
@@ -85,16 +99,47 @@ async def get_check(
     if not check or check.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Проверка не найдена")
 
-    report = await db.get(File, check.result_report_id) if check.result_report_id else None
+    report_file = await db.get(File, check.result_report_id) if check.result_report_id else None
     output = await db.get(File, check.output_file_id) if check.output_file_id else None
+
+    report_json = _load_report_json(report_file) if report_file else None
+
     return {
         "id": check.id,
         "status": check.status.value,
         "created_at": check.created_at,
         "finished_at": check.finished_at,
-        "result_report_file_id": report.id if report else None,
+        "report_file_id": report_file.id if report_file else None,
         "output_file_id": output.id if output else None,
+        "report": report_json,
     }
+
+
+def _load_report_json(report_file: File) -> dict | None:
+    try:
+        p = Path(report_file.storage_path)
+        if not p.exists():
+            return None
+        raw = json.loads(p.read_text(encoding="utf-8"))
+        findings = raw.get("findings", [])
+        return {
+            "findings": findings,
+            "summary_errors": raw.get(
+                "summary_errors",
+                sum(1 for f in findings if f.get("severity") == "error"),
+            ),
+            "summary_warnings": raw.get(
+                "summary_warnings",
+                sum(1 for f in findings if f.get("severity") == "warning"),
+            ),
+            "summary_autofixed": raw.get(
+                "summary_autofixed",
+                sum(1 for f in findings if f.get("auto_fixed")),
+            ),
+        }
+    except Exception:
+        logger.exception("Failed to load report JSON from %s", report_file.storage_path)
+        return None
 
 
 @router.get("")

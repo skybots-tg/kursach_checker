@@ -14,10 +14,12 @@ from app.api.v1 import (
     auth,
     checks,
     content,
+    demo,
     files,
     gosts,
     orders,
     payments,
+    products,
     templates,
     universities,
 )
@@ -32,6 +34,8 @@ api_router.include_router(payments.router, prefix="/payments", tags=["payments"]
 api_router.include_router(orders.router, prefix="/orders", tags=["orders"])
 api_router.include_router(files.router, prefix="/files", tags=["files"])
 api_router.include_router(content.router, prefix="/content", tags=["content"])
+api_router.include_router(demo.router, prefix="/demo", tags=["demo"])
+api_router.include_router(products.router, prefix="/products", tags=["products"])
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 api_router.include_router(admin_products.router, prefix="/admin/products", tags=["admin-products"])
 api_router.include_router(admin_orders.router, prefix="/admin/orders", tags=["admin-orders"])
