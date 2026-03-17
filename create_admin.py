@@ -10,14 +10,12 @@ import asyncio
 import getpass
 import sys
 
-from passlib.context import CryptContext
+import bcrypt
 from sqlalchemy import select
 
 from app.db.session import SessionLocal, engine
 from app.db.base import Base
 from app.models import AdminUser
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 async def ensure_tables() -> None:
@@ -38,7 +36,7 @@ async def create_owner(login: str, password: str) -> None:
 
         user = AdminUser(
             login=login,
-            password_hash=pwd_context.hash(password),
+            password_hash=bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8"),
             role="owner",
         )
         db.add(user)
