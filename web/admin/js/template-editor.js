@@ -1,4 +1,5 @@
-/* Template Editor — accordion block editor with human-readable Russian UI */
+/* Template Editor — accordion block editor with human-readable Russian UI.
+   Uses tag-input.js for arrays and param-renderers.js for complex params. */
 
 const SEVERITY_OPTIONS = [
   { value: 'error', label: 'Ошибка', badge: 'danger' },
@@ -66,6 +67,17 @@ const PARAM_LABELS = {
   space_after_pt: 'Интервал после абзаца (пт)',
   academic: 'Академический формат',
   project_creative: 'Проектно-творческий формат',
+};
+
+const PARAM_HINTS = {
+  allowed_extensions: 'Форматы файлов, которые можно загружать для проверки',
+  max_size_mb: 'Файлы тяжелее этого значения будут отклонены',
+  authors_labels: 'Слова, по которым система ищет авторов на титульном листе',
+  author_sheet_chars_with_spaces: 'Стандарт: 40 000 знаков с пробелами = 1 авторский лист',
+  min_author_sheets_default: 'Минимальный объём работы в авторских листах',
+  min_total_sources: 'Сколько источников должно быть в списке литературы',
+  recent_window_years_max: 'Источники старше этого срока считаются устаревшими',
+  tolerance_mm: 'На сколько миллиметров поля могут отличаться от заданных',
 };
 
 /* ---- Editor State ---- */
@@ -166,7 +178,7 @@ function renderBlock(block, index) {
   const sevOptions = SEVERITY_OPTIONS.map(o =>
     `<option value="${o.value}" ${block.severity === o.value ? 'selected' : ''}>${o.label}</option>`
   ).join('');
-  const paramsHtml = renderParams(block.params, index, '');
+  const paramsHtml = renderParams(block.params, index, '', block.key);
 
   return `
     <div class="tpl-block card" data-index="${index}">
@@ -188,6 +200,7 @@ function renderBlock(block, index) {
         <div class="form-group">
           <label class="form-label">Строгость</label>
           <select class="form-select" onchange="onSeverityChange(${index}, this.value)">${sevOptions}</select>
+          <div class="form-hint">Определяет, насколько серьёзно расценивается нарушение этого правила</div>
         </div>
         ${paramsHtml
           ? `<div class="tpl-params-section"><div class="form-label" style="margin-bottom:12px;font-size:14px">Параметры</div>${paramsHtml}</div>`
@@ -197,21 +210,28 @@ function renderBlock(block, index) {
 }
 
 /* ---- Param Rendering ---- */
-function renderParams(params, blockIndex, prefix) {
+function renderParams(params, blockIndex, prefix, blockKey) {
   if (!params || Object.keys(params).length === 0) return '';
   return Object.entries(params).map(([key, value]) => {
     const path = prefix ? `${prefix}.${key}` : key;
-    return renderParamField(key, value, blockIndex, path);
+    return renderParamField(key, value, blockIndex, path, blockKey);
   }).join('');
 }
 
-function renderParamField(key, value, blockIndex, path) {
+function renderParamField(key, value, blockIndex, path, blockKey) {
+  const special = getSpecialRenderer(blockKey, key, value, blockIndex, path);
+  if (special) return special;
+
   const label = PARAM_LABELS[key] || key;
+  const hint = PARAM_HINTS[key] || '';
   const fieldId = `blk-${blockIndex}-${path.replace(/\./g, '-')}`;
 
   if (typeof value === 'boolean') {
     return `<div class="toggle">
-      <div class="toggle-info"><div class="toggle-title">${escHtml(label)}</div></div>
+      <div class="toggle-info">
+        <div class="toggle-title">${escHtml(label)}</div>
+        ${hint ? `<div class="toggle-desc">${escHtml(hint)}</div>` : ''}
+      </div>
       <label class="switch">
         <input type="checkbox" id="${fieldId}" ${value ? 'checked' : ''}
                onchange="onParamChange(${blockIndex},'${path}',this.checked,'bool')">
@@ -224,6 +244,7 @@ function renderParamField(key, value, blockIndex, path) {
       <label class="form-label">${escHtml(label)}</label>
       <input class="form-input" type="number" id="${fieldId}" value="${value}" step="any"
              onchange="onParamChange(${blockIndex},'${path}',this.value,'number')">
+      ${hint ? `<div class="form-hint">${escHtml(hint)}</div>` : ''}
     </div>`;
   }
   if (typeof value === 'string') {
@@ -231,47 +252,25 @@ function renderParamField(key, value, blockIndex, path) {
       <label class="form-label">${escHtml(label)}</label>
       <input class="form-input" id="${fieldId}" value="${escHtml(value)}"
              onchange="onParamChange(${blockIndex},'${path}',this.value,'string')">
+      ${hint ? `<div class="form-hint">${escHtml(hint)}</div>` : ''}
     </div>`;
   }
-  if (Array.isArray(value)) {
-    if (value.length > 0 && value.every(v => typeof v === 'string' || typeof v === 'number')) {
-      return `<div class="form-group">
-        <label class="form-label">${escHtml(label)}</label>
-        <input class="form-input" id="${fieldId}" value="${escHtml(value.join(', '))}"
-               onchange="onParamChange(${blockIndex},'${path}',this.value,'array')">
-        <div class="form-hint">Через запятую</div>
-      </div>`;
-    }
-    return renderJsonField(fieldId, label, value, blockIndex, path);
-  }
-  if (typeof value === 'object' && value !== null) {
+  if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
     const entries = Object.entries(value);
     const allSimple = entries.every(([, v]) =>
       typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
     );
     if (allSimple && entries.length <= 8) {
       const inner = entries.map(([k, v]) =>
-        renderParamField(k, v, blockIndex, `${path}.${k}`)
+        renderParamField(k, v, blockIndex, `${path}.${k}`, blockKey)
       ).join('');
       return `<fieldset class="tpl-param-group"><legend>${escHtml(label)}</legend>${inner}</fieldset>`;
     }
-    return renderJsonField(fieldId, label, value, blockIndex, path);
   }
   return `<div class="form-group">
     <label class="form-label">${escHtml(label)}</label>
     <input class="form-input" id="${fieldId}" value="${escHtml(String(value))}"
            onchange="onParamChange(${blockIndex},'${path}',this.value,'string')">
-  </div>`;
-}
-
-function renderJsonField(fieldId, label, value, blockIndex, path) {
-  const json = JSON.stringify(value, null, 2);
-  const rows = Math.min(Math.max(json.split('\n').length, 3), 12);
-  return `<div class="form-group">
-    <label class="form-label">${escHtml(label)}</label>
-    <textarea class="form-textarea" id="${fieldId}" rows="${rows}"
-              onchange="onParamChange(${blockIndex},'${path}',this.value,'json')">${escHtml(json)}</textarea>
-    <div class="form-hint">Формат JSON</div>
   </div>`;
 }
 
@@ -305,12 +304,33 @@ function onParamChange(blockIndex, path, rawValue, type) {
     case 'bool': value = !!rawValue; break;
     case 'number': value = parseFloat(rawValue); break;
     case 'array': value = rawValue.split(',').map(s => s.trim()).filter(Boolean); break;
-    case 'json':
-      try { value = JSON.parse(rawValue); } catch { return; }
-      break;
+    case 'raw': value = rawValue; break;
     default: value = rawValue;
   }
   setNestedValue(_editBlocks[blockIndex].params, path, value);
+}
+
+/* ---- Re-render a single block body (for section add/remove) ---- */
+function rerenderBlockBody(blockIndex) {
+  const block = _editBlocks[blockIndex];
+  const body = document.getElementById(`block-body-${blockIndex}`);
+  if (!body || !block) return;
+
+  const sevOptions = SEVERITY_OPTIONS.map(o =>
+    `<option value="${o.value}" ${block.severity === o.value ? 'selected' : ''}>${o.label}</option>`
+  ).join('');
+  const paramsHtml = renderParams(block.params, blockIndex, '', block.key);
+
+  body.innerHTML = `
+    <div class="form-group">
+      <label class="form-label">Строгость</label>
+      <select class="form-select" onchange="onSeverityChange(${blockIndex}, this.value)">${sevOptions}</select>
+      <div class="form-hint">Определяет, насколько серьёзно расценивается нарушение этого правила</div>
+    </div>
+    ${paramsHtml
+      ? `<div class="tpl-params-section"><div class="form-label" style="margin-bottom:12px;font-size:14px">Параметры</div>${paramsHtml}</div>`
+      : '<div class="form-hint" style="padding:8px 0">Нет настраиваемых параметров</div>'}`;
+  body.style.display = 'block';
 }
 
 /* ---- Accordion Toggles ---- */
@@ -378,3 +398,4 @@ window.onSeverityChange = onSeverityChange;
 window.onParamChange = onParamChange;
 window.saveTemplateChanges = saveTemplateChanges;
 window.backToTemplateList = backToTemplateList;
+window.rerenderBlockBody = rerenderBlockBody;

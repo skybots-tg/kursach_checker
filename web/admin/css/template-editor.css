@@ -1,0 +1,256 @@
+/* ============================================================
+   Template Editor — block accordion, tag inputs, param controls
+   ============================================================ */
+
+/* ---- Block Accordion ---- */
+.tpl-editor-header { margin-bottom: 20px; }
+.tpl-editor-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-top: 12px;
+  gap: 16px;
+}
+.tpl-blocks-list { display: flex; flex-direction: column; gap: 8px; }
+.tpl-block { padding: 0 !important; overflow: hidden; }
+.tpl-block-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.tpl-block-header:hover { background: #fafbfe; }
+.tpl-block-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+.tpl-block-info { flex: 1; min-width: 0; }
+.tpl-block-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.tpl-block-desc { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+.tpl-block-chevron {
+  color: var(--text-muted);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.tpl-block-body {
+  border-top: 1px solid var(--border);
+  padding: 18px;
+  background: #fafbfc;
+}
+.tpl-params-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.tpl-param-group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: white;
+}
+.tpl-param-group legend {
+  font-size: 13px; font-weight: 600; color: var(--text); padding: 0 6px;
+}
+
+/* ---- Tag Input (chip-style) ---- */
+.tag-input-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  cursor: text;
+  min-height: 40px;
+  transition: all var(--transition);
+}
+.tag-input-wrap:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-focus);
+  background: white;
+}
+
+.tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px 3px 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  animation: tagAppear 0.15s ease;
+  white-space: nowrap;
+}
+@keyframes tagAppear {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.tag-chip-text { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+
+.tag-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.tag-chip-remove:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.tag-text-input {
+  flex: 1;
+  min-width: 120px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text);
+  padding: 3px 0;
+}
+.tag-text-input::placeholder { color: var(--text-muted); font-size: 12px; }
+
+/* ---- Checkbox Cards (format selectors) ---- */
+.checkbox-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkbox-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+  background: white;
+  user-select: none;
+}
+.checkbox-card:hover { border-color: var(--accent-muted); background: #fafbfe; }
+.checkbox-card:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.checkbox-card input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.checkbox-card-label { font-size: 13px; font-weight: 500; color: var(--text); }
+
+/* ---- Per-format fields ---- */
+.per-format-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.form-group.compact { margin-bottom: 4px; }
+
+/* ---- Section List ---- */
+.sections-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: white;
+  transition: all var(--transition);
+}
+.section-item:hover { border-color: var(--accent-muted); }
+
+.section-item-handle {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 6px;
+  color: var(--text-muted);
+  cursor: grab;
+  flex-shrink: 0;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+}
+.section-item:hover .section-item-handle { opacity: 0.8; }
+
+.section-item-body { flex: 1; min-width: 0; }
+
+.section-item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.section-item-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.section-id-input {
+  flex: 1;
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  font-family: 'SF Mono', 'Consolas', monospace;
+}
+
+.section-remove {
+  color: var(--text-muted) !important;
+  flex-shrink: 0;
+}
+.section-remove:hover { color: var(--danger) !important; background: var(--danger-soft) !important; }
+
+.section-titles-wrap { padding-left: 32px; }
+
+/* ---- Mono input (regex etc.) ---- */
+.mono-input { font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px !important; }
