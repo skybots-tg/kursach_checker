@@ -48,6 +48,8 @@ function navigateTo(pageId) {
   const topTitle = document.getElementById('topbar-title');
   if (topTitle && link) topTitle.textContent = link.dataset.label || link.textContent.trim();
 
+  if (location.hash !== '#' + pageId) history.replaceState(null, '', '#' + pageId);
+
   if (pageLoaders[pageId]) pageLoaders[pageId]();
 
   closeSidebar();
@@ -264,9 +266,18 @@ function iconSvg(name, size = 18) {
 }
 
 /* ---- Init ---- */
+function getPageFromHash() {
+  const id = location.hash.replace('#', '');
+  return document.getElementById('page-' + id) ? id : 'dashboard';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!getToken()) showLoginModal();
-  else navigateTo('dashboard');
+  else navigateTo(getPageFromHash());
+});
+
+window.addEventListener('hashchange', () => {
+  if (getToken()) navigateTo(getPageFromHash());
 });
 
 async function apiUpload(method, path, formData) {

@@ -41,7 +41,7 @@ async def list_templates(
             "name": r.name,
             "type_work": r.type_work,
             "year": r.year,
-            "status": r.status.value,
+            "status": r.status.value if hasattr(r.status, "value") else r.status,
             "active": r.active,
         }
         for r in rows
@@ -149,16 +149,17 @@ async def publish_template(
     template = await db.get(Template, template_id)
     if not template:
         raise HTTPException(status_code=404, detail="Шаблон не найден")
-    before = template.status.value
+    before = template.status.value if hasattr(template.status, "value") else template.status
     template.status = TemplateStatus.published
 
+    after = template.status.value if hasattr(template.status, "value") else template.status
     await log_admin_action(
         db=db,
         admin_user_id=current_admin.id,
         action="template.publish",
         entity_type="template",
         entity_id=str(template_id),
-        diff={"before": before, "after": template.status.value},
+        diff={"before": before, "after": after},
     )
     await db.commit()
-    return {"template_id": template_id, "status": template.status.value}
+    return {"template_id": template_id, "status": after}

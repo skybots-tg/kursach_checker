@@ -131,13 +131,35 @@ async function loadMessages(itemId) {
   }
 }
 
+function sanitizeTgHtml(raw) {
+  if (!raw) return '';
+  const allowed = ['b', 'i', 'u', 's', 'a', 'code', 'pre', 'em', 'strong'];
+  const div = document.createElement('div');
+  div.innerHTML = raw;
+  function walk(node) {
+    for (const child of Array.from(node.childNodes)) {
+      if (child.nodeType === 1) {
+        const tag = child.tagName.toLowerCase();
+        if (!allowed.includes(tag)) {
+          const text = document.createTextNode(child.textContent);
+          node.replaceChild(text, child);
+        } else {
+          walk(child);
+        }
+      }
+    }
+  }
+  walk(div);
+  return div.innerHTML;
+}
+
 function renderMessageItem(msg, itemId, idx, total) {
   const typeLabels = {
     text: 'Текст', photo: 'Фото', video: 'Видео',
     audio: 'Аудио', document: 'Файл', animation: 'GIF',
   };
   const preview = msg.message_type === 'text'
-    ? escHtml((msg.text || '').substring(0, 80))
+    ? sanitizeTgHtml((msg.text || '').substring(0, 120))
     : (msg.file_name ? escHtml(msg.file_name) : typeLabels[msg.message_type] || msg.message_type);
   const moveUp = idx > 0
     ? `<button class="btn btn-icon btn-sm" title="Вверх" onclick="moveMessage(${itemId},${msg.id},-1)">&#9650;</button>` : '';
@@ -194,8 +216,12 @@ function messageFormHtml(msg) {
           <button type="button" class="rt-btn" onclick="rtWrap('msg-text','<u>','</u>')" title="Подчёркнутый"><u>U</u></button>
           <button type="button" class="rt-btn" onclick="rtInsertLink('msg-text')" title="Ссылка">🔗</button>
         </div>
-        <textarea class="form-textarea" id="msg-text" rows="5">${escHtml(msg?.text || '')}</textarea>
+        <textarea class="form-textarea" id="msg-text" rows="5" oninput="updateMsgPreview()">${escHtml(msg?.text || '')}</textarea>
         <div class="form-hint">Поддерживается HTML: &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;a href="..."&gt;</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Предпросмотр</label>
+        <div id="msg-preview-box" class="msg-preview-box" style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;min-height:40px;background:var(--bg-subtle);line-height:1.5">${sanitizeTgHtml(msg?.text || '')}</div>
       </div>
     </div>`;
 }
@@ -219,6 +245,7 @@ function rtWrap(textareaId, openTag, closeTag) {
   const replacement = openTag + sel + closeTag;
   ta.setRangeText(replacement, start, end, 'select');
   ta.focus();
+  updateMsgPreview();
 }
 
 function rtInsertLink(textareaId) {
@@ -232,6 +259,7 @@ function rtInsertLink(textareaId) {
   const replacement = `<a href="${url}">${sel}</a>`;
   ta.setRangeText(replacement, start, end, 'select');
   ta.focus();
+  updateMsgPreview();
 }
 
 function showAddMessage(itemId) {
@@ -308,8 +336,15 @@ function buildMessageFormData() {
   return fd;
 }
 
+function updateMsgPreview() {
+  const box = document.getElementById('msg-preview-box');
+  if (box) box.innerHTML = sanitizeTgHtml(getVal('msg-text'));
+}
+
 /* ---------- Expose ---------- */
 window.loadContentTexts = loadContentTexts;
+window.sanitizeTgHtml = sanitizeTgHtml;
+window.updateMsgPreview = updateMsgPreview;
 window.editText = editText;
 window.saveText = saveText;
 window.toggleMsgCard = toggleMsgCard;

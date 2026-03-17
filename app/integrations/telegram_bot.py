@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher, F
@@ -9,14 +10,38 @@ from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     Message,
+    User as TgUser,
 )
 from sqlalchemy import select
 
 from app.core.config import settings
 from app.db.session import SessionLocal
-from app.models import ContentMenuItem, MenuItemMessage
+from app.models import ContentMenuItem, CreditsBalance, MenuItemMessage, User
 
 logger = logging.getLogger(__name__)
+
+
+async def _ensure_user(tg_user: TgUser) -> None:
+    """Create or update the User record from a Telegram user object."""
+    async with SessionLocal() as db:
+        user = await db.scalar(
+            select(User).where(User.telegram_id == tg_user.id)
+        )
+        if user is None:
+            user = User(
+                telegram_id=tg_user.id,
+                first_name=tg_user.first_name,
+                username=tg_user.username,
+                last_login_at=datetime.utcnow(),
+            )
+            db.add(user)
+            await db.flush()
+            db.add(CreditsBalance(user_id=user.id, credits_available=0))
+        else:
+            user.first_name = tg_user.first_name
+            user.username = tg_user.username
+            user.last_login_at = datetime.utcnow()
+        await db.commit()
 
 
 async def build_main_keyboard() -> InlineKeyboardMarkup:
@@ -139,6 +164,8 @@ async def run_bot() -> None:
 
     @dp.message(CommandStart())
     async def start_handler(message: Message) -> None:
+        if message.from_user:
+            await _ensure_user(message.from_user)
         kb = await build_main_keyboard()
         await message.answer(
             "Добро пожаловать в сервис технической проверки документов.",
@@ -155,4 +182,35 @@ async def run_bot() -> None:
             return
         await _send_menu_messages(bot, callback.message.chat.id, menu_item_id)
 
+    @dp.callback_query()
+    async def custom_callback_handler(callback: CallbackQuery) -> None:
+        """Handle callback queries with custom payload (not menu_*)."""
+        await callback.answer()
+        data = callback.data or ""
+        item = await _find_menu_item_by_payload(data)
+        if item:
+            await _send_menu_messages(bot, callback.message.chat.id, item.id)
+
+    @dp.message()
+    async def fallback_message_handler(message: Message) -> None:
+        """Handle any message that wasn't caught by specific handlers."""
+        if message.from_user:
+            await _ensure_user(message.from_user)
+        kb = await build_main_keyboard()
+        await message.answer(
+            "Добро пожаловать в сервис технической проверки документов.",
+            reply_markup=kb,
+        )
+
     await dp.start_polling(bot)
+
+
+async def _find_menu_item_by_payload(payload: str) -> ContentMenuItem | None:
+    if not payload:
+        return None
+    async with SessionLocal() as db:
+        return await db.scalar(
+            select(ContentMenuItem)
+            .where(ContentMenuItem.payload == payload, ContentMenuItem.active.is_(True))
+            .limit(1)
+        )

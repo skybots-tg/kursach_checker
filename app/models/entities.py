@@ -91,6 +91,7 @@ class Gost(Base):
     __tablename__ = "gosts"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    university_id: Mapped[int | None] = mapped_column(ForeignKey("universities.id"), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(255))
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
