@@ -6,9 +6,14 @@ try:
 except ImportError:
     pass
 
-asyncio.set_event_loop(asyncio.new_event_loop())
+from app.workers.tasks import WorkerSettings
+from arq.worker import create_worker
 
-from arq.cli import cli
+
+async def main():
+    worker = create_worker(WorkerSettings)
+    await worker.async_run()
+
 
 if __name__ == "__main__":
-    cli()
+    asyncio.run(main())
