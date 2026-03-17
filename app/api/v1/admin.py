@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
+import bcrypt
 from fastapi import APIRouter, Depends, HTTPException
-from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +11,14 @@ from app.db.session import get_db
 from app.models import AdminUser, AuditLog, Check, Order, OrderStatus
 
 router = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
 
 class AdminLoginRequest(BaseModel):
@@ -28,7 +35,7 @@ class AdminCreateRequest(BaseModel):
 @router.post("/auth/login")
 async def admin_login(payload: AdminLoginRequest, db: AsyncSession = Depends(get_db)) -> dict:
     admin = await get_admin_by_login(db, payload.login)
-    if not admin or not pwd_context.verify(payload.password, admin.password_hash):
+    if not admin or not verify_password(payload.password, admin.password_hash):
         raise HTTPException(status_code=401, detail="Неверные учётные данные")
     token = create_admin_token(admin.id, admin.role)
     return {"access_token": token, "token_type": "bearer", "role": admin.role}
@@ -47,7 +54,7 @@ async def create_admin_user(
 
     item = AdminUser(
         login=payload.login,
-        password_hash=pwd_context.hash(payload.password),
+        password_hash=hash_password(payload.password),
         role=payload.role,
     )
     db.add(item)
