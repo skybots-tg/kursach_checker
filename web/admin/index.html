@@ -1,323 +1,147 @@
 <!doctype html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Админка — Курсач Чекер</title>
-    <link rel="stylesheet" href="/static/styles.css" />
-    <script src="/static/lucide.min.js"></script>
-    <style>
-      :root {
-        --sidebar-w: 240px;
-        --radius: 16px;
-        --glass-bg: rgba(255,255,255,0.72);
-        --glass-border: rgba(154,190,255,0.32);
-        --glass-shadow: 0 6px 24px rgba(93,127,179,0.10);
-        --accent: #3f8cff;
-        --accent-soft: #e8f1ff;
-        --danger: #ff5d73;
-        --success: #4fc38a;
-        --warn: #ffb84d;
-        --text: #1f2a44;
-        --text-muted: #6b7a99;
-        --bg: #f4f8ff;
-      }
-      * { box-sizing: border-box; margin: 0; }
-      body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background: var(--bg); color: var(--text); }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админка — Курсач Чекер</title>
+  <link rel="stylesheet" href="/admin/assets/css/admin.css">
+  <link rel="stylesheet" href="/admin/assets/css/components.css">
+</head>
+<body>
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
 
-      .layout { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 100vh; }
-      @media (max-width:900px) { .layout { grid-template-columns:1fr; } aside { display:none; } }
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <h2>Курсач Чекер</h2>
+        <span>Панель администратора</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Главная</div>
+          <a class="nav-link active" data-page="dashboard" data-label="Дашборд">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Дашборд
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Настройка проверок</div>
+          <a class="nav-link" data-page="universities" data-label="ВУЗы и программы">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22V6l10-4 10 4v16"/><path d="M6 10v8"/><path d="M10 8v12"/><path d="M14 8v12"/><path d="M18 10v8"/></svg>
+            ВУЗы
+          </a>
+          <a class="nav-link" data-page="gosts" data-label="ГОСТы / стили">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+            ГОСТы
+          </a>
+          <a class="nav-link" data-page="templates" data-label="Шаблоны проверок">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
+            Шаблоны
+          </a>
+          <a class="nav-link" data-page="rules" data-label="Библиотека правил">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 12H3"/><path d="M16 6H3"/><path d="M16 18H3"/><path d="m19 10-4 4"/><path d="m15 10 4 4"/></svg>
+            Правила
+          </a>
+          <a class="nav-link" data-page="autofix" data-label="Автоисправления">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 4-8 16"/><path d="m2 16 6-3"/><path d="m8 13 6 3"/><path d="m22 8-6 3"/><path d="m16 11-6-3"/></svg>
+            Автоисправления
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Бизнес</div>
+          <a class="nav-link" data-page="products" data-label="Продукты и цены">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            Продукты
+          </a>
+          <a class="nav-link" data-page="orders" data-label="Заказы и платежи">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Заказы
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Мониторинг</div>
+          <a class="nav-link" data-page="checks" data-label="Проверки">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Проверки
+          </a>
+          <a class="nav-link" data-page="users" data-label="Пользователи">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Пользователи
+          </a>
+          <a class="nav-link" data-page="logs" data-label="Логи и аудит">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Логи
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Контент</div>
+          <a class="nav-link" data-page="content" data-label="Контент бота">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Контент бота
+          </a>
+          <a class="nav-link" data-page="demo" data-label="Демо-примеры">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Демо
+          </a>
+          <a class="nav-link" data-page="settings" data-label="Настройки">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Настройки
+          </a>
+        </div>
+      </nav>
+    </aside>
 
-      aside { padding:24px 16px; background:#fff; border-right:1px solid var(--glass-border); }
-      aside h3 { font-size:18px; margin-bottom:20px; color:var(--accent); }
-      .menu a {
-        display:flex; align-items:center; gap:10px;
-        padding:10px 14px; border-radius:12px; text-decoration:none;
-        color:var(--text); font-size:14px; transition:background .15s;
-      }
-      .menu a:hover, .menu a.active { background:var(--accent-soft); color:var(--accent); font-weight:600; }
-      .menu a i { width:18px; height:18px; flex-shrink:0; }
-
-      main { padding:28px 32px; overflow-y:auto; }
-
-      .page { display:none; }
-      .page.active { display:block; }
-
-      .page-title { font-size:22px; font-weight:700; margin-bottom:20px; }
-
-      .card {
-        background:var(--glass-bg); backdrop-filter:blur(14px);
-        border:1px solid var(--glass-border); border-radius:var(--radius);
-        box-shadow:var(--glass-shadow); padding:20px; margin-bottom:16px;
-      }
-      .card h4 { font-size:15px; margin-bottom:12px; color:var(--text); }
-      .card p.desc { font-size:13px; color:var(--text-muted); margin-bottom:14px; }
-
-      .badge {
-        display:inline-block; padding:4px 10px; border-radius:999px;
-        font-size:11px; font-weight:600;
-      }
-      .badge.safe { background:#e8fff2; color:#1c784d; }
-      .badge.unsafe { background:#ffe8ec; color:#a62a3a; }
-      .badge.on { background:#e8fff2; color:#1c784d; }
-      .badge.off { background:#f2f4f7; color:#6b7a99; }
-
-      .toggle-row {
-        display:flex; align-items:center; justify-content:space-between;
-        padding:10px 0; border-bottom:1px solid #f0f2f5;
-      }
-      .toggle-row:last-child { border-bottom:none; }
-      .toggle-row .label { font-size:14px; }
-      .toggle-row .sublabel { font-size:12px; color:var(--text-muted); }
-
-      .switch { position:relative; width:44px; height:24px; }
-      .switch input { opacity:0; width:0; height:0; }
-      .switch .slider {
-        position:absolute; inset:0; background:#cdd5e0; border-radius:24px;
-        cursor:pointer; transition:.2s;
-      }
-      .switch .slider::before {
-        content:''; position:absolute; width:18px; height:18px;
-        left:3px; bottom:3px; background:#fff; border-radius:50%;
-        transition:.2s;
-      }
-      .switch input:checked + .slider { background:var(--accent); }
-      .switch input:checked + .slider::before { transform:translateX(20px); }
-
-      .btn {
-        border:none; border-radius:12px; height:40px; padding:0 20px;
-        font-weight:600; font-size:13px; cursor:pointer; transition:opacity .15s;
-      }
-      .btn:hover { opacity:.85; }
-      .btn-primary { background:var(--accent); color:#fff; }
-      .btn-secondary { background:var(--accent-soft); color:var(--accent); }
-      .btn-danger { background:var(--danger); color:#fff; }
-      .btn-success { background:var(--success); color:#fff; }
-
-      .form-group { margin-bottom:14px; }
-      .form-group label { display:block; font-size:13px; font-weight:600; margin-bottom:5px; }
-      .form-group input, .form-group select, .form-group textarea {
-        width:100%; padding:10px 12px; border:1px solid #d6e1f0; border-radius:10px;
-        font-size:13px; background:#fff; color:var(--text);
-      }
-      .form-group input:focus, .form-group textarea:focus {
-        outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(63,140,255,.12);
-      }
-      .form-group .hint { font-size:11px; color:var(--text-muted); margin-top:4px; }
-
-      .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:20px; }
-      .stat-card { text-align:center; padding:16px; }
-      .stat-card .val { font-size:28px; font-weight:700; color:var(--accent); }
-      .stat-card .lbl { font-size:12px; color:var(--text-muted); margin-top:4px; }
-
-      .rule-list { display:flex; flex-direction:column; gap:8px; }
-      .rule-item {
-        display:flex; align-items:center; gap:12px;
-        padding:12px 16px; border-radius:12px; background:#fafbfe;
-        border:1px solid #eef1f6;
-      }
-      .rule-item .ri-info { flex:1; }
-      .rule-item .ri-title { font-size:14px; font-weight:600; }
-      .rule-item .ri-desc { font-size:12px; color:var(--text-muted); }
-
-      .alert {
-        padding:12px 16px; border-radius:12px; font-size:13px; margin-bottom:14px;
-      }
-      .alert.info { background:#e8f1ff; color:#2563a8; }
-      .alert.success { background:#e8fff2; color:#1c784d; }
-      .alert.error { background:#ffe8ec; color:#a62a3a; }
-
-      .section-sep { height:1px; background:#e8ecf2; margin:20px 0; }
-
-      .actions { display:flex; gap:10px; margin-top:16px; }
-    </style>
-  </head>
-  <body>
-    <div class="layout">
-      <aside>
-        <h3>Админка</h3>
-        <nav class="menu" id="sidebar-menu">
-          <a href="#" data-page="dashboard"><i data-lucide="layout-dashboard"></i>Дашборд</a>
-          <a href="#" data-page="universities"><i data-lucide="building-2"></i>ВУЗы и программы</a>
-          <a href="#" data-page="gosts"><i data-lucide="book-open"></i>ГОСТы / стили</a>
-          <a href="#" data-page="templates"><i data-lucide="file-cog"></i>Шаблоны проверок</a>
-          <a href="#" data-page="rules"><i data-lucide="list-checks"></i>Библиотека правил</a>
-          <a href="#" data-page="autofix"><i data-lucide="wand-2"></i>Автоисправления</a>
-          <a href="#" data-page="products"><i data-lucide="tag"></i>Продукты и цены</a>
-          <a href="#" data-page="orders"><i data-lucide="credit-card"></i>Заказы и платежи</a>
-          <a href="#" data-page="checks"><i data-lucide="search"></i>Проверки</a>
-          <a href="#" data-page="users"><i data-lucide="users"></i>Пользователи</a>
-          <a href="#" data-page="content"><i data-lucide="message-square"></i>Контент бота</a>
-          <a href="#" data-page="demo"><i data-lucide="play-circle"></i>Демо-пример</a>
-          <a href="#" data-page="logs"><i data-lucide="scroll-text"></i>Логи и аудит</a>
-          <a href="#" data-page="settings"><i data-lucide="settings"></i>Настройки</a>
-        </nav>
-      </aside>
-
-      <main id="main-content">
-        <!-- ====== Автоисправления ====== -->
-        <div class="page" id="page-autofix">
-          <h2 class="page-title">Автоисправления</h2>
-
-          <div class="stats-grid" id="autofix-stats">
-            <div class="card stat-card"><div class="val" id="af-stat-total">—</div><div class="lbl">Проверок с автоисправлениями</div></div>
-            <div class="card stat-card"><div class="val" id="af-stat-items">—</div><div class="lbl">Всего исправлений</div></div>
-            <div class="card stat-card"><div class="val" id="af-stat-avg">—</div><div class="lbl">Среднее на проверку</div></div>
-          </div>
-
-          <div class="card">
-            <h4>Автоисправляемые правила</h4>
-            <p class="desc">Эти типы правил поддерживают безопасное автоисправление форматирования. Глобальные дефолты можно переопределить в каждом шаблоне.</p>
-            <div class="rule-list" id="af-fixable-list"></div>
-          </div>
-
-          <div class="card">
-            <h4>Не автоисправляемые</h4>
-            <p class="desc">Эти правила не поддерживают автоматическое исправление из соображений безопасности.</p>
-            <div class="rule-list" id="af-notfixable-list"></div>
-          </div>
-
-          <div class="card">
-            <h4>Глобальные дефолты</h4>
-            <p class="desc">Значения по умолчанию для новых шаблонов. Перезаписываются настройками конкретного шаблона.</p>
-            <div id="af-defaults-form">
-              <div class="toggle-row">
-                <div><div class="label">Автоисправления включены</div></div>
-                <label class="switch"><input type="checkbox" id="af-enabled" checked><span class="slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div><div class="label">Выравнивание</div><div class="sublabel">Устанавливать по ширине</div></div>
-                <label class="switch"><input type="checkbox" id="af-alignment" checked><span class="slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div><div class="label">Межстрочный интервал</div></div>
-                <label class="switch"><input type="checkbox" id="af-spacing" checked><span class="slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div><div class="label">Красная строка</div></div>
-                <label class="switch"><input type="checkbox" id="af-indent" checked><span class="slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div><div class="label">Интервалы до/после</div></div>
-                <label class="switch"><input type="checkbox" id="af-before-after" checked><span class="slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div><div class="label">Шрифт и кегль</div></div>
-                <label class="switch"><input type="checkbox" id="af-font" checked><span class="slider"></span></label>
-              </div>
-              <div class="form-group" style="margin-top:12px">
-                <label>Интервал до абзаца (pt)</label>
-                <input type="number" id="af-space-before" value="0" min="0" step="0.5">
-              </div>
-              <div class="form-group">
-                <label>Интервал после абзаца (pt)</label>
-                <input type="number" id="af-space-after" value="0" min="0" step="0.5">
-              </div>
-            </div>
-            <div class="actions">
-              <button class="btn btn-primary" onclick="saveAutofixDefaults()">Сохранить дефолты</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <h4>Пределы безопасности</h4>
-            <p class="desc">Что категорически не трогать при автоисправлении.</p>
-            <div id="af-safety-form">
-              <div class="toggle-row">
-                <div><div class="label">Пропускать заголовки</div></div>
-                <label class="switch"><input type="checkbox" id="af-skip-headings" checked><span class="slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div><div class="label">Пропускать таблицы</div></div>
-                <label class="switch"><input type="checkbox" id="af-skip-tables" checked><span class="slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div><div class="label">Пропускать оглавление</div></div>
-                <label class="switch"><input type="checkbox" id="af-skip-toc" checked><span class="slider"></span></label>
-              </div>
-              <div class="toggle-row">
-                <div><div class="label">Пропускать сноски</div></div>
-                <label class="switch"><input type="checkbox" id="af-skip-footnotes"><span class="slider"></span></label>
-              </div>
-              <div class="form-group" style="margin-top:12px">
-                <label>Макс. исправлений на документ</label>
-                <input type="number" id="af-max-changes" value="500" min="1">
-              </div>
-            </div>
-            <div class="actions">
-              <button class="btn btn-primary" onclick="saveAutofixSafety()">Сохранить ограничения</button>
-            </div>
+    <!-- Main -->
+    <div class="main-wrap">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="openSidebar()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+          </button>
+          <span class="topbar-title" id="topbar-title">Дашборд</span>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-user">
+            <div class="topbar-avatar">A</div>
+            <span>Админ</span>
           </div>
         </div>
+      </header>
 
-        <!-- ====== Настройки ====== -->
-        <div class="page" id="page-settings">
-          <h2 class="page-title">Настройки системы</h2>
-
-          <div class="card">
-            <h4>Конвертер DOC → DOCX</h4>
-            <p class="desc">Настройте команду конвертации .doc-файлов через LibreOffice headless или совместимый конвертер.</p>
-            <div id="dc-alert-area"></div>
-
-            <div class="toggle-row">
-              <div><div class="label">Конвертер включён</div><div class="sublabel">Разрешить автоматическую конвертацию DOC → DOCX</div></div>
-              <label class="switch"><input type="checkbox" id="dc-enabled"><span class="slider"></span></label>
-            </div>
-
-            <div class="form-group" style="margin-top:14px">
-              <label>Шаблон команды</label>
-              <input type="text" id="dc-command" placeholder='soffice --headless --convert-to docx --outdir "{outdir}" "{input}"'>
-              <div class="hint">Используйте плейсхолдеры <code>{outdir}</code> и <code>{input}</code> для подстановки путей</div>
-            </div>
-
-            <div class="form-group">
-              <label>Таймаут (секунд)</label>
-              <input type="number" id="dc-timeout" value="60" min="5" max="600">
-            </div>
-
-            <div class="actions">
-              <button class="btn btn-primary" onclick="saveDocConverter()">Сохранить</button>
-              <button class="btn btn-secondary" onclick="testDocConverter()">Проверить конвертер</button>
-            </div>
-
-            <div id="dc-test-result" style="margin-top:14px"></div>
-          </div>
-        </div>
-
-        <!-- ====== Заглушки ====== -->
-        <div class="page active" id="page-dashboard">
-          <h2 class="page-title">Дашборд</h2>
-          <div class="card"><p>Карточки KPI и события загрузятся здесь.</p></div>
-        </div>
-        <div class="page" id="page-universities"><h2 class="page-title">ВУЗы и программы</h2><div class="card"><p>Управление вузами</p></div></div>
-        <div class="page" id="page-gosts"><h2 class="page-title">ГОСТы / стили</h2><div class="card"><p>Управление ГОСТами</p></div></div>
-        <div class="page" id="page-templates">
-          <h2 class="page-title">Шаблоны проверок</h2>
-          <div class="card">
-            <h4>Конструктор шаблона (универсальный)</h4>
-            <p>Блоки включаются/выключаются, параметры расширяются без изменения схемы БД.</p>
-          </div>
-          <div class="card">
-            <h4>Блоки</h4>
-            <ul style="padding-left:20px;font-size:14px;line-height:2">
-              <li>Паспорт шаблона</li><li>Приём файлов</li><li>Контекст работы</li>
-              <li>Структура и разделы</li><li>Объём и правила подсчёта</li><li>Источники</li>
-              <li>Страница и поля</li><li>Основной текст</li>
-            </ul>
-          </div>
-        </div>
-        <div class="page" id="page-rules"><h2 class="page-title">Библиотека правил</h2><div class="card"><p>Каталог стандартных правил</p></div></div>
-        <div class="page" id="page-products"><h2 class="page-title">Продукты и цены</h2><div class="card"><p>Управление продуктами</p></div></div>
-        <div class="page" id="page-orders"><h2 class="page-title">Заказы и платежи</h2><div class="card"><p>Список заказов</p></div></div>
-        <div class="page" id="page-checks"><h2 class="page-title">Проверки</h2><div class="card"><p>Журнал проверок</p></div></div>
-        <div class="page" id="page-users"><h2 class="page-title">Пользователи</h2><div class="card"><p>Управление пользователями</p></div></div>
-        <div class="page" id="page-content"><h2 class="page-title">Контент бота</h2><div class="card"><p>Тексты и меню</p></div></div>
-        <div class="page" id="page-demo"><h2 class="page-title">Демо-пример</h2><div class="card"><p>Управление демо</p></div></div>
-        <div class="page" id="page-logs"><h2 class="page-title">Логи и аудит</h2><div class="card"><p>История действий</p></div></div>
-      </main>
+      <div class="content">
+        <div class="page active" id="page-dashboard"></div>
+        <div class="page" id="page-universities"></div>
+        <div class="page" id="page-gosts"></div>
+        <div class="page" id="page-templates"></div>
+        <div class="page" id="page-rules"></div>
+        <div class="page" id="page-autofix"></div>
+        <div class="page" id="page-products"></div>
+        <div class="page" id="page-orders"></div>
+        <div class="page" id="page-checks"></div>
+        <div class="page" id="page-users"></div>
+        <div class="page" id="page-content"></div>
+        <div class="page" id="page-demo"></div>
+        <div class="page" id="page-logs"></div>
+        <div class="page" id="page-settings"></div>
+      </div>
     </div>
+  </div>
 
-    <script src="/admin/assets/app.js"></script>
-    <script>if(window.lucide)window.lucide.createIcons();</script>
-  </body>
+  <script src="/admin/assets/js/core.js"></script>
+  <script src="/admin/assets/js/dashboard.js"></script>
+  <script src="/admin/assets/js/universities.js"></script>
+  <script src="/admin/assets/js/gosts.js"></script>
+  <script src="/admin/assets/js/templates.js"></script>
+  <script src="/admin/assets/js/rules.js"></script>
+  <script src="/admin/assets/js/autofix.js"></script>
+  <script src="/admin/assets/js/products.js"></script>
+  <script src="/admin/assets/js/orders.js"></script>
+  <script src="/admin/assets/js/checks.js"></script>
+  <script src="/admin/assets/js/users.js"></script>
+  <script src="/admin/assets/js/content.js"></script>
+  <script src="/admin/assets/js/demo.js"></script>
+  <script src="/admin/assets/js/logs.js"></script>
+  <script src="/admin/assets/js/settings.js"></script>
+</body>
 </html>
