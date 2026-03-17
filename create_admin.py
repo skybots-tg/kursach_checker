@@ -74,6 +74,10 @@ def main() -> None:
         print("[!] Пароль слишком короткий (минимум 4 символа).")
         sys.exit(1)
 
+    if len(password.encode("utf-8")) > 72:
+        print("[!] Пароль слишком длинный (макс. 72 байта — ограничение bcrypt).")
+        sys.exit(1)
+
     asyncio.run(create_owner(login, password))
 
 
