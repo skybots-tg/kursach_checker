@@ -11,10 +11,19 @@ function headers() {
   return { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getToken() };
 }
 
-async function api(method, path, body) {
+async function api(method, path, body, _retries = 1) {
   const opts = { method, headers: headers() };
   if (body !== undefined) opts.body = JSON.stringify(body);
-  const res = await fetch(API + path, opts);
+  let res;
+  try {
+    res = await fetch(API + path, opts);
+  } catch (netErr) {
+    if (_retries > 0) {
+      await new Promise(r => setTimeout(r, 1500));
+      return api(method, path, body, _retries - 1);
+    }
+    throw new Error('Сервер недоступен. Проверьте соединение и попробуйте снова.');
+  }
   if (res.status === 401) {
     clearToken();
     showLoginModal();
