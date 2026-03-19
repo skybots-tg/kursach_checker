@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/admin/assets/css/template-editor.css">
   <link rel="stylesheet" href="/admin/assets/css/content.css">
   <link rel="stylesheet" href="/admin/assets/css/analytics.css">
+  <link rel="stylesheet" href="/admin/assets/css/onboarding.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -110,6 +111,7 @@
           <span class="topbar-title" id="topbar-title">Дашборд</span>
         </div>
         <div class="topbar-right">
+          <button class="onboarding-help-btn" onclick="restartCurrentTour()" title="Помощь по разделу">?</button>
           <div class="topbar-user">
             <div class="topbar-avatar">A</div>
             <span>Админ</span>
@@ -138,6 +140,8 @@
   </div>
 
   <script src="/admin/assets/js/core.js"></script>
+  <script src="/admin/assets/js/onboarding.js"></script>
+  <script src="/admin/assets/js/onboarding-steps.js"></script>
   <script src="/admin/assets/js/dashboard.js"></script>
   <script src="/admin/assets/js/universities.js"></script>
   <script src="/admin/assets/js/gosts.js"></script>

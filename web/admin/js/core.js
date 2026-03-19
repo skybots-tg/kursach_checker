@@ -61,6 +61,8 @@ function navigateTo(pageId) {
 
   if (pageLoaders[pageId]) pageLoaders[pageId]();
 
+  if (window.onboardingCheck) onboardingCheck(pageId);
+
   closeSidebar();
 }
 
