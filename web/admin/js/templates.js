@@ -94,23 +94,25 @@ function showAddTemplate() {
     `<option value="${u.id}">${escHtml(u.name)}</option>`
   ).join('');
 
+  const mh = typeof META_HINTS !== 'undefined' ? META_HINTS : {};
+  const hi = typeof helpIcon === 'function' ? helpIcon : () => '';
   const body = `
     <div class="form-group">
-      <label class="form-label">Название шаблона</label>
+      <label class="form-label">Название шаблона${hi('name', mh)}</label>
       <input class="form-input" id="tpl-name" placeholder="Курсовая работа — МГУ 2025">
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">ВУЗ</label>
+        <label class="form-label">ВУЗ${hi('uni', mh)}</label>
         <select class="form-select" id="tpl-uni">${uniOpts}</select>
       </div>
       <div class="form-group">
-        <label class="form-label">Год</label>
+        <label class="form-label">Год${hi('year', mh)}</label>
         <input class="form-input" id="tpl-year" placeholder="2025">
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Тип работы</label>
+      <label class="form-label">Тип работы${hi('type', mh)}</label>
       <input class="form-input" id="tpl-type" placeholder="Курсовая / Диплом / Реферат">
     </div>`;
   const footer = `

@@ -70,15 +70,60 @@ const PARAM_LABELS = {
 };
 
 const PARAM_HINTS = {
-  allowed_extensions: 'Форматы файлов, которые можно загружать для проверки',
-  max_size_mb: 'Файлы тяжелее этого значения будут отклонены',
-  authors_labels: 'Слова, по которым система ищет авторов на титульном листе',
-  author_sheet_chars_with_spaces: 'Стандарт: 40 000 знаков с пробелами = 1 авторский лист',
-  min_author_sheets_default: 'Минимальный объём работы в авторских листах',
-  min_total_sources: 'Сколько источников должно быть в списке литературы',
-  recent_window_years_max: 'Источники старше этого срока считаются устаревшими',
-  tolerance_mm: 'На сколько миллиметров поля могут отличаться от заданных',
+  allowed_extensions: 'Список форматов, которые система примет. Рекомендуется .docx как основной формат',
+  max_size_mb: 'Файлы тяжелее этого значения будут отклонены при загрузке',
+  doc_policy: 'Как поступить, если пользователь загрузит файл в старом формате .doc',
+  detect_course_year: 'Система попробует определить курс студента по тексту титульного листа',
+  detect_authors_count: 'Система попробует определить количество авторов по титульному листу',
+  course_year_regex: 'Регулярное выражение для извлечения номера курса. Менять только если стандартный шаблон не работает',
+  authors_labels: 'Ключевые слова для поиска авторов на титульном листе (например: «Выполнил», «Студент»)',
+  allowed_formats: 'Какие форматы работ допустимы: академический (классическая структура) или проектный',
+  max_authors: 'Максимальное число авторов для каждого формата. Для групповых работ — больше 1',
+  allowed_for_course_years: 'На каком курсе какой формат доступен студентам',
+  required_sections_in_order: 'Обязательные разделы работы. Система проверит наличие и порядок следования',
+  author_sheet_chars_with_spaces: 'Сколько знаков с пробелами = 1 авторский лист. Стандарт — 40 000',
+  min_author_sheets_default: 'Минимальный объём работы. Работы меньшего объёма получат замечание',
+  min_total_sources: 'Минимальное число источников в списке литературы. Обычно 15–30 для курсовых',
+  require_foreign_sources: 'Обязательно ли наличие иностранных источников в библиографии',
+  recent_window_years_max: 'За сколько лет источники считаются актуальными. Более старые — устаревшими',
+  margins_mm: 'Размеры полей страницы в мм. Стандарт: верх 20, низ 20, лево 30, право 15',
+  tolerance_mm: 'На сколько мм поля могут отклоняться от заданных. Обычно 1–2 мм',
+  top: 'Верхнее поле страницы в миллиметрах',
+  bottom: 'Нижнее поле страницы в миллиметрах',
+  left: 'Левое поле (обычно больше из-за подшивки)',
+  right: 'Правое поле страницы в миллиметрах',
+  body: 'Настройки форматирования основного текста (не заголовков)',
+  font: 'Название шрифта основного текста. Стандарт — Times New Roman',
+  size_pt: 'Размер шрифта в пунктах. Стандарт для основного текста — 14 пт',
+  line_spacing: 'Межстрочный интервал. Стандарт — 1.5 (полуторный)',
+  first_line_indent_mm: 'Отступ первой строки абзаца. Стандарт — 12.5 мм (1.25 см)',
+  required: 'Обязательны ли сноски в работе',
+  forbid_linked_media: 'Запретить вставку изображений по ссылке — все медиа должны быть встроены',
+  require_embedded_objects: 'Все объекты (таблицы, рисунки) должны быть встроены в документ',
+  forbid_track_changes: 'Запретить наличие неприменённых правок (Track Changes)',
+  forbid_comments: 'Запретить наличие комментариев в финальном документе',
+  forbid_password_protection: 'Документ не должен быть защищён паролем',
+  normalize_alignment: 'Автоматически устанавливать выравнивание текста по ширине',
+  normalize_line_spacing: 'Автоматически исправлять межстрочный интервал',
+  normalize_first_line_indent: 'Автоматически исправлять абзацный отступ',
+  normalize_spacing_before_after: 'Автоматически убирать лишние интервалы до/после абзацев',
+  normalize_font: 'Автоматически исправлять шрифт и его размер',
+  space_before_pt: 'Интервал перед абзацем в пунктах. Обычно 0',
+  space_after_pt: 'Интервал после абзаца в пунктах. Обычно 0',
 };
+
+const META_HINTS = {
+  name: 'Уникальное имя шаблона. Обычно включает ВУЗ, тип работы и год',
+  uni: 'Университет, для которого предназначен шаблон. Определяет набор ГОСТов',
+  year: 'Учебный год, для которого актуален шаблон',
+  type: 'Тип работы: курсовая, дипломная, реферат, ВКР и т.д.',
+};
+
+function helpIcon(key, hints) {
+  const text = (hints || PARAM_HINTS)[key];
+  if (!text) return '';
+  return `<span class="param-help" data-help="${escHtml(text)}">?</span>`;
+}
 
 /* ---- Editor State ---- */
 let _editTplId = null;
@@ -133,21 +178,21 @@ function renderEditor() {
       </div>
       <div id="tpl-meta-body">
         <div class="form-group">
-          <label class="form-label">Название шаблона</label>
+          <label class="form-label">Название шаблона${helpIcon('name', META_HINTS)}</label>
           <input class="form-input" id="edit-tpl-name" value="${escHtml(_editTplMeta.name)}">
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">ВУЗ</label>
+            <label class="form-label">ВУЗ${helpIcon('uni', META_HINTS)}</label>
             <select class="form-select" id="edit-tpl-uni">${uniOpts}</select>
           </div>
           <div class="form-group">
-            <label class="form-label">Год</label>
+            <label class="form-label">Год${helpIcon('year', META_HINTS)}</label>
             <input class="form-input" id="edit-tpl-year" value="${escHtml(_editTplMeta.year || '')}">
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Тип работы</label>
+          <label class="form-label">Тип работы${helpIcon('type', META_HINTS)}</label>
           <input class="form-input" id="edit-tpl-type" value="${escHtml(_editTplMeta.type_work || '')}">
         </div>
         <div class="toggle" style="border:none;padding-top:4px">
@@ -223,14 +268,13 @@ function renderParamField(key, value, blockIndex, path, blockKey) {
   if (special) return special;
 
   const label = PARAM_LABELS[key] || key;
-  const hint = PARAM_HINTS[key] || '';
+  const help = helpIcon(key);
   const fieldId = `blk-${blockIndex}-${path.replace(/\./g, '-')}`;
 
   if (typeof value === 'boolean') {
     return `<div class="toggle">
       <div class="toggle-info">
-        <div class="toggle-title">${escHtml(label)}</div>
-        ${hint ? `<div class="toggle-desc">${escHtml(hint)}</div>` : ''}
+        <div class="toggle-title">${escHtml(label)}${help}</div>
       </div>
       <label class="switch">
         <input type="checkbox" id="${fieldId}" ${value ? 'checked' : ''}
@@ -241,18 +285,16 @@ function renderParamField(key, value, blockIndex, path, blockKey) {
   }
   if (typeof value === 'number') {
     return `<div class="form-group">
-      <label class="form-label">${escHtml(label)}</label>
+      <label class="form-label">${escHtml(label)}${help}</label>
       <input class="form-input" type="number" id="${fieldId}" value="${value}" step="any"
              onchange="onParamChange(${blockIndex},'${path}',this.value,'number')">
-      ${hint ? `<div class="form-hint">${escHtml(hint)}</div>` : ''}
     </div>`;
   }
   if (typeof value === 'string') {
     return `<div class="form-group">
-      <label class="form-label">${escHtml(label)}</label>
+      <label class="form-label">${escHtml(label)}${help}</label>
       <input class="form-input" id="${fieldId}" value="${escHtml(value)}"
              onchange="onParamChange(${blockIndex},'${path}',this.value,'string')">
-      ${hint ? `<div class="form-hint">${escHtml(hint)}</div>` : ''}
     </div>`;
   }
   if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
@@ -264,11 +306,11 @@ function renderParamField(key, value, blockIndex, path, blockKey) {
       const inner = entries.map(([k, v]) =>
         renderParamField(k, v, blockIndex, `${path}.${k}`, blockKey)
       ).join('');
-      return `<fieldset class="tpl-param-group"><legend>${escHtml(label)}</legend>${inner}</fieldset>`;
+      return `<fieldset class="tpl-param-group"><legend>${escHtml(label)}${help}</legend>${inner}</fieldset>`;
     }
   }
   return `<div class="form-group">
-    <label class="form-label">${escHtml(label)}</label>
+    <label class="form-label">${escHtml(label)}${help}</label>
     <input class="form-input" id="${fieldId}" value="${escHtml(String(value))}"
            onchange="onParamChange(${blockIndex},'${path}',this.value,'string')">
   </div>`;
@@ -390,6 +432,8 @@ function backToTemplateList() {
 }
 
 /* ---- Exports ---- */
+window.helpIcon = helpIcon;
+window.META_HINTS = META_HINTS;
 window.openTemplateEditor = openTemplateEditor;
 window.toggleBlockAccordion = toggleBlockAccordion;
 window.toggleMetaSection = toggleMetaSection;

@@ -37,12 +37,11 @@ function renderDocPolicySelect(blockIndex, path, currentValue) {
   ).join('');
 
   return `<div class="form-group">
-    <label class="form-label">${PARAM_LABELS.doc_policy || 'Политика для .doc файлов'}</label>
+    <label class="form-label">${PARAM_LABELS.doc_policy || 'Политика для .doc файлов'}${helpIcon('doc_policy')}</label>
     <select class="form-select" id="${fieldId}"
             onchange="onParamChange(${blockIndex},'${path}',this.value,'string')">
       ${options}
     </select>
-    <div class="form-hint">Что делать, если пользователь загрузит файл в старом формате .doc</div>
   </div>`;
 }
 
@@ -69,9 +68,8 @@ function renderTagArray(blockIndex, path, items, label, opts = {}) {
   });
 
   return `<div class="form-group">
-    <label class="form-label">${escHtml(label)}</label>
+    <label class="form-label">${escHtml(label)}${helpIcon(path.split('.').pop())}</label>
     <div class="tag-input-wrap" id="${tagId}"></div>
-    ${hint ? `<div class="form-hint">${escHtml(hint)}</div>` : ''}
   </div>`;
 }
 
@@ -87,7 +85,7 @@ function renderFormatCheckboxes(blockIndex, path, selected) {
   }).join('');
 
   return `<div class="form-group">
-    <label class="form-label">${PARAM_LABELS.allowed_formats || 'Разрешённые форматы работы'}</label>
+    <label class="form-label">${PARAM_LABELS.allowed_formats || 'Разрешённые форматы работы'}${helpIcon('allowed_formats')}</label>
     <div class="checkbox-cards" id="fmt-checks-${blockIndex}-${path.replace(/\./g,'-')}">${items}</div>
   </div>`;
 }
@@ -112,9 +110,8 @@ function renderPerFormatNumbers(blockIndex, path, obj, label, hint) {
   }).join('');
 
   return `<fieldset class="tpl-param-group">
-    <legend>${escHtml(label)}</legend>
+    <legend>${escHtml(label)}${helpIcon(path.split('.').pop())}</legend>
     <div class="per-format-fields" id="pfn-${blockIndex}-${path.replace(/\./g,'-')}">${fields}</div>
-    ${hint ? `<div class="form-hint">${escHtml(hint)}</div>` : ''}
   </fieldset>`;
 }
 
@@ -153,8 +150,7 @@ function renderPerFormatCourses(blockIndex, path, obj) {
   }).join('');
 
   return `<fieldset class="tpl-param-group">
-    <legend>${PARAM_LABELS.allowed_for_course_years || 'Доступные курсы'}</legend>
-    <div class="form-hint" style="margin-bottom:10px">Для какого курса доступен каждый формат работы</div>
+    <legend>${PARAM_LABELS.allowed_for_course_years || 'Доступные курсы'}${helpIcon('allowed_for_course_years')}</legend>
     ${groups}
   </fieldset>`;
 }
@@ -174,10 +170,7 @@ function renderSectionsList(blockIndex, path, sections) {
   const items = (sections || []).map((sec, i) => renderSectionItem(blockIndex, path, sec, i)).join('');
 
   return `<div class="form-group">
-    <label class="form-label">${PARAM_LABELS.required_sections_in_order || 'Обязательные разделы'}</label>
-    <div class="form-hint" style="margin-bottom:10px">
-      Разделы проверяются в указанном порядке. Перетаскивайте для изменения последовательности.
-    </div>
+    <label class="form-label">${PARAM_LABELS.required_sections_in_order || 'Обязательные разделы'}${helpIcon('required_sections_in_order')}</label>
     <div class="sections-list" id="seclist-${blockIndex}-${path.replace(/\./g,'-')}">${items}</div>
     <button type="button" class="btn btn-secondary btn-sm" style="margin-top:10px"
             onclick="addSectionItem(${blockIndex},'${path}')">
@@ -274,13 +267,9 @@ function getNestedValue(obj, path) {
 function renderRegexField(blockIndex, path, value, label) {
   const fieldId = `blk-${blockIndex}-${path.replace(/\./g, '-')}`;
   return `<div class="form-group">
-    <label class="form-label">${escHtml(label)}</label>
+    <label class="form-label">${escHtml(label)}${helpIcon(path.split('.').pop())}</label>
     <input class="form-input mono-input" id="${fieldId}" value="${escHtml(value || '')}"
            onchange="onParamChange(${blockIndex},'${path}',this.value,'string')">
-    <div class="form-hint">
-      Регулярное выражение для автоматического извлечения данных из текста документа.
-      Менять только при необходимости.
-    </div>
   </div>`;
 }
 

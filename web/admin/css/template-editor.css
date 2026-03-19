@@ -254,3 +254,68 @@
 
 /* ---- Mono input (regex etc.) ---- */
 .mono-input { font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px !important; }
+
+/* ---- Param Help Tooltip ---- */
+.param-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--border, #e2e5ec);
+  color: var(--text-muted, #888);
+  font-size: 10px;
+  font-weight: 800;
+  cursor: help;
+  margin-left: 5px;
+  position: relative;
+  vertical-align: middle;
+  flex-shrink: 0;
+  transition: background .15s, color .15s;
+  font-family: inherit;
+  line-height: 1;
+}
+.param-help:hover {
+  background: var(--accent, #4f6ef7);
+  color: #fff;
+}
+.param-help:hover::after {
+  content: attr(data-help);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text, #1a1a2e);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: normal;
+  width: max-content;
+  max-width: 280px;
+  z-index: 100;
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  pointer-events: none;
+  animation: paramHelpIn .15s ease;
+}
+.param-help:hover::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--text, #1a1a2e);
+  z-index: 100;
+  pointer-events: none;
+}
+@keyframes paramHelpIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.form-label .param-help,
+.toggle-title .param-help { vertical-align: baseline; }
+.tpl-param-group legend .param-help { vertical-align: baseline; }
