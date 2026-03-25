@@ -8,9 +8,14 @@
   var token = localStorage.getItem('miniapp_token');
   var currentUser = null;
 
+  var tg = window.Telegram && window.Telegram.WebApp;
+  if (tg) {
+    tg.expand();
+    tg.ready();
+  }
+
   async function ensureAuth() {
     if (token) return;
-    var tg = window.Telegram && window.Telegram.WebApp;
     if (!tg || !tg.initData) return;
     try {
       var res = await fetch('/api/auth/telegram', {

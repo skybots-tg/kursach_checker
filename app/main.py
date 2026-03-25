@@ -36,7 +36,10 @@ def create_app() -> FastAPI:
 
     @app.get("/{path:path}", tags=["web"], include_in_schema=False)
     async def mini_app_spa(path: str) -> FileResponse:
-        return FileResponse("web/mini_app/index.html")
+        return FileResponse(
+            "web/mini_app/index.html",
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
 
     return app
 
