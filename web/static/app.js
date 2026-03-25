@@ -50,6 +50,18 @@
     return res.json();
   }
 
+  async function apiUpload(path, formData) {
+    var headers = {};
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    var res = await fetch('/api' + path, { method: 'POST', headers: headers, body: formData });
+    if (!res.ok) {
+      var detail = 'HTTP ' + res.status;
+      try { var b = await res.json(); if (b.detail) detail = b.detail; } catch (_) {}
+      throw new Error(detail);
+    }
+    return res.json();
+  }
+
   async function getMe() {
     if (!currentUser) {
       try { currentUser = await api('/auth/me'); } catch (_) {}
@@ -85,6 +97,33 @@
     var d = document.createElement('div');
     d.textContent = str;
     return d.innerHTML;
+  }
+
+  var _pageTimer = null;
+  function clearPageTimer() {
+    if (_pageTimer) { clearTimeout(_pageTimer); _pageTimer = null; }
+  }
+
+  function renderReport(report, outputFileId) {
+    if (!report || !report.findings || !report.findings.length) return '';
+    return '<div class="section-label" style="margin-top:14px">Замечания</div>' +
+      '<div class="chips" style="margin-bottom:8px">' +
+        '<span class="chip error">' + report.summary_errors + ' ошибок</span>' +
+        '<span class="chip warning">' + report.summary_warnings + ' предупр.</span>' +
+        '<span class="chip fixed">' + report.summary_autofixed + ' исправлено</span>' +
+      '</div>' +
+      report.findings.map(function (f) {
+        return '<div class="glass list-card finding-item">' +
+          '<div class="list-card-row">' +
+            '<span class="chip ' + (f.severity === 'error' ? 'error' : f.severity === 'warning' ? 'warning' : 'fixed') + '">' + esc(f.severity) + '</span>' +
+            '<span style="font-size:11px;color:var(--text-muted)">' + esc(f.category || '') + '</span>' +
+          '</div>' +
+          '<div class="finding-title">' + esc(f.title || f.rule_id) + '</div>' +
+          (f.expected ? '<div class="finding-rec">Ожидалось: ' + esc(f.expected) + '</div>' : '') +
+          (f.actual ? '<div class="finding-rec" style="color:var(--text-muted)">Факт: ' + esc(f.actual) + '</div>' : '') +
+          (f.recommendation ? '<div class="finding-rec">' + esc(f.recommendation) + '</div>' : '') +
+        '</div>';
+      }).join('');
   }
 
   // ---- Page: Home ----
@@ -284,64 +323,151 @@
     icons();
   }
 
-  // ---- Page: Check (stub) ----
+  // ---- Page: Check ----
 
   async function pageCheck() {
     document.title = 'Новая проверка — Проверка оформления';
+    var me = await getMe();
+    var credits = me ? me.credits_available : 0;
+
     appEl.innerHTML =
       '<div class="section-label">Новая проверка</div>' +
-      '<section class="glass" style="padding:24px;text-align:center">' +
-        '<div class="hero-icon"><i data-lucide="upload"></i></div>' +
-        '<p style="color:var(--text-secondary);margin:12px 0 0">Загрузка файла для проверки</p>' +
-        '<p style="color:var(--text-muted);font-size:13px;margin:4px 0 0">Страница в разработке</p>' +
+      '<section class="glass check-form">' +
+        '<div class="check-field"><label class="check-label">ВУЗ</label>' +
+          '<select id="sel-uni" class="check-select"><option value="">Загрузка\u2026</option></select></div>' +
+        '<div class="check-field"><label class="check-label">Шаблон проверки</label>' +
+          '<select id="sel-tpl" class="check-select" disabled><option value="">Сначала выберите вуз</option></select></div>' +
+        '<div class="check-field"><label class="check-label">ГОСТ / стиль (опционально)</label>' +
+          '<select id="sel-gost" class="check-select"><option value="">Автоматически по шаблону</option></select></div>' +
+        '<div class="check-field"><label class="check-label">Файл работы (DOC/DOCX, до 20 МБ)</label>' +
+          '<div class="upload-area" id="upload-area"><i data-lucide="upload-cloud"></i><span>Нажмите, чтобы выбрать файл</span></div>' +
+          '<input type="file" id="file-input" accept=".doc,.docx" style="display:none">' +
+          '<div id="file-info" style="display:none;margin-top:8px;font-size:12px"></div></div>' +
+        '<div style="font-size:12px;color:var(--text-muted);margin-top:2px">Доступно проверок: <b>' + credits + '</b></div>' +
+        '<div id="check-err" style="display:none;margin-top:8px;font-size:12px;color:var(--danger)"></div>' +
+        '<button id="btn-start" class="btn btn-primary" style="margin-top:14px" disabled>' +
+          '<i data-lucide="sparkles"></i> Запустить проверку и списать 1 кредит</button>' +
       '</section>';
     icons();
+
+    var selUni = document.getElementById('sel-uni');
+    var selTpl = document.getElementById('sel-tpl');
+    var selGost = document.getElementById('sel-gost');
+    var fileInput = document.getElementById('file-input');
+    var fileInfo = document.getElementById('file-info');
+    var btnStart = document.getElementById('btn-start');
+    var errEl = document.getElementById('check-err');
+    var chosenFile = null, versionId = null;
+
+    function showErr(msg) { errEl.textContent = msg; errEl.style.display = msg ? 'block' : 'none'; }
+    function updateBtn() { btnStart.disabled = !chosenFile || !versionId; }
+
+    try {
+      var refs = await Promise.all([api('/universities'), api('/gosts')]);
+      selUni.innerHTML = '<option value="">Выберите вуз</option>' +
+        refs[0].map(function (u) { return '<option value="' + u.id + '">' + esc(u.name) + '</option>'; }).join('');
+      if (refs[1].length) {
+        selGost.innerHTML = '<option value="">Автоматически по шаблону</option>' +
+          refs[1].map(function (g) { return '<option value="' + g.id + '">' + esc(g.name) + '</option>'; }).join('');
+      }
+    } catch (e) { showErr('Не удалось загрузить справочники: ' + e.message); }
+
+    selUni.addEventListener('change', async function () {
+      versionId = null; selTpl.disabled = true; updateBtn();
+      selTpl.innerHTML = '<option value="">Загрузка\u2026</option>';
+      if (!selUni.value) { selTpl.innerHTML = '<option value="">Сначала выберите вуз</option>'; return; }
+      try {
+        var tpls = await api('/templates?university_id=' + selUni.value);
+        selTpl.disabled = false;
+        selTpl.innerHTML = '<option value="">Выберите шаблон</option>' +
+          tpls.map(function (t) {
+            return '<option value="' + t.id + '">' + esc(t.name) + ' \xB7 ' + esc(t.type_work) + (t.year ? ' \xB7 ' + esc(t.year) : '') + '</option>';
+          }).join('');
+      } catch (e) { selTpl.innerHTML = '<option value="">Ошибка загрузки</option>'; showErr(e.message); }
+    });
+
+    selTpl.addEventListener('change', async function () {
+      versionId = null; updateBtn();
+      if (!selTpl.value) return;
+      try {
+        var blocks = await api('/templates/' + selTpl.value + '/blocks');
+        versionId = blocks.version_id;
+        updateBtn();
+      } catch (e) { showErr('Не удалось загрузить версию шаблона'); }
+    });
+
+    document.getElementById('upload-area').addEventListener('click', function () { fileInput.click(); });
+
+    fileInput.addEventListener('change', function () {
+      var f = fileInput.files && fileInput.files[0];
+      if (!f) return;
+      if (!/\.(doc|docx)$/i.test(f.name)) { showErr('Поддерживаются только файлы DOC/DOCX'); return; }
+      if (f.size > 20 * 1024 * 1024) { showErr('Файл слишком большой (макс. 20 МБ)'); return; }
+      showErr('');
+      chosenFile = f;
+      fileInfo.style.display = 'block';
+      fileInfo.innerHTML = '<i data-lucide="file-text" style="width:14px;height:14px;vertical-align:middle"></i> ' +
+        esc(f.name) + ' <span style="color:var(--text-muted)">(' + (f.size / (1024 * 1024)).toFixed(1) + ' МБ)</span>';
+      icons(); updateBtn();
+    });
+
+    btnStart.addEventListener('click', async function () {
+      if (!chosenFile || !versionId) return;
+      if (credits <= 0) { showErr('Недостаточно кредитов. Пополните баланс в профиле.'); return; }
+      showErr(''); btnStart.disabled = true;
+      btnStart.textContent = 'Загружаем файл\u2026';
+      try {
+        var fd = new FormData(); fd.append('file', chosenFile);
+        var uploaded = await apiUpload('/checks/upload', fd);
+        btnStart.textContent = 'Запускаем проверку\u2026';
+        var qs = 'template_version_id=' + versionId + '&input_file_id=' + uploaded.file_id;
+        if (selGost.value) qs += '&gost_id=' + selGost.value;
+        var check = await apiPost('/checks/start?' + qs, {});
+        navigate('/checks/' + check.check_id, true);
+      } catch (e) {
+        showErr('Ошибка: ' + e.message);
+        btnStart.disabled = false;
+        btnStart.innerHTML = '<i data-lucide="sparkles"></i> Запустить проверку и списать 1 кредит';
+        icons();
+      }
+    });
   }
 
-  // ---- Page: Demo (stub) ----
+  // ---- Page: Demo ----
 
   async function pageDemo() {
     document.title = 'Демо-отчёт — Проверка оформления';
-    appEl.innerHTML =
-      '<div class="section-label">Демо-отчёт</div>' +
-      '<section class="glass" style="padding:24px;text-align:center">' +
-        '<div class="hero-icon"><i data-lucide="play"></i></div>' +
-        '<p style="color:var(--text-secondary);margin:12px 0 0">Пример результата проверки</p>' +
-        '<p style="color:var(--text-muted);font-size:13px;margin:4px 0 0">Страница в разработке</p>' +
-      '</section>';
+    appEl.innerHTML = '<div class="section-label">Демо-отчёт</div>' +
+      '<div class="loading-spinner"><i data-lucide="loader-2" class="spin"></i><span>Загрузка\u2026</span></div>';
+    icons();
+    try {
+      var check = await api('/demo');
+      appEl.innerHTML =
+        '<div class="section-label">Демо-отчёт</div>' +
+        '<section class="glass list-card">' +
+          '<div class="list-card-row"><span class="list-card-title">Пример проверки</span><span class="chip fixed">Готово</span></div>' +
+          '<div class="list-card-meta">Ниже — реальный пример отчёта по работе</div>' +
+          (check.output_file_id ? '<a href="/api/files/' + check.output_file_id + '/download" target="_blank" class="btn btn-secondary btn-sm" style="margin-top:10px"><i data-lucide="download"></i> Скачать пример работы</a>' : '') +
+        '</section>' +
+        renderReport(check.report) +
+        '<a href="/" class="btn btn-secondary" style="margin-top:10px"><i data-lucide="arrow-left"></i> На главную</a>';
+    } catch (e) {
+      appEl.innerHTML = '<div class="section-label">Демо-отчёт</div>' +
+        '<div class="empty-state glass"><i data-lucide="alert-circle"></i><p>' + esc(e.message) + '</p></div>' +
+        '<a href="/" class="btn btn-secondary" style="margin-top:10px"><i data-lucide="arrow-left"></i> На главную</a>';
+    }
     icons();
   }
 
-  // ---- Page: Check Result ----
+  // ---- Page: Check Result (with auto-polling) ----
 
   async function pageCheckResult(id) {
     document.title = 'Результат #' + id + ' — Проверка оформления';
     appEl.innerHTML = '<div class="loading-spinner"><i data-lucide="loader-2" class="spin"></i><span>Загрузка\u2026</span></div>';
     icons();
 
-    try {
-      var check = await api('/checks/' + id);
-      var reportHtml = '';
-      if (check.report && check.report.findings && check.report.findings.length) {
-        reportHtml =
-          '<div class="section-label" style="margin-top:14px">Замечания</div>' +
-          '<div class="chips" style="margin-bottom:8px">' +
-            '<span class="chip error">' + check.report.summary_errors + ' ошибок</span>' +
-            '<span class="chip warning">' + check.report.summary_warnings + ' предупр.</span>' +
-            '<span class="chip fixed">' + check.report.summary_autofixed + ' исправлено</span>' +
-          '</div>' +
-          check.report.findings.map(function (f) {
-            return '<div class="glass list-card finding-item">' +
-              '<div class="list-card-row">' +
-                '<span class="chip ' + (f.severity === 'error' ? 'error' : f.severity === 'warning' ? 'warning' : 'fixed') + '">' + esc(f.severity) + '</span>' +
-                '<span style="font-size:11px;color:var(--text-muted)">' + esc(f.category || '') + '</span>' +
-              '</div>' +
-              '<div class="finding-title">' + esc(f.title || f.rule_id) + '</div>' +
-              (f.recommendation ? '<div class="finding-rec">' + esc(f.recommendation) + '</div>' : '') +
-            '</div>';
-          }).join('');
-      }
-
+    function render(check) {
+      var inProgress = check.status === 'queued' || check.status === 'running';
       appEl.innerHTML =
         '<div class="section-label">Результат проверки #' + check.id + '</div>' +
         '<section class="glass list-card">' +
@@ -357,14 +483,30 @@
             ? '<a href="/api/files/' + check.output_file_id + '/download" target="_blank" class="btn btn-secondary btn-sm" style="margin-top:10px"><i data-lucide="download"></i> Скачать исправленный</a>'
             : '') +
         '</section>' +
-        reportHtml +
+        (inProgress
+          ? '<div class="loading-spinner"><i data-lucide="loader-2" class="spin"></i><span>Проверяется, подождите\u2026</span></div>'
+          : '') +
+        renderReport(check.report) +
         '<a href="/history" class="btn btn-secondary" style="margin-top:10px"><i data-lucide="arrow-left"></i> Назад к истории</a>';
-    } catch (e) {
-      appEl.innerHTML =
-        '<div class="empty-state glass"><i data-lucide="alert-circle"></i><p>Ошибка: ' + esc(e.message) + '</p></div>' +
-        '<a href="/history" class="btn btn-secondary" style="margin-top:10px"><i data-lucide="arrow-left"></i> Назад</a>';
+      icons();
     }
-    icons();
+
+    async function poll() {
+      try {
+        var check = await api('/checks/' + id);
+        render(check);
+        if (check.status === 'queued' || check.status === 'running') {
+          _pageTimer = setTimeout(poll, 3000);
+        }
+      } catch (e) {
+        appEl.innerHTML =
+          '<div class="empty-state glass"><i data-lucide="alert-circle"></i><p>Ошибка: ' + esc(e.message) + '</p></div>' +
+          '<a href="/history" class="btn btn-secondary" style="margin-top:10px"><i data-lucide="arrow-left"></i> Назад</a>';
+        icons();
+      }
+    }
+
+    await poll();
   }
 
   // ---- Router ----
@@ -387,6 +529,7 @@
   }
 
   async function navigate(path, push) {
+    clearPageTimer();
     if (push) history.pushState(null, '', path);
     updateNav(path);
     for (var i = 0; i < routes.length; i++) {

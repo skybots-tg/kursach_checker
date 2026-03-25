@@ -261,3 +261,64 @@ a.list-card:hover {
 .finding-item { padding: 12px 14px; }
 .finding-title { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 4px; }
 .finding-rec { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
+
+/* ---- Check form ---- */
+.check-form { padding: 20px; }
+.check-field { margin-bottom: 14px; }
+.check-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.check-select {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%238A8698' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.check-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.check-select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 100px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.upload-area:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text-secondary);
+}
+.upload-area svg { width: 28px; height: 28px; opacity: 0.5; }
