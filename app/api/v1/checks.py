@@ -28,7 +28,9 @@ async def upload_file(
     if ext not in {".doc", ".docx"}:
         raise HTTPException(status_code=400, detail="Разрешены только DOC/DOCX")
 
-    path, size = await save_upload_file(file)
+    from app.core.config import settings as cfg
+    max_bytes = cfg.max_upload_mb * 1024 * 1024
+    path, size = await save_upload_file(file, max_bytes=max_bytes)
     entry = File(
         storage_path=path,
         original_name=file.filename or "document.docx",

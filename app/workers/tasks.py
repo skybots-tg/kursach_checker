@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -12,6 +13,8 @@ from app.models import Check, CheckStatus, CheckWorkerLog, File, TemplateVersion
 from app.services.check_pipeline import run_check_pipeline
 from app.storage.files import save_json_report
 
+logger = logging.getLogger(__name__)
+
 
 async def process_check_task(ctx: dict, check_id: int) -> dict:
     async with SessionLocal() as session:
@@ -23,22 +26,28 @@ async def process_check_task(ctx: dict, check_id: int) -> dict:
         session.add(CheckWorkerLog(check_id=check.id, level="info", message="Check started"))
         await session.commit()
 
-        result = await _run_pipeline(session, check)
+        try:
+            result = await _run_pipeline(session, check)
+            check.status = CheckStatus.done if result.get("ok") else CheckStatus.error
+            log_msg = "Check completed" if result.get("ok") else "Check failed"
+            log_lvl = "info" if result.get("ok") else "error"
+        except Exception:
+            logger.exception("Unhandled error in check %s", check_id)
+            result = {"ok": False}
+            check.status = CheckStatus.error
+            log_msg = "Check failed with unhandled exception"
+            log_lvl = "error"
 
-        check.status = CheckStatus.done if result.get("ok") else CheckStatus.error
-        session.add(
-            CheckWorkerLog(
-                check_id=check.id,
-                level="info" if result.get("ok") else "error",
-                message="Check completed" if result.get("ok") else "Check failed",
-            )
-        )
+        session.add(CheckWorkerLog(check_id=check.id, level=log_lvl, message=log_msg))
         check.finished_at = datetime.utcnow()
         await session.commit()
 
-        user = await session.get(User, check.user_id)
-        if user and user.telegram_id and check.status == CheckStatus.done:
-            await notify_check_ready(user.telegram_id, check.id)
+        try:
+            user = await session.get(User, check.user_id)
+            if user and user.telegram_id and check.status == CheckStatus.done:
+                await notify_check_ready(user.telegram_id, check.id)
+        except Exception:
+            logger.exception("Failed to notify user about check %s", check_id)
 
         return {"check_id": check_id, "status": check.status.value}
 
@@ -82,11 +91,19 @@ async def _run_pipeline(session: AsyncSession, check: Check) -> dict:
     return {"ok": True}
 
 
+_redis_settings = RedisSettings.from_dsn(settings.redis_url)
+
+
 class WorkerSettings:
     functions = [process_check_task]
-    redis_settings = RedisSettings.from_dsn(settings.redis_url)
+    redis_settings = _redis_settings
+    max_tries = 1
+    job_timeout = 300
 
 
 async def enqueue_check(check_id: int) -> None:
-    redis = await create_pool(RedisSettings.from_dsn(settings.redis_url))
-    await redis.enqueue_job("process_check_task", check_id)
+    redis = await create_pool(_redis_settings)
+    try:
+        await redis.enqueue_job("process_check_task", check_id)
+    finally:
+        await redis.close()

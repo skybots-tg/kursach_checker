@@ -3,8 +3,9 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.admin_deps import get_current_admin
 from app.db.session import get_db
-from app.models import Gost
+from app.models import AdminUser, Gost
 
 router = APIRouter()
 
@@ -28,12 +29,16 @@ def _gost_dict(r: Gost) -> dict:
 
 @router.get("")
 async def list_gosts(db: AsyncSession = Depends(get_db)) -> list[dict]:
-    rows = await db.scalars(select(Gost).order_by(Gost.id))
+    rows = await db.scalars(select(Gost).where(Gost.active.is_(True)).order_by(Gost.id))
     return [_gost_dict(r) for r in rows]
 
 
 @router.post("")
-async def create_gost(payload: GostIn, db: AsyncSession = Depends(get_db)) -> dict:
+async def create_gost(
+    payload: GostIn,
+    _admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
     item = Gost(
         name=payload.name,
         description=payload.description,
@@ -47,7 +52,12 @@ async def create_gost(payload: GostIn, db: AsyncSession = Depends(get_db)) -> di
 
 
 @router.put("/{gost_id}")
-async def update_gost(gost_id: int, payload: GostIn, db: AsyncSession = Depends(get_db)) -> dict:
+async def update_gost(
+    gost_id: int,
+    payload: GostIn,
+    _admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
     item = await db.get(Gost, gost_id)
     if not item:
         raise HTTPException(status_code=404, detail="ГОСТ не найден")
@@ -61,7 +71,11 @@ async def update_gost(gost_id: int, payload: GostIn, db: AsyncSession = Depends(
 
 
 @router.delete("/{gost_id}")
-async def delete_gost(gost_id: int, db: AsyncSession = Depends(get_db)) -> dict:
+async def delete_gost(
+    gost_id: int,
+    _admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
     item = await db.get(Gost, gost_id)
     if not item:
         raise HTTPException(status_code=404, detail="ГОСТ не найден")

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user_or_token
 from app.db.session import get_db
 from app.models import Check, File, User
 
@@ -14,7 +14,7 @@ router = APIRouter()
 @router.get("/{file_id}/download")
 async def download_file(
     file_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_or_token),
     db: AsyncSession = Depends(get_db),
 ) -> FileResponse:
     file_obj = await db.get(File, file_id)

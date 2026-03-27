@@ -2,9 +2,9 @@ import json
 import uuid
 from pathlib import Path
 
-from fastapi import UploadFile
+from fastapi import HTTPException, UploadFile
 
-BASE_DIR = Path("storage")
+BASE_DIR = Path(__file__).resolve().parents[2] / "storage"
 UPLOADS_DIR = BASE_DIR / "uploads"
 RESULTS_DIR = BASE_DIR / "results"
 DEMO_DIR = BASE_DIR / "demo"
@@ -13,12 +13,14 @@ for folder in (UPLOADS_DIR, RESULTS_DIR, DEMO_DIR):
     folder.mkdir(parents=True, exist_ok=True)
 
 
-async def save_upload_file(file: UploadFile) -> tuple[str, int]:
+async def save_upload_file(file: UploadFile, *, max_bytes: int = 20 * 1024 * 1024) -> tuple[str, int]:
     ext = Path(file.filename or "file.bin").suffix
     filename = f"{uuid.uuid4().hex}{ext}"
     target = UPLOADS_DIR / filename
 
     content = await file.read()
+    if len(content) > max_bytes:
+        raise HTTPException(status_code=413, detail=f"Файл превышает лимит {max_bytes // (1024*1024)} МБ")
     target.write_bytes(content)
     return str(target), len(content)
 

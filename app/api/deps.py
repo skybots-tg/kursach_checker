@@ -1,4 +1,4 @@
-from fastapi import Depends, Header, HTTPException
+from fastapi import Depends, Header, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +16,28 @@ async def get_current_user(
 
     token = authorization.split(" ", 1)[1]
     user_id = decode_access_token(token)
+    user = await db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=401, detail="Пользователь не найден")
+    return user
+
+
+async def get_current_user_or_token(
+    authorization: str | None = Header(default=None),
+    token: str | None = Query(default=None, alias="token"),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    """Supports both Bearer header and ?token= query param (for file downloads via <a href>)."""
+    raw_token = None
+    if authorization and authorization.startswith("Bearer "):
+        raw_token = authorization.split(" ", 1)[1]
+    elif token:
+        raw_token = token
+
+    if not raw_token:
+        raise HTTPException(status_code=401, detail="Требуется авторизация")
+
+    user_id = decode_access_token(raw_token)
     user = await db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=401, detail="Пользователь не найден")

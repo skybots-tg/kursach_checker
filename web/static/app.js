@@ -109,6 +109,10 @@
     if (_pageTimer) { clearTimeout(_pageTimer); _pageTimer = null; }
   }
 
+  function dlUrl(fileId) {
+    return '/api/files/' + fileId + '/download?token=' + encodeURIComponent(token || '');
+  }
+
   function renderReport(report, outputFileId) {
     if (!report || !report.findings || !report.findings.length) return '';
     return '<div class="section-label" style="margin-top:14px">Замечания</div>' +
@@ -452,7 +456,7 @@
         '<section class="glass list-card">' +
           '<div class="list-card-row"><span class="list-card-title">Пример проверки</span><span class="chip fixed">Готово</span></div>' +
           '<div class="list-card-meta">Ниже — реальный пример отчёта по работе</div>' +
-          (check.output_file_id ? '<a href="/api/files/' + check.output_file_id + '/download" target="_blank" class="btn btn-secondary btn-sm" style="margin-top:10px"><i data-lucide="download"></i> Скачать пример работы</a>' : '') +
+          (check.output_file_id ? '<a href="' + dlUrl(check.output_file_id) + '" target="_blank" class="btn btn-secondary btn-sm" style="margin-top:10px"><i data-lucide="download"></i> Скачать пример работы</a>' : '') +
         '</section>' +
         renderReport(check.report) +
         '<a href="/" class="btn btn-secondary" style="margin-top:10px"><i data-lucide="arrow-left"></i> На главную</a>';
@@ -485,7 +489,7 @@
             (check.finished_at ? ' \xB7 Завершено: ' + fmtDate(check.finished_at) : '') +
           '</div>' +
           (check.output_file_id
-            ? '<a href="/api/files/' + check.output_file_id + '/download" target="_blank" class="btn btn-secondary btn-sm" style="margin-top:10px"><i data-lucide="download"></i> Скачать исправленный</a>'
+            ? '<a href="' + dlUrl(check.output_file_id) + '" target="_blank" class="btn btn-secondary btn-sm" style="margin-top:10px"><i data-lucide="download"></i> Скачать исправленный</a>'
             : '') +
         '</section>' +
         (inProgress

@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -7,12 +9,17 @@ from app.api.router import api_router
 from app.core.config import settings
 from app.db.init_db import create_tables
 
+logger = logging.getLogger(__name__)
+
 
 def create_app() -> FastAPI:
-    app = FastAPI(title=settings.app_name)
+    docs_kwargs = {} if settings.debug else {"docs_url": None, "redoc_url": None, "openapi_url": None}
+    app = FastAPI(title=settings.app_name, **docs_kwargs)
+
+    origins = settings.cors_origins
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -23,6 +30,7 @@ def create_app() -> FastAPI:
 
     @app.on_event("startup")
     async def on_startup() -> None:
+        _validate_config()
         if settings.init_db_on_startup:
             await create_tables()
 
@@ -42,6 +50,17 @@ def create_app() -> FastAPI:
         )
 
     return app
+
+
+def _validate_config() -> None:
+    if settings.jwt_secret in ("change-me", ""):
+        logger.warning("JWT_SECRET is using default value! Set a strong secret in .env")
+    if settings.admin_jwt_secret in ("change-admin-me", ""):
+        logger.warning("ADMIN_JWT_SECRET is using default value! Set a strong secret in .env")
+    if not settings.telegram_bot_token:
+        logger.warning("TELEGRAM_BOT_TOKEN is empty — Telegram auth will not work")
+    if not settings.prodamus_secret_key:
+        logger.warning("PRODAMUS_SECRET_KEY is empty — payment webhooks will be rejected")
 
 
 app = create_app()

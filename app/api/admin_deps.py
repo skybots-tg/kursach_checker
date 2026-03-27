@@ -4,12 +4,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.security import create_admin_token
 from app.db.session import get_db
 from app.models import AdminUser
 
-
-def create_admin_token(admin_id: int, role: str) -> str:
-    return jwt.encode({"sub": str(admin_id), "role": role}, settings.admin_jwt_secret, algorithm="HS256")
+__all__ = ["create_admin_token", "get_current_admin", "require_role", "get_admin_by_login"]
 
 
 async def get_current_admin(
