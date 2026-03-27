@@ -5,7 +5,8 @@ PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$PROJECT_DIR"
 
 echo "=== Pulling latest code ==="
-git pull
+git fetch origin
+git reset --hard origin/main
 
 echo "=== Activating venv ==="
 source venv/bin/activate
