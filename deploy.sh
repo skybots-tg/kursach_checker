@@ -19,8 +19,8 @@ cd "$PROJECT_DIR"
 PYTHONPATH="$PROJECT_DIR" alembic upgrade head
 
 echo "=== Restarting services ==="
-systemctl restart kursach-api || echo "WARNING: kursach-api restart failed"
-systemctl restart kursach-worker || echo "WARNING: kursach-worker restart failed"
-systemctl restart kursach-bot || echo "WARNING: kursach-bot restart failed"
+systemctl restart kursach_checker-api || echo "WARNING: kursach_checker-api restart failed"
+systemctl restart kursach_checker-worker || echo "WARNING: kursach_checker-worker restart failed"
+systemctl restart kursach_checker-bot || echo "WARNING: kursach_checker-bot restart failed"
 
 echo "=== Deploy complete ==="
