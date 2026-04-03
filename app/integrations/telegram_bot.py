@@ -20,6 +20,7 @@ from app.db.session import SessionLocal
 from app.integrations.analytics_middleware import AnalyticsMiddleware
 from app.integrations.telegram_check_handler import handle_document
 from app.models import ContentMenuItem, CreditsBalance, MenuItemMessage, User
+from app.services.bot_texts import get_text
 
 logger = logging.getLogger(__name__)
 
@@ -328,11 +329,8 @@ async def _navigate_home(bot: Bot, chat_id: int) -> None:
     """Delete tracked messages and show the main (root) menu."""
     await _delete_tracked(bot, chat_id)
     kb = await build_main_keyboard()
-    sent = await bot.send_message(
-        chat_id,
-        "Добро пожаловать в сервис технической проверки документов.",
-        reply_markup=kb,
-    )
+    welcome = await get_text("bot.welcome")
+    sent = await bot.send_message(chat_id, welcome, reply_markup=kb)
     _track(chat_id, sent.message_id)
 
 

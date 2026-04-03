@@ -24,7 +24,7 @@ async def list_orders(
         {
             "id": o.id,
             "amount": float(o.amount),
-            "status": o.status.value,
+            "status": getattr(o.status, 'value', o.status),
             "product": p.name,
             "created_at": o.created_at,
             "paid_at": o.paid_at,

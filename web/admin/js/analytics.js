@@ -133,11 +133,11 @@ async function renderUsersTab(container) {
       </select>
       <span style="font-size:12px;color:var(--text-muted)">Всего: ${data.total}</span>
     </div>
-    ${data.items.length ? renderUsersTable(data.items) : emptyHtml('Нет пользователей', '')}
+    ${data.items.length ? analyticsUsersTable(data.items) : emptyHtml('Нет пользователей', '')}
     ${analyticsUsersPagination(data.total, perPage)}`;
 }
 
-function renderUsersTable(users) {
+function analyticsUsersTable(users) {
   return `<div class="table-wrap"><table class="data-table">
     <thead><tr>
       <th>ID</th><th>Telegram</th><th>Имя</th><th>Username</th>

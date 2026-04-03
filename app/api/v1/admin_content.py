@@ -9,6 +9,7 @@ from app.api.admin_deps import get_current_admin
 from app.db.session import get_db
 from app.models import AdminUser, BotContent, ContentMenuItem, ContentVersion, MenuItemMessage
 from app.services.audit import log_admin_action
+from app.services.bot_texts import list_system_texts
 
 router = APIRouter()
 
@@ -40,6 +41,24 @@ async def list_texts(
     _ = current_admin
     rows = await db.scalars(select(BotContent).order_by(BotContent.key))
     return [{"id": r.id, "key": r.key, "value": r.value, "updated_at": r.updated_at} for r in rows]
+
+
+@router.get("/system-texts")
+async def get_system_texts(
+    current_admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> list[dict]:
+    """Return all system text definitions with current overrides."""
+    _ = current_admin
+    meta = list_system_texts()
+    keys = [m["key"] for m in meta]
+    rows = await db.scalars(select(BotContent).where(BotContent.key.in_(keys)))
+    overrides = {r.key: {"value": r.value, "updated_at": r.updated_at} for r in rows}
+    for item in meta:
+        ovr = overrides.get(item["key"])
+        item["current_value"] = ovr["value"] if ovr else None
+        item["updated_at"] = ovr["updated_at"] if ovr else None
+    return meta
 
 
 @router.put("/texts/{key}")

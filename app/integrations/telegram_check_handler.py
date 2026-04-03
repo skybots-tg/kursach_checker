@@ -19,6 +19,7 @@ from app.models import (
     TemplateVersion,
     User,
 )
+from app.services.bot_texts import get_text
 from app.services.check_pipeline import run_check_pipeline
 from app.storage.files import save_json_report, save_raw_file
 
@@ -38,12 +39,12 @@ async def handle_document(message: Message, bot: Bot) -> None:
 
     ext = Path(doc.file_name).suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
-        await message.reply("Поддерживаются только файлы DOC и DOCX.")
+        await message.reply(await get_text("check.only_doc_docx"))
         return
 
     if doc.file_size and doc.file_size > MAX_FILE_SIZE:
         await message.reply(
-            f"Файл слишком большой. Лимит — {settings.max_upload_mb} МБ."
+            await get_text("check.file_too_big", max_mb=settings.max_upload_mb)
         )
         return
 
@@ -56,33 +57,31 @@ async def handle_document(message: Message, bot: Bot) -> None:
             select(User).where(User.telegram_id == telegram_id)
         )
         if not user:
-            await message.reply("Сначала запустите бота командой /start.")
+            await message.reply(await get_text("check.need_start"))
             return
 
         credits = await db.get(CreditsBalance, user.id)
         if not credits or credits.credits_available < 1:
-            await message.reply("Недостаточно кредитов для проверки.")
+            await message.reply(await get_text("check.no_credits"))
             return
 
         tv = await _get_default_template_version(db)
         if not tv:
-            await message.reply(
-                "Нет активных шаблонов. Обратитесь к администратору."
-            )
+            await message.reply(await get_text("check.no_templates"))
             return
 
         gost = await db.scalar(
             select(Gost).where(Gost.active.is_(True)).order_by(Gost.id).limit(1)
         )
 
-        status_msg = await message.reply("⏳ Скачиваю файл…")
+        status_msg = await message.reply(await get_text("check.downloading"))
 
         try:
             tg_file = await bot.get_file(doc.file_id)
             file_bytes = await bot.download_file(tg_file.file_path)
         except Exception:
             logger.exception("Failed to download file from Telegram")
-            await status_msg.edit_text("Не удалось скачать файл. Попробуйте ещё раз.")
+            await status_msg.edit_text(await get_text("check.download_failed"))
             return
 
         raw = file_bytes.read() if hasattr(file_bytes, "read") else file_bytes
@@ -111,7 +110,7 @@ async def handle_document(message: Message, bot: Bot) -> None:
         await db.flush()
         await db.commit()
 
-    await status_msg.edit_text("🔍 Проверяю документ…")
+    await status_msg.edit_text(await get_text("check.processing"))
 
     try:
         result = await run_check_pipeline(storage_path, tv.rules_json)
@@ -121,7 +120,7 @@ async def handle_document(message: Message, bot: Bot) -> None:
             check.id, CheckStatus.error,
             error_message=f"Pipeline exception: {exc}",
         )
-        await status_msg.edit_text("Произошла ошибка при проверке. Попробуйте позже.")
+        await status_msg.edit_text(await get_text("check.error"))
         return
 
     if not result.get("ok"):
@@ -130,21 +129,21 @@ async def handle_document(message: Message, bot: Bot) -> None:
             check.id, CheckStatus.error,
             error_message=f"Pipeline error: {error}",
         )
-        await status_msg.edit_text(f"Проверка не удалась: {error}")
+        await status_msg.edit_text(await get_text("check.error_detail", error=error))
         return
 
     report = result.get("report") or {}
     output_docx_path = result.get("output_docx_path")
     await _save_check_results(check.id, report, output_docx_path)
 
-    text = _format_report(report)
+    text = await _format_report(report)
     await status_msg.edit_text(text, parse_mode="HTML")
 
     if output_docx_path and Path(output_docx_path).exists():
         await bot.send_document(
             message.chat.id,
             FSInputFile(output_docx_path, filename=f"fixed_{doc.file_name}"),
-            caption="Исправленный документ",
+            caption=await get_text("check.fixed_doc_caption"),
         )
 
 
@@ -222,22 +221,22 @@ async def _save_check_results(
         await db.commit()
 
 
-def _format_report(report: dict) -> str:
+async def _format_report(report: dict) -> str:
     """Format the check report as a compact Telegram-friendly HTML message."""
     summary = report.get("summary", {})
     errors = summary.get("errors", 0)
     warnings = summary.get("warnings", 0)
     fixed = summary.get("fixed", 0)
 
-    lines = ["<b>📋 Результат проверки</b>", ""]
+    title = await get_text("report.title")
+    lines = [title, ""]
 
     if errors == 0 and warnings == 0:
-        lines.append("✅ Нарушений не обнаружено!")
+        lines.append(await get_text("report.no_issues"))
     else:
-        lines.append(f"❌ Ошибок: {errors}")
-        lines.append(f"⚠️ Предупреждений: {warnings}")
-        if fixed:
-            lines.append(f"🔧 Автоисправлений: {fixed}")
+        lines.append(await get_text(
+            "report.summary", errors=errors, warnings=warnings, fixed=fixed,
+        ))
 
     findings = report.get("findings", [])
     important = [
@@ -247,19 +246,21 @@ def _format_report(report: dict) -> str:
 
     if important:
         lines.append("")
-        lines.append("<b>Замечания:</b>")
+        lines.append(await get_text("report.findings_header"))
         for i, f in enumerate(important[:15], 1):
             icon = "❌" if f.get("severity") == "error" else "⚠️"
-            title = f.get("title", "—")
+            ftitle = f.get("title", "—")
             found = f.get("found", "")
-            line = f"{icon} {i}. <b>{_escape(title)}</b>"
+            line = f"{icon} {i}. <b>{_escape(ftitle)}</b>"
             if found:
                 line += f"\n     {_escape(found)}"
             lines.append(line)
 
         remaining = len(important) - 15
         if remaining > 0:
-            lines.append(f"\n… и ещё {remaining} замечаний")
+            lines.append(
+                "\n" + await get_text("report.more_findings", count=remaining)
+            )
 
     return "\n".join(lines)
 

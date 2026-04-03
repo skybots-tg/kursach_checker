@@ -1,4 +1,4 @@
-/* Content — page shell, tab switching between Menu and Texts */
+/* Content — page shell, tab switching between Menu, Texts & System Texts */
 
 registerPage('content', loadContent);
 
@@ -9,6 +9,7 @@ async function loadContent() {
   page.innerHTML = loadingHtml();
   try {
     if (_contentTab === 'texts') await loadContentTexts();
+    else if (_contentTab === 'system') await loadSystemTexts();
     else await loadContentMenu();
   } catch (err) {
     page.innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
@@ -16,7 +17,6 @@ async function loadContent() {
 }
 
 function renderContentPage(bodyHtml, actionBtn) {
-  const isTexts = _contentTab === 'texts';
   $('page-content').innerHTML = `
     <div class="page-header">
       <div>
@@ -26,8 +26,9 @@ function renderContentPage(bodyHtml, actionBtn) {
       ${actionBtn || ''}
     </div>
     <div class="tabs">
-      <button class="tab-btn ${!isTexts ? 'active' : ''}" onclick="switchContentTab('menu')">Меню</button>
-      <button class="tab-btn ${isTexts ? 'active' : ''}" onclick="switchContentTab('texts')">Тексты</button>
+      <button class="tab-btn ${_contentTab === 'menu' ? 'active' : ''}" onclick="switchContentTab('menu')">Меню</button>
+      <button class="tab-btn ${_contentTab === 'texts' ? 'active' : ''}" onclick="switchContentTab('texts')">Тексты</button>
+      <button class="tab-btn ${_contentTab === 'system' ? 'active' : ''}" onclick="switchContentTab('system')">Системные тексты</button>
     </div>
     ${bodyHtml}`;
 }

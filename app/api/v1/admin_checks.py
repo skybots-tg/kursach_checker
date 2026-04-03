@@ -34,7 +34,7 @@ async def list_checks(
     return [
         {
             "id": c.id,
-            "status": c.status.value,
+            "status": getattr(c.status, 'value', c.status),
             "user": {"id": u.id, "telegram_id": u.telegram_id, "username": u.username},
             "user_id": u.id,
             "template_version_id": tv.id,
@@ -74,7 +74,7 @@ async def get_check_card(
     return {
         "check": {
             "id": check.id,
-            "status": check.status.value,
+            "status": getattr(check.status, 'value', check.status),
             "user_id": check.user_id,
             "user": {"id": user.id, "telegram_id": user.telegram_id, "username": user.username} if user else None,
             "template_version_id": check.template_version_id,

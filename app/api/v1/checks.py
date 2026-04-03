@@ -95,7 +95,7 @@ async def start_check(
     await db.commit()
 
     await enqueue_check(check.id)
-    return {"check_id": check.id, "status": check.status.value}
+    return {"check_id": check.id, "status": getattr(check.status, 'value', check.status)}
 
 
 @router.get("/{check_id}")
@@ -115,7 +115,7 @@ async def get_check(
 
     return {
         "id": check.id,
-        "status": check.status.value,
+        "status": getattr(check.status, 'value', check.status),
         "created_at": check.created_at,
         "finished_at": check.finished_at,
         "report_file_id": report_file.id if report_file else None,
@@ -160,7 +160,7 @@ async def list_checks(
     return [
         {
             "id": r.id,
-            "status": r.status.value,
+            "status": getattr(r.status, 'value', r.status),
             "created_at": r.created_at,
             "finished_at": r.finished_at,
             "template_version_id": r.template_version_id,
