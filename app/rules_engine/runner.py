@@ -1,6 +1,13 @@
 from __future__ import annotations
 
 from app.rules_engine.autofix import apply_safe_autofixes
+from app.rules_engine.checks_advanced import (
+    run_captions_checks,
+    run_footnotes_checks,
+    run_heading_formatting_checks,
+    run_page_numbering_checks,
+    run_toc_checks,
+)
 from app.rules_engine.checks_core import (
     run_bibliography_checks,
     run_context_extraction_checks,
@@ -41,12 +48,20 @@ async def run_document_checks(file_path: str, rules: dict | None) -> dict:
             location="input",
             recommendation="Повторно загрузите файл",
         )
-        return {
-            "summary": _summary(findings, snapshot.size),
-            "findings": [x.to_dict() for x in findings],
-            "rules_meta": {"blocks_count": cfg.blocks_count()},
-            "output_docx_path": None,
-        }
+        return _make_result(findings, snapshot.size, cfg, None)
+
+    if snapshot.is_encrypted:
+        add_finding(
+            findings,
+            title="Файл зашифрован",
+            category="integrity",
+            severity="error",
+            expected="Документ не защищён паролем",
+            found="Документ защищён паролем или повреждён",
+            location="файл",
+            recommendation="Снимите защиту и загрузите файл заново",
+        )
+        return _make_result(findings, snapshot.size, cfg, None)
 
     run_file_intake_checks(snapshot, cfg, findings)
 
@@ -56,10 +71,15 @@ async def run_document_checks(file_path: str, rules: dict | None) -> dict:
         run_work_formats_checks(snapshot, cfg, findings)
         run_layout_checks(snapshot, cfg, findings)
         run_typography_checks(snapshot, cfg, findings)
+        run_heading_formatting_checks(snapshot, cfg, findings)
         run_structure_checks(snapshot, cfg, findings)
         run_volume_checks(snapshot, cfg, findings)
         run_bibliography_checks(snapshot, cfg, findings)
         run_objects_checks(snapshot, cfg, findings)
+        run_page_numbering_checks(snapshot, cfg, findings)
+        run_toc_checks(snapshot, cfg, findings)
+        run_footnotes_checks(snapshot, cfg, findings)
+        run_captions_checks(snapshot, cfg, findings)
 
     autofix_output_path: str | None = None
     if snapshot.extension == ".docx":
@@ -78,9 +98,15 @@ async def run_document_checks(file_path: str, rules: dict | None) -> dict:
             recommendation="Можно переходить к следующему этапу",
         )
 
+    return _make_result(findings, snapshot.size, cfg, autofix_output_path)
+
+
+def _make_result(
+    findings: list[Finding], size: int, cfg: RulesConfig, output_path: str | None,
+) -> dict:
     return {
-        "summary": _summary(findings, snapshot.size),
+        "summary": _summary(findings, size),
         "findings": [x.to_dict() for x in findings],
         "rules_meta": {"blocks_count": cfg.blocks_count()},
-        "output_docx_path": autofix_output_path,
+        "output_docx_path": output_path,
     }

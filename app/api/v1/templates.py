@@ -41,7 +41,23 @@ async def list_templates(
     stmt = select(Template).order_by(Template.id)
     if university_id:
         stmt = stmt.where(Template.university_id == university_id)
-    rows = await db.scalars(stmt)
+    rows = list(await db.scalars(stmt))
+
+    if not rows:
+        return []
+
+    template_ids = [r.id for r in rows]
+    latest_sq = (
+        select(
+            TemplateVersion.template_id,
+            func.max(TemplateVersion.id).label("vid"),
+        )
+        .where(TemplateVersion.template_id.in_(template_ids))
+        .group_by(TemplateVersion.template_id)
+    )
+    ver_rows = await db.execute(latest_sq)
+    ver_map = {r.template_id: r.vid for r in ver_rows}
+
     return [
         {
             "id": r.id,
@@ -51,6 +67,7 @@ async def list_templates(
             "year": r.year,
             "status": r.status.value if hasattr(r.status, "value") else r.status,
             "active": r.active,
+            "latest_version_id": ver_map.get(r.id),
         }
         for r in rows
     ]

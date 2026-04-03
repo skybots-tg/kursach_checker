@@ -10,7 +10,6 @@ class RuleBlock(BaseModel):
 
 
 class TemplateRules(BaseModel):
-    # Универсальный расширяемый набор блоков, можно добавлять новые ключи без миграций схемы БД
     blocks: list[RuleBlock] = Field(default_factory=list)
 
 
@@ -34,7 +33,9 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
             "detect_course_year": True,
             "detect_authors_count": True,
             "course_year_regex": "(?i)\\b([2-6])\\s*курс\\b",
-            "authors_labels": ["Автор", "Автор(ы)", "Студент", "Студент(ы)", "Выполнил", "Выполнили"],
+            "authors_labels": [
+                "Автор", "Автор(ы)", "Студент", "Студент(ы)", "Выполнил", "Выполнили",
+            ],
         },
     ),
     RuleBlock(
@@ -77,37 +78,88 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
         key="bibliography",
         title="Источники",
         severity="warning",
-        params={"min_total_sources": 20, "require_foreign_sources": True, "recent_window_years_max": 10},
+        params={
+            "min_total_sources": 20,
+            "require_foreign_sources": True,
+            "recent_window_years_max": 10,
+        },
     ),
     RuleBlock(
         key="layout",
         title="Страница и поля",
         severity="warning",
-        params={"margins_mm": {"top": 20, "bottom": 25, "left": 30, "right": 15}, "tolerance_mm": 1},
+        params={
+            "margins_mm": {"top": 20, "bottom": 25, "left": 30, "right": 15},
+            "tolerance_mm": 1,
+        },
     ),
     RuleBlock(
         key="typography",
         title="Основной текст",
         severity="warning",
-        params={"body": {"font": "Times New Roman", "size_pt": 14, "line_spacing": 1.5, "first_line_indent_mm": 12.5}},
+        params={
+            "body": {
+                "font": "Times New Roman",
+                "size_pt": 14,
+                "line_spacing": 1.5,
+                "first_line_indent_mm": 12.5,
+            },
+        },
+    ),
+    RuleBlock(
+        key="heading_formatting",
+        title="Форматирование заголовков",
+        severity="warning",
+        params={
+            "font": "Times New Roman",
+            "size_pt": 14,
+            "require_bold": True,
+            "level1_alignment": "CENTER",
+        },
+    ),
+    RuleBlock(
+        key="page_numbering",
+        title="Нумерация страниц",
+        severity="warning",
+        params={"require": True, "position": "bottom_center"},
+    ),
+    RuleBlock(
+        key="toc",
+        title="Оглавление",
+        severity="warning",
+        params={"require": True},
     ),
     RuleBlock(
         key="footnotes",
         title="Сноски",
         severity="warning",
-        params={"required": False, "font": "Times New Roman", "size_pt": 10},
+        params={"required": False, "min_count": 0, "font": "Times New Roman", "size_pt": 10},
+    ),
+    RuleBlock(
+        key="captions",
+        title="Подписи рисунков и таблиц",
+        severity="warning",
+        params={
+            "figure_pattern": "^Рисунок\\s+\\d+\\s*[—–-]\\s*\\S",
+            "table_pattern": "^Таблица\\s+\\d+\\s*[—–-]\\s*\\S",
+            "check_sequential_numbering": True,
+        },
     ),
     RuleBlock(
         key="objects",
         title="Таблицы/рисунки/объекты",
         severity="warning",
-        params={"forbid_linked_media": True, "require_embedded_objects": True},
+        params={"forbid_linked_media": True, "require_embedded_objects": False},
     ),
     RuleBlock(
         key="integrity",
         title="Техническая чистота",
         severity="error",
-        params={"forbid_track_changes": True, "forbid_comments": True, "forbid_password_protection": True},
+        params={
+            "forbid_track_changes": True,
+            "forbid_comments": True,
+            "forbid_password_protection": True,
+        },
     ),
     RuleBlock(
         key="autofix",
@@ -119,6 +171,8 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
             "normalize_first_line_indent": True,
             "normalize_spacing_before_after": True,
             "normalize_font": True,
+            "normalize_margins": True,
+            "normalize_headings": True,
             "space_before_pt": 0,
             "space_after_pt": 0,
         },

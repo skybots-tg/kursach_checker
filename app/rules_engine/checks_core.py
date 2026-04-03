@@ -51,6 +51,18 @@ def run_integrity_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings:
     severity = cfg.severity("integrity", "error")
     params = cfg.params("integrity")
 
+    if params.get("forbid_password_protection", True) and snapshot.is_encrypted:
+        add_finding(
+            findings,
+            title="Защита паролем",
+            category="integrity",
+            severity=severity,
+            expected="Документ не защищён паролем",
+            found="Документ защищён паролем или повреждён",
+            location="документ",
+            recommendation="Снимите защиту паролем и загрузите файл заново",
+        )
+
     if params.get("forbid_track_changes", True) and snapshot.revisions_present:
         add_finding(
             findings,
@@ -157,31 +169,32 @@ def run_layout_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings: li
     params = cfg.params("layout")
     target = params.get("margins_mm", {"left": 30, "right": 15, "top": 20, "bottom": 25})
     tolerance = float(params.get("tolerance_mm", 1))
-
-    first = snapshot.sections[0]
-    values = {
-        "left": first.left_mm,
-        "right": first.right_mm,
-        "top": first.top_mm,
-        "bottom": first.bottom_mm,
-    }
     labels = {"left": "левое", "right": "правое", "top": "верхнее", "bottom": "нижнее"}
 
-    for key, expected in target.items():
-        found = values.get(key)
-        if found is None:
-            continue
-        if abs(float(found) - float(expected)) > tolerance:
-            add_finding(
-                findings,
-                title=f"Поле страницы: {labels.get(key, key)}",
-                category="layout",
-                severity=severity,
-                expected=f"{expected} мм (±{tolerance} мм)",
-                found=f"{found} мм",
-                location="раздел 1",
-                recommendation="Исправьте параметры страницы в настройках документа",
-            )
+    for sec_idx, section in enumerate(snapshot.sections):
+        values = {
+            "left": section.left_mm,
+            "right": section.right_mm,
+            "top": section.top_mm,
+            "bottom": section.bottom_mm,
+        }
+        location = f"раздел {sec_idx + 1}" if len(snapshot.sections) > 1 else "документ"
+
+        for key, expected in target.items():
+            found = values.get(key)
+            if found is None:
+                continue
+            if abs(float(found) - float(expected)) > tolerance:
+                add_finding(
+                    findings,
+                    title=f"Поле страницы: {labels.get(key, key)}",
+                    category="layout",
+                    severity=severity,
+                    expected=f"{expected} мм (±{tolerance} мм)",
+                    found=f"{found} мм",
+                    location=location,
+                    recommendation="Исправьте параметры страницы в настройках документа",
+                )
 
 
 def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding]) -> None:
@@ -392,25 +405,37 @@ def run_bibliography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findin
             recommendation="Добавьте недостающие источники в список литературы",
         )
 
+    if params.get("require_foreign_sources", False) and refs:
+        latin_refs = sum(1 for r in refs if re.search(r"[A-Za-z]{3,}", r))
+        if latin_refs == 0:
+            add_finding(
+                findings,
+                title="Иноязычные источники",
+                category="bibliography",
+                severity=severity,
+                expected="Наличие иноязычных источников",
+                found="Иноязычные источники не обнаружены",
+                location="список литературы",
+                recommendation="Добавьте иноязычные источники в список литературы",
+            )
+
 
 def run_objects_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding]) -> None:
     if not cfg.has("objects"):
         return
 
-    severity = cfg.severity("objects", "warning")
-    params = cfg.params("objects")
-    if not params.get("forbid_linked_media", True):
-        return
-
     if Path(snapshot.path).suffix.lower() != ".docx":
         return
+
+    severity = cfg.severity("objects", "warning")
+    params = cfg.params("objects")
 
     try:
         raw = Path(snapshot.path).read_bytes()
     except OSError:
         return
 
-    if b'TargetMode="External"' in raw:
+    if params.get("forbid_linked_media", True) and b'TargetMode="External"' in raw:
         add_finding(
             findings,
             title="Связанные внешние объекты",
@@ -421,3 +446,17 @@ def run_objects_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings: l
             location="объекты",
             recommendation="Вставьте объекты в документ как встроенные",
         )
+
+    if params.get("require_embedded_objects", False):
+        has_media = b"word/media/" in raw or b"<wp:inline" in raw or b"<wp:anchor" in raw
+        if not has_media:
+            add_finding(
+                findings,
+                title="Встроенные объекты",
+                category="objects",
+                severity="advice",
+                expected="В документе есть рисунки или таблицы",
+                found="Встроенные объекты не обнаружены",
+                location="объекты",
+                recommendation="Добавьте иллюстрации или таблицы в документ",
+            )

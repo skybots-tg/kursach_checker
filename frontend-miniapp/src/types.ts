@@ -27,23 +27,19 @@ export interface TemplateItem {
   year: string;
   status: string;
   active: boolean;
-}
-
-export interface CheckReportFindingLocation {
-  section_id: string | null;
-  section_title: string | null;
+  latest_version_id: number | null;
 }
 
 export interface CheckReportFinding {
-  rule_id: string;
   title: string;
   severity: "error" | "warning" | "advice" | "info";
   category: string;
   auto_fixed: boolean;
   expected: string | null;
-  actual: string | null;
+  found: string | null;
   recommendation: string | null;
-  location: CheckReportFindingLocation | null;
+  location: string | null;
+  auto_fix_details?: string;
 }
 
 export interface CheckReport {

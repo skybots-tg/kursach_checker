@@ -127,9 +127,9 @@
             '<span class="chip ' + (f.severity === 'error' ? 'error' : f.severity === 'warning' ? 'warning' : 'fixed') + '">' + esc(f.severity) + '</span>' +
             '<span style="font-size:11px;color:var(--text-muted)">' + esc(f.category || '') + '</span>' +
           '</div>' +
-          '<div class="finding-title">' + esc(f.title || f.rule_id) + '</div>' +
+          '<div class="finding-title">' + esc(f.title) + '</div>' +
           (f.expected ? '<div class="finding-rec">Ожидалось: ' + esc(f.expected) + '</div>' : '') +
-          (f.actual ? '<div class="finding-rec" style="color:var(--text-muted)">Факт: ' + esc(f.actual) + '</div>' : '') +
+          (f.found ? '<div class="finding-rec" style="color:var(--text-muted)">Факт: ' + esc(f.found) + '</div>' : '') +
           (f.recommendation ? '<div class="finding-rec">' + esc(f.recommendation) + '</div>' : '') +
         '</div>';
       }).join('');

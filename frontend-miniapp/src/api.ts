@@ -134,3 +134,9 @@ export async function createPayment(productId: number): Promise<CreatePaymentRes
 export async function fetchDemoCheck(): Promise<CheckDetailResponse> {
   return request<CheckDetailResponse>("/demo");
 }
+
+export function getDownloadUrl(fileId: number): string {
+  const token = getToken();
+  const base = `${API_BASE}/files/${fileId}/download`;
+  return token ? `${base}?token=${encodeURIComponent(token)}` : base;
+}

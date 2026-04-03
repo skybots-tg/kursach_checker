@@ -140,8 +140,8 @@ export const CheckPage: React.FC<Props> = ({ me }) => {
         style={{ width: "100%", minHeight: 50, borderRadius: "var(--radius-md)", padding: "var(--spacing-md) var(--spacing-lg)" }}
       >
         <option value="">Выберите шаблон</option>
-        {templates.map((t) => (
-          <option key={t.id} value={t.id}>
+        {templates.filter((t) => t.latest_version_id != null).map((t) => (
+          <option key={t.id} value={t.latest_version_id!}>
             {t.name} · {t.type_work} · {t.year || "год не указан"}
           </option>
         ))}
