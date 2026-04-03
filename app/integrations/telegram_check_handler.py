@@ -10,6 +10,7 @@ from app.db.session import SessionLocal
 from app.models import (
     Check,
     CheckStatus,
+    CheckWorkerLog,
     CreditsBalance,
     File,
     Gost,
@@ -114,15 +115,21 @@ async def handle_document(message: Message, bot: Bot) -> None:
 
     try:
         result = await run_check_pipeline(storage_path, tv.rules_json)
-    except Exception:
+    except Exception as exc:
         logger.exception("Pipeline error for check %s", check.id)
-        await _finalize_check(check.id, CheckStatus.error)
+        await _finalize_check(
+            check.id, CheckStatus.error,
+            error_message=f"Pipeline exception: {exc}",
+        )
         await status_msg.edit_text("Произошла ошибка при проверке. Попробуйте позже.")
         return
 
     if not result.get("ok"):
-        await _finalize_check(check.id, CheckStatus.error)
         error = result.get("error") or "Неизвестная ошибка"
+        await _finalize_check(
+            check.id, CheckStatus.error,
+            error_message=f"Pipeline error: {error}",
+        )
         await status_msg.edit_text(f"Проверка не удалась: {error}")
         return
 
@@ -159,12 +166,22 @@ async def _get_default_template_version(db) -> TemplateVersion | None:
     )
 
 
-async def _finalize_check(check_id: int, status: CheckStatus) -> None:
+async def _finalize_check(
+    check_id: int,
+    status: CheckStatus,
+    error_message: str | None = None,
+) -> None:
     async with SessionLocal() as db:
         check = await db.get(Check, check_id)
         if check:
             check.status = status
             check.finished_at = datetime.utcnow()
+            if error_message:
+                db.add(CheckWorkerLog(
+                    check_id=check_id,
+                    level="error",
+                    message=error_message[:4000],
+                ))
             await db.commit()
 
 

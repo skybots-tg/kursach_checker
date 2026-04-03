@@ -139,26 +139,64 @@ async function viewCheck(id) {
     const c = data.check || {};
     const files = data.files || {};
     const logs = data.worker_logs || [];
+    const rs = data.report_summary;
 
     const fileRow = (label, f) => f
       ? `<div><strong>${label}:</strong> ${escHtml(f.name)} (${(f.size / 1024).toFixed(1)} KB)
           <a href="/api/files/${f.id}/download" class="btn btn-sm btn-secondary" style="margin-left:8px">${iconSvg('download', 12)} Скачать</a></div>`
       : `<div><strong>${label}:</strong> —</div>`;
 
+    const reportSection = rs ? `
+      <div>
+        <div class="form-label" style="margin-bottom:8px">Результат проверки</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div style="text-align:center;padding:8px 14px;background:#fef2f2;border-radius:8px;min-width:80px">
+            <div style="font-size:20px;font-weight:700;color:var(--danger)">${rs.errors}</div>
+            <div style="font-size:11px;color:var(--text-muted)">Ошибок</div>
+          </div>
+          <div style="text-align:center;padding:8px 14px;background:#fffbeb;border-radius:8px;min-width:80px">
+            <div style="font-size:20px;font-weight:700;color:var(--warn)">${rs.warnings}</div>
+            <div style="font-size:11px;color:var(--text-muted)">Предупр.</div>
+          </div>
+          <div style="text-align:center;padding:8px 14px;background:#f0fdf4;border-radius:8px;min-width:80px">
+            <div style="font-size:20px;font-weight:700;color:var(--success)">${rs.fixed}</div>
+            <div style="font-size:11px;color:var(--text-muted)">Исправл.</div>
+          </div>
+          <div style="text-align:center;padding:8px 14px;background:#f8fafc;border-radius:8px;min-width:80px">
+            <div style="font-size:20px;font-weight:700;color:var(--text-secondary)">${rs.findings_count}</div>
+            <div style="font-size:11px;color:var(--text-muted)">Всего</div>
+          </div>
+        </div>
+        ${rs.check_errors && rs.check_errors.length ? `
+          <div style="margin-top:10px;padding:10px;background:#fef2f2;border-radius:8px;border:1px solid #fecaca">
+            <div style="font-size:12px;font-weight:600;color:var(--danger);margin-bottom:4px">Внутренние ошибки проверок:</div>
+            ${rs.check_errors.map(e => `<div style="font-size:12px;color:var(--danger)">• ${escHtml(e)}</div>`).join('')}
+          </div>` : ''}
+      </div>` : '';
+
+    const errorLogs = logs.filter(l => l.level === 'error');
+    const warnLogs = logs.filter(l => l.level === 'warning');
+    const infoLogs = logs.filter(l => l.level === 'info');
+
+    const logColor = level => level === 'error' ? 'var(--danger)' : level === 'warning' ? 'var(--warn)' : 'var(--text-muted)';
+    const logBg = level => level === 'error' ? '#fef2f2' : level === 'warning' ? '#fffbeb' : '#f8fafc';
+
     const body = `
       <div style="display:flex;flex-direction:column;gap:14px">
         <div class="form-row">
           <div><div class="form-label">Статус</div>${statusBadge(c.status)}</div>
           <div><div class="form-label">Создано</div>${formatDate(c.created_at)}</div>
+          <div><div class="form-label">Завершено</div>${formatDate(c.finished_at)}</div>
         </div>
         ${c.user_id ? `<div>
           <div class="form-label">Пользователь</div>
-          <div>${entityTag('user', c.user_id, '#' + c.user_id)}</div>
+          <div>${c.user ? entityTag('user', c.user_id, c.user.username ? '@' + c.user.username : '#' + c.user_id) : entityTag('user', c.user_id, '#' + c.user_id)}</div>
         </div>` : ''}
         ${c.gost_id || c.gost ? `<div>
           <div class="form-label">ГОСТ</div>
           <div>${c.gost ? entityTag('gost', c.gost.id || c.gost_id, c.gost.name) : entityTag('gost', c.gost_id, '#' + c.gost_id)}</div>
         </div>` : ''}
+        ${reportSection}
         <div>
           <div class="form-label" style="margin-bottom:6px">Файлы</div>
           ${fileRow('Исходный', files.input)}
@@ -167,12 +205,12 @@ async function viewCheck(id) {
         </div>
         ${logs.length ? `
           <div>
-            <div class="form-label" style="margin-bottom:8px">Worker логи (${logs.length})</div>
-            <div style="max-height:200px;overflow-y:auto;font-size:12px;font-family:monospace;background:#f8fafc;padding:12px;border-radius:8px">
-              ${logs.map(l => `<div style="margin-bottom:4px">
-                <span style="color:${l.level === 'error' ? 'var(--danger)' : l.level === 'warning' ? 'var(--warn)' : 'var(--text-muted)'}">[${escHtml(l.level)}]</span>
-                ${escHtml(l.message)}
-                <span style="color:var(--text-muted);font-size:10px">${formatDate(l.created_at)}</span>
+            <div class="form-label" style="margin-bottom:8px">Логи проверки (${logs.length})</div>
+            <div style="max-height:300px;overflow-y:auto;font-size:12px;font-family:monospace;border-radius:8px;border:1px solid #e2e8f0">
+              ${logs.map(l => `<div style="padding:6px 12px;background:${logBg(l.level)};border-bottom:1px solid #e2e8f0">
+                <span style="color:${logColor(l.level)};font-weight:600">[${escHtml(l.level)}]</span>
+                <span style="white-space:pre-wrap">${escHtml(l.message)}</span>
+                <span style="color:var(--text-muted);font-size:10px;float:right">${formatDate(l.created_at)}</span>
               </div>`).join('')}
             </div>
           </div>` : ''}

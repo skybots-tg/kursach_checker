@@ -1,4 +1,5 @@
 import logging
+import traceback
 from datetime import datetime
 from pathlib import Path
 
@@ -16,29 +17,43 @@ from app.storage.files import save_json_report
 logger = logging.getLogger(__name__)
 
 
+def _add_log(session: AsyncSession, check_id: int, level: str, message: str) -> None:
+    session.add(CheckWorkerLog(check_id=check_id, level=level, message=message[:4000]))
+
+
 async def process_check_task(ctx: dict, check_id: int) -> dict:
     async with SessionLocal() as session:
         check = await session.get(Check, check_id)
         if not check:
+            logger.error("Check %s not found in DB", check_id)
             return {"error": "check_not_found", "check_id": check_id}
 
         check.status = CheckStatus.running
-        session.add(CheckWorkerLog(check_id=check.id, level="info", message="Check started"))
+        _add_log(session, check.id, "info", "Check started")
         await session.commit()
 
         try:
             result = await _run_pipeline(session, check)
-            check.status = CheckStatus.done if result.get("ok") else CheckStatus.error
-            log_msg = "Check completed" if result.get("ok") else "Check failed"
-            log_lvl = "info" if result.get("ok") else "error"
+            ok = result.get("ok", False)
+            check.status = CheckStatus.done if ok else CheckStatus.error
+
+            if ok:
+                _add_log(session, check.id, "info", "Check completed successfully")
+                for notice in result.get("pipeline_notices", []):
+                    _add_log(session, check.id, "info", f"Pipeline: {notice}")
+                for ce in result.get("check_errors", []):
+                    _add_log(session, check.id, "warning", f"Check issue: {ce}")
+            else:
+                error_msg = result.get("error") or "Unknown pipeline error"
+                _add_log(session, check.id, "error", f"Check failed: {error_msg}")
+
         except Exception:
+            tb = traceback.format_exc()
             logger.exception("Unhandled error in check %s", check_id)
             result = {"ok": False}
             check.status = CheckStatus.error
-            log_msg = "Check failed with unhandled exception"
-            log_lvl = "error"
+            _add_log(session, check.id, "error", f"Unhandled exception:\n{tb}")
 
-        session.add(CheckWorkerLog(check_id=check.id, level=log_lvl, message=log_msg))
         check.finished_at = datetime.utcnow()
         await session.commit()
 
@@ -55,14 +70,24 @@ async def process_check_task(ctx: dict, check_id: int) -> dict:
 async def _run_pipeline(session: AsyncSession, check: Check) -> dict:
     input_file = await session.get(File, check.input_file_id)
     template_version = await session.get(TemplateVersion, check.template_version_id)
-    if not input_file or not template_version:
-        return {"ok": False}
+
+    if not input_file:
+        return {"ok": False, "error": f"Input file (id={check.input_file_id}) not found in DB"}
+    if not template_version:
+        return {"ok": False, "error": f"Template version (id={check.template_version_id}) not found in DB"}
 
     pipeline_result = await run_check_pipeline(input_file.storage_path, template_version.rules_json)
+
     if not pipeline_result.get("ok"):
-        return {"ok": False}
+        return {
+            "ok": False,
+            "error": pipeline_result.get("error", "Pipeline returned ok=False"),
+            "pipeline_notices": pipeline_result.get("pipeline_notices", []),
+        }
 
     report = pipeline_result.get("report") or {}
+    check_errors = report.get("check_errors", [])
+
     report_path, report_size = save_json_report(report)
     report_file = File(
         storage_path=report_path,
@@ -88,7 +113,11 @@ async def _run_pipeline(session: AsyncSession, check: Check) -> dict:
             await session.flush()
             check.output_file_id = output_file.id
 
-    return {"ok": True}
+    return {
+        "ok": True,
+        "pipeline_notices": pipeline_result.get("pipeline_notices", []),
+        "check_errors": check_errors,
+    }
 
 
 _redis_settings = RedisSettings.from_dsn(settings.redis_url)

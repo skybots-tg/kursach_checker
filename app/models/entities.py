@@ -158,7 +158,7 @@ class Check(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     template_version_id: Mapped[int] = mapped_column(ForeignKey("template_versions.id"))
-    gost_id: Mapped[int] = mapped_column(ForeignKey("gosts.id"))
+    gost_id: Mapped[int | None] = mapped_column(ForeignKey("gosts.id"), nullable=True)
     status: Mapped[CheckStatus] = mapped_column(String(20), default=CheckStatus.queued)
     input_file_id: Mapped[int] = mapped_column(ForeignKey("files.id"))
     result_report_id: Mapped[int | None] = mapped_column(ForeignKey("files.id"), nullable=True)

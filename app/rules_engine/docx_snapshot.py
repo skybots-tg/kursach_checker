@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import logging
 import re
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
 from docx import Document
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -265,20 +268,46 @@ def _empty_snapshot(
     )
 
 
+def _is_encrypted_docx(path: Path) -> bool:
+    try:
+        with zipfile.ZipFile(str(path), "r") as zf:
+            if "EncryptedPackage" in zf.namelist():
+                return True
+    except zipfile.BadZipFile:
+        pass
+    except Exception:  # noqa: BLE001
+        pass
+    return False
+
+
 def build_snapshot(file_path: str) -> DocumentSnapshot:
     path = Path(file_path)
     extension = path.suffix.lower()
-    size = path.stat().st_size if path.exists() else 0
+
+    try:
+        size = path.stat().st_size if path.exists() else 0
+    except OSError:
+        logger.warning("Cannot stat file %s", file_path)
+        size = 0
 
     if extension != ".docx":
         return _empty_snapshot(path, extension, size)
 
-    try:
-        doc = Document(str(path))
-    except Exception:  # noqa: BLE001
+    if _is_encrypted_docx(path):
+        logger.info("File is encrypted: %s", file_path)
         return _empty_snapshot(path, extension, size, is_encrypted=True)
 
-    paragraphs = _paragraphs(doc)
+    try:
+        doc = Document(str(path))
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Cannot open DOCX (corrupted?): %s — %s", file_path, exc)
+        return _empty_snapshot(path, extension, size, is_encrypted=True)
+
+    try:
+        paragraphs = _paragraphs(doc)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Failed to parse paragraphs: %s — %s", file_path, exc)
+        paragraphs = []
 
     return DocumentSnapshot(
         path=path,

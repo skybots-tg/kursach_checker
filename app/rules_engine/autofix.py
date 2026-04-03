@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -8,6 +9,8 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Mm, Pt
 
 from app.rules_engine.findings import Finding
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -27,7 +30,12 @@ def apply_safe_autofixes(
     if not cfg.enabled:
         return AutoFixResult(output_file_path=None, details=[])
 
-    doc = Document(str(source))
+    try:
+        doc = Document(str(source))
+    except Exception:
+        logger.warning("Autofix: cannot open DOCX %s", file_path)
+        return AutoFixResult(output_file_path=None, details=[])
+
     changed = False
     details: list[str] = []
 
@@ -101,7 +109,11 @@ def apply_safe_autofixes(
         return AutoFixResult(output_file_path=None, details=[])
 
     output = source.with_name(f"{source.stem}.fixed.docx")
-    doc.save(str(output))
+    try:
+        doc.save(str(output))
+    except Exception:
+        logger.exception("Autofix: failed to save fixed DOCX to %s", output)
+        return AutoFixResult(output_file_path=None, details=[])
 
     findings.append(
         Finding(

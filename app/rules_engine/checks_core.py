@@ -197,6 +197,9 @@ def run_layout_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings: li
                 )
 
 
+_MAX_FINDINGS_PER_TYPE = 10
+
+
 def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding]) -> None:
     if not cfg.has("typography"):
         return
@@ -211,6 +214,8 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
     expected_indent = float(body.get("first_line_indent_mm", 12.5))
     max_samples = int(params.get("max_paragraphs_sample", 120))
 
+    counts: dict[str, int] = {"font": 0, "size": 0, "spacing": 0, "indent": 0}
+
     checked = 0
     for paragraph in snapshot.paragraphs:
         if not paragraph.text or paragraph.is_heading:
@@ -219,9 +224,10 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
         if checked > max_samples:
             break
 
-        if paragraph.runs_fonts:
+        if paragraph.runs_fonts and counts["font"] < _MAX_FINDINGS_PER_TYPE:
             font = paragraph.runs_fonts[0].lower()
             if font != expected_font:
+                counts["font"] += 1
                 add_finding(
                     findings,
                     title="Шрифт основного текста",
@@ -233,9 +239,10 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
                     recommendation="Приведите основной текст к единому шрифту",
                 )
 
-        if paragraph.runs_size_pt:
+        if paragraph.runs_size_pt and counts["size"] < _MAX_FINDINGS_PER_TYPE:
             size = paragraph.runs_size_pt[0]
             if abs(size - expected_size) > 0.2:
+                counts["size"] += 1
                 add_finding(
                     findings,
                     title="Размер шрифта",
@@ -247,28 +254,45 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
                     recommendation="Установите единый размер шрифта для основного текста",
                 )
 
-        if paragraph.line_spacing and abs(paragraph.line_spacing - expected_line_spacing) > 0.2:
-            add_finding(
-                findings,
-                title="Межстрочный интервал",
-                category="typography",
-                severity=severity,
-                expected=str(expected_line_spacing),
-                found=str(paragraph.line_spacing),
-                location=f"абзац #{paragraph.index + 1}",
-                recommendation="Установите корректный межстрочный интервал",
-            )
+        if paragraph.line_spacing and counts["spacing"] < _MAX_FINDINGS_PER_TYPE:
+            if abs(paragraph.line_spacing - expected_line_spacing) > 0.2:
+                counts["spacing"] += 1
+                add_finding(
+                    findings,
+                    title="Межстрочный интервал",
+                    category="typography",
+                    severity=severity,
+                    expected=str(expected_line_spacing),
+                    found=str(paragraph.line_spacing),
+                    location=f"абзац #{paragraph.index + 1}",
+                    recommendation="Установите корректный межстрочный интервал",
+                )
 
-        if paragraph.first_line_indent_mm is not None and abs(paragraph.first_line_indent_mm - expected_indent) > 1.0:
+        if paragraph.first_line_indent_mm is not None and counts["indent"] < _MAX_FINDINGS_PER_TYPE:
+            if abs(paragraph.first_line_indent_mm - expected_indent) > 1.0:
+                counts["indent"] += 1
+                add_finding(
+                    findings,
+                    title="Абзацный отступ",
+                    category="typography",
+                    severity=severity,
+                    expected=f"{expected_indent} мм",
+                    found=f"{paragraph.first_line_indent_mm} мм",
+                    location=f"абзац #{paragraph.index + 1}",
+                    recommendation="Установите корректный отступ первой строки",
+                )
+
+    for label, key in [("шрифт", "font"), ("размер шрифта", "size"), ("интервал", "spacing"), ("отступ", "indent")]:
+        if counts[key] >= _MAX_FINDINGS_PER_TYPE:
             add_finding(
                 findings,
-                title="Абзацный отступ",
+                title=f"Типографика: {label} — ещё замечания",
                 category="typography",
-                severity=severity,
-                expected=f"{expected_indent} мм",
-                found=f"{paragraph.first_line_indent_mm} мм",
-                location=f"абзац #{paragraph.index + 1}",
-                recommendation="Установите корректный отступ первой строки",
+                severity="advice",
+                expected="",
+                found=f"Показаны первые {_MAX_FINDINGS_PER_TYPE} замечаний, проблема массовая",
+                location="весь документ",
+                recommendation="Выделите весь текст и установите единое форматирование",
             )
 
 
