@@ -79,6 +79,27 @@ class CreditsBalance(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
+class CreditsTransactionType(str, enum.Enum):
+    topup = "topup"
+    spend = "spend"
+    admin_set = "admin_set"
+    refund = "refund"
+
+
+class CreditsTransaction(Base):
+    __tablename__ = "credits_transactions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    tx_type: Mapped[str] = mapped_column(String(32), index=True)
+    amount: Mapped[int] = mapped_column(Integer)
+    balance_after: Mapped[int] = mapped_column(Integer)
+    description: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    reference_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    reference_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class University(Base):
     __tablename__ = "universities"
 

@@ -18,6 +18,7 @@ from sqlalchemy import select
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.integrations.analytics_middleware import AnalyticsMiddleware
+from app.integrations.telegram_check_handler import handle_document
 from app.models import ContentMenuItem, CreditsBalance, MenuItemMessage, User
 
 logger = logging.getLogger(__name__)
@@ -405,6 +406,12 @@ async def run_bot() -> None:
         item = await _find_menu_item_by_payload(data)
         if item:
             await _navigate_to_item(bot, callback.message.chat.id, item.id)
+
+    @dp.message(F.document)
+    async def document_handler(message: Message) -> None:
+        if message.from_user:
+            await _ensure_user(message.from_user)
+        await handle_document(message, bot)
 
     @dp.message()
     async def fallback_message_handler(message: Message) -> None:

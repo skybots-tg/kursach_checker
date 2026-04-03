@@ -14,7 +14,8 @@ from app.integrations.prodamus import (
     extract_payload_and_signature,
     verify_signature,
 )
-from app.models import CreditsBalance, Order, OrderStatus, PaymentProdamus, Product, User
+from app.models import CreditsBalance, CreditsTransactionType, Order, OrderStatus, PaymentProdamus, Product, User
+from app.services.credits import add_credits
 
 router = APIRouter()
 
@@ -120,14 +121,17 @@ async def prodamus_webhook(
     order.paid_at = datetime.utcnow()
 
     product = await db.get(Product, order.product_id)
-    credits = await db.get(CreditsBalance, order.user_id)
-    if not credits:
-        credits = CreditsBalance(user_id=order.user_id, credits_available=0)
-        db.add(credits)
-        await db.flush()
+    credits_amount = int(product.credits_amount if product else 1)
 
-    credits.credits_available += int(product.credits_amount if product else 1)
-    credits.updated_at = datetime.utcnow()
+    await add_credits(
+        db,
+        user_id=order.user_id,
+        amount=credits_amount,
+        tx_type=CreditsTransactionType.topup,
+        description=f"Payment for order #{order.id}" + (f" ({product.name})" if product else ""),
+        reference_type="order",
+        reference_id=order.id,
+    )
 
     await db.commit()
     return {"message": "processed", "order_id": order.id, "order_status": order.status.value}

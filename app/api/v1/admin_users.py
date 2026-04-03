@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.admin_deps import get_current_admin
 from app.db.session import get_db
-from app.models import AdminUser, CreditsBalance, User
+from app.models import AdminUser, CreditsBalance, CreditsTransaction, User
+from app.services.credits import set_credits
 
 router = APIRouter()
 
@@ -97,18 +98,52 @@ async def update_user_credits(
     current_admin: AdminUser = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    _ = current_admin
     user = await db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
-    credits = await db.get(CreditsBalance, user_id)
-    if not credits:
-        credits = CreditsBalance(user_id=user_id, credits_available=payload.credits_available)
-        db.add(credits)
-    else:
-        credits.credits_available = payload.credits_available
+    await set_credits(
+        db,
+        user_id=user_id,
+        new_value=payload.credits_available,
+        admin_user_id=current_admin.id,
+    )
     await db.commit()
     return {"ok": True}
+
+
+@router.get("/{user_id}/credits/history")
+async def get_user_credits_history(
+    user_id: int,
+    limit: int = 50,
+    offset: int = 0,
+    current_admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> list[dict]:
+    user = await db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    stmt = (
+        select(CreditsTransaction)
+        .where(CreditsTransaction.user_id == user_id)
+        .order_by(CreditsTransaction.id.desc())
+        .offset(offset)
+        .limit(min(limit, 200))
+    )
+    rows = await db.scalars(stmt)
+    return [
+        {
+            "id": t.id,
+            "tx_type": t.tx_type,
+            "amount": t.amount,
+            "balance_after": t.balance_after,
+            "description": t.description,
+            "reference_type": t.reference_type,
+            "reference_id": t.reference_id,
+            "created_at": t.created_at,
+        }
+        for t in rows
+    ]
 
 

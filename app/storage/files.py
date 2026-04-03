@@ -25,6 +25,14 @@ async def save_upload_file(file: UploadFile, *, max_bytes: int = 20 * 1024 * 102
     return str(target), len(content)
 
 
+def save_raw_file(data: bytes, ext: str) -> tuple[str, int]:
+    """Save raw bytes to uploads directory. Returns (path, size)."""
+    filename = f"{uuid.uuid4().hex}{ext}"
+    target = UPLOADS_DIR / filename
+    target.write_bytes(data)
+    return str(target), len(data)
+
+
 def save_json_report(data: dict) -> tuple[str, int]:
     filename = f"{uuid.uuid4().hex}.json"
     target = RESULTS_DIR / filename

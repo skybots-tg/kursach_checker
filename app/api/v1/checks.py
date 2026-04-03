@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models import Check, CheckStatus, CreditsBalance, File, TemplateVersion, User
+from app.services.credits import spend_credits
 from app.storage.files import save_upload_file
 from app.workers.tasks import enqueue_check
 
@@ -73,9 +74,6 @@ async def start_check(
     if not credits or credits.credits_available < 1:
         raise HTTPException(status_code=402, detail="Недостаточно кредитов")
 
-    credits.credits_available -= 1
-    credits.updated_at = datetime.utcnow()
-
     check = Check(
         user_id=current_user.id,
         template_version_id=template_version_id,
@@ -85,6 +83,15 @@ async def start_check(
     )
     db.add(check)
     await db.flush()
+
+    await spend_credits(
+        db,
+        user_id=current_user.id,
+        amount=1,
+        description=f"Check #{check.id}",
+        reference_type="check",
+        reference_id=check.id,
+    )
     await db.commit()
 
     await enqueue_check(check.id)
