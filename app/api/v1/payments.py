@@ -15,6 +15,21 @@ from app.services.credits import add_credits
 router = APIRouter()
 
 
+def _parse_order_id(ref: str) -> int | None:
+    """Извлекает числовой order.id из строки вида 'KC-00042-u7' или просто '42'."""
+    if ref.startswith("KC-"):
+        parts = ref.split("-")
+        if len(parts) >= 2:
+            try:
+                return int(parts[1])
+            except ValueError:
+                return None
+    try:
+        return int(ref)
+    except ValueError:
+        return None
+
+
 class PaymentCreateRequest(BaseModel):
     product_id: int
 
@@ -38,11 +53,12 @@ async def create_payment(
     db.add(order)
     await db.flush()
 
+    prodamus_order_id = f"KC-{order.id:05d}-u{current_user.id}"
     payment_url = await create_payment_link(
-        order_id=str(order.id),
+        order_id=prodamus_order_id,
         amount=float(product.price),
         product_name=product.name,
-        customer_extra=f"u{current_user.id}-order{order.id}",
+        customer_extra=prodamus_order_id,
     )
     if not payment_url:
         raise HTTPException(status_code=502, detail="Не удалось создать ссылку на оплату")
@@ -85,13 +101,12 @@ async def prodamus_webhook(
 
     payload = body
 
-    order_ref = payload.get("order_num") or payload.get("order_id")
+    order_ref = str(payload.get("order_num") or payload.get("order_id") or "")
     if not order_ref:
         return {"message": "ignored", "reason": "missing_order_id"}
 
-    try:
-        order_id = int(str(order_ref))
-    except ValueError:
+    order_id = _parse_order_id(order_ref)
+    if order_id is None:
         return {"message": "ignored", "reason": "invalid_order_id"}
 
     order = await db.get(Order, order_id)
