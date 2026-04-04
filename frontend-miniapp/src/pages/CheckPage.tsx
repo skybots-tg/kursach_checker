@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { GostItem, MeResponse, TemplateItem, UniversityItem } from "../types";
 import { fetchGosts, fetchTemplates, fetchUniversities, uploadFile, startCheck } from "../api";
 import { Icon } from "../components/Icon";
+import { pluralize } from "../pluralize";
 import { useNavigate } from "react-router-dom";
 
 interface Props {
@@ -186,7 +187,7 @@ export const CheckPage: React.FC<Props> = ({ me }) => {
 
       <div className="field-label">Кредиты</div>
       <div className="credits-badge">
-        Доступно проверок: <strong>{me.credits_available}</strong>
+        Доступно: <strong>{pluralize(me.credits_available, "проверка", "проверки", "проверок")}</strong>
       </div>
 
       {error && (

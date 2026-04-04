@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { MeResponse, ProductItem } from "../types";
 import { createPayment, fetchProducts } from "../api";
 import { Icon } from "../components/Icon";
+import { pluralize } from "../pluralize";
 
 interface Props {
   me: MeResponse;
@@ -81,7 +82,7 @@ export const ProfilePage: React.FC<Props> = ({ me }) => {
                 </div>
               </div>
               <div className="finding-meta">
-                Кредитов: {p.credits_amount} · {p.description || "Пакет проверок"}
+                {pluralize(p.credits_amount, "проверка", "проверки", "проверок")} · {p.description || "Пакет проверок"}
               </div>
               <div className="spacer-8" />
               <button

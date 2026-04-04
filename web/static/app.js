@@ -3,6 +3,15 @@
 
   var appEl = document.getElementById('app');
 
+  function pluralize(n, one, few, many) {
+    var abs = Math.abs(n) % 100;
+    var last = abs % 10;
+    if (abs > 10 && abs < 20) return n + ' ' + many;
+    if (last > 1 && last < 5) return n + ' ' + few;
+    if (last === 1) return n + ' ' + one;
+    return n + ' ' + many;
+  }
+
   // ---- Auth ----
 
   var token = localStorage.getItem('miniapp_token');
@@ -303,7 +312,7 @@
               '<span class="list-card-title">' + esc(p.name) + '</span>' +
               '<span class="product-price">' + p.price + ' ' + esc(p.currency || '\u20BD') + '</span>' +
             '</div>' +
-            '<div class="list-card-meta">' + p.credits_amount + ' проверок' +
+            '<div class="list-card-meta">' + pluralize(p.credits_amount, 'проверка', 'проверки', 'проверок') +
               (p.description ? ' \xB7 ' + esc(p.description) : '') +
             '</div>' +
             '<button class="btn btn-primary btn-sm" data-buy="' + p.id + '">' +
@@ -375,7 +384,7 @@
           '<div class="upload-area" id="upload-area"><i data-lucide="upload-cloud"></i><span>Нажмите, чтобы выбрать файл</span></div>' +
           '<input type="file" id="file-input" accept=".doc,.docx" style="display:none">' +
           '<div id="file-info" style="display:none;margin-top:8px;font-size:12px"></div></div>' +
-        '<div style="font-size:12px;color:var(--text-muted);margin-top:2px">Доступно проверок: <b>' + credits + '</b></div>' +
+        '<div style="font-size:12px;color:var(--text-muted);margin-top:2px">Доступно: <b>' + pluralize(credits, 'проверка', 'проверки', 'проверок') + '</b></div>' +
         '<div id="check-err" style="display:none;margin-top:8px;font-size:12px;color:var(--danger)"></div>' +
         '<button id="btn-start" class="btn btn-primary" style="margin-top:14px" disabled>' +
           '<i data-lucide="sparkles"></i> Запустить проверку и списать 1 кредит</button>' +

@@ -42,6 +42,7 @@ async def create_payment(
         order_id=str(order.id),
         amount=float(product.price),
         product_name=product.name,
+        customer_extra=f"u{current_user.id}-order{order.id}",
     )
     if not payment_url:
         raise HTTPException(status_code=502, detail="Не удалось создать ссылку на оплату")

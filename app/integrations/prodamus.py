@@ -62,6 +62,7 @@ async def create_payment_link(
     order_id: str,
     amount: int | float,
     product_name: str = "Оплата заказа",
+    customer_extra: str | None = None,
 ) -> str | None:
     """Создаёт ссылку на оплату через Prodamus API (do=link)."""
     webhook_url = f"{settings.app_base_url}/api/payments/webhook/prodamus"
@@ -71,6 +72,7 @@ async def create_payment_link(
         "type": "json",
         "callbackType": "json",
         "order_id": order_id,
+        "customer_extra": customer_extra or f"order-{order_id}",
         "products": [
             {
                 "name": product_name,
