@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,12 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.core.config import settings
 from app.db.session import get_db
-from app.integrations.prodamus import (
-    build_link_payload,
-    build_link_request_url,
-    extract_payload_and_signature,
-    verify_signature,
-)
+from app.integrations.prodamus import create_payment_link, verify_signature
 from app.models import CreditsBalance, CreditsTransactionType, Order, OrderStatus, PaymentProdamus, Product, User
 from app.services.credits import add_credits
 
@@ -43,17 +38,18 @@ async def create_payment(
     db.add(order)
     await db.flush()
 
-    link_payload = build_link_payload(
+    payment_url = await create_payment_link(
         order_id=str(order.id),
         amount=float(product.price),
         product_name=product.name,
     )
-    payment_url = build_link_request_url(link_payload)
+    if not payment_url:
+        raise HTTPException(status_code=502, detail="Не удалось создать ссылку на оплату")
 
     payment = PaymentProdamus(
         order_id=order.id,
         status="created",
-        raw_payload={"link_payload": link_payload},
+        raw_payload={"payment_url": payment_url},
     )
     db.add(payment)
     await db.commit()
@@ -70,18 +66,23 @@ async def create_payment(
 async def prodamus_webhook(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    sign: str | None = Header(default=None),
 ) -> dict:
-    raw = await request.body()
     content_type = request.headers.get("content-type", "")
-    payload, body_signature = extract_payload_and_signature(raw, content_type)
-    signature = sign or body_signature
+    if "json" in content_type:
+        body = await request.json()
+    else:
+        form = await request.form()
+        body = {k: str(v) for k, v in form.items()}
 
-    payload_to_check = dict(payload)
-    payload_to_check.pop("signature", None)
+    signature = request.headers.get("Sign", "")
+    if not signature:
+        raise HTTPException(status_code=400, detail="Missing signature")
 
-    if not verify_signature(payload_to_check, signature, settings.prodamus_secret_key):
-        raise HTTPException(status_code=401, detail="Некорректная подпись Prodamus")
+    verify_data = {k: v for k, v in body.items() if k != "signature"}
+    if not verify_signature(verify_data, signature):
+        raise HTTPException(status_code=403, detail="Invalid signature")
+
+    payload = body
 
     order_ref = payload.get("order_num") or payload.get("order_id")
     if not order_ref:

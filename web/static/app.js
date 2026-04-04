@@ -14,9 +14,8 @@
     tg.ready();
   }
 
-  async function ensureAuth() {
-    if (token) return;
-    if (!tg || !tg.initData) return;
+  async function authenticateWithTelegram() {
+    if (!tg || !tg.initData) return false;
     try {
       var res = await fetch('/api/auth/telegram', {
         method: 'POST',
@@ -27,8 +26,21 @@
         var data = await res.json();
         token = data.access_token;
         localStorage.setItem('miniapp_token', token);
+        return true;
       }
     } catch (_) {}
+    return false;
+  }
+
+  async function ensureAuth() {
+    if (token) return;
+    await authenticateWithTelegram();
+  }
+
+  function apiError(status, detail) {
+    var err = new Error(detail);
+    err.status = status;
+    return err;
   }
 
   async function api(path) {
@@ -38,7 +50,7 @@
     if (!res.ok) {
       var detail = 'HTTP ' + res.status;
       try { var body = await res.json(); if (body.detail) detail = body.detail; } catch (_) {}
-      throw new Error(detail);
+      throw apiError(res.status, detail);
     }
     return res.json();
   }
@@ -50,7 +62,7 @@
     if (!res.ok) {
       var detail = 'HTTP ' + res.status;
       try { var b = await res.json(); if (b.detail) detail = b.detail; } catch (_) {}
-      throw new Error(detail);
+      throw apiError(res.status, detail);
     }
     return res.json();
   }
@@ -62,14 +74,25 @@
     if (!res.ok) {
       var detail = 'HTTP ' + res.status;
       try { var b = await res.json(); if (b.detail) detail = b.detail; } catch (_) {}
-      throw new Error(detail);
+      throw apiError(res.status, detail);
     }
     return res.json();
   }
 
   async function getMe() {
     if (!currentUser) {
-      try { currentUser = await api('/auth/me'); } catch (_) {}
+      try {
+        currentUser = await api('/auth/me');
+      } catch (e) {
+        if (e.status === 401 || e.status === 403) {
+          token = null;
+          localStorage.removeItem('miniapp_token');
+          currentUser = null;
+          if (await authenticateWithTelegram()) {
+            try { currentUser = await api('/auth/me'); } catch (_) {}
+          }
+        }
+      }
     }
     return currentUser;
   }

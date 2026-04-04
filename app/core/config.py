@@ -24,9 +24,7 @@ class Settings(BaseSettings):
     telegram_auth_max_age_sec: int = 86400
 
     prodamus_secret_key: str = ""
-    prodamus_shop_id: str = ""
     prodamus_payform_url: str = "https://payform.prodamus.ru"
-    prodamus_sys: str = ""
     prodamus_timeout_sec: int = 30
 
     admin_jwt_secret: str = "change-admin-me"
