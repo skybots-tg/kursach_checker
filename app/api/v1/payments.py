@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -11,6 +12,8 @@ from app.db.session import get_db
 from app.integrations.prodamus import create_payment_link, verify_signature
 from app.models import CreditsBalance, CreditsTransactionType, Order, OrderStatus, PaymentProdamus, Product, User
 from app.services.credits import add_credits
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -84,12 +87,15 @@ async def prodamus_webhook(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
+    logger.info("Prodamus webhook received from %s", request.client.host if request.client else "unknown")
     content_type = request.headers.get("content-type", "")
+    logger.info("Webhook content-type: %s", content_type)
     if "json" in content_type:
         body = await request.json()
     else:
         form = await request.form()
         body = {k: str(v) for k, v in form.items()}
+    logger.info("Webhook body keys: %s", list(body.keys()))
 
     signature = request.headers.get("Sign", "")
     if not signature:

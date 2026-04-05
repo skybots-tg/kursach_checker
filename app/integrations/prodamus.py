@@ -66,6 +66,7 @@ async def create_payment_link(
 ) -> str | None:
     """Создаёт ссылку на оплату через Prodamus API (do=link)."""
     webhook_url = f"{settings.app_base_url}/api/payments/webhook/prodamus"
+    logger.info("Prodamus payment link: order_id=%s, webhook_url=%s", order_id, webhook_url)
 
     data: dict[str, Any] = {
         "do": "link",
