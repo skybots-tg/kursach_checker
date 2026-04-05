@@ -215,7 +215,8 @@
         '<div class="check-field"><label class="check-label">ВУЗ</label>' +
           '<select id="sel-uni" class="check-select"><option value="">Загрузка\u2026</option></select></div>' +
         '<div class="check-field"><label class="check-label">Шаблон проверки</label>' +
-          '<select id="sel-tpl" class="check-select" disabled><option value="">Сначала выберите вуз</option></select></div>' +
+          '<select id="sel-tpl" class="check-select" disabled><option value="">Сначала выберите вуз</option></select>' +
+          '<div id="tpl-hint" class="check-field-hint" style="display:none;margin-top:6px;font-size:12px;color:var(--text-muted);line-height:1.4"></div></div>' +
         '<div class="check-field"><label class="check-label">ГОСТ / стиль (опционально)</label>' +
           '<select id="sel-gost" class="check-select"><option value="">Автоматически по шаблону</option></select></div>' +
         '<div class="check-field"><label class="check-label">Файл работы (DOC/DOCX, до 20 МБ)</label>' +
@@ -246,9 +247,15 @@
     var fileCardSize = document.getElementById('file-card-size');
     var btnStart = document.getElementById('btn-start');
     var errEl = document.getElementById('check-err');
+    var tplHintEl = document.getElementById('tpl-hint');
     var chosenFile = null, versionId = null;
 
     function showErr(msg) { errEl.textContent = msg; errEl.style.display = msg ? 'block' : 'none'; }
+    function showTplHint(msg) {
+      if (!tplHintEl) return;
+      tplHintEl.textContent = msg || '';
+      tplHintEl.style.display = msg ? 'block' : 'none';
+    }
     function updateBtn() { /* state tracked via chosenFile & versionId */ }
 
     try {
@@ -262,17 +269,30 @@
     } catch (e) { showErr('Не удалось загрузить справочники: ' + e.message); }
 
     selUni.addEventListener('change', async function () {
-      versionId = null; selTpl.disabled = true; updateBtn();
+      versionId = null; selTpl.disabled = true; updateBtn(); showTplHint('');
       selTpl.innerHTML = '<option value="">Загрузка\u2026</option>';
-      if (!selUni.value) { selTpl.innerHTML = '<option value="">Сначала выберите вуз</option>'; return; }
+      if (!selUni.value) {
+        selTpl.innerHTML = '<option value="">Сначала выберите вуз</option>';
+        return;
+      }
       try {
-        var tpls = await A.api('/templates?university_id=' + selUni.value);
+        var tpls = await A.api('/templates?university_id=' + encodeURIComponent(selUni.value));
         selTpl.disabled = false;
+        if (!tpls.length) {
+          selTpl.innerHTML = '<option value="">\u2014 нет шаблонов \u2014</option>';
+          showTplHint(
+            'Для этого ВУЗа нет опубликованных шаблонов. В админке: шаблон должен быть «Опубликован» и привязан к этому ВУЗу (тот же, что в списке).'
+          );
+          return;
+        }
         selTpl.innerHTML = '<option value="">Выберите шаблон</option>' +
           tpls.map(function (t) {
             return '<option value="' + t.id + '">' + A.esc(t.name) + ' \xB7 ' + A.esc(t.type_work) + (t.year ? ' \xB7 ' + A.esc(t.year) : '') + '</option>';
           }).join('');
-      } catch (e) { selTpl.innerHTML = '<option value="">Ошибка загрузки</option>'; showErr(e.message); }
+      } catch (e) {
+        selTpl.innerHTML = '<option value="">Ошибка загрузки</option>';
+        showErr(e.message);
+      }
     });
 
     selTpl.addEventListener('change', async function () {

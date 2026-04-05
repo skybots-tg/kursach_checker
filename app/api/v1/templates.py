@@ -90,7 +90,7 @@ async def create_template(
         name=payload.name,
         type_work=payload.type_work,
         year=payload.year,
-        status=TemplateStatus.draft,
+        status=TemplateStatus.published,
         active=True,
     )
     db.add(item)

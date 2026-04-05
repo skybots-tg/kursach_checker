@@ -24,6 +24,9 @@ async def get_optional_admin(
         admin_id = int(payload["sub"])
     except Exception:  # noqa: BLE001
         return None
+    # User JWT (тот же секрет в .env) не содержит role — не считаем это админом
+    if payload.get("role") is None:
+        return None
     admin = await db.get(AdminUser, admin_id)
     return admin
 
@@ -41,6 +44,9 @@ async def get_current_admin(
         admin_id = int(payload["sub"])
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=401, detail="Невалидный admin токен") from exc
+
+    if payload.get("role") is None:
+        raise HTTPException(status_code=401, detail="Невалидный admin токен")
 
     admin = await db.get(AdminUser, admin_id)
     if not admin:
