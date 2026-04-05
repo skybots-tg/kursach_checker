@@ -20,7 +20,7 @@ def resolve_doc_policy(rules: dict | None) -> str:
         policy = str(params.get("doc_policy", "allow")).lower()
         if policy in {"reject", "allow", "convert"}:
             return policy
-    return "allow"
+    return "convert"
 
 
 async def run_check_pipeline(input_path: str, rules: dict | None) -> dict:

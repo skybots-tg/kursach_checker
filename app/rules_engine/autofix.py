@@ -65,8 +65,10 @@ def apply_safe_autofixes(
 
         if cfg.normalize_line_spacing:
             curr = pf.line_spacing
-            curr_float = float(curr) if isinstance(curr, float) else None
-            if curr_float is None or abs(curr_float - cfg.line_spacing) > 0.05:
+            needs_fix = True
+            if isinstance(curr, (int, float)):
+                needs_fix = abs(float(curr) - cfg.line_spacing) > 0.05
+            if needs_fix:
                 pf.line_spacing = cfg.line_spacing
                 changed = True
                 details.append(f"Абзац #{idx + 1}: межстрочный {cfg.line_spacing}")
@@ -91,18 +93,17 @@ def apply_safe_autofixes(
                 details.append(f"Абзац #{idx + 1}: интервал после {cfg.space_after_pt} pt")
 
         if cfg.normalize_font:
+            font_changed = False
             for run in paragraph.runs:
-                run_changed = False
                 if cfg.font_name and run.font.name != cfg.font_name:
                     run.font.name = cfg.font_name
-                    run_changed = True
+                    font_changed = True
                 size_pt = float(run.font.size.pt) if run.font.size else None
                 if size_pt is None or abs(size_pt - cfg.font_size_pt) > 0.2:
                     run.font.size = Pt(cfg.font_size_pt)
-                    run_changed = True
-                if run_changed:
-                    changed = True
-            if changed:
+                    font_changed = True
+            if font_changed:
+                changed = True
                 details.append(f"Абзац #{idx + 1}: шрифт {cfg.font_name}, {cfg.font_size_pt}pt")
 
     if not changed:

@@ -184,7 +184,7 @@
         '<div class="credits-banner-left">' +
           '<i data-lucide="zap" class="credits-banner-icon"></i>' +
           '<span class="credits-banner-value">' + credits + '</span>' +
-          '<span class="credits-banner-label">' + pluralize(credits, 'проверка', 'проверки', 'проверок').replace(/^\d+\s/, '') + '</span>' +
+          '<span class="credits-banner-label">' + pluralize(credits, 'проверка', 'проверки', 'проверок').replace(/^\d+\s/, '') + ' доступно</span>' +
         '</div>' +
         '<a href="/profile" class="credits-banner-topup">Пополнить</a>' +
       '</div>' +
@@ -195,7 +195,7 @@
         '<div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Получите отчёт</div><div class="step-desc">Подробный список замечаний с рекомендациями</div></div></div>' +
       '</section>' +
       '<div class="btn-group">' +
-        '<a href="/check" class="btn btn-primary"><i data-lucide="sparkles"></i> Начать проверку <i data-lucide="arrow-right" style="opacity:.6"></i></a>' +
+        '<a href="' + (credits <= 0 ? '/profile' : '/check') + '" class="btn btn-primary"><i data-lucide="sparkles"></i> Начать проверку <i data-lucide="arrow-right" style="opacity:.6"></i></a>' +
         '<a href="/demo" class="btn btn-secondary"><i data-lucide="play"></i> Посмотреть демо-отчёт</a>' +
       '</div>' +
       '<div class="section-label">Преимущества</div>' +

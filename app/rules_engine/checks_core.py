@@ -384,6 +384,35 @@ def run_volume_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings: li
         )
 
 
+_BIBLIOGRAPHY_MARKERS = [
+    "список литературы",
+    "список использованных источников и литературы",
+    "список использованных источников",
+    "list of references",
+]
+
+
+def _extract_bibliography_section(full_text: str) -> str | None:
+    """Return text from the bibliography heading to the next heading or end of document."""
+    lower = full_text.lower()
+    best_pos = -1
+    for marker in _BIBLIOGRAPHY_MARKERS:
+        pos = lower.find(marker)
+        if pos != -1 and (best_pos == -1 or pos < best_pos):
+            best_pos = pos
+    if best_pos == -1:
+        return None
+    section_text = full_text[best_pos:]
+    lines = section_text.split("\n")
+    result_lines = [lines[0]]
+    for line in lines[1:]:
+        stripped = line.strip()
+        if stripped and stripped == stripped.upper() and len(stripped) > 3 and not re.match(r"^\s*[\[\d]", stripped):
+            break
+        result_lines.append(line)
+    return "\n".join(result_lines)
+
+
 def run_bibliography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding]) -> None:
     if not cfg.has("bibliography"):
         return
@@ -392,17 +421,9 @@ def run_bibliography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findin
     params = cfg.params("bibliography")
 
     min_total = int(params.get("min_total_sources", 20))
-    text = snapshot.full_text.lower()
 
-    section_found = any(
-        marker in text
-        for marker in [
-            "список литературы",
-            "список использованных источников",
-            "list of references",
-        ]
-    )
-    if not section_found:
+    bib_section = _extract_bibliography_section(snapshot.full_text)
+    if bib_section is None:
         add_finding(
             findings,
             title="Раздел источников",
@@ -415,7 +436,7 @@ def run_bibliography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findin
         )
         return
 
-    refs = re.findall(r"(?m)^\s*(?:\[?\d{1,3}\]?)[\.)]\s+.+$", snapshot.full_text)
+    refs = re.findall(r"(?m)^\s*(?:\[?\d{1,3}\]?)[\.)]\s+.+$", bib_section)
     found_count = len(refs)
     if found_count < min_total:
         add_finding(

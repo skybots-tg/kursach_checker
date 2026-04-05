@@ -140,15 +140,34 @@ def _section_margins(doc: Document) -> list[SectionMargins]:
     return result
 
 
+def _resolve_line_spacing(paragraph) -> float | None:
+    """Extract line spacing as a multiplier (e.g. 1.5) from any representation."""
+    pformat = paragraph.paragraph_format
+    raw = pformat.line_spacing
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)):
+        return float(raw)
+    # Length object (exact/at-least spacing) — approximate multiplier via font size
+    try:
+        spacing_pt = float(raw.pt)
+        base_pt = 14.0
+        for run in paragraph.runs:
+            if run.font and run.font.size:
+                base_pt = float(run.font.size.pt)
+                break
+        return round(spacing_pt / base_pt, 2)
+    except (AttributeError, TypeError, ValueError):
+        return None
+
+
 def _paragraphs(doc: Document) -> list[ParagraphSnapshot]:
     result: list[ParagraphSnapshot] = []
     for idx, paragraph in enumerate(doc.paragraphs):
         text = (paragraph.text or "").strip()
         pformat = paragraph.paragraph_format
         indent = _mm_from_emu(getattr(pformat.first_line_indent, "emu", None))
-        line_spacing = None
-        if pformat.line_spacing and isinstance(pformat.line_spacing, float):
-            line_spacing = float(pformat.line_spacing)
+        line_spacing = _resolve_line_spacing(paragraph)
 
         result.append(
             ParagraphSnapshot(

@@ -116,6 +116,22 @@ async def run_document_checks(file_path: str, rules: dict | None) -> dict:
 
     _run_check_safe("file_intake", run_file_intake_checks, snapshot, cfg, findings, check_errors)
 
+    if snapshot.extension != ".docx":
+        add_finding(
+            findings,
+            title="Формат не поддерживает полную проверку",
+            category="file",
+            severity="warning",
+            expected="DOCX-файл для полноценного анализа оформления",
+            found=f"Файл с расширением «{snapshot.extension}»",
+            location="input",
+            recommendation=(
+                "Загрузите документ в формате DOCX. "
+                "Для файлов .doc настройте автоконвертацию (doc_policy: convert)"
+            ),
+        )
+        return _make_result(findings, snapshot.size, cfg, None, check_errors)
+
     if snapshot.extension == ".docx":
         checks: list[tuple[str, CheckFunc]] = [
             ("integrity", run_integrity_checks),
