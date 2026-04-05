@@ -2,6 +2,7 @@ import React from "react";
 import type { MeResponse } from "../types";
 import { Link } from "react-router-dom";
 import { Icon } from "../components/Icon";
+import { pluralize } from "../pluralize";
 
 interface Props {
   me: MeResponse;
@@ -13,28 +14,24 @@ export const HomePage: React.FC<Props> = ({ me }) => {
       {/* Hero section */}
       <div className="home-hero">
         <div className="home-hero-icon">
-          <Icon name="file-search" style={{ width: 32, height: 32 }} />
+          <Icon name="file-search" style={{ width: 28, height: 28 }} />
         </div>
         <h1 className="home-hero-title">Проверка оформления</h1>
         <p className="home-hero-subtitle">
-          Загрузите DOCX — получите подробный отчёт по ГОСТу и методичке вуза за секунды
+          Загрузите DOCX — получите отчёт по ГОСТу и методичке вуза
         </p>
       </div>
 
-      {/* Stats row */}
-      <div className="home-stats">
-        <div className="home-stat-card home-stat-accent">
-          <Icon name="zap" className="home-stat-icon" />
-          <div className="home-stat-value">{me.credits_available}</div>
-          <div className="home-stat-label">Доступно проверок</div>
-        </div>
-        <div className="home-stat-card">
-          <Icon name="user" className="home-stat-icon" />
-          <div className="home-stat-value home-stat-value-sm">
-            {me.username || me.first_name || `ID ${me.telegram_id}`}
+      {/* Credits banner */}
+      <div className="home-credits-banner">
+        <div className="home-credits-left">
+          <Icon name="zap" className="home-credits-icon" />
+          <div className="home-credits-value">{me.credits_available}</div>
+          <div className="home-credits-label">
+            {pluralize(me.credits_available, "проверка", "проверки", "проверок")}
           </div>
-          <div className="home-stat-label">Telegram</div>
         </div>
+        <Link to="/profile" className="home-credits-topup">Пополнить</Link>
       </div>
 
       {/* Steps */}

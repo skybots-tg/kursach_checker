@@ -132,6 +132,7 @@ function BottomNav() {
       </NavLink>
       <NavLink
         to="/check"
+        end
         className={({ isActive }) => `bottom-nav-item ${isActive ? "bottom-nav-item-active" : ""}`}
       >
         <Icon name="check" className="bottom-nav-icon" />

@@ -84,7 +84,7 @@ export const CheckPage: React.FC<Props> = ({ me }) => {
       return;
     }
     if (me.credits_available <= 0) {
-      setError("Недостаточно кредитов. Пополните баланс в профиле.");
+      navigate("/profile");
       return;
     }
     try {
