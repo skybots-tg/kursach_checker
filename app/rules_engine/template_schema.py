@@ -173,6 +173,7 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
             "normalize_font": True,
             "normalize_margins": True,
             "normalize_headings": True,
+            "normalize_table_width": True,
             "space_before_pt": 0,
             "space_after_pt": 0,
         },

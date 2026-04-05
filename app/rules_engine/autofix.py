@@ -6,6 +6,8 @@ from pathlib import Path
 
 from docx import Document
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
 from app.rules_engine.findings import Finding
@@ -106,6 +108,9 @@ def apply_safe_autofixes(
                 changed = True
                 details.append(f"Абзац #{idx + 1}: шрифт {cfg.font_name}, {cfg.font_size_pt}pt")
 
+    if cfg.normalize_table_width and _clamp_overflow_table_widths(doc, details):
+        changed = True
+
     if not changed:
         return AutoFixResult(output_file_path=None, details=[])
 
@@ -131,6 +136,69 @@ def apply_safe_autofixes(
     )
 
     return AutoFixResult(output_file_path=str(output), details=details)
+
+
+def _min_content_width_twips(doc: Document) -> int:
+    """Минимальная ширина области текста по разделам (twips), чтобы не сломать многораздельные работы."""
+    widths: list[int] = []
+    for sec in doc.sections:
+        try:
+            inner = sec.page_width.twips - sec.left_margin.twips - sec.right_margin.twips
+            widths.append(max(int(inner), 400))
+        except (AttributeError, TypeError, ValueError):
+            continue
+    return min(widths) if widths else 8640
+
+
+def _set_table_width_pct100(tbl) -> None:
+    """100% ширины области текста: OOXML pct в 1/50 процента, 5000 = 100%."""
+    tbl_pr = tbl.tblPr
+    if tbl_pr is None:
+        tbl_pr = OxmlElement("w:tblPr")
+        tbl.insert(0, tbl_pr)
+    for old in tbl_pr.findall(qn("w:tblW")):
+        tbl_pr.remove(old)
+    tbl_w = OxmlElement("w:tblW")
+    tbl_w.set(qn("w:w"), "5000")
+    tbl_w.set(qn("w:type"), "pct")
+    tbl_pr.append(tbl_w)
+
+
+def _clamp_overflow_table_widths(doc: Document, details: list[str]) -> bool:
+    """
+    После смены полей фиксированная ширина таблицы (dxa) часто остаётся «старый» и вылезает за правое поле.
+    Подрезаем только заведомо слишком широкие таблицы.
+    """
+    limit = _min_content_width_twips(doc)
+    slop_twips = 72
+    changed_any = False
+    seen: set[int] = set()
+    for table in doc.tables:
+        el = table._tbl
+        tid = id(el)
+        if tid in seen:
+            continue
+        seen.add(tid)
+        tbl_pr = el.tblPr
+        if tbl_pr is None:
+            continue
+        tbl_w = tbl_pr.find(qn("w:tblW"))
+        if tbl_w is None:
+            continue
+        if tbl_w.get(qn("w:type")) != "dxa":
+            continue
+        w_raw = tbl_w.get(qn("w:w"))
+        try:
+            w_val = int(w_raw) if w_raw is not None else 0
+        except (TypeError, ValueError):
+            continue
+        if w_val <= limit + slop_twips:
+            continue
+        _set_table_width_pct100(el)
+        changed_any = True
+    if changed_any:
+        details.append("Таблицы: ширина ограничена областью текста (100%)")
+    return changed_any
 
 
 def _fix_section_margins(
@@ -182,6 +250,7 @@ class _AutoFixConfig:
     normalize_font: bool
     normalize_margins: bool
     normalize_headings: bool
+    normalize_table_width: bool
     line_spacing: float
     first_line_indent_mm: float
     space_before_pt: float
@@ -222,6 +291,7 @@ class _AutoFixConfig:
             normalize_font=bool(params.get("normalize_font", True)),
             normalize_margins=bool(params.get("normalize_margins", True)),
             normalize_headings=bool(params.get("normalize_headings", True)),
+            normalize_table_width=bool(params.get("normalize_table_width", True)),
             line_spacing=float(body.get("line_spacing", 1.5)),
             first_line_indent_mm=float(body.get("first_line_indent_mm", 12.5)),
             space_before_pt=float(params.get("space_before_pt", 0)),
