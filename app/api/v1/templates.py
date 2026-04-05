@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.admin_deps import get_current_admin
+from app.api.admin_deps import get_current_admin, get_optional_admin
 from app.db.session import get_db
 from app.models import AdminUser, Template, TemplateStatus, TemplateVersion
 from app.rules_engine.template_schema import DEFAULT_TEMPLATE_BLOCKS, TemplateRules
@@ -37,12 +37,14 @@ class TemplateVersionCreateRequest(BaseModel):
 async def list_templates(
     university_id: int | None = None,
     db: AsyncSession = Depends(get_db),
+    admin: AdminUser | None = Depends(get_optional_admin),
 ) -> list[dict]:
-    stmt = (
-        select(Template)
-        .where(Template.status == TemplateStatus.published, Template.active.is_(True))
-        .order_by(Template.id)
-    )
+    stmt = select(Template).order_by(Template.id)
+    if admin is None:
+        stmt = stmt.where(
+            Template.status == TemplateStatus.published,
+            Template.active.is_(True),
+        )
     if university_id:
         stmt = stmt.where(Template.university_id == university_id)
     rows = list(await db.scalars(stmt))
