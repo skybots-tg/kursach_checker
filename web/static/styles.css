@@ -104,17 +104,27 @@ body {
   z-index: 1;
 }
 
-/* ---- Card ---- */
+/* ---- Card (liquid glass) ---- */
 .glass {
   position: relative;
-  background: var(--bg-card-elevated);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 50%, transparent 100%),
+    var(--bg-card-elevated);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   padding: 16px;
   transition: box-shadow var(--transition), transform var(--transition-fast);
+}
+@media (prefers-color-scheme: dark) {
+  .glass {
+    background:
+      linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 50%, transparent 100%),
+      var(--bg-card-elevated);
+    box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
 }
 
 /* ---- Reusable text utilities ---- */
@@ -154,16 +164,16 @@ body {
   width: 100%;
   min-height: 52px;
   border-radius: var(--radius-md);
-  background: var(--accent);
+  background: linear-gradient(160deg, var(--accent-light) 0%, var(--accent) 60%);
   color: #ffffff;
   font-size: 16px;
   letter-spacing: -0.01em;
   padding: 0 20px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   filter: brightness(1.06);
 }
 .btn-primary:active {
@@ -202,11 +212,18 @@ body {
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
   z-index: 100;
-  background: var(--nav-bg);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.14) 0%, transparent 50%),
+    var(--nav-bg);
   backdrop-filter: blur(50px) saturate(180%);
   -webkit-backdrop-filter: blur(50px) saturate(180%);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+@media (prefers-color-scheme: dark) {
+  .bottom-nav {
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
 }
 .bottom-nav a {
   display: flex;
