@@ -3,10 +3,8 @@ import hmac
 import json
 import logging
 import re
-from collections.abc import Mapping
-from copy import deepcopy
 from typing import Any
-from urllib.parse import parse_qsl, urlencode
+from urllib.parse import urlencode
 
 import httpx
 
@@ -15,12 +13,28 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 
+def _deep_sort(obj: Any) -> Any:
+    """Рекурсивная сортировка ключей + приведение значений к строке."""
+    if isinstance(obj, dict):
+        return {k: _deep_sort(v) for k, v in sorted(obj.items())}
+    if isinstance(obj, list):
+        return [_deep_sort(item) for item in obj]
+    return str(obj)
+
+
 def create_signature(data: dict, secret_key: str | None = None) -> str:
-    """HMAC-SHA256 подпись — алгоритм совместим с официальной prodamuspy."""
-    secret_key = secret_key or settings.prodamus_secret_key
-    json_str = json.dumps(data, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    """HMAC-SHA256 подпись по алгоритму Prodamus.
+
+    1. Все значения → строки, ключи рекурсивно сортируются
+    2. JSON без пробелов
+    3. Слэши ``/`` экранируются как ``\\/``
+    """
+    key = secret_key or settings.prodamus_secret_key
+    sorted_data = _deep_sort(data)
+    json_str = json.dumps(sorted_data, ensure_ascii=False, separators=(",", ":"))
+    json_str = json_str.replace("/", "\\/")
     return hmac.new(
-        secret_key.encode("utf-8"),
+        key.encode("utf-8"),
         json_str.encode("utf-8"),
         hashlib.sha256,
     ).hexdigest()
@@ -31,56 +45,48 @@ def verify_signature(data: dict, signature: str, secret_key: str | None = None) 
     if not signature:
         return False
     expected = create_signature(data, secret_key)
-    return hmac.compare_digest(expected.lower(), signature.lower())
+    return hmac.compare_digest(expected, signature)
 
 
-def parse_form_body(body: str) -> dict:
-    """Разбор PHP-style query string (products[0][name]=...) во вложенный dict."""
-    payload = dict(parse_qsl(body, keep_blank_values=True))
-    return _php2dict(payload)
-
-
-def _php2dict(array: dict) -> dict:
-    dct: dict = {}
-    for k, v in array.items():
-        m = re.fullmatch(r"([^\[]+)(\[.+\])", k)
-        if m:
-            idx = [m.group(1)] + list(re.findall(r"\[([^\]]+)\]", m.group(2)))
-            subdct = _dict_build(idx, v)
-        else:
-            subdct = {k: v}
-        dct = _dict_merge(dct, subdct)
-    return dct
-
-
-def _dict_build(idx: list, value: Any) -> Any:
-    value = deepcopy(value)
-    if idx:
-        i = idx.pop(0)
-        if re.fullmatch(r"[0-9]+", i):
-            return [{} for _ in range(int(i))] + [_dict_build(idx, value)]
-        return {i: _dict_build(idx, value)}
-    return value
-
-
-def _dict_merge(dct: dict, merge_dct: dict) -> dict:
-    dct = deepcopy(dct)
-    for k, v in merge_dct.items():
-        if not dct.get(k):
-            dct[k] = deepcopy(v)
-        elif k in dct and type(v) != type(dct[k]):
-            raise TypeError(f"Overlapping keys with different types: {type(dct[k])} vs {type(v)}")
-        elif isinstance(dct[k], dict) and isinstance(v, Mapping):
-            dct[k] = _dict_merge(dct[k], v)
-        elif isinstance(v, list):
-            for li, lv in enumerate(v):
-                if len(dct[k]) <= li:
-                    dct[k].append(lv)
+def unflatten_form_data(flat_dict: dict[str, Any]) -> dict[str, Any]:
+    """Конвертация плоских form-data ключей (products[0][name]) во вложенный dict."""
+    result: dict[str, Any] = {}
+    for key, value in flat_dict.items():
+        str_value = str(value)
+        if "[" in key and key.endswith("]"):
+            parts = re.findall(r"([^\[\]]+)", key)
+            if len(parts) > 1:
+                current = result
+                i = 0
+                while i < len(parts) - 1:
+                    part = parts[i]
+                    if i + 1 < len(parts) - 1 and parts[i + 1].isdigit():
+                        idx = int(parts[i + 1])
+                        if part not in current:
+                            current[part] = []
+                        arr = current[part]
+                        if not isinstance(arr, list):
+                            arr = []
+                            current[part] = arr
+                        while len(arr) <= idx:
+                            arr.append({})
+                        current = arr[idx]
+                        i += 2
+                    else:
+                        if part not in current:
+                            current[part] = {}
+                        current = current[part]
+                        i += 1
+                final_key = parts[-1]
+                if isinstance(current, dict):
+                    current[final_key] = str_value
                 else:
-                    dct[k][li] = _dict_merge(dct[k][li], lv)
+                    result[key] = str_value
+            else:
+                result[key] = str_value
         else:
-            dct[k] = v
-    return dct
+            result[key] = str_value
+    return result
 
 
 def _flatten(obj: Any, prefix: str | None = None) -> list[tuple[str, str]]:

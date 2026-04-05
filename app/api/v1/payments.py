@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.core.config import settings
 from app.db.session import get_db
-from app.integrations.prodamus import create_payment_link, parse_form_body, verify_signature
+from app.integrations.prodamus import create_payment_link, unflatten_form_data, verify_signature
 from app.models import CreditsBalance, CreditsTransactionType, Order, OrderStatus, PaymentProdamus, Product, User
 from app.services.credits import add_credits
 
@@ -91,20 +91,37 @@ async def prodamus_webhook(
     content_type = request.headers.get("content-type", "")
     logger.info("Webhook content-type: %s", content_type)
 
+    flat_body = None
     if "json" in content_type:
         body = await request.json()
+        body = {k: str(v) for k, v in body.items()}
     else:
-        raw = (await request.body()).decode("utf-8")
-        body = parse_form_body(raw)
+        form = await request.form()
+        flat_body = {}
+        for key, value in form.items():
+            flat_body[key] = value[0] if isinstance(value, list) else str(value)
+        body = unflatten_form_data(flat_body)
 
     logger.info("Webhook body keys: %s", list(body.keys()))
 
     signature = request.headers.get("Sign", "") or request.headers.get("sign", "")
     if not signature:
+        signature = body.pop("signature", "")
+    if not signature:
         raise HTTPException(status_code=400, detail="Missing signature")
 
     verify_data = {k: v for k, v in body.items() if k != "signature"}
-    if not verify_signature(verify_data, signature):
+
+    signature_valid = verify_signature(verify_data, signature)
+
+    if not signature_valid and flat_body is not None:
+        flat_verify = {k: v for k, v in flat_body.items() if k != "signature"}
+        logger.debug("Retrying signature with flat form structure")
+        signature_valid = verify_signature(flat_verify, signature)
+        if signature_valid:
+            body = flat_body
+
+    if not signature_valid:
         logger.warning("Webhook signature mismatch! Keys: %s", list(verify_data.keys()))
         raise HTTPException(status_code=403, detail="Invalid signature")
 
