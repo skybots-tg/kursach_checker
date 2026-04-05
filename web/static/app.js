@@ -145,6 +145,51 @@
     return '/api/files/' + fileId + '/download?token=' + encodeURIComponent(token || '');
   }
 
+  /** Русские подписи для отчёта проверки (серьёзность и категория из rules engine). */
+  var REPORT_SEVERITY_RU = {
+    error: 'Ошибка',
+    warning: 'Предупреждение',
+    advice: 'Совет',
+    off: 'Не проверялось',
+  };
+
+  var REPORT_CATEGORY_RU = {
+    internal: 'Система',
+    file: 'Файл',
+    integrity: 'Целостность документа',
+    context_extraction: 'Определение курса и авторов',
+    work_formats: 'Формат работы',
+    layout: 'Поля и страница',
+    typography: 'Шрифт и абзацы',
+    structure: 'Структура работы',
+    volume: 'Объём текста',
+    bibliography: 'Список источников',
+    footnotes: 'Сноски',
+    objects: 'Таблицы и рисунки',
+    heading_formatting: 'Заголовки',
+    page_numbering: 'Нумерация страниц',
+    toc: 'Оглавление',
+    captions: 'Подписи к объектам',
+    autofix: 'Автоисправление',
+    summary: 'Итог',
+  };
+
+  function findingSeverityRu(sev) {
+    return (sev && REPORT_SEVERITY_RU[sev]) || sev || '';
+  }
+
+  function findingCategoryRu(cat) {
+    if (!cat) return '';
+    return REPORT_CATEGORY_RU[cat] || cat;
+  }
+
+  function findingSeverityChipClass(sev) {
+    if (sev === 'error') return 'error';
+    if (sev === 'warning') return 'warning';
+    if (sev === 'advice') return 'advice';
+    return 'fixed';
+  }
+
   function renderReport(report) {
     if (!report || !report.findings || !report.findings.length) return '';
     return '<div class="section-label" style="margin-top:14px">Замечания</div>' +
@@ -154,10 +199,11 @@
         '<span class="chip fixed">' + report.summary_autofixed + ' исправлено</span>' +
       '</div>' +
       report.findings.map(function (f) {
+        var catRu = findingCategoryRu(f.category);
         return '<div class="glass list-card finding-item">' +
           '<div class="list-card-row">' +
-            '<span class="chip ' + (f.severity === 'error' ? 'error' : f.severity === 'warning' ? 'warning' : 'fixed') + '">' + esc(f.severity) + '</span>' +
-            '<span style="font-size:11px;color:var(--text-muted)">' + esc(f.category || '') + '</span>' +
+            '<span class="chip ' + findingSeverityChipClass(f.severity) + '">' + esc(findingSeverityRu(f.severity)) + '</span>' +
+            (catRu ? '<span style="font-size:11px;color:var(--text-muted)">' + esc(catRu) + '</span>' : '') +
           '</div>' +
           '<div class="finding-title">' + esc(f.title) + '</div>' +
           (f.expected ? '<div class="finding-rec">Ожидалось: ' + esc(f.expected) + '</div>' : '') +

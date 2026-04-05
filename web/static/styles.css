@@ -254,6 +254,7 @@ body {
 }
 .chip.error   { background: var(--danger-soft); color: var(--danger); }
 .chip.warning { background: var(--warn-soft); color: var(--warn); }
+.chip.advice  { background: var(--accent-soft); color: var(--accent); }
 .chip.fixed   { background: var(--success-soft); color: var(--success); }
 
 /* ---- Animations ---- */
