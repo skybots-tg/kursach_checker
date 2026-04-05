@@ -3,13 +3,14 @@ alwaysApply: true
 ---
 # Структура проекта `kursach_checker`
 
-- Backend на FastAPI находится в пакете [`backend`](mdc:backend).
-- Точка входа HTTP‑API: [`backend/main.py`](mdc:backend/main.py) (порт 8343 при запуске uvicorn).
-- Async SQLAlchemy и модели БД лежат в [`backend/db`](mdc:backend/db).
-- Правила/ГОСТы и universal rules engine описаны в [`backend/rules_engine`](mdc:backend/rules_engine) и примерах в [`rules_specs`](mdc:rules_specs).
-- Telegram‑бот расположен в [`bot`](mdc:bot).
-- Клиентский Mini App (vanilla JS SPA): HTML в [`web/mini_app`](mdc:web/mini_app), статика (JS/CSS) в [`web/static`](mdc:web/static).
-- Админка — в [`frontend-admin`](mdc:frontend-admin) / [`web/admin`](mdc:web/admin).
+- Backend на FastAPI — пакет [`app`](mdc:app), точка входа [`app/main.py`](mdc:app/main.py) (порт 8343).
+- Запуск: [`run.py`](mdc:run.py) (API), [`run_bot.py`](mdc:run_bot.py) (Telegram-бот), [`run_worker.py`](mdc:run_worker.py) (воркер).
+- Async SQLAlchemy и модели БД — [`app/db`](mdc:app/db), [`app/models`](mdc:app/models).
+- Правила/ГОСТы и rules engine — [`app/rules_engine`](mdc:app/rules_engine).
+- Telegram-бот — [`app/integrations/telegram_bot.py`](mdc:app/integrations/telegram_bot.py).
+- Клиентский Mini App (vanilla JS SPA): HTML — [`web/mini_app`](mdc:web/mini_app), статика (JS/CSS) — [`web/static`](mdc:web/static).
+- Админка — [`web/admin`](mdc:web/admin).
+- Миграции — [`alembic`](mdc:alembic).
 
 Ограничение: исходные файлы следует держать не более 500 строк, при необходимости дробить по подпакетам.
 
