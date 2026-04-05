@@ -8,7 +8,8 @@ alwaysApply: true
 - Async SQLAlchemy и модели БД лежат в [`backend/db`](mdc:backend/db).
 - Правила/ГОСТы и universal rules engine описаны в [`backend/rules_engine`](mdc:backend/rules_engine) и примерах в [`rules_specs`](mdc:rules_specs).
 - Telegram‑бот расположен в [`bot`](mdc:bot).
-- Клиентский Mini App и админка — в [`frontend-miniapp`](mdc:frontend-miniapp) и [`frontend-admin`](mdc:frontend-admin).
+- Клиентский Mini App (vanilla JS SPA): HTML в [`web/mini_app`](mdc:web/mini_app), статика (JS/CSS) в [`web/static`](mdc:web/static).
+- Админка — в [`frontend-admin`](mdc:frontend-admin) / [`web/admin`](mdc:web/admin).
 
 Ограничение: исходные файлы следует держать не более 500 строк, при необходимости дробить по подпакетам.
 
