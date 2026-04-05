@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.core.config import settings
 from app.db.session import get_db
-from app.integrations.prodamus import create_payment_link, verify_signature
+from app.integrations.prodamus import create_payment_link, parse_form_body, verify_signature
 from app.models import CreditsBalance, CreditsTransactionType, Order, OrderStatus, PaymentProdamus, Product, User
 from app.services.credits import add_credits
 
@@ -90,19 +90,22 @@ async def prodamus_webhook(
     logger.info("Prodamus webhook received from %s", request.client.host if request.client else "unknown")
     content_type = request.headers.get("content-type", "")
     logger.info("Webhook content-type: %s", content_type)
+
     if "json" in content_type:
         body = await request.json()
     else:
-        form = await request.form()
-        body = {k: str(v) for k, v in form.items()}
+        raw = (await request.body()).decode("utf-8")
+        body = parse_form_body(raw)
+
     logger.info("Webhook body keys: %s", list(body.keys()))
 
-    signature = request.headers.get("Sign", "")
+    signature = request.headers.get("Sign", "") or request.headers.get("sign", "")
     if not signature:
         raise HTTPException(status_code=400, detail="Missing signature")
 
     verify_data = {k: v for k, v in body.items() if k != "signature"}
     if not verify_signature(verify_data, signature):
+        logger.warning("Webhook signature mismatch! Keys: %s", list(verify_data.keys()))
         raise HTTPException(status_code=403, detail="Invalid signature")
 
     payload = body
