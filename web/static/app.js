@@ -175,22 +175,18 @@
     var credits = me ? me.credits_available : '\u2014';
     var name = me ? (me.username || me.first_name || 'ID ' + me.telegram_id) : '\u2014';
     appEl.innerHTML =
-      '<section class="glass hero">' +
+      '<section class="glass hero hero-compact">' +
         '<div class="hero-icon"><i data-lucide="file-search"></i></div>' +
         '<h1 class="gradient-text">Проверка оформления</h1>' +
-        '<p>Загрузите DOCX \u2014 получите подробный отчёт по ГОСТу и методичке вуза за секунды</p>' +
+        '<p>Загрузите DOCX \u2014 получите отчёт по ГОСТу и методичке вуза</p>' +
       '</section>' +
-      '<div class="stats-row">' +
-        '<div class="stat-card accent">' +
-          '<div class="stat-icon"><i data-lucide="zap"></i></div>' +
-          '<div class="stat-value">' + credits + '</div>' +
-          '<div class="stat-label">Доступно проверок</div>' +
+      '<div class="credits-banner">' +
+        '<div class="credits-banner-left">' +
+          '<i data-lucide="zap" class="credits-banner-icon"></i>' +
+          '<span class="credits-banner-value">' + credits + '</span>' +
+          '<span class="credits-banner-label">' + pluralize(credits, 'проверка', 'проверки', 'проверок').replace(/^\d+\s/, '') + '</span>' +
         '</div>' +
-        '<div class="stat-card">' +
-          '<div class="stat-icon"><i data-lucide="user"></i></div>' +
-          '<div class="stat-value stat-value-sm">' + esc(name) + '</div>' +
-          '<div class="stat-label">Telegram</div>' +
-        '</div>' +
+        '<a href="/profile" class="credits-banner-topup">Пополнить</a>' +
       '</div>' +
       '<div class="section-label">Как это работает</div>' +
       '<section class="glass steps-list">' +
@@ -457,7 +453,7 @@
 
     btnStart.addEventListener('click', async function () {
       if (!chosenFile || !versionId) return;
-      if (credits <= 0) { showErr('Недостаточно кредитов. Пополните баланс в профиле.'); return; }
+      if (credits <= 0) { navigate('/profile', true); return; }
       showErr(''); btnStart.disabled = true;
       btnStart.textContent = 'Загружаем файл\u2026';
       try {

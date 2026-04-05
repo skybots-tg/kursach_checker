@@ -352,8 +352,12 @@ body::after {
   .glass, .stat-card, .bottom-nav, .bottom-nav a { border-width: 0.5px; }
 }
 
+@media (max-width: 420px) {
+  .app { gap: 10px; }
+}
+
 @media (max-width: 375px) {
-  .app { padding: 10px 10px calc(76px + env(safe-area-inset-bottom, 10px)); }
+  .app { padding: 10px 10px calc(76px + env(safe-area-inset-bottom, 10px)); gap: 8px; }
   .hero h1 { font-size: 24px; }
   .stat-value { font-size: 24px; }
   .bottom-nav a { min-height: 44px; font-size: 10px; }
