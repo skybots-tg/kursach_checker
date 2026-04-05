@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
 from app.db.session import get_db
-from app.models import Order, Product, User
+from app.models import Order, OrderStatus, Product, User
 
 router = APIRouter()
 
@@ -31,3 +31,25 @@ async def list_orders(
         }
         for o, p in rows
     ]
+
+
+@router.get("/{order_id}/status")
+async def get_order_status(
+    order_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    order = await db.get(Order, order_id)
+    if not order or order.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Заказ не найден")
+
+    result: dict = {
+        "order_id": order.id,
+        "status": getattr(order.status, "value", order.status),
+    }
+
+    if order.status == OrderStatus.paid:
+        product = await db.get(Product, order.product_id)
+        result["credits_added"] = int(product.credits_amount) if product else 0
+
+    return result
