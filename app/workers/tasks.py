@@ -69,7 +69,21 @@ async def process_check_task(ctx: dict, check_id: int) -> dict:
         try:
             user = await session.get(User, check.user_id)
             if user and user.telegram_id and check.status == CheckStatus.done:
-                await notify_check_ready(user.telegram_id, check.id)
+                fixed_path = None
+                fixed_name = None
+                if check.output_file_id:
+                    out_f = await session.get(File, check.output_file_id)
+                    if out_f:
+                        p = Path(out_f.storage_path)
+                        if p.is_file():
+                            fixed_path = str(p)
+                            fixed_name = out_f.original_name
+                await notify_check_ready(
+                    user.telegram_id,
+                    check.id,
+                    fixed_doc_path=fixed_path,
+                    fixed_doc_filename=fixed_name,
+                )
         except Exception:
             logger.exception("Failed to notify user about check %s", check_id)
 
