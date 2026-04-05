@@ -13,7 +13,7 @@ from app.integrations.telegram_notify import notify_check_ready
 from app.models import Check, CheckStatus, CheckWorkerLog, File, TemplateVersion, User
 from app.services.check_pipeline import run_check_pipeline
 from app.services.credits import spend_credits
-from app.storage.files import save_json_report
+from app.storage.files import fixed_output_download_name, save_json_report
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +114,7 @@ async def _run_pipeline(session: AsyncSession, check: Check) -> dict:
         if output_path.exists():
             output_file = File(
                 storage_path=str(output_path),
-                original_name=f"check_{check.id}_fixed.docx",
+                original_name=fixed_output_download_name(input_file.original_name),
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 size=output_path.stat().st_size,
             )

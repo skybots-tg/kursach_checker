@@ -22,7 +22,7 @@ from app.models import (
 from app.services.bot_texts import get_text
 from app.services.check_pipeline import run_check_pipeline
 from app.services.credits import spend_credits
-from app.storage.files import save_json_report, save_raw_file
+from app.storage.files import fixed_output_download_name, save_json_report, save_raw_file
 
 from sqlalchemy import select
 
@@ -153,7 +153,7 @@ async def handle_document(message: Message, bot: Bot) -> None:
     if output_docx_path and Path(output_docx_path).exists():
         await bot.send_document(
             message.chat.id,
-            FSInputFile(output_docx_path, filename=f"fixed_{doc.file_name}"),
+            FSInputFile(output_docx_path, filename=fixed_output_download_name(doc.file_name)),
             caption=await get_text("check.fixed_doc_caption"),
         )
 
@@ -217,9 +217,11 @@ async def _save_check_results(
         if output_docx_path:
             out = Path(output_docx_path)
             if out.exists():
+                input_row = await db.get(File, check.input_file_id) if check.input_file_id else None
+                dl_name = fixed_output_download_name(input_row.original_name if input_row else None)
                 output_file = File(
                     storage_path=str(out),
-                    original_name=f"check_{check_id}_fixed.docx",
+                    original_name=dl_name,
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     size=out.stat().st_size,
                 )

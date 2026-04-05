@@ -41,3 +41,19 @@ def save_json_report(data: dict) -> tuple[str, int]:
     return str(target), len(raw)
 
 
+def fixed_output_download_name(input_original_name: str | None, *, max_len: int = 240) -> str:
+    """Имя файла для выдачи исправленного DOCX: базовое имя загрузки + «_исправлено» + .docx."""
+    raw = (input_original_name or "").strip() or "document"
+    stem = Path(Path(raw).name).stem or "document"
+    for ch in '<>:"/\\|?*\x00':
+        stem = stem.replace(ch, "_")
+    stem = stem.strip() or "document"
+    tag = "_исправлено"
+    ext = ".docx"
+    name = f"{stem}{tag}{ext}"
+    if len(name) > max_len:
+        budget = max(1, max_len - len(tag) - len(ext))
+        name = f"{stem[:budget]}{tag}{ext}"
+    return name
+
+
