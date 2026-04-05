@@ -12,6 +12,7 @@ from app.db.session import SessionLocal
 from app.integrations.telegram_notify import notify_check_ready
 from app.models import Check, CheckStatus, CheckWorkerLog, File, TemplateVersion, User
 from app.services.check_pipeline import run_check_pipeline
+from app.services.credits import spend_credits
 from app.storage.files import save_json_report
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,14 @@ async def process_check_task(ctx: dict, check_id: int) -> dict:
 
             if ok:
                 _add_log(session, check.id, "info", "Check completed successfully")
+                await spend_credits(
+                    session,
+                    user_id=check.user_id,
+                    amount=1,
+                    description=f"Check #{check.id}",
+                    reference_type="check",
+                    reference_id=check.id,
+                )
                 for notice in result.get("pipeline_notices", []):
                     _add_log(session, check.id, "info", f"Pipeline: {notice}")
                 for ce in result.get("check_errors", []):

@@ -1,6 +1,5 @@
 import json
 import logging
-from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File as FastFile, HTTPException, UploadFile
@@ -10,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models import Check, CheckStatus, CreditsBalance, File, TemplateVersion, User
-from app.services.credits import spend_credits
 from app.storage.files import save_upload_file
 from app.workers.tasks import enqueue_check
 
@@ -82,16 +80,6 @@ async def start_check(
         input_file_id=input_file_id,
     )
     db.add(check)
-    await db.flush()
-
-    await spend_credits(
-        db,
-        user_id=current_user.id,
-        amount=1,
-        description=f"Check #{check.id}",
-        reference_type="check",
-        reference_id=check.id,
-    )
     await db.commit()
 
     await enqueue_check(check.id)

@@ -351,7 +351,10 @@
         btn.textContent = 'Переходим\u2026';
         try {
           var res = await apiPost('/payments/create', { product_id: productId });
-          if (res.payment_url) window.open(res.payment_url, '_blank');
+          if (res.payment_url) {
+            if (tg && tg.openLink) tg.openLink(res.payment_url);
+            else window.open(res.payment_url, '_blank');
+          }
         } catch (e) {
           alert('Ошибка: ' + e.message);
         } finally {

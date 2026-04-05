@@ -38,7 +38,11 @@ async def list_templates(
     university_id: int | None = None,
     db: AsyncSession = Depends(get_db),
 ) -> list[dict]:
-    stmt = select(Template).order_by(Template.id)
+    stmt = (
+        select(Template)
+        .where(Template.status == TemplateStatus.published, Template.active.is_(True))
+        .order_by(Template.id)
+    )
     if university_id:
         stmt = stmt.where(Template.university_id == university_id)
     rows = list(await db.scalars(stmt))

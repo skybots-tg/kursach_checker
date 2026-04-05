@@ -21,6 +21,7 @@ from app.models import (
 )
 from app.services.bot_texts import get_text
 from app.services.check_pipeline import run_check_pipeline
+from app.services.credits import spend_credits
 from app.storage.files import save_json_report, save_raw_file
 
 from sqlalchemy import select
@@ -96,9 +97,6 @@ async def handle_document(message: Message, bot: Bot) -> None:
         db.add(input_file)
         await db.flush()
 
-        credits.credits_available -= 1
-        credits.updated_at = datetime.utcnow()
-
         check = Check(
             user_id=user.id,
             template_version_id=tv.id,
@@ -108,6 +106,8 @@ async def handle_document(message: Message, bot: Bot) -> None:
         )
         db.add(check)
         await db.flush()
+        check_id = check.id
+        user_id = user.id
         await db.commit()
 
     await status_msg.edit_text(await get_text("check.processing"))
@@ -115,9 +115,9 @@ async def handle_document(message: Message, bot: Bot) -> None:
     try:
         result = await run_check_pipeline(storage_path, tv.rules_json)
     except Exception as exc:
-        logger.exception("Pipeline error for check %s", check.id)
+        logger.exception("Pipeline error for check %s", check_id)
         await _finalize_check(
-            check.id, CheckStatus.error,
+            check_id, CheckStatus.error,
             error_message=f"Pipeline exception: {exc}",
         )
         await status_msg.edit_text(await get_text("check.error"))
@@ -126,7 +126,7 @@ async def handle_document(message: Message, bot: Bot) -> None:
     if not result.get("ok"):
         error = result.get("error") or "Неизвестная ошибка"
         await _finalize_check(
-            check.id, CheckStatus.error,
+            check_id, CheckStatus.error,
             error_message=f"Pipeline error: {error}",
         )
         await status_msg.edit_text(await get_text("check.error_detail", error=error))
@@ -134,7 +134,18 @@ async def handle_document(message: Message, bot: Bot) -> None:
 
     report = result.get("report") or {}
     output_docx_path = result.get("output_docx_path")
-    await _save_check_results(check.id, report, output_docx_path)
+    await _save_check_results(check_id, report, output_docx_path)
+
+    async with SessionLocal() as db:
+        await spend_credits(
+            db,
+            user_id=user_id,
+            amount=1,
+            description=f"Check #{check_id} (bot)",
+            reference_type="check",
+            reference_id=check_id,
+        )
+        await db.commit()
 
     text = await _format_report(report)
     await status_msg.edit_text(text, parse_mode="HTML")
@@ -151,7 +162,7 @@ async def _get_default_template_version(db) -> TemplateVersion | None:
     """Pick the first active template's latest version."""
     template = await db.scalar(
         select(Template)
-        .where(Template.status == TemplateStatus.active)
+        .where(Template.status == TemplateStatus.published, Template.active.is_(True))
         .order_by(Template.id)
         .limit(1)
     )
@@ -160,7 +171,7 @@ async def _get_default_template_version(db) -> TemplateVersion | None:
     return await db.scalar(
         select(TemplateVersion)
         .where(TemplateVersion.template_id == template.id)
-        .order_by(TemplateVersion.version.desc())
+        .order_by(TemplateVersion.version_number.desc())
         .limit(1)
     )
 

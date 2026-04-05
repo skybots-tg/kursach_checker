@@ -13,6 +13,7 @@ export const ProfilePage: React.FC<Props> = ({ me }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [creatingOrderId, setCreatingOrderId] = useState<number | null>(null);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -34,11 +35,41 @@ export const ProfilePage: React.FC<Props> = ({ me }) => {
   }, []);
 
   async function handleBuy(productId: number) {
+    const tg = (window as any).Telegram?.WebApp;
+
+    // Открываем пустое окно синхронно, пока ещё жив user-gesture контекст.
+    // На Telegram Web openLink внутри делает window.open — после await
+    // браузер заблокирует его как popup.
+    let popupWindow: Window | null = null;
+    if (!tg?.openLink) {
+      popupWindow = window.open("about:blank", "_blank");
+    }
+
     try {
       setCreatingOrderId(productId);
+      setPaymentUrl(null);
+      setError(null);
       const res = await createPayment(productId);
-      window.open(res.payment_url, "_blank");
+
+      let opened = false;
+
+      if (tg?.openLink) {
+        try {
+          tg.openLink(res.payment_url, { try_instant_view: false });
+          opened = true;
+        } catch { /* fallback ниже */ }
+      }
+
+      if (!opened && popupWindow && !popupWindow.closed) {
+        popupWindow.location.href = res.payment_url;
+        opened = true;
+      }
+
+      // Всегда показываем ссылку как fallback — если openLink/popup
+      // не сработал, пользователь сможет перейти вручную
+      setPaymentUrl(res.payment_url);
     } catch (e) {
+      popupWindow?.close();
       setError(e instanceof Error ? e.message : "Не удалось создать оплату");
     } finally {
       setCreatingOrderId(null);
@@ -100,6 +131,29 @@ export const ProfilePage: React.FC<Props> = ({ me }) => {
             <div className="page-section-description">Тарифы пока не настроены. Попробуйте позже.</div>
           )}
         </div>
+      )}
+
+      {paymentUrl && (
+        <>
+          <div className="spacer-16" />
+          <div className="finding-card" style={{ borderColor: "var(--accent-primary)" }}>
+            <div className="finding-title">Ссылка на оплату готова</div>
+            <div className="spacer-8" />
+            <a
+              href={paymentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="primary-btn"
+              style={{ width: "100%", display: "block", textAlign: "center", textDecoration: "none" }}
+            >
+              Перейти к оплате
+            </a>
+            <div className="spacer-8" />
+            <div className="finding-meta">
+              Если переход не произошёл автоматически, нажмите кнопку выше.
+            </div>
+          </div>
+        </>
       )}
 
       <div className="spacer-16" />
