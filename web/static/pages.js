@@ -219,12 +219,19 @@
         '<div class="check-field"><label class="check-label">ГОСТ / стиль (опционально)</label>' +
           '<select id="sel-gost" class="check-select"><option value="">Автоматически по шаблону</option></select></div>' +
         '<div class="check-field"><label class="check-label">Файл работы (DOC/DOCX, до 20 МБ)</label>' +
-          '<div class="upload-area" id="upload-area"><i data-lucide="upload-cloud"></i><span>Нажмите, чтобы выбрать файл</span></div>' +
-          '<input type="file" id="file-input" accept=".doc,.docx" style="display:none">' +
-          '<div id="file-info" style="display:none;margin-top:8px;font-size:12px"></div></div>' +
+          '<div id="upload-wrap">' +
+            '<div class="upload-area" id="upload-area"><i data-lucide="upload-cloud"></i><span>Нажмите, чтобы выбрать файл</span></div>' +
+            '<div class="file-card" id="file-card" style="display:none">' +
+              '<div class="file-card-icon"><i data-lucide="file-text"></i></div>' +
+              '<div class="file-card-info"><span class="file-card-name" id="file-card-name"></span>' +
+                '<span class="file-card-size" id="file-card-size"></span></div>' +
+              '<button type="button" class="file-card-remove" id="file-card-remove" title="Удалить"><i data-lucide="x"></i></button>' +
+            '</div>' +
+          '</div>' +
+          '<input type="file" id="file-input" accept=".doc,.docx" style="display:none"></div>' +
         '<div style="font-size:12px;color:var(--text-muted);margin-top:2px">Доступно: <b>' + A.pluralize(credits, 'проверка', 'проверки', 'проверок') + '</b></div>' +
         '<div id="check-err" style="display:none;margin-top:8px;font-size:12px;color:var(--danger)"></div>' +
-        '<button id="btn-start" class="btn btn-primary" style="margin-top:14px" disabled>' +
+        '<button id="btn-start" class="btn btn-primary" style="margin-top:14px">' +
           '<i data-lucide="sparkles"></i> Запустить проверку и списать 1 кредит</button>' +
       '</section>';
     A.icons();
@@ -233,13 +240,16 @@
     var selTpl = document.getElementById('sel-tpl');
     var selGost = document.getElementById('sel-gost');
     var fileInput = document.getElementById('file-input');
-    var fileInfo = document.getElementById('file-info');
+    var uploadArea = document.getElementById('upload-area');
+    var fileCard = document.getElementById('file-card');
+    var fileCardName = document.getElementById('file-card-name');
+    var fileCardSize = document.getElementById('file-card-size');
     var btnStart = document.getElementById('btn-start');
     var errEl = document.getElementById('check-err');
     var chosenFile = null, versionId = null;
 
     function showErr(msg) { errEl.textContent = msg; errEl.style.display = msg ? 'block' : 'none'; }
-    function updateBtn() { btnStart.disabled = !chosenFile || !versionId; }
+    function updateBtn() { /* state tracked via chosenFile & versionId */ }
 
     try {
       var refs = await Promise.all([A.api('/universities'), A.api('/gosts')]);
@@ -275,7 +285,28 @@
       } catch (e) { showErr('Не удалось загрузить версию шаблона'); }
     });
 
-    document.getElementById('upload-area').addEventListener('click', function () { fileInput.click(); });
+    uploadArea.addEventListener('click', function () { fileInput.click(); });
+
+    function showFile(f) {
+      chosenFile = f;
+      fileCardName.textContent = f.name;
+      fileCardSize.textContent = (f.size / (1024 * 1024)).toFixed(1) + ' МБ';
+      uploadArea.style.display = 'none';
+      fileCard.style.display = 'flex';
+      A.icons(); updateBtn();
+    }
+    function clearFile() {
+      chosenFile = null;
+      fileInput.value = '';
+      fileCard.style.display = 'none';
+      uploadArea.style.display = 'flex';
+      updateBtn();
+    }
+
+    document.getElementById('file-card-remove').addEventListener('click', function (e) {
+      e.stopPropagation();
+      clearFile();
+    });
 
     fileInput.addEventListener('change', function () {
       var f = fileInput.files && fileInput.files[0];
@@ -283,16 +314,14 @@
       if (!/\.(doc|docx)$/i.test(f.name)) { showErr('Поддерживаются только файлы DOC/DOCX'); return; }
       if (f.size > 20 * 1024 * 1024) { showErr('Файл слишком большой (макс. 20 МБ)'); return; }
       showErr('');
-      chosenFile = f;
-      fileInfo.style.display = 'block';
-      fileInfo.innerHTML = '<i data-lucide="file-text" style="width:14px;height:14px;vertical-align:middle"></i> ' +
-        A.esc(f.name) + ' <span style="color:var(--text-muted)">(' + (f.size / (1024 * 1024)).toFixed(1) + ' МБ)</span>';
-      A.icons(); updateBtn();
+      showFile(f);
     });
 
     btnStart.addEventListener('click', async function () {
-      if (!chosenFile || !versionId) return;
-      if (credits <= 0) { A.navigate('/profile', true); return; }
+      if (!selUni.value) { A.showToast('Выберите вуз', 'error'); return; }
+      if (!versionId) { A.showToast('Выберите шаблон проверки', 'error'); return; }
+      if (!chosenFile) { A.showToast('Прикрепите файл работы', 'error'); return; }
+      if (credits <= 0) { A.showToast('Нет доступных проверок', 'error'); A.navigate('/profile', true); return; }
       showErr(''); btnStart.disabled = true;
       btnStart.textContent = 'Загружаем файл\u2026';
       try {

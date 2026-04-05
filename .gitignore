@@ -41,3 +41,5 @@ storage/demo/
 
 # Alembic
 alembic/versions/*.pyc
+
+.test_files/

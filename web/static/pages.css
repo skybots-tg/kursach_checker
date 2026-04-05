@@ -360,6 +360,65 @@ a.list-card:hover {
 }
 .upload-area svg { width: 28px; height: 28px; opacity: 0.5; }
 
+/* ---- File card (selected file) ---- */
+.file-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  animation: fadeIn var(--transition-base);
+}
+.file-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  flex-shrink: 0;
+}
+.file-card-icon svg { width: 20px; height: 20px; }
+.file-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.file-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-card-size {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.file-card-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.file-card-remove:hover { background: var(--danger); color: #fff; }
+.file-card-remove svg { width: 16px; height: 16px; }
+
 /* ---- Mobile compact ---- */
 @media (max-width: 420px) {
   .hero-compact { padding: 14px 14px 12px; }
