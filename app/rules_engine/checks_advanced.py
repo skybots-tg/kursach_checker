@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 from app.rules_engine.docx_snapshot import DocumentSnapshot
 from app.rules_engine.findings import Finding, add_finding
@@ -217,3 +218,130 @@ def _check_sequential(
             location="объекты",
             recommendation=f"Проверьте последовательность нумерации «{label}»",
         )
+
+
+# ── bibliography & objects (перенесены из checks_core) ──────────────
+
+_BIBLIOGRAPHY_MARKERS = [
+    "список литературы",
+    "список использованных источников и литературы",
+    "список использованных источников",
+    "list of references",
+]
+
+
+def _extract_bibliography_section(full_text: str) -> str | None:
+    """Return text from the bibliography heading to the next heading or end."""
+    lower = full_text.lower()
+    best_pos = -1
+    for marker in _BIBLIOGRAPHY_MARKERS:
+        pos = lower.find(marker)
+        if pos != -1 and (best_pos == -1 or pos < best_pos):
+            best_pos = pos
+    if best_pos == -1:
+        return None
+    section_text = full_text[best_pos:]
+    lines = section_text.split("\n")
+    result_lines = [lines[0]]
+    for line in lines[1:]:
+        stripped = line.strip()
+        if stripped and stripped == stripped.upper() and len(stripped) > 3 and not re.match(r"^\s*[\[\d]", stripped):
+            break
+        result_lines.append(line)
+    return "\n".join(result_lines)
+
+
+def run_bibliography_checks(
+    snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding],
+) -> None:
+    if not cfg.has("bibliography"):
+        return
+
+    severity = cfg.severity("bibliography", "warning")
+    params = cfg.params("bibliography")
+    min_total = int(params.get("min_total_sources", 20))
+
+    bib_section = _extract_bibliography_section(snapshot.full_text)
+    if bib_section is None:
+        add_finding(
+            findings,
+            title="Раздел источников",
+            category="bibliography",
+            severity=severity,
+            expected="В документе присутствует раздел со списком источников",
+            found="Не найден",
+            location="структура",
+            recommendation="Добавьте раздел со списком литературы",
+        )
+        return
+
+    refs = re.findall(r"(?m)^\s*(?:\[?\d{1,3}\]?)[\.)]\s+.+$", bib_section)
+    found_count = len(refs)
+    if found_count < min_total:
+        add_finding(
+            findings,
+            title="Количество источников",
+            category="bibliography",
+            severity=severity,
+            expected=f"Не менее {min_total}",
+            found=str(found_count),
+            location="список литературы",
+            recommendation="Добавьте недостающие источники в список литературы",
+        )
+
+    if params.get("require_foreign_sources", False) and refs:
+        latin_refs = sum(1 for r in refs if re.search(r"[A-Za-z]{3,}", r))
+        if latin_refs == 0:
+            add_finding(
+                findings,
+                title="Иноязычные источники",
+                category="bibliography",
+                severity=severity,
+                expected="Наличие иноязычных источников",
+                found="Иноязычные источники не обнаружены",
+                location="список литературы",
+                recommendation="Добавьте иноязычные источники в список литературы",
+            )
+
+
+def run_objects_checks(
+    snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding],
+) -> None:
+    if not cfg.has("objects"):
+        return
+    if Path(snapshot.path).suffix.lower() != ".docx":
+        return
+
+    severity = cfg.severity("objects", "warning")
+    params = cfg.params("objects")
+
+    try:
+        raw = Path(snapshot.path).read_bytes()
+    except OSError:
+        return
+
+    if params.get("forbid_linked_media", True) and b'TargetMode="External"' in raw:
+        add_finding(
+            findings,
+            title="Связанные внешние объекты",
+            category="objects",
+            severity=severity,
+            expected="Таблицы и изображения встроены в документ",
+            found="Обнаружены внешние ссылки на объекты",
+            location="объекты",
+            recommendation="Вставьте объекты в документ как встроенные",
+        )
+
+    if params.get("require_embedded_objects", False):
+        has_media = b"word/media/" in raw or b"<wp:inline" in raw or b"<wp:anchor" in raw
+        if not has_media:
+            add_finding(
+                findings,
+                title="Встроенные объекты",
+                category="objects",
+                severity="advice",
+                expected="В документе есть рисунки или таблицы",
+                found="Встроенные объекты не обнаружены",
+                location="объекты",
+                recommendation="Добавьте иллюстрации или таблицы в документ",
+            )

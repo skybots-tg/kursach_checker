@@ -5,19 +5,19 @@ from typing import Callable
 
 from app.rules_engine.autofix import apply_safe_autofixes
 from app.rules_engine.checks_advanced import (
+    run_bibliography_checks,
     run_captions_checks,
     run_footnotes_checks,
     run_heading_formatting_checks,
+    run_objects_checks,
     run_page_numbering_checks,
     run_toc_checks,
 )
 from app.rules_engine.checks_core import (
-    run_bibliography_checks,
     run_context_extraction_checks,
     run_file_intake_checks,
     run_integrity_checks,
     run_layout_checks,
-    run_objects_checks,
     run_structure_checks,
     run_typography_checks,
     run_volume_checks,
