@@ -152,6 +152,10 @@ def run_work_formats_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findin
         "academic": ["основная часть", "введение", "заключение"],
         "project_creative": ["теоретическая записка", "проектная записка", "творческая часть"],
     }
+    _FORMAT_LABELS = {
+        "academic": "академический",
+        "project_creative": "проектно-творческий",
+    }
 
     detected: list[str] = []
     for fmt in allowed_formats:
@@ -160,12 +164,13 @@ def run_work_formats_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findin
             detected.append(fmt)
 
     if not detected:
+        labels = [_FORMAT_LABELS.get(f, f) for f in allowed_formats]
         add_finding(
             findings,
             title="Определение формата работы",
             category="work_formats",
             severity=severity,
-            expected=f"Один из форматов: {', '.join(allowed_formats)}",
+            expected=f"Один из форматов: {', '.join(labels)}",
             found="Не удалось определить формат по структуре",
             location="структура",
             recommendation="Проверьте названия ключевых разделов или задайте формат вручную",
@@ -386,14 +391,14 @@ def run_structure_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings:
                     found_title = p_text
                     break
 
-        section_name = section.get("id") or titles[0]
+        display_name = titles[0]
         optional = bool(section.get("required") is False)
         if found_para_idx is None:
             if optional:
                 continue
             add_finding(
                 findings,
-                title=f"Раздел «{section_name}»",
+                title=f"Раздел «{display_name}»",
                 category="structure",
                 severity=severity,
                 expected=f"Наличие раздела: {', '.join(titles)}",
@@ -406,7 +411,7 @@ def run_structure_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings:
         if found_para_idx < cursor:
             add_finding(
                 findings,
-                title=f"Порядок разделов: «{section_name}»",
+                title=f"Порядок разделов: «{display_name}»",
                 category="structure",
                 severity=severity,
                 expected="Разделы идут в заданной последовательности",

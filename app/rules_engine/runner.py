@@ -29,6 +29,24 @@ from app.rules_engine.rules_config import RulesConfig
 
 logger = logging.getLogger(__name__)
 
+_CHECK_NAME_RU: dict[str, str] = {
+    "file_intake": "формат файла",
+    "integrity": "целостность документа",
+    "context_extraction": "определение курса и авторов",
+    "work_formats": "формат работы",
+    "layout": "поля и страница",
+    "typography": "шрифт и абзацы",
+    "heading_formatting": "заголовки",
+    "structure": "структура работы",
+    "volume": "объём текста",
+    "bibliography": "список источников",
+    "objects": "таблицы и рисунки",
+    "page_numbering": "нумерация страниц",
+    "toc": "оглавление",
+    "footnotes": "сноски",
+    "captions": "подписи к объектам",
+}
+
 CheckFunc = Callable[..., None]
 
 
@@ -51,14 +69,15 @@ def _run_check_safe(
         func(snapshot, cfg, findings)
     except Exception:
         logger.exception("Check '%s' crashed for %s", name, snapshot.path)  # type: ignore[attr-defined]
-        check_errors.append(f"Проверка «{name}» завершилась с внутренней ошибкой")
+        label = _CHECK_NAME_RU.get(name, name)
+        check_errors.append(f"Проверка «{label}» завершилась с внутренней ошибкой")
         add_finding(
             findings,
-            title=f"Внутренняя ошибка: {name}",
+            title=f"Внутренняя ошибка: {label}",
             category="internal",
             severity="warning",
             expected="Проверка выполняется без ошибок",
-            found=f"Проверка «{name}» не выполнена из-за внутренней ошибки",
+            found=f"Проверка «{label}» не выполнена из-за внутренней ошибки",
             location="система",
             recommendation="Сообщите администратору. Остальные проверки продолжены.",
         )
@@ -141,10 +160,7 @@ async def run_document_checks(
             expected="DOCX-файл для полноценного анализа оформления",
             found=f"Файл с расширением «{snapshot.extension}»",
             location="input",
-            recommendation=(
-                "Загрузите документ в формате DOCX. "
-                "Для файлов .doc настройте автоконвертацию (doc_policy: convert)"
-            ),
+            recommendation="Загрузите документ в формате DOCX",
         )
         return _make_result(findings, snapshot.size, cfg, None, check_errors)
 
