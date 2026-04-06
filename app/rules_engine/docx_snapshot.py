@@ -9,7 +9,7 @@ from pathlib import Path
 from docx import Document
 from docx.oxml.ns import qn
 
-from app.rules_engine.style_resolve import walk_style_pPr
+from app.rules_engine.style_resolve import detect_toc_paragraph_indices, walk_style_pPr
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +44,7 @@ class ParagraphSnapshot:
     runs_fonts: list[str]
     runs_size_pt: list[float]
     runs_bold: list[bool | None]
+    is_toc_entry: bool
 
     @property
     def is_heading(self) -> bool:
@@ -205,7 +206,7 @@ def _has_numbering(paragraph) -> bool:
     return False
 
 
-def _paragraphs(doc: Document) -> list[ParagraphSnapshot]:
+def _paragraphs(doc: Document, toc_indices: set[int]) -> list[ParagraphSnapshot]:
     result: list[ParagraphSnapshot] = []
     for idx, paragraph in enumerate(doc.paragraphs):
         text = (paragraph.text or "").strip()
@@ -229,6 +230,7 @@ def _paragraphs(doc: Document) -> list[ParagraphSnapshot]:
                 runs_fonts=_extract_run_fonts(paragraph),
                 runs_size_pt=_extract_run_sizes(paragraph),
                 runs_bold=_extract_run_bolds(paragraph),
+                is_toc_entry=idx in toc_indices,
             )
         )
     return result
@@ -372,7 +374,13 @@ def build_snapshot(file_path: str) -> DocumentSnapshot:
         return _empty_snapshot(path, extension, size, is_corrupted=True)
 
     try:
-        paragraphs = _paragraphs(doc)
+        toc_indices = detect_toc_paragraph_indices(doc)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Failed to detect TOC indices: %s — %s", file_path, exc)
+        toc_indices = set()
+
+    try:
+        paragraphs = _paragraphs(doc, toc_indices)
     except Exception as exc:  # noqa: BLE001
         logger.warning("Failed to parse paragraphs: %s — %s", file_path, exc)
         paragraphs = []

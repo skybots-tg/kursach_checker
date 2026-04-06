@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 
@@ -144,3 +146,91 @@ def effective_font_size_pt(run, paragraph) -> float | None:
             if val:
                 return float(val) / 2.0
     return None
+
+
+_TOC_ENTRY_RE = re.compile(
+    r"^.+?(?:\t|\.{2,}|\u2026|[ ]{3,})\s*\d{1,4}\s*$"
+)
+
+_TOC_HEADING_WORDS = frozenset({
+    "содержание", "оглавление",
+    "table of contents", "contents",
+})
+
+
+def is_toc_like_text(text: str) -> bool:
+    return bool(_TOC_ENTRY_RE.match(text.strip()))
+
+
+def detect_toc_paragraph_indices(doc) -> set[int]:
+    return _detect_toc_field_indices(doc) | _detect_manual_toc_indices(doc)
+
+
+def _detect_toc_field_indices(doc) -> set[int]:
+    body = doc._element.body
+    p_tag = qn("w:p")
+    fld_tag = qn("w:fldChar")
+    instr_tag = qn("w:instrText")
+    fld_type_attr = qn("w:fldCharType")
+
+    p_elements = list(body.iterchildren(p_tag))
+    toc_indices: set[int] = set()
+    field_stack: list[str] = []
+    in_toc = False
+
+    for idx, p_elem in enumerate(p_elements):
+        was_in_toc = in_toc
+
+        for elem in p_elem.iter():
+            tag = elem.tag
+            if tag == fld_tag:
+                ftype = elem.get(fld_type_attr)
+                if ftype == "begin":
+                    field_stack.append("unknown")
+                elif ftype == "separate":
+                    if field_stack:
+                        if field_stack[-1] == "unknown":
+                            field_stack[-1] = "other"
+                        if field_stack[-1] == "TOC":
+                            in_toc = True
+                elif ftype == "end":
+                    if field_stack:
+                        ended = field_stack.pop()
+                        if ended == "TOC":
+                            in_toc = False
+            elif tag == instr_tag:
+                text = (elem.text or "")
+                if field_stack and field_stack[-1] == "unknown" and "TOC" in text.upper():
+                    field_stack[-1] = "TOC"
+
+        if in_toc or was_in_toc:
+            toc_indices.add(idx)
+
+    return toc_indices
+
+
+def _detect_manual_toc_indices(doc) -> set[int]:
+    paragraphs = doc.paragraphs
+    toc_indices: set[int] = set()
+
+    toc_heading_idx = None
+    for idx, p in enumerate(paragraphs):
+        raw = re.sub(r"\s+", " ", (p.text or "")).strip().lower().rstrip(":.;")
+        if raw in _TOC_HEADING_WORDS:
+            toc_heading_idx = idx
+            toc_indices.add(idx)
+            break
+
+    if toc_heading_idx is None:
+        return toc_indices
+
+    for idx in range(toc_heading_idx + 1, len(paragraphs)):
+        text = (paragraphs[idx].text or "").strip()
+        if not text:
+            continue
+        if _TOC_ENTRY_RE.match(text):
+            toc_indices.add(idx)
+        else:
+            break
+
+    return toc_indices

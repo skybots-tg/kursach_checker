@@ -14,6 +14,7 @@ from lxml import etree
 
 from app.rules_engine.findings import Finding
 from app.rules_engine.style_resolve import (
+    detect_toc_paragraph_indices,
     effective_alignment,
     effective_first_line_indent_mm,
     effective_font_name,
@@ -128,12 +129,19 @@ def apply_safe_autofixes(
 
     safety = (admin_autofix_config or {}).get("safety_limits", {})
     max_changes = int(safety.get("max_changes_per_document", 500))
+    skip_toc = bool(safety.get("skip_toc", True))
+    skip_headings_safety = bool(safety.get("skip_headings", True))
+    skip_tables_safety = bool(safety.get("skip_tables", True))
 
     try:
         doc = Document(str(source))
     except Exception:
         logger.warning("Autofix: cannot open DOCX %s", file_path)
         return AutoFixResult(output_file_path=None, details=[])
+
+    toc_indices: set[int] = set()
+    if skip_toc:
+        toc_indices = detect_toc_paragraph_indices(doc)
 
     changed = False
     details: list[str] = []
@@ -159,8 +167,11 @@ def apply_safe_autofixes(
         if not text:
             continue
 
+        if idx in toc_indices:
+            continue
+
         if _is_heading_para(paragraph):
-            if cfg.normalize_headings:
+            if not skip_headings_safety and cfg.normalize_headings:
                 if _fix_heading(paragraph, idx, cfg, details):
                     changed = True
                     change_count += 1
@@ -234,7 +245,7 @@ def apply_safe_autofixes(
                 change_count += 1
                 details.append(f"Paragraph #{idx + 1}: font {cfg.font_name}, {cfg.font_size_pt}pt")
 
-    if cfg.normalize_table_width and _clamp_overflow_table_widths(doc, details):
+    if cfg.normalize_table_width and not skip_tables_safety and _clamp_overflow_table_widths(doc, details):
         changed = True
 
     if not changed:

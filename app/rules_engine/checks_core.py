@@ -261,6 +261,8 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
             continue
         if _is_skip_style_for_typography(paragraph):
             continue
+        if paragraph.is_toc_entry:
+            continue
         checked += 1
         if checked > max_samples:
             break
@@ -359,7 +361,7 @@ def run_structure_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings:
     short_para_entries = [
         (p.index, p.text.strip().lower())
         for p in snapshot.paragraphs
-        if p.text and len(p.text.strip()) < 100 and not p.is_heading
+        if p.text and len(p.text.strip()) < 100 and not p.is_heading and not p.is_toc_entry
     ]
 
     cursor = -1
