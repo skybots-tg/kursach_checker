@@ -35,13 +35,13 @@ def convert_doc_to_docx(
     if not command_template:
         return None, "DOC не поддерживается: конвертер DOC→DOCX не настроен"
 
-    outdir = Path(tempfile.gettempdir()) / "kursach_checker" / "converted"
+    outdir = Path(tempfile.gettempdir()) / "kursach_checker" / "converted" / uuid.uuid4().hex
     outdir.mkdir(parents=True, exist_ok=True)
 
     try:
         command = command_template.format(outdir=str(outdir), input=str(source))
     except KeyError:
-        return None, "Некорректный шаблон команды конвертации DOC→DOCX"
+        return None, "Invalid DOC->DOCX command template"
 
     try:
         completed = subprocess.run(
@@ -52,25 +52,19 @@ def convert_doc_to_docx(
             timeout=timeout_sec,
         )
     except Exception as exc:  # noqa: BLE001
-        return None, f"Ошибка запуска конвертера DOC→DOCX: {exc}"
+        return None, f"DOC->DOCX converter launch error: {exc}"
 
     if completed.returncode != 0:
         stderr = (completed.stderr or "").strip()
         stdout = (completed.stdout or "").strip()
         details = stderr or stdout or f"code={completed.returncode}"
-        return None, f"Конвертация DOC→DOCX завершилась с ошибкой: {details}"
+        return None, f"DOC->DOCX conversion failed: {details}"
 
     expected = outdir / f"{source.stem}.docx"
-    if expected.exists():
-        target = outdir / f"{source.stem}_{uuid.uuid4().hex}.docx"
-        expected.replace(target)
-        return str(target), None
+    if not expected.exists():
+        return None, "Converter did not produce expected DOCX file"
 
-    variants = sorted(outdir.glob("*.docx"), key=lambda p: p.stat().st_mtime, reverse=True)
-    if not variants:
-        return None, "Конвертер не создал DOCX файл"
-
-    return str(variants[0]), None
+    return str(expected), None
 
 
 async def get_converter_settings_from_db() -> tuple[str, int, bool]:

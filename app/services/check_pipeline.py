@@ -17,8 +17,8 @@ def resolve_doc_policy(rules: dict | None) -> str:
         if block.get("key") != "file_intake":
             continue
         params = block.get("params") or {}
-        policy = str(params.get("doc_policy", "allow")).lower()
-        if policy in {"reject", "allow", "convert"}:
+        policy = str(params.get("doc_policy", "convert")).lower()
+        if policy in {"reject", "convert"}:
             return policy
     return "convert"
 
@@ -54,7 +54,10 @@ async def run_check_pipeline(input_path: str, rules: dict | None) -> dict:
                 return _error_result(err, notices)
             if converted_path:
                 working_path = converted_path
-                notices.append("DOC конвертирован в DOCX согласно политике шаблона")
+                notices.append(
+                    "DOC converted to DOCX; "
+                    "check results may differ from the original document"
+                )
                 logger.info("DOC converted to DOCX: %s", converted_path)
 
     try:

@@ -9,7 +9,7 @@ class DocConverterSettings(BaseModel):
     enabled: bool = False
     command_template: str = Field(
         "",
-        description='Шаблон команды, например: soffice --headless --convert-to docx --outdir "{outdir}" "{input}"',
+        description='Command template, e.g.: soffice --headless --convert-to "docx:Office Open XML Text" --outdir "{outdir}" "{input}"',
     )
     timeout_sec: int = Field(60, ge=5, le=600)
 

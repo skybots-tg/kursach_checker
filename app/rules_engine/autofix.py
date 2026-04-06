@@ -18,46 +18,48 @@ logger = logging.getLogger(__name__)
 
 _W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
-_HEADING_STYLE_IDS = frozenset({
-    "Heading1", "Heading2", "Heading3", "Heading4",
-    "Heading5", "Heading6", "Heading7", "Heading8", "Heading9",
-})
-
-_SKIP_STYLE_IDS = frozenset({
-    "TOCHeading", "TOC1", "TOC2", "TOC3", "TOC4", "TOC5",
-    "TOC6", "TOC7", "TOC8", "TOC9",
-    "TableofFigures", "TableofAuthorities",
-    "Caption", "Title", "Subtitle", "NoSpacing",
-    "BalloonText", "MacroText",
-    "EndnoteText", "FootnoteText",
-    "Header", "Footer", "CommentText",
-})
-
+_HEADING_STYLE_IDS = frozenset(
+    {f"Heading{i}" for i in range(1, 10)}
+)
+_SKIP_STYLE_IDS = frozenset(
+    {f"TOC{i}" for i in range(1, 10)}
+    | {"TOCHeading", "TableofFigures", "TableofAuthorities", "Caption", "Title",
+       "Subtitle", "NoSpacing", "BalloonText", "MacroText", "EndnoteText",
+       "FootnoteText", "Header", "Footer", "CommentText"}
+)
 _SKIP_STYLE_NAMES = frozenset({
-    "toc heading", "table of figures", "table of authorities",
-    "caption", "title", "subtitle", "no spacing",
-    "balloon text", "macro text",
-    "endnote text", "footnote text",
-    "header", "footer", "annotation text",
+    "toc heading", "table of figures", "table of authorities", "caption",
+    "title", "subtitle", "no spacing", "balloon text", "macro text",
+    "endnote text", "footnote text", "header", "footer", "annotation text",
 })
-
 _SKIP_NAME_PREFIXES = ("toc ", "toc\xa0", "index ")
-
 _LIST_STYLE_IDS = frozenset({
-    "ListParagraph",
-    "ListBullet", "ListBullet2", "ListBullet3",
+    "ListParagraph", "ListBullet", "ListBullet2", "ListBullet3",
     "ListNumber", "ListNumber2", "ListNumber3",
     "ListContinue", "ListContinue2", "ListContinue3",
 })
-
 _LIST_STYLE_NAMES = frozenset({
-    "list paragraph",
-    "list bullet", "list bullet 2", "list bullet 3",
+    "list paragraph", "list bullet", "list bullet 2", "list bullet 3",
     "list number", "list number 2", "list number 3",
     "list continue", "list continue 2", "list continue 3",
 })
 
 _BINARY_PREFIXES = ("word/media/", "word/embeddings/")
+
+
+def _walk_style_pPr(paragraph):
+    pPr = paragraph._element.find(qn("w:pPr"))
+    if pPr is not None:
+        yield pPr
+    style = paragraph.style
+    while style is not None:
+        try:
+            spPr = style._element.find(qn("w:pPr"))
+            if spPr is not None:
+                yield spPr
+            style = style.base_style
+        except (AttributeError, TypeError):
+            break
 
 
 def _is_heading_para(paragraph) -> bool:
@@ -67,8 +69,16 @@ def _is_heading_para(paragraph) -> bool:
     sname = (getattr(paragraph.style, "name", "") or "").lower()
     if "heading" in sname or "\u0437\u0430\u0433\u043e\u043b\u043e\u0432" in sname:
         return True
-    pPr = paragraph._element.find(qn("w:pPr"))
-    return pPr is not None and pPr.find(qn("w:outlineLvl")) is not None
+    for pPr in _walk_style_pPr(paragraph):
+        ol = pPr.find(qn("w:outlineLvl"))
+        if ol is not None:
+            val = ol.get(qn("w:val"))
+            try:
+                if val is not None and int(val) < 9:
+                    return True
+            except (TypeError, ValueError):
+                pass
+    return False
 
 
 def _should_skip_para(paragraph) -> bool:
@@ -82,8 +92,7 @@ def _should_skip_para(paragraph) -> bool:
 
 
 def _is_list_para(paragraph) -> bool:
-    pPr = paragraph._element.find(qn("w:pPr"))
-    if pPr is not None:
+    for pPr in _walk_style_pPr(paragraph):
         numPr = pPr.find(qn("w:numPr"))
         if numPr is not None:
             numId = numPr.find(qn("w:numId"))
@@ -251,6 +260,7 @@ def _postprocess_fixed_docx(original: Path, output: Path) -> None:
         return
 
     temp_path = output.with_name(output.stem + ".tmp.docx")
+    settings_injected = False
     with zipfile.ZipFile(str(output), "r") as out_zf:
         with zipfile.ZipFile(str(temp_path), "w", zipfile.ZIP_DEFLATED) as new_zf:
             for item in out_zf.infolist():
@@ -262,8 +272,12 @@ def _postprocess_fixed_docx(original: Path, output: Path) -> None:
                 elif has_toc and item.filename == "word/settings.xml":
                     data = _inject_update_fields(out_zf.read(item.filename))
                     new_zf.writestr(item, data)
+                    settings_injected = True
                 else:
                     new_zf.writestr(item, out_zf.read(item.filename))
+
+    if has_toc and not settings_injected:
+        logger.debug("Autofix: word/settings.xml not found, cannot inject updateFields")
 
     _validate_docx_zip(temp_path)
     temp_path.replace(output)
@@ -311,6 +325,8 @@ def _validate_docx_zip(path: Path) -> None:
             if required not in names:
                 raise ValueError(f"Missing required entry: {required}")
         etree.fromstring(zf.read("word/document.xml"))
+        if "word/settings.xml" in names:
+            etree.fromstring(zf.read("word/settings.xml"))
 
 
 def _min_content_width_twips(doc: Document) -> int:

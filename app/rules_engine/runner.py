@@ -104,13 +104,26 @@ async def run_document_checks(file_path: str, rules: dict | None) -> dict:
     if snapshot.is_encrypted:
         add_finding(
             findings,
-            title="Файл зашифрован или повреждён",
+            title="Файл зашифрован",
             category="integrity",
             severity="error",
-            expected="Документ не защищён паролем и не повреждён",
-            found="Документ защищён паролем или повреждён",
+            expected="Документ не защищён паролем",
+            found="Документ защищён паролем",
             location="файл",
-            recommendation="Снимите защиту или проверьте целостность файла и загрузите заново",
+            recommendation="Снимите защиту паролем и загрузите файл заново",
+        )
+        return _make_result(findings, snapshot.size, cfg, None, check_errors)
+
+    if snapshot.is_corrupted:
+        add_finding(
+            findings,
+            title="Повреждённый файл",
+            category="integrity",
+            severity="error",
+            expected="Документ корректно открывается",
+            found="Документ повреждён или не может быть прочитан",
+            location="файл",
+            recommendation="Пересохраните документ в Word и загрузите заново",
         )
         return _make_result(findings, snapshot.size, cfg, None, check_errors)
 

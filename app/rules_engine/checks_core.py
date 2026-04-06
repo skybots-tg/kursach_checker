@@ -57,9 +57,21 @@ def run_integrity_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings:
             category="integrity",
             severity=severity,
             expected="Документ не защищён паролем",
-            found="Документ защищён паролем или повреждён",
+            found="Документ защищён паролем",
             location="документ",
             recommendation="Снимите защиту паролем и загрузите файл заново",
+        )
+
+    if snapshot.is_corrupted:
+        add_finding(
+            findings,
+            title="Повреждённый файл",
+            category="integrity",
+            severity=severity,
+            expected="Документ корректно открывается",
+            found="Документ повреждён или не может быть прочитан",
+            location="документ",
+            recommendation="Пересохраните документ в Word и загрузите заново",
         )
 
     if params.get("forbid_track_changes", True) and snapshot.revisions_present:

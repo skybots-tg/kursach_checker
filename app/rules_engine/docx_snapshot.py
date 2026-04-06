@@ -98,6 +98,7 @@ class DocumentSnapshot:
     footnotes_count: int
     captions: list[CaptionSnapshot]
     is_encrypted: bool
+    is_corrupted: bool
 
 
 def _mm_from_emu(value: int | None) -> float | None:
@@ -177,31 +178,44 @@ def _resolve_line_spacing(paragraph) -> float | None:
         return None
 
 
-def _extract_outline_level(paragraph) -> int | None:
+def _walk_style_pPr(paragraph):
     pPr = paragraph._element.find(qn("w:pPr"))
-    if pPr is None:
-        return None
-    ol = pPr.find(qn("w:outlineLvl"))
-    if ol is None:
-        return None
-    val = ol.get(qn("w:val"))
-    if val is None:
-        return None
-    try:
-        return int(val)
-    except (TypeError, ValueError):
-        return None
+    if pPr is not None:
+        yield pPr
+    style = paragraph.style
+    while style is not None:
+        try:
+            spPr = style._element.find(qn("w:pPr"))
+            if spPr is not None:
+                yield spPr
+            style = style.base_style
+        except (AttributeError, TypeError):
+            break
+
+
+def _extract_outline_level(paragraph) -> int | None:
+    for pPr in _walk_style_pPr(paragraph):
+        ol = pPr.find(qn("w:outlineLvl"))
+        if ol is not None:
+            val = ol.get(qn("w:val"))
+            if val is not None:
+                try:
+                    lvl = int(val)
+                    if lvl < 9:
+                        return lvl
+                except (TypeError, ValueError):
+                    pass
+    return None
 
 
 def _has_numbering(paragraph) -> bool:
-    pPr = paragraph._element.find(qn("w:pPr"))
-    if pPr is None:
-        return False
-    numPr = pPr.find(qn("w:numPr"))
-    if numPr is None:
-        return False
-    numId = numPr.find(qn("w:numId"))
-    return numId is not None and numId.get(qn("w:val")) != "0"
+    for pPr in _walk_style_pPr(paragraph):
+        numPr = pPr.find(qn("w:numPr"))
+        if numPr is not None:
+            numId = numPr.find(qn("w:numId"))
+            if numId is not None and numId.get(qn("w:val")) != "0":
+                return True
+    return False
 
 
 def _paragraphs(doc: Document) -> list[ParagraphSnapshot]:
@@ -312,7 +326,8 @@ def _count_footnotes(path: Path) -> int:
 
 
 def _empty_snapshot(
-    path: Path, extension: str, size: int, *, is_encrypted: bool = False,
+    path: Path, extension: str, size: int, *,
+    is_encrypted: bool = False, is_corrupted: bool = False,
 ) -> DocumentSnapshot:
     return DocumentSnapshot(
         path=path,
@@ -330,6 +345,7 @@ def _empty_snapshot(
         footnotes_count=0,
         captions=[],
         is_encrypted=is_encrypted,
+        is_corrupted=is_corrupted,
     )
 
 
@@ -366,7 +382,7 @@ def build_snapshot(file_path: str) -> DocumentSnapshot:
         doc = Document(str(path))
     except Exception as exc:  # noqa: BLE001
         logger.warning("Cannot open DOCX (corrupted?): %s — %s", file_path, exc)
-        return _empty_snapshot(path, extension, size, is_encrypted=True)
+        return _empty_snapshot(path, extension, size, is_corrupted=True)
 
     try:
         paragraphs = _paragraphs(doc)
@@ -390,4 +406,5 @@ def build_snapshot(file_path: str) -> DocumentSnapshot:
         footnotes_count=_count_footnotes(path),
         captions=_extract_captions(paragraphs),
         is_encrypted=False,
+        is_corrupted=False,
     )

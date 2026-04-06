@@ -6,7 +6,6 @@ const _tagInputInstances = {};
 const DOC_POLICY_OPTIONS = [
   { value: 'convert', label: 'Конвертировать в .docx автоматически' },
   { value: 'reject', label: 'Отклонить файл' },
-  { value: 'skip', label: 'Пропустить проверку' },
 ];
 
 const FORMAT_LABELS = {
