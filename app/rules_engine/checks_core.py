@@ -196,6 +196,38 @@ def run_layout_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings: li
                 )
 
 
+_SKIP_TYPOGRAPHY_STYLES = frozenset({
+    "toc heading",
+    "table of figures",
+    "table of authorities",
+    "caption",
+    "title",
+    "subtitle",
+    "endnote text",
+    "footnote text",
+    "header",
+    "footer",
+    "annotation text",
+    "balloon text",
+})
+
+_SKIP_TYPOGRAPHY_PREFIXES = (
+    "toc ",
+    "toc\xa0",
+    "index ",
+)
+
+
+def _is_skip_style_for_typography(style_name: str) -> bool:
+    lower = style_name.lower()
+    if lower in _SKIP_TYPOGRAPHY_STYLES:
+        return True
+    for prefix in _SKIP_TYPOGRAPHY_PREFIXES:
+        if lower.startswith(prefix):
+            return True
+    return False
+
+
 _MAX_FINDINGS_PER_TYPE = 10
 
 
@@ -218,6 +250,8 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
     checked = 0
     for paragraph in snapshot.paragraphs:
         if not paragraph.text or paragraph.is_heading:
+            continue
+        if _is_skip_style_for_typography(paragraph.style_name):
             continue
         checked += 1
         if checked > max_samples:

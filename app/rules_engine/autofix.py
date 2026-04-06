@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -58,12 +59,16 @@ def apply_safe_autofixes(
                     changed = True
             continue
 
+        if _should_skip_style(style_name):
+            continue
+
+        is_list = _is_list_style(style_name)
         pf = paragraph.paragraph_format
 
-        if cfg.normalize_alignment and paragraph.alignment != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
+        if not is_list and cfg.normalize_alignment and paragraph.alignment != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
             paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
             changed = True
-            details.append(f"Абзац #{idx + 1}: выравнивание по ширине")
+            details.append(f"Paragraph #{idx + 1}: alignment justify")
 
         if cfg.normalize_line_spacing:
             curr = pf.line_spacing
@@ -73,26 +78,26 @@ def apply_safe_autofixes(
             if needs_fix:
                 pf.line_spacing = cfg.line_spacing
                 changed = True
-                details.append(f"Абзац #{idx + 1}: межстрочный {cfg.line_spacing}")
+                details.append(f"Paragraph #{idx + 1}: line spacing {cfg.line_spacing}")
 
-        if cfg.normalize_first_line_indent:
+        if not is_list and cfg.normalize_first_line_indent:
             curr_mm = None
             if pf.first_line_indent is not None:
                 curr_mm = round(float(pf.first_line_indent.mm), 2)
             if curr_mm is None or abs(curr_mm - cfg.first_line_indent_mm) > 0.5:
                 pf.first_line_indent = Mm(cfg.first_line_indent_mm)
                 changed = True
-                details.append(f"Абзац #{idx + 1}: красная строка {cfg.first_line_indent_mm} мм")
+                details.append(f"Paragraph #{idx + 1}: first line indent {cfg.first_line_indent_mm} mm")
 
-        if cfg.normalize_spacing_before_after:
+        if not is_list and cfg.normalize_spacing_before_after:
             if pf.space_before is None or abs(float(pf.space_before.pt) - cfg.space_before_pt) > 0.2:
                 pf.space_before = Pt(cfg.space_before_pt)
                 changed = True
-                details.append(f"Абзац #{idx + 1}: интервал до {cfg.space_before_pt} pt")
+                details.append(f"Paragraph #{idx + 1}: spacing before {cfg.space_before_pt} pt")
             if pf.space_after is None or abs(float(pf.space_after.pt) - cfg.space_after_pt) > 0.2:
                 pf.space_after = Pt(cfg.space_after_pt)
                 changed = True
-                details.append(f"Абзац #{idx + 1}: интервал после {cfg.space_after_pt} pt")
+                details.append(f"Paragraph #{idx + 1}: spacing after {cfg.space_after_pt} pt")
 
         if cfg.normalize_font:
             font_changed = False
@@ -106,7 +111,7 @@ def apply_safe_autofixes(
                     font_changed = True
             if font_changed:
                 changed = True
-                details.append(f"Абзац #{idx + 1}: шрифт {cfg.font_name}, {cfg.font_size_pt}pt")
+                details.append(f"Paragraph #{idx + 1}: font {cfg.font_name}, {cfg.font_size_pt}pt")
 
     if cfg.normalize_table_width and _clamp_overflow_table_widths(doc, details):
         changed = True
@@ -120,6 +125,11 @@ def apply_safe_autofixes(
     except Exception:
         logger.exception("Autofix: failed to save fixed DOCX to %s", output)
         return AutoFixResult(output_file_path=None, details=[])
+
+    try:
+        _restore_original_binaries(source, output)
+    except Exception:
+        logger.warning("Autofix: binary restore failed for %s, using python-docx output", output)
 
     findings.append(
         Finding(
@@ -136,6 +146,33 @@ def apply_safe_autofixes(
     )
 
     return AutoFixResult(output_file_path=str(output), details=details)
+
+
+_BINARY_PREFIXES = ("word/media/", "word/embeddings/")
+
+
+def _restore_original_binaries(original: Path, output: Path) -> None:
+    orig_binaries: dict[str, bytes] = {}
+    with zipfile.ZipFile(str(original), "r") as orig_zf:
+        for info in orig_zf.infolist():
+            if any(info.filename.startswith(p) for p in _BINARY_PREFIXES) and not info.filename.endswith("/"):
+                orig_binaries[info.filename] = orig_zf.read(info.filename)
+
+    if not orig_binaries:
+        return
+
+    temp_path = output.with_name(output.stem + ".tmp.docx")
+    with zipfile.ZipFile(str(output), "r") as out_zf:
+        with zipfile.ZipFile(str(temp_path), "w", zipfile.ZIP_DEFLATED) as new_zf:
+            for item in out_zf.infolist():
+                if item.filename in orig_binaries:
+                    restored = zipfile.ZipInfo(item.filename)
+                    restored.compress_type = zipfile.ZIP_STORED
+                    new_zf.writestr(restored, orig_binaries[item.filename])
+                else:
+                    new_zf.writestr(item, out_zf.read(item.filename))
+
+    temp_path.replace(output)
 
 
 def _min_content_width_twips(doc: Document) -> int:
@@ -307,6 +344,55 @@ class _AutoFixConfig:
         )
 
 
+_SKIP_STYLES_FULL = frozenset({
+    "toc heading",
+    "table of figures",
+    "table of authorities",
+    "caption",
+    "title",
+    "subtitle",
+    "no spacing",
+    "balloon text",
+    "macro text",
+    "endnote text",
+    "footnote text",
+    "header",
+    "footer",
+    "annotation text",
+})
+
+_SKIP_STYLE_PREFIXES = (
+    "toc ",
+    "toc\xa0",
+    "index ",
+)
+
+_LIST_STYLES = frozenset({
+    "list paragraph",
+    "list bullet",
+    "list number",
+    "list continue",
+    "list bullet 2",
+    "list bullet 3",
+    "list number 2",
+    "list number 3",
+})
+
+
 def _is_heading(style_name: str) -> bool:
     lower = style_name.lower()
     return "heading" in lower or "заголов" in lower
+
+
+def _should_skip_style(style_name: str) -> bool:
+    lower = style_name.lower()
+    if lower in _SKIP_STYLES_FULL:
+        return True
+    for prefix in _SKIP_STYLE_PREFIXES:
+        if lower.startswith(prefix):
+            return True
+    return False
+
+
+def _is_list_style(style_name: str) -> bool:
+    return style_name.lower() in _LIST_STYLES
