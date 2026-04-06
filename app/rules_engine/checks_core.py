@@ -353,7 +353,7 @@ def run_structure_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings:
 
     required = params.get("required_sections_in_order") or [
         {"titles_any_of": ["введение"]},
-        {"titles_any_of": ["основная часть"]},
+        {"titles_any_of": ["основная часть", "глава"], "required": False},
         {"titles_any_of": ["заключение"]},
         {"titles_any_of": ["список литературы", "список использованных источников"]},
     ]

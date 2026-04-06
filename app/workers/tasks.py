@@ -40,17 +40,24 @@ async def process_check_task(ctx: dict, check_id: int) -> dict:
 
             if ok:
                 _add_log(session, check.id, "info", "Check completed successfully")
-                await spend_credits(
-                    session,
-                    user_id=check.user_id,
-                    amount=1,
-                    description=f"Check #{check.id}",
-                    reference_type="check",
-                    reference_id=check.id,
-                )
+                check_errors = result.get("check_errors", [])
+                if not check_errors:
+                    await spend_credits(
+                        session,
+                        user_id=check.user_id,
+                        amount=1,
+                        description=f"Check #{check.id}",
+                        reference_type="check",
+                        reference_id=check.id,
+                    )
+                else:
+                    _add_log(
+                        session, check.id, "warning",
+                        f"Credits not charged: {len(check_errors)} internal check error(s)",
+                    )
                 for notice in result.get("pipeline_notices", []):
                     _add_log(session, check.id, "info", f"Pipeline: {notice}")
-                for ce in result.get("check_errors", []):
+                for ce in check_errors:
                     _add_log(session, check.id, "warning", f"Check issue: {ce}")
             else:
                 error_msg = result.get("error") or "Unknown pipeline error"

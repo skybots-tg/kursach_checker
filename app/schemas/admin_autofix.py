@@ -22,6 +22,9 @@ class AutofixDefaultsIn(BaseModel):
     normalize_first_line_indent: bool = True
     normalize_spacing_before_after: bool = True
     normalize_font: bool = True
+    normalize_margins: bool = False
+    normalize_table_width: bool = True
+    normalize_headings: bool = True
     space_before_pt: float = Field(0.0, ge=0)
     space_after_pt: float = Field(0.0, ge=0)
 
@@ -33,6 +36,7 @@ class AutofixSafetyLimits(BaseModel):
     skip_tables: bool = True
     skip_toc: bool = True
     skip_footnotes: bool = False
+    skip_margin_normalization: bool = True
     max_changes_per_document: int = Field(500, ge=1)
 
 
@@ -72,6 +76,27 @@ AUTOFIX_RULES_CATALOG: list[AutofixRuleInfo] = [
         rule_id="normalize_font",
         title="Шрифт и кегль",
         description="Приводит шрифт и размер к значениям из шаблона (Times New Roman 14 по умолчанию)",
+    ),
+    AutofixRuleInfo(
+        rule_id="normalize_margins",
+        title="Поля страницы",
+        description="Нормализует поля страницы по ГОСТу. Отключено по умолчанию — может сломать вёрстку",
+        safe=False,
+        default_enabled=False,
+    ),
+    AutofixRuleInfo(
+        rule_id="normalize_table_width",
+        title="Ширина таблиц",
+        description="Приводит ширину таблиц к области текста при переполнении",
+        safe=False,
+        default_enabled=False,
+    ),
+    AutofixRuleInfo(
+        rule_id="normalize_headings",
+        title="Форматирование заголовков",
+        description="Нормализует шрифт и кегль заголовков по шаблону",
+        safe=False,
+        default_enabled=False,
     ),
 ]
 

@@ -123,15 +123,17 @@ def apply_safe_autofixes(
     if source.suffix.lower() != ".docx" or not source.exists():
         return AutoFixResult(output_file_path=None, details=[])
 
-    cfg = _AutoFixConfig.from_rules(rules)
+    admin_cfg = admin_autofix_config or {}
+    cfg = _AutoFixConfig.from_rules(rules, admin_defaults=admin_cfg.get("defaults"))
     if not cfg.enabled:
         return AutoFixResult(output_file_path=None, details=[])
 
-    safety = (admin_autofix_config or {}).get("safety_limits", {})
+    safety = admin_cfg.get("safety_limits", {})
     max_changes = int(safety.get("max_changes_per_document", 500))
     skip_toc = bool(safety.get("skip_toc", True))
     skip_headings_safety = bool(safety.get("skip_headings", True))
     skip_tables_safety = bool(safety.get("skip_tables", True))
+    skip_margins_safety = bool(safety.get("skip_margin_normalization", True))
 
     try:
         doc = Document(str(source))
@@ -147,11 +149,14 @@ def apply_safe_autofixes(
     details: list[str] = []
     change_count = 0
 
-    if cfg.normalize_margins:
-        for sec_idx, section in enumerate(doc.sections):
-            if _fix_section_margins(section, cfg.margins_mm, sec_idx, details):
-                changed = True
-                change_count += 1
+    if cfg.normalize_margins and not skip_margins_safety:
+        if _preflight_margins_safe(doc, cfg.margins_mm):
+            for sec_idx, section in enumerate(doc.sections):
+                if _fix_section_margins(section, cfg.margins_mm, sec_idx, details):
+                    changed = True
+                    change_count += 1
+        else:
+            logger.info("Autofix: margin normalization skipped — tables would overflow")
 
     body_start = 0
     for i, p in enumerate(doc.paragraphs):
@@ -374,6 +379,44 @@ def _min_content_width_twips(doc: Document) -> int:
     return min(widths) if widths else 8640
 
 
+def _preflight_margins_safe(doc: Document, target_margins_mm: dict) -> bool:
+    min_content_twips = None
+    for sec in doc.sections:
+        try:
+            page_w_twips = sec.page_width.twips
+        except (AttributeError, TypeError):
+            continue
+        left_t = Mm(target_margins_mm.get("left", 30)).twips
+        right_t = Mm(target_margins_mm.get("right", 15)).twips
+        content = page_w_twips - left_t - right_t
+        if min_content_twips is None or content < min_content_twips:
+            min_content_twips = content
+
+    if min_content_twips is None or min_content_twips < 400:
+        return False
+
+    slop_twips = 72
+    for table in doc.tables:
+        el = table._tbl
+        tbl_pr = el.tblPr
+        if tbl_pr is None:
+            continue
+        tbl_w = tbl_pr.find(qn("w:tblW"))
+        if tbl_w is None:
+            continue
+        if tbl_w.get(qn("w:type")) != "dxa":
+            continue
+        w_raw = tbl_w.get(qn("w:w"))
+        try:
+            w_val = int(w_raw) if w_raw is not None else 0
+        except (TypeError, ValueError):
+            continue
+        if w_val > min_content_twips + slop_twips:
+            return False
+
+    return True
+
+
 def _set_table_width_pct100(tbl) -> None:
     tbl_pr = tbl.tblPr
     if tbl_pr is None:
@@ -484,7 +527,8 @@ class _AutoFixConfig:
     heading_bold: bool
 
     @classmethod
-    def from_rules(cls, rules: dict | None) -> "_AutoFixConfig":
+    def from_rules(cls, rules: dict | None, admin_defaults: dict | None = None) -> "_AutoFixConfig":
+        ad = admin_defaults or {}
         blocks = {
             str(b.get("key")): b
             for b in (rules or {}).get("blocks", [])
@@ -492,7 +536,7 @@ class _AutoFixConfig:
         }
         auto = blocks.get("autofix", {})
         params = auto.get("params") or {}
-        enabled = bool(auto.get("enabled", True))
+        enabled = bool(auto.get("enabled", ad.get("enabled", True)))
 
         typography = blocks.get("typography", {})
         body = (typography.get("params") or {}).get("body") or {}
@@ -505,18 +549,18 @@ class _AutoFixConfig:
 
         return cls(
             enabled=enabled,
-            normalize_alignment=bool(params.get("normalize_alignment", True)),
-            normalize_line_spacing=bool(params.get("normalize_line_spacing", True)),
-            normalize_first_line_indent=bool(params.get("normalize_first_line_indent", True)),
-            normalize_spacing_before_after=bool(params.get("normalize_spacing_before_after", True)),
-            normalize_font=bool(params.get("normalize_font", True)),
-            normalize_margins=bool(params.get("normalize_margins", True)),
-            normalize_headings=bool(params.get("normalize_headings", True)),
-            normalize_table_width=bool(params.get("normalize_table_width", True)),
+            normalize_alignment=bool(params.get("normalize_alignment", ad.get("normalize_alignment", True))),
+            normalize_line_spacing=bool(params.get("normalize_line_spacing", ad.get("normalize_line_spacing", True))),
+            normalize_first_line_indent=bool(params.get("normalize_first_line_indent", ad.get("normalize_first_line_indent", True))),
+            normalize_spacing_before_after=bool(params.get("normalize_spacing_before_after", ad.get("normalize_spacing_before_after", True))),
+            normalize_font=bool(params.get("normalize_font", ad.get("normalize_font", True))),
+            normalize_margins=bool(params.get("normalize_margins", ad.get("normalize_margins", False))),
+            normalize_headings=bool(params.get("normalize_headings", ad.get("normalize_headings", True))),
+            normalize_table_width=bool(params.get("normalize_table_width", ad.get("normalize_table_width", True))),
             line_spacing=float(body.get("line_spacing", 1.5)),
             first_line_indent_mm=float(body.get("first_line_indent_mm", 12.5)),
-            space_before_pt=float(params.get("space_before_pt", 0)),
-            space_after_pt=float(params.get("space_after_pt", 0)),
+            space_before_pt=float(params.get("space_before_pt", ad.get("space_before_pt", 0))),
+            space_after_pt=float(params.get("space_after_pt", ad.get("space_after_pt", 0))),
             font_name=str(body.get("font", "Times New Roman")),
             font_size_pt=float(body.get("size_pt", 14)),
             margins_mm=layout_params.get(
