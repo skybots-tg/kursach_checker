@@ -196,36 +196,32 @@ def run_layout_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings: li
                 )
 
 
-_SKIP_TYPOGRAPHY_STYLES = frozenset({
-    "toc heading",
-    "table of figures",
-    "table of authorities",
-    "caption",
-    "title",
-    "subtitle",
-    "endnote text",
-    "footnote text",
-    "header",
-    "footer",
-    "annotation text",
-    "balloon text",
+_SKIP_TYPO_STYLE_IDS = frozenset({
+    "TOCHeading", "TOC1", "TOC2", "TOC3", "TOC4", "TOC5",
+    "TOC6", "TOC7", "TOC8", "TOC9",
+    "TableofFigures", "TableofAuthorities",
+    "Caption", "Title", "Subtitle",
+    "EndnoteText", "FootnoteText",
+    "Header", "Footer", "CommentText", "BalloonText",
 })
 
-_SKIP_TYPOGRAPHY_PREFIXES = (
-    "toc ",
-    "toc\xa0",
-    "index ",
-)
+_SKIP_TYPO_STYLE_NAMES = frozenset({
+    "toc heading", "table of figures", "table of authorities",
+    "caption", "title", "subtitle",
+    "endnote text", "footnote text",
+    "header", "footer", "annotation text", "balloon text",
+})
+
+_SKIP_TYPO_NAME_PREFIXES = ("toc ", "toc\xa0", "index ")
 
 
-def _is_skip_style_for_typography(style_name: str) -> bool:
-    lower = style_name.lower()
-    if lower in _SKIP_TYPOGRAPHY_STYLES:
+def _is_skip_style_for_typography(paragraph) -> bool:
+    if paragraph.style_id in _SKIP_TYPO_STYLE_IDS:
         return True
-    for prefix in _SKIP_TYPOGRAPHY_PREFIXES:
-        if lower.startswith(prefix):
-            return True
-    return False
+    lower = paragraph.style_name.lower()
+    if lower in _SKIP_TYPO_STYLE_NAMES:
+        return True
+    return any(lower.startswith(p) for p in _SKIP_TYPO_NAME_PREFIXES)
 
 
 _MAX_FINDINGS_PER_TYPE = 10
@@ -251,7 +247,7 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
     for paragraph in snapshot.paragraphs:
         if not paragraph.text or paragraph.is_heading:
             continue
-        if _is_skip_style_for_typography(paragraph.style_name):
+        if _is_skip_style_for_typography(paragraph):
             continue
         checked += 1
         if checked > max_samples:

@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from docx import Document
+from docx.oxml.ns import qn
 
 logger = logging.getLogger(__name__)
 
@@ -19,29 +20,44 @@ class SectionMargins:
     bottom_mm: float | None
 
 
+_HEADING_STYLE_IDS = frozenset({
+    "Heading1", "Heading2", "Heading3", "Heading4",
+    "Heading5", "Heading6", "Heading7", "Heading8", "Heading9",
+})
+
+
 @dataclass(slots=True)
 class ParagraphSnapshot:
     index: int
     text: str
     style_name: str
+    style_id: str
     alignment: str | None
     first_line_indent_mm: float | None
     line_spacing: float | None
     has_explicit_before: bool
     has_explicit_after: bool
+    has_numbering: bool
+    outline_level: int | None
     runs_fonts: list[str]
     runs_size_pt: list[float]
     runs_bold: list[bool | None]
 
     @property
     def is_heading(self) -> bool:
+        if self.style_id in _HEADING_STYLE_IDS:
+            return True
         lower = self.style_name.lower()
-        return "heading" in lower or "заголов" in lower
+        if "heading" in lower or "заголов" in lower:
+            return True
+        return self.outline_level is not None
 
     @property
     def heading_level(self) -> int | None:
         if not self.is_heading:
             return None
+        if self.outline_level is not None:
+            return self.outline_level + 1
         m = re.search(r"\d+", self.style_name)
         return int(m.group()) if m else 1
 
@@ -161,6 +177,33 @@ def _resolve_line_spacing(paragraph) -> float | None:
         return None
 
 
+def _extract_outline_level(paragraph) -> int | None:
+    pPr = paragraph._element.find(qn("w:pPr"))
+    if pPr is None:
+        return None
+    ol = pPr.find(qn("w:outlineLvl"))
+    if ol is None:
+        return None
+    val = ol.get(qn("w:val"))
+    if val is None:
+        return None
+    try:
+        return int(val)
+    except (TypeError, ValueError):
+        return None
+
+
+def _has_numbering(paragraph) -> bool:
+    pPr = paragraph._element.find(qn("w:pPr"))
+    if pPr is None:
+        return False
+    numPr = pPr.find(qn("w:numPr"))
+    if numPr is None:
+        return False
+    numId = numPr.find(qn("w:numId"))
+    return numId is not None and numId.get(qn("w:val")) != "0"
+
+
 def _paragraphs(doc: Document) -> list[ParagraphSnapshot]:
     result: list[ParagraphSnapshot] = []
     for idx, paragraph in enumerate(doc.paragraphs):
@@ -174,11 +217,14 @@ def _paragraphs(doc: Document) -> list[ParagraphSnapshot]:
                 index=idx,
                 text=text,
                 style_name=getattr(paragraph.style, "name", "") or "",
+                style_id=getattr(paragraph.style, "style_id", "") or "",
                 alignment=_normalize_alignment(paragraph.alignment),
                 first_line_indent_mm=indent,
                 line_spacing=line_spacing,
                 has_explicit_before=pformat.space_before is not None,
                 has_explicit_after=pformat.space_after is not None,
+                has_numbering=_has_numbering(paragraph),
+                outline_level=_extract_outline_level(paragraph),
                 runs_fonts=_extract_run_fonts(paragraph),
                 runs_size_pt=_extract_run_sizes(paragraph),
                 runs_bold=_extract_run_bolds(paragraph),

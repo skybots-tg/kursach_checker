@@ -10,10 +10,98 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
+from lxml import etree
 
 from app.rules_engine.findings import Finding
 
 logger = logging.getLogger(__name__)
+
+_W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+
+_HEADING_STYLE_IDS = frozenset({
+    "Heading1", "Heading2", "Heading3", "Heading4",
+    "Heading5", "Heading6", "Heading7", "Heading8", "Heading9",
+})
+
+_SKIP_STYLE_IDS = frozenset({
+    "TOCHeading", "TOC1", "TOC2", "TOC3", "TOC4", "TOC5",
+    "TOC6", "TOC7", "TOC8", "TOC9",
+    "TableofFigures", "TableofAuthorities",
+    "Caption", "Title", "Subtitle", "NoSpacing",
+    "BalloonText", "MacroText",
+    "EndnoteText", "FootnoteText",
+    "Header", "Footer", "CommentText",
+})
+
+_SKIP_STYLE_NAMES = frozenset({
+    "toc heading", "table of figures", "table of authorities",
+    "caption", "title", "subtitle", "no spacing",
+    "balloon text", "macro text",
+    "endnote text", "footnote text",
+    "header", "footer", "annotation text",
+})
+
+_SKIP_NAME_PREFIXES = ("toc ", "toc\xa0", "index ")
+
+_LIST_STYLE_IDS = frozenset({
+    "ListParagraph",
+    "ListBullet", "ListBullet2", "ListBullet3",
+    "ListNumber", "ListNumber2", "ListNumber3",
+    "ListContinue", "ListContinue2", "ListContinue3",
+})
+
+_LIST_STYLE_NAMES = frozenset({
+    "list paragraph",
+    "list bullet", "list bullet 2", "list bullet 3",
+    "list number", "list number 2", "list number 3",
+    "list continue", "list continue 2", "list continue 3",
+})
+
+_BINARY_PREFIXES = ("word/media/", "word/embeddings/")
+
+
+def _is_heading_para(paragraph) -> bool:
+    sid = getattr(paragraph.style, "style_id", "") or ""
+    if sid in _HEADING_STYLE_IDS:
+        return True
+    sname = (getattr(paragraph.style, "name", "") or "").lower()
+    if "heading" in sname or "\u0437\u0430\u0433\u043e\u043b\u043e\u0432" in sname:
+        return True
+    pPr = paragraph._element.find(qn("w:pPr"))
+    return pPr is not None and pPr.find(qn("w:outlineLvl")) is not None
+
+
+def _should_skip_para(paragraph) -> bool:
+    sid = getattr(paragraph.style, "style_id", "") or ""
+    if sid in _SKIP_STYLE_IDS:
+        return True
+    sname = (getattr(paragraph.style, "name", "") or "").lower()
+    if sname in _SKIP_STYLE_NAMES:
+        return True
+    return any(sname.startswith(p) for p in _SKIP_NAME_PREFIXES)
+
+
+def _is_list_para(paragraph) -> bool:
+    pPr = paragraph._element.find(qn("w:pPr"))
+    if pPr is not None:
+        numPr = pPr.find(qn("w:numPr"))
+        if numPr is not None:
+            numId = numPr.find(qn("w:numId"))
+            if numId is not None and numId.get(qn("w:val")) != "0":
+                return True
+    sid = getattr(paragraph.style, "style_id", "") or ""
+    if sid in _LIST_STYLE_IDS:
+        return True
+    sname = (getattr(paragraph.style, "name", "") or "").lower()
+    return sname in _LIST_STYLE_NAMES
+
+
+def _is_field_code_run(run) -> bool:
+    elem = run._element
+    return (
+        elem.find(qn("w:fldChar")) is not None
+        or elem.find(qn("w:instrText")) is not None
+    )
 
 
 @dataclass(slots=True)
@@ -49,20 +137,19 @@ def apply_safe_autofixes(
 
     for idx, paragraph in enumerate(doc.paragraphs):
         text = (paragraph.text or "").strip()
-        style_name = getattr(paragraph.style, "name", "") or ""
         if not text:
             continue
 
-        if _is_heading(style_name):
+        if _is_heading_para(paragraph):
             if cfg.normalize_headings:
                 if _fix_heading(paragraph, idx, cfg, details):
                     changed = True
             continue
 
-        if _should_skip_style(style_name):
+        if _should_skip_para(paragraph):
             continue
 
-        is_list = _is_list_style(style_name)
+        is_list = _is_list_para(paragraph)
         pf = paragraph.paragraph_format
 
         if not is_list and cfg.normalize_alignment and paragraph.alignment != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
@@ -102,6 +189,8 @@ def apply_safe_autofixes(
         if cfg.normalize_font:
             font_changed = False
             for run in paragraph.runs:
+                if _is_field_code_run(run):
+                    continue
                 if cfg.font_name and run.font.name != cfg.font_name:
                     run.font.name = cfg.font_name
                     font_changed = True
@@ -127,9 +216,9 @@ def apply_safe_autofixes(
         return AutoFixResult(output_file_path=None, details=[])
 
     try:
-        _restore_original_binaries(source, output)
+        _postprocess_fixed_docx(source, output)
     except Exception:
-        logger.warning("Autofix: binary restore failed for %s, using python-docx output", output)
+        logger.warning("Autofix: postprocessing failed for %s, using python-docx output", output)
 
     findings.append(
         Finding(
@@ -148,35 +237,83 @@ def apply_safe_autofixes(
     return AutoFixResult(output_file_path=str(output), details=details)
 
 
-_BINARY_PREFIXES = ("word/media/", "word/embeddings/")
-
-
-def _restore_original_binaries(original: Path, output: Path) -> None:
-    orig_binaries: dict[str, bytes] = {}
+def _postprocess_fixed_docx(original: Path, output: Path) -> None:
+    orig_bins: dict[str, tuple[zipfile.ZipInfo, bytes]] = {}
     with zipfile.ZipFile(str(original), "r") as orig_zf:
         for info in orig_zf.infolist():
             if any(info.filename.startswith(p) for p in _BINARY_PREFIXES) and not info.filename.endswith("/"):
-                orig_binaries[info.filename] = orig_zf.read(info.filename)
+                orig_bins[info.filename] = (info, orig_zf.read(info.filename))
 
-    if not orig_binaries:
+    has_toc = _zip_has_toc(output)
+
+    if not orig_bins and not has_toc:
+        _validate_docx_zip(output)
         return
 
     temp_path = output.with_name(output.stem + ".tmp.docx")
     with zipfile.ZipFile(str(output), "r") as out_zf:
         with zipfile.ZipFile(str(temp_path), "w", zipfile.ZIP_DEFLATED) as new_zf:
             for item in out_zf.infolist():
-                if item.filename in orig_binaries:
-                    restored = zipfile.ZipInfo(item.filename)
+                if item.filename in orig_bins:
+                    orig_info, orig_data = orig_bins[item.filename]
+                    restored = _clone_zipinfo(orig_info)
                     restored.compress_type = zipfile.ZIP_STORED
-                    new_zf.writestr(restored, orig_binaries[item.filename])
+                    new_zf.writestr(restored, orig_data)
+                elif has_toc and item.filename == "word/settings.xml":
+                    data = _inject_update_fields(out_zf.read(item.filename))
+                    new_zf.writestr(item, data)
                 else:
                     new_zf.writestr(item, out_zf.read(item.filename))
 
+    _validate_docx_zip(temp_path)
     temp_path.replace(output)
 
 
+def _zip_has_toc(path: Path) -> bool:
+    with zipfile.ZipFile(str(path), "r") as zf:
+        if "word/document.xml" not in zf.namelist():
+            return False
+        data = zf.read("word/document.xml")
+        return b"TOC " in data or b"Table of Contents" in data
+
+
+def _clone_zipinfo(src: zipfile.ZipInfo) -> zipfile.ZipInfo:
+    zi = zipfile.ZipInfo(src.filename)
+    zi.date_time = src.date_time
+    zi.compress_type = src.compress_type
+    zi.comment = src.comment
+    zi.extra = src.extra
+    zi.create_system = src.create_system
+    zi.external_attr = src.external_attr
+    zi.flag_bits = src.flag_bits & 0x800
+    return zi
+
+
+def _inject_update_fields(settings_bytes: bytes) -> bytes:
+    root = etree.fromstring(settings_bytes)
+    tag = f"{{{_W_NS}}}updateFields"
+    existing = root.find(tag)
+    if existing is None:
+        elem = etree.SubElement(root, tag)
+        elem.set(f"{{{_W_NS}}}val", "true")
+    else:
+        existing.set(f"{{{_W_NS}}}val", "true")
+    return etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
+
+
+def _validate_docx_zip(path: Path) -> None:
+    with zipfile.ZipFile(str(path), "r") as zf:
+        bad = zf.testzip()
+        if bad is not None:
+            raise ValueError(f"Corrupted ZIP entry: {bad}")
+        names = set(zf.namelist())
+        for required in ("[Content_Types].xml", "word/document.xml"):
+            if required not in names:
+                raise ValueError(f"Missing required entry: {required}")
+        etree.fromstring(zf.read("word/document.xml"))
+
+
 def _min_content_width_twips(doc: Document) -> int:
-    """Минимальная ширина области текста по разделам (twips), чтобы не сломать многораздельные работы."""
     widths: list[int] = []
     for sec in doc.sections:
         try:
@@ -188,7 +325,6 @@ def _min_content_width_twips(doc: Document) -> int:
 
 
 def _set_table_width_pct100(tbl) -> None:
-    """100% ширины области текста: OOXML pct в 1/50 процента, 5000 = 100%."""
     tbl_pr = tbl.tblPr
     if tbl_pr is None:
         tbl_pr = OxmlElement("w:tblPr")
@@ -202,10 +338,6 @@ def _set_table_width_pct100(tbl) -> None:
 
 
 def _clamp_overflow_table_widths(doc: Document, details: list[str]) -> bool:
-    """
-    После смены полей фиксированная ширина таблицы (dxa) часто остаётся «старый» и вылезает за правое поле.
-    Подрезаем только заведомо слишком широкие таблицы.
-    """
     limit = _min_content_width_twips(doc)
     slop_twips = 72
     changed_any = False
@@ -234,7 +366,7 @@ def _clamp_overflow_table_widths(doc: Document, details: list[str]) -> bool:
         _set_table_width_pct100(el)
         changed_any = True
     if changed_any:
-        details.append("Таблицы: ширина ограничена областью текста (100%)")
+        details.append("Tables: width clamped to text area (100%)")
     return changed_any
 
 
@@ -253,13 +385,15 @@ def _fix_section_margins(
             setattr(section, attr, target)
             changed = True
     if changed:
-        details.append(f"Раздел #{sec_idx + 1}: поля страницы исправлены")
+        details.append(f"Section #{sec_idx + 1}: margins fixed")
     return changed
 
 
 def _fix_heading(paragraph, idx: int, cfg: "_AutoFixConfig", details: list[str]) -> bool:
     changed = False
     for run in paragraph.runs:
+        if _is_field_code_run(run):
+            continue
         if cfg.heading_font and run.font.name != cfg.heading_font:
             run.font.name = cfg.heading_font
             changed = True
@@ -272,7 +406,7 @@ def _fix_heading(paragraph, idx: int, cfg: "_AutoFixConfig", details: list[str])
             changed = True
     if changed:
         details.append(
-            f"Заголовок #{idx + 1}: {cfg.heading_font}, {cfg.heading_size_pt}pt, полужирный"
+            f"Heading #{idx + 1}: {cfg.heading_font}, {cfg.heading_size_pt}pt, bold"
         )
     return changed
 
@@ -342,57 +476,3 @@ class _AutoFixConfig:
             heading_size_pt=float(heading_params.get("size_pt", body.get("size_pt", 14))),
             heading_bold=bool(heading_params.get("require_bold", True)),
         )
-
-
-_SKIP_STYLES_FULL = frozenset({
-    "toc heading",
-    "table of figures",
-    "table of authorities",
-    "caption",
-    "title",
-    "subtitle",
-    "no spacing",
-    "balloon text",
-    "macro text",
-    "endnote text",
-    "footnote text",
-    "header",
-    "footer",
-    "annotation text",
-})
-
-_SKIP_STYLE_PREFIXES = (
-    "toc ",
-    "toc\xa0",
-    "index ",
-)
-
-_LIST_STYLES = frozenset({
-    "list paragraph",
-    "list bullet",
-    "list number",
-    "list continue",
-    "list bullet 2",
-    "list bullet 3",
-    "list number 2",
-    "list number 3",
-})
-
-
-def _is_heading(style_name: str) -> bool:
-    lower = style_name.lower()
-    return "heading" in lower or "заголов" in lower
-
-
-def _should_skip_style(style_name: str) -> bool:
-    lower = style_name.lower()
-    if lower in _SKIP_STYLES_FULL:
-        return True
-    for prefix in _SKIP_STYLE_PREFIXES:
-        if lower.startswith(prefix):
-            return True
-    return False
-
-
-def _is_list_style(style_name: str) -> bool:
-    return style_name.lower() in _LIST_STYLES
