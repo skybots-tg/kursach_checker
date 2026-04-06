@@ -64,7 +64,10 @@ def _run_check_safe(
         )
 
 
-async def run_document_checks(file_path: str, rules: dict | None) -> dict:
+async def run_document_checks(
+    file_path: str, rules: dict | None,
+    admin_autofix_config: dict | None = None,
+) -> dict:
     logger.info("Starting document checks: %s", file_path)
     cfg = RulesConfig(rules)
     check_errors: list[str] = []
@@ -168,7 +171,10 @@ async def run_document_checks(file_path: str, rules: dict | None) -> dict:
     autofix_output_path: str | None = None
     if snapshot.extension == ".docx":
         try:
-            autofix = apply_safe_autofixes(file_path, rules, findings)
+            autofix = apply_safe_autofixes(
+                file_path, rules, findings,
+                admin_autofix_config=admin_autofix_config,
+            )
             autofix_output_path = autofix.output_file_path
         except Exception:
             logger.exception("Autofix crashed for %s", file_path)

@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.integrations.telegram_notify import notify_check_ready
-from app.models import Check, CheckStatus, CheckWorkerLog, File, TemplateVersion, User
+from app.models import Check, CheckStatus, CheckWorkerLog, File, SystemSetting, TemplateVersion, User
 from app.services.check_pipeline import run_check_pipeline
 from app.services.credits import spend_credits
 from app.storage.files import fixed_output_download_name, save_json_report
@@ -99,7 +99,13 @@ async def _run_pipeline(session: AsyncSession, check: Check) -> dict:
     if not template_version:
         return {"ok": False, "error": f"Template version (id={check.template_version_id}) not found in DB"}
 
-    pipeline_result = await run_check_pipeline(input_file.storage_path, template_version.rules_json)
+    admin_cfg_row = await session.get(SystemSetting, "autofix_global")
+    admin_autofix_config = admin_cfg_row.value if admin_cfg_row else None
+
+    pipeline_result = await run_check_pipeline(
+        input_file.storage_path, template_version.rules_json,
+        admin_autofix_config=admin_autofix_config,
+    )
 
     if not pipeline_result.get("ok"):
         return {

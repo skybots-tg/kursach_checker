@@ -35,6 +35,7 @@ async def upload_file(
         original_name=file.filename or "document.docx",
         mime=file.content_type or "application/octet-stream",
         size=size,
+        user_id=current_user.id,
     )
     db.add(entry)
     await db.commit()
@@ -57,6 +58,8 @@ async def start_check(
     file_obj = await db.get(File, input_file_id)
     if not file_obj:
         raise HTTPException(status_code=404, detail="Файл не найден")
+    if file_obj.user_id is not None and file_obj.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied to this file")
 
     resolved_gost_id = gost_id
     if resolved_gost_id is None:

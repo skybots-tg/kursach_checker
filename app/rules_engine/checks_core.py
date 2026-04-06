@@ -351,7 +351,17 @@ def run_structure_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings:
         {"titles_any_of": ["список литературы", "список использованных источников"]},
     ]
 
-    heading_titles = snapshot.heading_titles
+    heading_entries = [
+        (p.index, p.text.strip().lower())
+        for p in snapshot.paragraphs
+        if p.text and p.is_heading
+    ]
+    short_para_entries = [
+        (p.index, p.text.strip().lower())
+        for p in snapshot.paragraphs
+        if p.text and len(p.text.strip()) < 100 and not p.is_heading
+    ]
+
     cursor = -1
 
     for section in required:
@@ -359,17 +369,24 @@ def run_structure_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings:
         if not titles:
             continue
 
-        found_index = None
+        found_para_idx = None
         found_title = None
-        for idx, heading in enumerate(heading_titles):
-            if any(t in heading for t in titles):
-                found_index = idx
-                found_title = heading
+        for para_idx, h_text in heading_entries:
+            if any(t in h_text for t in titles):
+                found_para_idx = para_idx
+                found_title = h_text
                 break
+
+        if found_para_idx is None:
+            for para_idx, p_text in short_para_entries:
+                if any(t in p_text for t in titles):
+                    found_para_idx = para_idx
+                    found_title = p_text
+                    break
 
         section_name = section.get("id") or titles[0]
         optional = bool(section.get("required") is False)
-        if found_index is None:
+        if found_para_idx is None:
             if optional:
                 continue
             add_finding(
@@ -384,7 +401,7 @@ def run_structure_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings:
             )
             continue
 
-        if found_index < cursor:
+        if found_para_idx < cursor:
             add_finding(
                 findings,
                 title=f"Порядок разделов: «{section_name}»",
@@ -395,7 +412,7 @@ def run_structure_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings:
                 location="структура",
                 recommendation="Переставьте разделы согласно методическим требованиям",
             )
-        cursor = found_index
+        cursor = found_para_idx
 
 
 def run_volume_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding]) -> None:

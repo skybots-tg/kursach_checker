@@ -23,7 +23,10 @@ def resolve_doc_policy(rules: dict | None) -> str:
     return "convert"
 
 
-async def run_check_pipeline(input_path: str, rules: dict | None) -> dict:
+async def run_check_pipeline(
+    input_path: str, rules: dict | None,
+    admin_autofix_config: dict | None = None,
+) -> dict:
     logger.info("Pipeline started: %s", input_path)
     source = Path(input_path)
     working_path = str(source)
@@ -61,7 +64,9 @@ async def run_check_pipeline(input_path: str, rules: dict | None) -> dict:
                 logger.info("DOC converted to DOCX: %s", converted_path)
 
     try:
-        report = await run_document_checks(working_path, rules)
+        report = await run_document_checks(
+            working_path, rules, admin_autofix_config=admin_autofix_config,
+        )
     except Exception:
         logger.exception("run_document_checks crashed for %s", working_path)
         return _error_result("Внутренняя ошибка при проверке документа", notices)

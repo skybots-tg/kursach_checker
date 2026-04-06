@@ -13,6 +13,16 @@ from docx.shared import Mm, Pt
 from lxml import etree
 
 from app.rules_engine.findings import Finding
+from app.rules_engine.style_resolve import (
+    effective_alignment,
+    effective_first_line_indent_mm,
+    effective_font_name,
+    effective_font_size_pt,
+    effective_line_spacing,
+    effective_space_after_pt,
+    effective_space_before_pt,
+    walk_style_pPr,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -47,21 +57,6 @@ _LIST_STYLE_NAMES = frozenset({
 _BINARY_PREFIXES = ("word/media/", "word/embeddings/")
 
 
-def _walk_style_pPr(paragraph):
-    pPr = paragraph._element.find(qn("w:pPr"))
-    if pPr is not None:
-        yield pPr
-    style = paragraph.style
-    while style is not None:
-        try:
-            spPr = style._element.find(qn("w:pPr"))
-            if spPr is not None:
-                yield spPr
-            style = style.base_style
-        except (AttributeError, TypeError):
-            break
-
-
 def _is_heading_para(paragraph) -> bool:
     sid = getattr(paragraph.style, "style_id", "") or ""
     if sid in _HEADING_STYLE_IDS:
@@ -69,7 +64,7 @@ def _is_heading_para(paragraph) -> bool:
     sname = (getattr(paragraph.style, "name", "") or "").lower()
     if "heading" in sname or "\u0437\u0430\u0433\u043e\u043b\u043e\u0432" in sname:
         return True
-    for pPr in _walk_style_pPr(paragraph):
+    for pPr in walk_style_pPr(paragraph):
         ol = pPr.find(qn("w:outlineLvl"))
         if ol is not None:
             val = ol.get(qn("w:val"))
@@ -92,7 +87,7 @@ def _should_skip_para(paragraph) -> bool:
 
 
 def _is_list_para(paragraph) -> bool:
-    for pPr in _walk_style_pPr(paragraph):
+    for pPr in walk_style_pPr(paragraph):
         numPr = pPr.find(qn("w:numPr"))
         if numPr is not None:
             numId = numPr.find(qn("w:numId"))
@@ -121,6 +116,7 @@ class AutoFixResult:
 
 def apply_safe_autofixes(
     file_path: str, rules: dict | None, findings: list[Finding],
+    admin_autofix_config: dict | None = None,
 ) -> AutoFixResult:
     source = Path(file_path)
     if source.suffix.lower() != ".docx" or not source.exists():
@@ -130,6 +126,9 @@ def apply_safe_autofixes(
     if not cfg.enabled:
         return AutoFixResult(output_file_path=None, details=[])
 
+    safety = (admin_autofix_config or {}).get("safety_limits", {})
+    max_changes = int(safety.get("max_changes_per_document", 500))
+
     try:
         doc = Document(str(source))
     except Exception:
@@ -138,13 +137,24 @@ def apply_safe_autofixes(
 
     changed = False
     details: list[str] = []
+    change_count = 0
 
     if cfg.normalize_margins:
         for sec_idx, section in enumerate(doc.sections):
             if _fix_section_margins(section, cfg.margins_mm, sec_idx, details):
                 changed = True
+                change_count += 1
+
+    body_start = 0
+    for i, p in enumerate(doc.paragraphs):
+        if _is_heading_para(p):
+            body_start = i
+            break
 
     for idx, paragraph in enumerate(doc.paragraphs):
+        if change_count >= max_changes:
+            break
+
         text = (paragraph.text or "").strip()
         if not text:
             continue
@@ -153,46 +163,57 @@ def apply_safe_autofixes(
             if cfg.normalize_headings:
                 if _fix_heading(paragraph, idx, cfg, details):
                     changed = True
+                    change_count += 1
             continue
 
         if _should_skip_para(paragraph):
             continue
 
+        if idx < body_start:
+            continue
+
+        eff_align = effective_alignment(paragraph)
+        if eff_align in (WD_PARAGRAPH_ALIGNMENT.CENTER, WD_PARAGRAPH_ALIGNMENT.RIGHT):
+            continue
+
         is_list = _is_list_para(paragraph)
         pf = paragraph.paragraph_format
 
-        if not is_list and cfg.normalize_alignment and paragraph.alignment != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
-            paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
-            changed = True
-            details.append(f"Paragraph #{idx + 1}: alignment justify")
+        if not is_list and cfg.normalize_alignment:
+            if eff_align != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
+                paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
+                changed = True
+                change_count += 1
+                details.append(f"Paragraph #{idx + 1}: alignment justify")
 
         if cfg.normalize_line_spacing:
-            curr = pf.line_spacing
-            needs_fix = True
-            if isinstance(curr, (int, float)):
-                needs_fix = abs(float(curr) - cfg.line_spacing) > 0.05
-            if needs_fix:
+            eff_ls = effective_line_spacing(paragraph)
+            if eff_ls is not None and abs(eff_ls - cfg.line_spacing) > 0.05:
                 pf.line_spacing = cfg.line_spacing
                 changed = True
+                change_count += 1
                 details.append(f"Paragraph #{idx + 1}: line spacing {cfg.line_spacing}")
 
         if not is_list and cfg.normalize_first_line_indent:
-            curr_mm = None
-            if pf.first_line_indent is not None:
-                curr_mm = round(float(pf.first_line_indent.mm), 2)
-            if curr_mm is None or abs(curr_mm - cfg.first_line_indent_mm) > 0.5:
+            eff_indent = effective_first_line_indent_mm(paragraph)
+            if abs(eff_indent - cfg.first_line_indent_mm) > 0.5:
                 pf.first_line_indent = Mm(cfg.first_line_indent_mm)
                 changed = True
+                change_count += 1
                 details.append(f"Paragraph #{idx + 1}: first line indent {cfg.first_line_indent_mm} mm")
 
         if not is_list and cfg.normalize_spacing_before_after:
-            if pf.space_before is None or abs(float(pf.space_before.pt) - cfg.space_before_pt) > 0.2:
+            eff_sb = effective_space_before_pt(paragraph)
+            if abs(eff_sb - cfg.space_before_pt) > 0.2:
                 pf.space_before = Pt(cfg.space_before_pt)
                 changed = True
+                change_count += 1
                 details.append(f"Paragraph #{idx + 1}: spacing before {cfg.space_before_pt} pt")
-            if pf.space_after is None or abs(float(pf.space_after.pt) - cfg.space_after_pt) > 0.2:
+            eff_sa = effective_space_after_pt(paragraph)
+            if abs(eff_sa - cfg.space_after_pt) > 0.2:
                 pf.space_after = Pt(cfg.space_after_pt)
                 changed = True
+                change_count += 1
                 details.append(f"Paragraph #{idx + 1}: spacing after {cfg.space_after_pt} pt")
 
         if cfg.normalize_font:
@@ -200,15 +221,17 @@ def apply_safe_autofixes(
             for run in paragraph.runs:
                 if _is_field_code_run(run):
                     continue
-                if cfg.font_name and run.font.name != cfg.font_name:
+                eff_name = effective_font_name(run, paragraph)
+                if cfg.font_name and eff_name and eff_name != cfg.font_name:
                     run.font.name = cfg.font_name
                     font_changed = True
-                size_pt = float(run.font.size.pt) if run.font.size else None
-                if size_pt is None or abs(size_pt - cfg.font_size_pt) > 0.2:
+                eff_size = effective_font_size_pt(run, paragraph)
+                if eff_size is not None and abs(eff_size - cfg.font_size_pt) > 0.2:
                     run.font.size = Pt(cfg.font_size_pt)
                     font_changed = True
             if font_changed:
                 changed = True
+                change_count += 1
                 details.append(f"Paragraph #{idx + 1}: font {cfg.font_name}, {cfg.font_size_pt}pt")
 
     if cfg.normalize_table_width and _clamp_overflow_table_widths(doc, details):

@@ -149,6 +149,7 @@ class File(Base):
     original_name: Mapped[str] = mapped_column(String(255))
     mime: Mapped[str] = mapped_column(String(255))
     size: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 

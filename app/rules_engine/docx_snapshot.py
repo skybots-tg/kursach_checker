@@ -9,6 +9,8 @@ from pathlib import Path
 from docx import Document
 from docx.oxml.ns import qn
 
+from app.rules_engine.style_resolve import walk_style_pPr
+
 logger = logging.getLogger(__name__)
 
 
@@ -178,23 +180,8 @@ def _resolve_line_spacing(paragraph) -> float | None:
         return None
 
 
-def _walk_style_pPr(paragraph):
-    pPr = paragraph._element.find(qn("w:pPr"))
-    if pPr is not None:
-        yield pPr
-    style = paragraph.style
-    while style is not None:
-        try:
-            spPr = style._element.find(qn("w:pPr"))
-            if spPr is not None:
-                yield spPr
-            style = style.base_style
-        except (AttributeError, TypeError):
-            break
-
-
 def _extract_outline_level(paragraph) -> int | None:
-    for pPr in _walk_style_pPr(paragraph):
+    for pPr in walk_style_pPr(paragraph):
         ol = pPr.find(qn("w:outlineLvl"))
         if ol is not None:
             val = ol.get(qn("w:val"))
@@ -209,7 +196,7 @@ def _extract_outline_level(paragraph) -> int | None:
 
 
 def _has_numbering(paragraph) -> bool:
-    for pPr in _walk_style_pPr(paragraph):
+    for pPr in walk_style_pPr(paragraph):
         numPr = pPr.find(qn("w:numPr"))
         if numPr is not None:
             numId = numPr.find(qn("w:numId"))
