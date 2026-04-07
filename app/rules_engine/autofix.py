@@ -1,17 +1,31 @@
 from __future__ import annotations
 
 import logging
-import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
 from docx import Document
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
-from lxml import etree
 
+from app.rules_engine.autofix_helpers import (
+    clamp_overflow_table_widths,
+    fix_caption_trailing_dot,
+    fix_dashes_in_text,
+    fix_font_color_runs,
+    fix_font_color_styles,
+    fix_italic_styles,
+    fix_list_indent,
+    fix_markers_text,
+    fix_numbering_bullets,
+    fix_remove_italic,
+    fix_section_margins,
+    is_field_code_run,
+    is_manual_list_para,
+    postprocess_fixed_docx,
+    preflight_margins_safe,
+)
 from app.rules_engine.findings import Finding
 from app.rules_engine.style_resolve import (
     detect_toc_paragraph_indices,
@@ -26,8 +40,6 @@ from app.rules_engine.style_resolve import (
 )
 
 logger = logging.getLogger(__name__)
-
-_W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
 _HEADING_STYLE_IDS = frozenset(
     {f"Heading{i}" for i in range(1, 10)}
@@ -54,8 +66,6 @@ _LIST_STYLE_NAMES = frozenset({
     "list number", "list number 2", "list number 3",
     "list continue", "list continue 2", "list continue 3",
 })
-
-_BINARY_PREFIXES = ("word/media/", "word/embeddings/")
 
 
 def _is_heading_para(paragraph) -> bool:
@@ -101,14 +111,6 @@ def _is_list_para(paragraph) -> bool:
     return sname in _LIST_STYLE_NAMES
 
 
-def _is_field_code_run(run) -> bool:
-    elem = run._element
-    return (
-        elem.find(qn("w:fldChar")) is not None
-        or elem.find(qn("w:instrText")) is not None
-    )
-
-
 @dataclass(slots=True)
 class AutoFixResult:
     output_file_path: str | None
@@ -149,10 +151,22 @@ def apply_safe_autofixes(
     details: list[str] = []
     change_count = 0
 
+    if cfg.normalize_font_color:
+        if fix_font_color_styles(doc, details):
+            changed = True
+
+    if cfg.remove_italic:
+        if fix_italic_styles(doc, details):
+            changed = True
+
+    if cfg.normalize_list_markers:
+        if fix_numbering_bullets(doc, cfg.font_name, details):
+            changed = True
+
     if cfg.normalize_margins and not skip_margins_safety:
-        if _preflight_margins_safe(doc, cfg.margins_mm):
+        if preflight_margins_safe(doc, cfg.margins_mm):
             for sec_idx, section in enumerate(doc.sections):
-                if _fix_section_margins(section, cfg.margins_mm, sec_idx, details):
+                if fix_section_margins(section, cfg.margins_mm, sec_idx, details):
                     changed = True
                     change_count += 1
         else:
@@ -171,6 +185,21 @@ def apply_safe_autofixes(
         text = (paragraph.text or "").strip()
         if not text:
             continue
+
+        if cfg.normalize_font_color:
+            if fix_font_color_runs(paragraph, idx, details):
+                changed = True
+                change_count += 1
+
+        if cfg.remove_italic:
+            if fix_remove_italic(paragraph, idx, details):
+                changed = True
+                change_count += 1
+
+        if cfg.remove_caption_trailing_dot:
+            if fix_caption_trailing_dot(paragraph, idx, details):
+                changed = True
+                change_count += 1
 
         if idx in toc_indices:
             continue
@@ -192,8 +221,23 @@ def apply_safe_autofixes(
         if eff_align in (WD_PARAGRAPH_ALIGNMENT.CENTER, WD_PARAGRAPH_ALIGNMENT.RIGHT):
             continue
 
-        is_list = _is_list_para(paragraph)
+        is_list = _is_list_para(paragraph) or is_manual_list_para(text)
         pf = paragraph.paragraph_format
+
+        if is_list and cfg.normalize_list_markers:
+            if fix_markers_text(paragraph, idx, details):
+                changed = True
+                change_count += 1
+
+        if is_list and cfg.normalize_list_indent:
+            if fix_list_indent(paragraph, idx, details):
+                changed = True
+                change_count += 1
+
+        if not is_list and cfg.normalize_dashes:
+            if fix_dashes_in_text(paragraph, idx, details):
+                changed = True
+                change_count += 1
 
         if not is_list and cfg.normalize_alignment:
             if eff_align != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
@@ -235,7 +279,7 @@ def apply_safe_autofixes(
         if cfg.normalize_font:
             font_changed = False
             for run in paragraph.runs:
-                if _is_field_code_run(run):
+                if is_field_code_run(run):
                     continue
                 eff_name = effective_font_name(run, paragraph)
                 if cfg.font_name and eff_name and eff_name != cfg.font_name:
@@ -250,7 +294,7 @@ def apply_safe_autofixes(
                 change_count += 1
                 details.append(f"Paragraph #{idx + 1}: font {cfg.font_name}, {cfg.font_size_pt}pt")
 
-    if cfg.normalize_table_width and not skip_tables_safety and _clamp_overflow_table_widths(doc, details):
+    if cfg.normalize_table_width and not skip_tables_safety and clamp_overflow_table_widths(doc, details):
         changed = True
 
     if not changed:
@@ -264,19 +308,19 @@ def apply_safe_autofixes(
         return AutoFixResult(output_file_path=None, details=[])
 
     try:
-        _postprocess_fixed_docx(source, output)
+        postprocess_fixed_docx(source, output)
     except Exception:
         logger.warning("Autofix: postprocessing failed for %s, using python-docx output", output)
 
     findings.append(
         Finding(
-            title="Автоисправления",
+            title="\u0410\u0432\u0442\u043e\u0438\u0441\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f",
             category="autofix",
             severity="advice",
             expected="",
             found="",
-            location="документ",
-            recommendation="Скачайте исправленный DOCX",
+            location="\u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442",
+            recommendation="\u0421\u043a\u0430\u0447\u0430\u0439\u0442\u0435 \u0438\u0441\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043d\u044b\u0439 DOCX",
             auto_fixed=True,
             auto_fix_details="; ".join(details[:30]),
         )
@@ -285,207 +329,10 @@ def apply_safe_autofixes(
     return AutoFixResult(output_file_path=str(output), details=details)
 
 
-def _postprocess_fixed_docx(original: Path, output: Path) -> None:
-    orig_bins: dict[str, tuple[zipfile.ZipInfo, bytes]] = {}
-    with zipfile.ZipFile(str(original), "r") as orig_zf:
-        for info in orig_zf.infolist():
-            if any(info.filename.startswith(p) for p in _BINARY_PREFIXES) and not info.filename.endswith("/"):
-                orig_bins[info.filename] = (info, orig_zf.read(info.filename))
-
-    has_toc = _zip_has_toc(output)
-
-    if not orig_bins and not has_toc:
-        _validate_docx_zip(output)
-        return
-
-    temp_path = output.with_name(output.stem + ".tmp.docx")
-    settings_injected = False
-    with zipfile.ZipFile(str(output), "r") as out_zf:
-        with zipfile.ZipFile(str(temp_path), "w", zipfile.ZIP_DEFLATED) as new_zf:
-            for item in out_zf.infolist():
-                if item.filename in orig_bins:
-                    orig_info, orig_data = orig_bins[item.filename]
-                    restored = _clone_zipinfo(orig_info)
-                    restored.compress_type = zipfile.ZIP_STORED
-                    new_zf.writestr(restored, orig_data)
-                elif has_toc and item.filename == "word/settings.xml":
-                    data = _inject_update_fields(out_zf.read(item.filename))
-                    new_zf.writestr(item, data)
-                    settings_injected = True
-                else:
-                    new_zf.writestr(item, out_zf.read(item.filename))
-
-    if has_toc and not settings_injected:
-        logger.debug("Autofix: word/settings.xml not found, cannot inject updateFields")
-
-    _validate_docx_zip(temp_path)
-    temp_path.replace(output)
-
-
-def _zip_has_toc(path: Path) -> bool:
-    with zipfile.ZipFile(str(path), "r") as zf:
-        if "word/document.xml" not in zf.namelist():
-            return False
-        data = zf.read("word/document.xml")
-        return b"TOC " in data or b"Table of Contents" in data
-
-
-def _clone_zipinfo(src: zipfile.ZipInfo) -> zipfile.ZipInfo:
-    zi = zipfile.ZipInfo(src.filename)
-    zi.date_time = src.date_time
-    zi.compress_type = src.compress_type
-    zi.comment = src.comment
-    zi.extra = src.extra
-    zi.create_system = src.create_system
-    zi.external_attr = src.external_attr
-    zi.flag_bits = src.flag_bits & 0x800
-    return zi
-
-
-def _inject_update_fields(settings_bytes: bytes) -> bytes:
-    root = etree.fromstring(settings_bytes)
-    tag = f"{{{_W_NS}}}updateFields"
-    existing = root.find(tag)
-    if existing is None:
-        elem = etree.SubElement(root, tag)
-        elem.set(f"{{{_W_NS}}}val", "true")
-    else:
-        existing.set(f"{{{_W_NS}}}val", "true")
-    return etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
-
-
-def _validate_docx_zip(path: Path) -> None:
-    with zipfile.ZipFile(str(path), "r") as zf:
-        bad = zf.testzip()
-        if bad is not None:
-            raise ValueError(f"Corrupted ZIP entry: {bad}")
-        names = set(zf.namelist())
-        for required in ("[Content_Types].xml", "word/document.xml"):
-            if required not in names:
-                raise ValueError(f"Missing required entry: {required}")
-        etree.fromstring(zf.read("word/document.xml"))
-        if "word/settings.xml" in names:
-            etree.fromstring(zf.read("word/settings.xml"))
-
-
-def _min_content_width_twips(doc: Document) -> int:
-    widths: list[int] = []
-    for sec in doc.sections:
-        try:
-            inner = sec.page_width.twips - sec.left_margin.twips - sec.right_margin.twips
-            widths.append(max(int(inner), 400))
-        except (AttributeError, TypeError, ValueError):
-            continue
-    return min(widths) if widths else 8640
-
-
-def _preflight_margins_safe(doc: Document, target_margins_mm: dict) -> bool:
-    min_content_twips = None
-    for sec in doc.sections:
-        try:
-            page_w_twips = sec.page_width.twips
-        except (AttributeError, TypeError):
-            continue
-        left_t = Mm(target_margins_mm.get("left", 30)).twips
-        right_t = Mm(target_margins_mm.get("right", 15)).twips
-        content = page_w_twips - left_t - right_t
-        if min_content_twips is None or content < min_content_twips:
-            min_content_twips = content
-
-    if min_content_twips is None or min_content_twips < 400:
-        return False
-
-    slop_twips = 72
-    for table in doc.tables:
-        el = table._tbl
-        tbl_pr = el.tblPr
-        if tbl_pr is None:
-            continue
-        tbl_w = tbl_pr.find(qn("w:tblW"))
-        if tbl_w is None:
-            continue
-        if tbl_w.get(qn("w:type")) != "dxa":
-            continue
-        w_raw = tbl_w.get(qn("w:w"))
-        try:
-            w_val = int(w_raw) if w_raw is not None else 0
-        except (TypeError, ValueError):
-            continue
-        if w_val > min_content_twips + slop_twips:
-            return False
-
-    return True
-
-
-def _set_table_width_pct100(tbl) -> None:
-    tbl_pr = tbl.tblPr
-    if tbl_pr is None:
-        tbl_pr = OxmlElement("w:tblPr")
-        tbl.insert(0, tbl_pr)
-    for old in tbl_pr.findall(qn("w:tblW")):
-        tbl_pr.remove(old)
-    tbl_w = OxmlElement("w:tblW")
-    tbl_w.set(qn("w:w"), "5000")
-    tbl_w.set(qn("w:type"), "pct")
-    tbl_pr.append(tbl_w)
-
-
-def _clamp_overflow_table_widths(doc: Document, details: list[str]) -> bool:
-    limit = _min_content_width_twips(doc)
-    slop_twips = 72
-    changed_any = False
-    seen: set[int] = set()
-    for table in doc.tables:
-        el = table._tbl
-        tid = id(el)
-        if tid in seen:
-            continue
-        seen.add(tid)
-        tbl_pr = el.tblPr
-        if tbl_pr is None:
-            continue
-        tbl_w = tbl_pr.find(qn("w:tblW"))
-        if tbl_w is None:
-            continue
-        if tbl_w.get(qn("w:type")) != "dxa":
-            continue
-        w_raw = tbl_w.get(qn("w:w"))
-        try:
-            w_val = int(w_raw) if w_raw is not None else 0
-        except (TypeError, ValueError):
-            continue
-        if w_val <= limit + slop_twips:
-            continue
-        _set_table_width_pct100(el)
-        changed_any = True
-    if changed_any:
-        details.append("Tables: width clamped to text area (100%)")
-    return changed_any
-
-
-def _fix_section_margins(
-    section, margins_mm: dict, sec_idx: int, details: list[str],
-) -> bool:
-    changed = False
-    for key in ("left", "right", "top", "bottom"):
-        target_mm = margins_mm.get(key)
-        if target_mm is None:
-            continue
-        attr = f"{key}_margin"
-        current = getattr(section, attr, None)
-        target = Mm(target_mm)
-        if current is None or abs(int(current) - int(target)) > int(Mm(0.5)):
-            setattr(section, attr, target)
-            changed = True
-    if changed:
-        details.append(f"Section #{sec_idx + 1}: margins fixed")
-    return changed
-
-
 def _fix_heading(paragraph, idx: int, cfg: "_AutoFixConfig", details: list[str]) -> bool:
     changed = False
     for run in paragraph.runs:
-        if _is_field_code_run(run):
+        if is_field_code_run(run):
             continue
         if cfg.heading_font and run.font.name != cfg.heading_font:
             run.font.name = cfg.heading_font
@@ -515,6 +362,13 @@ class _AutoFixConfig:
     normalize_margins: bool
     normalize_headings: bool
     normalize_table_width: bool
+    normalize_font_color: bool
+    target_font_color: str
+    remove_italic: bool
+    normalize_list_indent: bool
+    normalize_list_markers: bool
+    normalize_dashes: bool
+    remove_caption_trailing_dot: bool
     line_spacing: float
     first_line_indent_mm: float
     space_before_pt: float
@@ -557,6 +411,13 @@ class _AutoFixConfig:
             normalize_margins=bool(params.get("normalize_margins", ad.get("normalize_margins", False))),
             normalize_headings=bool(params.get("normalize_headings", ad.get("normalize_headings", True))),
             normalize_table_width=bool(params.get("normalize_table_width", ad.get("normalize_table_width", True))),
+            normalize_font_color=bool(params.get("normalize_font_color", ad.get("normalize_font_color", True))),
+            target_font_color=str(params.get("target_font_color", ad.get("target_font_color", "000000"))),
+            remove_italic=bool(params.get("remove_italic", ad.get("remove_italic", True))),
+            normalize_list_indent=bool(params.get("normalize_list_indent", ad.get("normalize_list_indent", True))),
+            normalize_list_markers=bool(params.get("normalize_list_markers", ad.get("normalize_list_markers", True))),
+            normalize_dashes=bool(params.get("normalize_dashes", ad.get("normalize_dashes", True))),
+            remove_caption_trailing_dot=bool(params.get("remove_caption_trailing_dot", ad.get("remove_caption_trailing_dot", True))),
             line_spacing=float(body.get("line_spacing", 1.5)),
             first_line_indent_mm=float(body.get("first_line_indent_mm", 12.5)),
             space_before_pt=float(params.get("space_before_pt", ad.get("space_before_pt", 0))),

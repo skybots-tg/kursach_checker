@@ -75,6 +75,12 @@ function renderAutofix(rules, config, stats) {
         ${afToggle('af-indent', 'Красная строка', '', d.normalize_first_line_indent)}
         ${afToggle('af-before-after', 'Интервалы до/после', '', d.normalize_spacing_before_after)}
         ${afToggle('af-font', 'Шрифт и кегль', '', d.normalize_font)}
+        ${afToggle('af-font-color', 'Цвет текста', 'Устанавливать чёрный цвет', d.normalize_font_color)}
+        ${afToggle('af-italic', 'Убирать курсив', 'Удалять курсивное начертание', d.remove_italic)}
+        ${afToggle('af-list-indent', 'Отступы списков', 'Убирать отступ в списках', d.normalize_list_indent)}
+        ${afToggle('af-list-markers', 'Маркеры списков', 'Заменять на тире', d.normalize_list_markers)}
+        ${afToggle('af-dashes', 'Длинные тире', 'Заменять на короткие', d.normalize_dashes)}
+        ${afToggle('af-caption-dot', 'Точка в подписях', 'Убирать в конце подписей', d.remove_caption_trailing_dot)}
         <div class="form-row" style="margin-top:14px">
           <div class="form-group">
             <label class="form-label">Интервал до абзаца (pt)</label>
@@ -140,6 +146,12 @@ async function saveAutofixDefaults() {
       normalize_first_line_indent: isChecked('af-indent'),
       normalize_spacing_before_after: isChecked('af-before-after'),
       normalize_font: isChecked('af-font'),
+      normalize_font_color: isChecked('af-font-color'),
+      remove_italic: isChecked('af-italic'),
+      normalize_list_indent: isChecked('af-list-indent'),
+      normalize_list_markers: isChecked('af-list-markers'),
+      normalize_dashes: isChecked('af-dashes'),
+      remove_caption_trailing_dot: isChecked('af-caption-dot'),
       space_before_pt: parseFloat(getVal('af-space-before')) || 0,
       space_after_pt: parseFloat(getVal('af-space-after')) || 0,
     });

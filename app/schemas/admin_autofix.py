@@ -25,6 +25,12 @@ class AutofixDefaultsIn(BaseModel):
     normalize_margins: bool = False
     normalize_table_width: bool = True
     normalize_headings: bool = True
+    normalize_font_color: bool = True
+    remove_italic: bool = True
+    normalize_list_indent: bool = True
+    normalize_list_markers: bool = True
+    normalize_dashes: bool = True
+    remove_caption_trailing_dot: bool = True
     space_before_pt: float = Field(0.0, ge=0)
     space_after_pt: float = Field(0.0, ge=0)
 
@@ -97,6 +103,36 @@ AUTOFIX_RULES_CATALOG: list[AutofixRuleInfo] = [
         description="Нормализует шрифт и кегль заголовков по шаблону",
         safe=False,
         default_enabled=False,
+    ),
+    AutofixRuleInfo(
+        rule_id="normalize_font_color",
+        title="Цвет текста",
+        description="Устанавливает чёрный цвет для всего текста, включая заголовки и оглавление",
+    ),
+    AutofixRuleInfo(
+        rule_id="remove_italic",
+        title="Удаление курсива",
+        description="Убирает курсивное начертание из всего текста по ГОСТ",
+    ),
+    AutofixRuleInfo(
+        rule_id="normalize_list_indent",
+        title="Отступы списков",
+        description="Убирает красную строку и лишний отступ у элементов перечислений",
+    ),
+    AutofixRuleInfo(
+        rule_id="normalize_list_markers",
+        title="Маркеры списков",
+        description="Заменяет маркеры-кружочки и прочие символы на тире",
+    ),
+    AutofixRuleInfo(
+        rule_id="normalize_dashes",
+        title="Длинные тире",
+        description="Заменяет длинные тире на короткие в тексте (кроме перечислений)",
+    ),
+    AutofixRuleInfo(
+        rule_id="remove_caption_trailing_dot",
+        title="Точка в подписях",
+        description="Убирает завершающую точку в подписях рисунков и таблиц",
     ),
 ]
 
