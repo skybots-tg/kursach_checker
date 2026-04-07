@@ -74,7 +74,7 @@ def fix_font_color_styles(doc: Document, details: list[str]) -> bool:
     return changed
 
 
-def fix_font_color_runs(paragraph, idx: int, details: list[str]) -> bool:
+def fix_font_color_runs(paragraph, para_label: str, details: list[str]) -> bool:
     changed = False
     for run in paragraph.runs:
         if is_field_code_run(run):
@@ -90,7 +90,7 @@ def fix_font_color_runs(paragraph, idx: int, details: list[str]) -> bool:
         except (AttributeError, TypeError):
             pass
     if changed:
-        details.append(f"Paragraph #{idx + 1}: font color -> black")
+        details.append(f"{para_label}: font color -> black")
     return changed
 
 
@@ -108,7 +108,7 @@ def fix_italic_styles(doc: Document, details: list[str]) -> bool:
     return changed
 
 
-def fix_remove_italic(paragraph, idx: int, details: list[str]) -> bool:
+def fix_remove_italic(paragraph, para_label: str, details: list[str]) -> bool:
     changed = False
     for run in paragraph.runs:
         if is_field_code_run(run):
@@ -117,23 +117,53 @@ def fix_remove_italic(paragraph, idx: int, details: list[str]) -> bool:
             run.italic = False
             changed = True
     if changed:
-        details.append(f"Paragraph #{idx + 1}: italic removed")
+        details.append(f"{para_label}: italic removed")
     return changed
 
 
-def fix_list_indent(paragraph, idx: int, details: list[str]) -> bool:
+def fix_list_indent(paragraph, para_label: str, details: list[str]) -> bool:
+    pf = paragraph.paragraph_format
+    changed = False
     eff = effective_first_line_indent_mm(paragraph)
-    if abs(eff) < 0.5:
-        return False
-    paragraph.paragraph_format.first_line_indent = Mm(0)
-    details.append(f"Paragraph #{idx + 1}: list indent zeroed")
-    return True
+    if abs(eff) > 0.5:
+        pf.first_line_indent = Mm(0)
+        changed = True
+    if pf.left_indent is not None and int(pf.left_indent) > int(Mm(0.5)):
+        pf.left_indent = Mm(0)
+        changed = True
+    pPr_el = paragraph._element.find(qn("w:pPr"))
+    if pPr_el is not None:
+        ind = pPr_el.find(qn("w:ind"))
+        if ind is not None:
+            for attr_name in (qn("w:left"), qn("w:start")):
+                attr_val = ind.get(attr_name)
+                if attr_val is not None:
+                    try:
+                        if int(attr_val) > 0:
+                            ind.set(attr_name, "0")
+                            changed = True
+                    except (ValueError, TypeError):
+                        pass
+            hanging = ind.get(qn("w:hanging"))
+            if hanging is not None:
+                try:
+                    if int(hanging) > 0:
+                        ind.attrib.pop(qn("w:hanging"), None)
+                        changed = True
+                except (ValueError, TypeError):
+                    pass
+    if changed:
+        details.append(f"{para_label}: list indent zeroed")
+    return changed
 
 
 _ALL_MARKER_CHARS = _BULLET_CHARS | frozenset((_EN_DASH, _EM_DASH))
 
 
-def fix_markers_text(paragraph, idx: int, details: list[str]) -> bool:
+def fix_markers_text(
+    paragraph, para_label: str, details: list[str],
+    marker_char: str = _HYPHEN,
+) -> bool:
     if not paragraph.runs:
         return False
     full = paragraph.text.lstrip()
@@ -147,8 +177,8 @@ def fix_markers_text(paragraph, idx: int, details: list[str]) -> bool:
         if stripped and stripped[0] in _ALL_MARKER_CHARS:
             ws = rt[: len(rt) - len(stripped)]
             rest = stripped[1:].lstrip()
-            run.text = ws + _HYPHEN + " " + rest
-            details.append(f"Paragraph #{idx + 1}: marker -> dash")
+            run.text = ws + marker_char + " " + rest
+            details.append(f"{para_label}: marker -> {marker_char}")
             return True
         break
     return False
@@ -156,6 +186,7 @@ def fix_markers_text(paragraph, idx: int, details: list[str]) -> bool:
 
 def fix_numbering_bullets(
     doc: Document, body_font: str, details: list[str],
+    marker_char: str = _HYPHEN,
 ) -> bool:
     try:
         npart = doc.part.numbering_part
@@ -173,8 +204,8 @@ def fix_numbering_bullets(
         if lt is None:
             continue
         val = lt.get(qn("w:val")) or ""
-        if val and val != _HYPHEN:
-            lt.set(qn("w:val"), _HYPHEN)
+        if val and val != marker_char:
+            lt.set(qn("w:val"), marker_char)
             rPr = lvl.find(qn("w:rPr"))
             if rPr is not None:
                 rFonts = rPr.find(qn("w:rFonts"))
@@ -189,7 +220,7 @@ def fix_numbering_bullets(
     return changed
 
 
-def fix_dashes_in_text(paragraph, idx: int, details: list[str]) -> bool:
+def fix_dashes_in_text(paragraph, para_label: str, details: list[str]) -> bool:
     changed = False
     for run in paragraph.runs:
         if is_field_code_run(run):
@@ -199,11 +230,11 @@ def fix_dashes_in_text(paragraph, idx: int, details: list[str]) -> bool:
             run.text = t.replace(_EM_DASH, _HYPHEN).replace(_EN_DASH, _HYPHEN)
             changed = True
     if changed:
-        details.append(f"Paragraph #{idx + 1}: long dashes -> short")
+        details.append(f"{para_label}: long dashes -> short")
     return changed
 
 
-def fix_caption_trailing_dot(paragraph, idx: int, details: list[str]) -> bool:
+def fix_caption_trailing_dot(paragraph, para_label: str, details: list[str]) -> bool:
     text = paragraph.text.strip()
     if not text.endswith(".") or text.endswith(".."):
         return False
@@ -214,7 +245,7 @@ def fix_caption_trailing_dot(paragraph, idx: int, details: list[str]) -> bool:
         s = rt.rstrip()
         if s and s.endswith(".") and not s.endswith(".."):
             run.text = s[:-1] + rt[len(s):]
-            details.append(f"Paragraph #{idx + 1}: caption trailing dot removed")
+            details.append(f"{para_label}: caption trailing dot removed")
             return True
         if s:
             break
@@ -397,6 +428,46 @@ def min_content_width_twips(doc: Document) -> int:
         except (AttributeError, TypeError, ValueError):
             continue
     return min(widths) if widths else 8640
+
+
+def iter_table_cell_paragraphs(doc: Document):
+    seen: set[int] = set()
+    for table in doc.tables:
+        yield from _walk_table_paragraphs(table, seen)
+
+
+def _walk_table_paragraphs(table, seen: set[int]):
+    for row in table.rows:
+        for cell in row.cells:
+            for p in cell.paragraphs:
+                eid = id(p._element)
+                if eid not in seen:
+                    seen.add(eid)
+                    yield p
+            for nested in cell.tables:
+                yield from _walk_table_paragraphs(nested, seen)
+
+
+def fix_hyperlink_colors(paragraph, para_label: str, details: list[str]) -> bool:
+    changed = False
+    for hl in paragraph._element.findall(qn("w:hyperlink")):
+        for r_elem in hl.findall(qn("w:r")):
+            rPr = r_elem.find(qn("w:rPr"))
+            if rPr is None:
+                continue
+            color_el = rPr.find(qn("w:color"))
+            if color_el is None:
+                continue
+            val = color_el.get(qn("w:val"))
+            if val and val.lower() != "000000":
+                color_el.set(qn("w:val"), "000000")
+                for attr in (qn("w:themeColor"), qn("w:themeTint"), qn("w:themeShade")):
+                    if color_el.get(attr) is not None:
+                        del color_el.attrib[attr]
+                changed = True
+    if changed:
+        details.append(f"{para_label}: hyperlink color -> black")
+    return changed
 
 
 def fix_section_margins(

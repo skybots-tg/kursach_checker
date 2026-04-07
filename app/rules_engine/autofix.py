@@ -15,6 +15,7 @@ from app.rules_engine.autofix_helpers import (
     fix_dashes_in_text,
     fix_font_color_runs,
     fix_font_color_styles,
+    fix_hyperlink_colors,
     fix_italic_styles,
     fix_list_indent,
     fix_markers_text,
@@ -23,6 +24,7 @@ from app.rules_engine.autofix_helpers import (
     fix_section_margins,
     is_field_code_run,
     is_manual_list_para,
+    iter_table_cell_paragraphs,
     postprocess_fixed_docx,
     preflight_margins_safe,
 )
@@ -160,7 +162,7 @@ def apply_safe_autofixes(
             changed = True
 
     if cfg.normalize_list_markers:
-        if fix_numbering_bullets(doc, cfg.font_name, details):
+        if fix_numbering_bullets(doc, cfg.font_name, details, cfg.list_marker_char):
             changed = True
 
     if cfg.normalize_margins and not skip_margins_safety:
@@ -186,18 +188,23 @@ def apply_safe_autofixes(
         if not text:
             continue
 
+        para_label = f"Paragraph #{idx + 1}"
+
         if cfg.normalize_font_color:
-            if fix_font_color_runs(paragraph, idx, details):
+            if fix_font_color_runs(paragraph, para_label, details):
+                changed = True
+                change_count += 1
+            if fix_hyperlink_colors(paragraph, para_label, details):
                 changed = True
                 change_count += 1
 
         if cfg.remove_italic:
-            if fix_remove_italic(paragraph, idx, details):
+            if fix_remove_italic(paragraph, para_label, details):
                 changed = True
                 change_count += 1
 
         if cfg.remove_caption_trailing_dot:
-            if fix_caption_trailing_dot(paragraph, idx, details):
+            if fix_caption_trailing_dot(paragraph, para_label, details):
                 changed = True
                 change_count += 1
 
@@ -225,17 +232,17 @@ def apply_safe_autofixes(
         pf = paragraph.paragraph_format
 
         if is_list and cfg.normalize_list_markers:
-            if fix_markers_text(paragraph, idx, details):
+            if fix_markers_text(paragraph, para_label, details, cfg.list_marker_char):
                 changed = True
                 change_count += 1
 
         if is_list and cfg.normalize_list_indent:
-            if fix_list_indent(paragraph, idx, details):
+            if fix_list_indent(paragraph, para_label, details):
                 changed = True
                 change_count += 1
 
         if not is_list and cfg.normalize_dashes:
-            if fix_dashes_in_text(paragraph, idx, details):
+            if fix_dashes_in_text(paragraph, para_label, details):
                 changed = True
                 change_count += 1
 
@@ -244,7 +251,7 @@ def apply_safe_autofixes(
                 paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
                 changed = True
                 change_count += 1
-                details.append(f"Paragraph #{idx + 1}: alignment justify")
+                details.append(f"{para_label}: alignment justify")
 
         if cfg.normalize_line_spacing:
             eff_ls = effective_line_spacing(paragraph)
@@ -252,7 +259,7 @@ def apply_safe_autofixes(
                 pf.line_spacing = cfg.line_spacing
                 changed = True
                 change_count += 1
-                details.append(f"Paragraph #{idx + 1}: line spacing {cfg.line_spacing}")
+                details.append(f"{para_label}: line spacing {cfg.line_spacing}")
 
         if not is_list and cfg.normalize_first_line_indent:
             eff_indent = effective_first_line_indent_mm(paragraph)
@@ -260,21 +267,21 @@ def apply_safe_autofixes(
                 pf.first_line_indent = Mm(cfg.first_line_indent_mm)
                 changed = True
                 change_count += 1
-                details.append(f"Paragraph #{idx + 1}: first line indent {cfg.first_line_indent_mm} mm")
+                details.append(f"{para_label}: first line indent {cfg.first_line_indent_mm} mm")
 
-        if not is_list and cfg.normalize_spacing_before_after:
+        if cfg.normalize_spacing_before_after:
             eff_sb = effective_space_before_pt(paragraph)
             if abs(eff_sb - cfg.space_before_pt) > 0.2:
                 pf.space_before = Pt(cfg.space_before_pt)
                 changed = True
                 change_count += 1
-                details.append(f"Paragraph #{idx + 1}: spacing before {cfg.space_before_pt} pt")
+                details.append(f"{para_label}: spacing before {cfg.space_before_pt} pt")
             eff_sa = effective_space_after_pt(paragraph)
             if abs(eff_sa - cfg.space_after_pt) > 0.2:
                 pf.space_after = Pt(cfg.space_after_pt)
                 changed = True
                 change_count += 1
-                details.append(f"Paragraph #{idx + 1}: spacing after {cfg.space_after_pt} pt")
+                details.append(f"{para_label}: spacing after {cfg.space_after_pt} pt")
 
         if cfg.normalize_font:
             font_changed = False
@@ -292,7 +299,43 @@ def apply_safe_autofixes(
             if font_changed:
                 changed = True
                 change_count += 1
-                details.append(f"Paragraph #{idx + 1}: font {cfg.font_name}, {cfg.font_size_pt}pt")
+                details.append(f"{para_label}: font {cfg.font_name}, {cfg.font_size_pt}pt")
+
+    for t_idx, t_para in enumerate(iter_table_cell_paragraphs(doc)):
+        if change_count >= max_changes:
+            break
+        t_text = (t_para.text or "").strip()
+        if not t_text:
+            continue
+        t_label = f"Table paragraph #{t_idx + 1}"
+        if cfg.normalize_font_color:
+            if fix_font_color_runs(t_para, t_label, details):
+                changed = True
+                change_count += 1
+            if fix_hyperlink_colors(t_para, t_label, details):
+                changed = True
+                change_count += 1
+        if cfg.remove_italic:
+            if fix_remove_italic(t_para, t_label, details):
+                changed = True
+                change_count += 1
+        if cfg.remove_caption_trailing_dot:
+            if fix_caption_trailing_dot(t_para, t_label, details):
+                changed = True
+                change_count += 1
+        t_is_list = _is_list_para(t_para) or is_manual_list_para(t_text)
+        if t_is_list and cfg.normalize_list_markers:
+            if fix_markers_text(t_para, t_label, details, cfg.list_marker_char):
+                changed = True
+                change_count += 1
+        if t_is_list and cfg.normalize_list_indent:
+            if fix_list_indent(t_para, t_label, details):
+                changed = True
+                change_count += 1
+        if not t_is_list and cfg.normalize_dashes:
+            if fix_dashes_in_text(t_para, t_label, details):
+                changed = True
+                change_count += 1
 
     if cfg.normalize_table_width and not skip_tables_safety and clamp_overflow_table_widths(doc, details):
         changed = True
@@ -367,6 +410,7 @@ class _AutoFixConfig:
     remove_italic: bool
     normalize_list_indent: bool
     normalize_list_markers: bool
+    list_marker_char: str
     normalize_dashes: bool
     remove_caption_trailing_dot: bool
     line_spacing: float
@@ -416,6 +460,7 @@ class _AutoFixConfig:
             remove_italic=bool(params.get("remove_italic", ad.get("remove_italic", True))),
             normalize_list_indent=bool(params.get("normalize_list_indent", ad.get("normalize_list_indent", True))),
             normalize_list_markers=bool(params.get("normalize_list_markers", ad.get("normalize_list_markers", True))),
+            list_marker_char=str(params.get("list_marker_char", ad.get("list_marker_char", "-"))),
             normalize_dashes=bool(params.get("normalize_dashes", ad.get("normalize_dashes", True))),
             remove_caption_trailing_dot=bool(params.get("remove_caption_trailing_dot", ad.get("remove_caption_trailing_dot", True))),
             line_spacing=float(body.get("line_spacing", 1.5)),
