@@ -127,12 +127,39 @@ async def get_template_blocks(template_id: int, db: AsyncSession = Depends(get_d
     )
     if not version:
         raise HTTPException(status_code=404, detail="Версия шаблона не найдена")
+    blocks = _merge_blocks_with_defaults(version.rules_json.get("blocks", []))
     return {
         "template_id": template_id,
         "version_id": version.id,
         "version_number": version.version_number,
-        "blocks": version.rules_json.get("blocks", []),
+        "blocks": blocks,
     }
+
+
+def _deep_merge_defaults(stored: dict, defaults: dict) -> dict:
+    result = dict(stored)
+    for key, default_val in defaults.items():
+        if key not in result:
+            result[key] = default_val
+        elif isinstance(default_val, dict) and isinstance(result[key], dict):
+            result[key] = _deep_merge_defaults(result[key], default_val)
+    return result
+
+
+def _merge_blocks_with_defaults(blocks: list[dict]) -> list[dict]:
+    defaults_map = {b.key: b.model_dump() for b in DEFAULT_TEMPLATE_BLOCKS}
+    merged = []
+    for block in blocks:
+        if not isinstance(block, dict):
+            merged.append(block)
+            continue
+        key = block.get("key")
+        if key in defaults_map:
+            default_params = defaults_map[key].get("params", {})
+            stored_params = block.get("params") or {}
+            block["params"] = _deep_merge_defaults(stored_params, default_params)
+        merged.append(block)
+    return merged
 
 
 @router.post("/{template_id}/versions")
