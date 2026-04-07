@@ -1,8 +1,9 @@
 import logging
+import time
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.router import api_router
@@ -10,6 +11,15 @@ from app.core.config import settings
 from app.db.init_db import create_tables
 
 logger = logging.getLogger(__name__)
+
+
+_app_version = str(int(time.time()))
+
+
+def _render_html(path: str) -> HTMLResponse:
+    with open(path, encoding="utf-8") as f:
+        html = f.read().replace("__APP_VERSION__", _app_version)
+    return HTMLResponse(html)
 
 
 def create_app() -> FastAPI:
@@ -35,19 +45,18 @@ def create_app() -> FastAPI:
             await create_tables()
 
     @app.get("/admin", tags=["web"])
-    async def admin_app() -> FileResponse:
-        return FileResponse("web/admin/index.html")
+    async def admin_app() -> HTMLResponse:
+        return _render_html("web/admin/index.html")
 
     @app.get("/health", tags=["system"])
     async def health() -> dict[str, str]:
         return {"status": "ok"}
 
     @app.get("/{path:path}", tags=["web"], include_in_schema=False)
-    async def mini_app_spa(path: str) -> FileResponse:
-        return FileResponse(
-            "web/mini_app/index.html",
-            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
-        )
+    async def mini_app_spa(path: str) -> HTMLResponse:
+        resp = _render_html("web/mini_app/index.html")
+        resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        return resp
 
     return app
 

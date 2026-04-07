@@ -188,6 +188,7 @@ function escHtml(s) {
 
 function formatDate(iso) {
   if (!iso) return '—';
+  if (iso.includes('T') && !/Z$|[+-]\d{2}:?\d{2}$/.test(iso)) iso += 'Z';
   const d = new Date(iso);
   return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour12: false })
     + ' ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false });

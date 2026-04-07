@@ -110,6 +110,7 @@
 
   function fmtDate(iso) {
     if (!iso) return '\u2014';
+    if (iso.includes('T') && !/Z$|[+-]\d{2}:?\d{2}$/.test(iso)) iso += 'Z';
     return new Date(iso).toLocaleString('ru-RU', {
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit', hour12: false,
