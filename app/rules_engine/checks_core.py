@@ -257,14 +257,12 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
     expected_line_spacing = float(body.get("line_spacing", 1.5))
     expected_indent = float(body.get("first_line_indent_mm", 12.5))
     expected_alignment = str(body.get("alignment", "JUSTIFY")).upper()
-    max_samples = int(params.get("max_paragraphs_sample", 500))
 
     counts: dict[str, int] = {
         "font": 0, "size": 0, "spacing": 0, "indent": 0,
         "alignment": 0, "highlight": 0,
     }
 
-    checked = 0
     for paragraph in snapshot.paragraphs:
         if not paragraph.text or paragraph.is_heading:
             continue
@@ -272,9 +270,6 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
             continue
         if paragraph.is_toc_entry:
             continue
-        checked += 1
-        if checked > max_samples:
-            break
 
         if paragraph.runs_fonts and counts["font"] < _MAX_FINDINGS_PER_TYPE:
             font = paragraph.runs_fonts[0].lower()
