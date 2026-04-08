@@ -15,7 +15,6 @@ from app.rules_engine.autofix_helpers import (
     fix_dashes_in_text,
     fix_font_color_runs,
     fix_font_color_styles,
-    fix_hyperlink_colors,
     fix_italic_styles,
     fix_list_indent,
     fix_markers_text,
@@ -194,9 +193,6 @@ def apply_safe_autofixes(
             if fix_font_color_runs(paragraph, para_label, details):
                 changed = True
                 change_count += 1
-            if fix_hyperlink_colors(paragraph, para_label, details):
-                changed = True
-                change_count += 1
 
         if cfg.remove_italic:
             if fix_remove_italic(paragraph, para_label, details):
@@ -310,9 +306,6 @@ def apply_safe_autofixes(
         t_label = f"Table paragraph #{t_idx + 1}"
         if cfg.normalize_font_color:
             if fix_font_color_runs(t_para, t_label, details):
-                changed = True
-                change_count += 1
-            if fix_hyperlink_colors(t_para, t_label, details):
                 changed = True
                 change_count += 1
         if cfg.remove_italic:

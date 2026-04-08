@@ -31,6 +31,19 @@ _CAPTION_RE = re.compile(
     r"|\u0422\u0430\u0431\u043b\u0438\u0446\u0430"
     r")\s+\d+"
 )
+_THEME_COLOR_ATTRS = (qn("w:themeColor"), qn("w:themeTint"), qn("w:themeShade"))
+
+
+def _set_color_to_black(color_el) -> bool:
+    val = color_el.get(qn("w:val"))
+    needs_fix = (val and val.lower() != "000000") or color_el.get(qn("w:themeColor")) is not None
+    if not needs_fix:
+        return False
+    color_el.set(qn("w:val"), "000000")
+    for attr in _THEME_COLOR_ATTRS:
+        if color_el.get(attr) is not None:
+            del color_el.attrib[attr]
+    return True
 
 
 def is_field_code_run(run) -> bool:
@@ -75,20 +88,22 @@ def fix_font_color_styles(doc: Document, details: list[str]) -> bool:
 
 
 def fix_font_color_runs(paragraph, para_label: str, details: list[str]) -> bool:
+    p_elem = paragraph._element
     changed = False
-    for run in paragraph.runs:
-        if is_field_code_run(run):
+    pPr = p_elem.find(qn("w:pPr"))
+    if pPr is not None:
+        rPr_def = pPr.find(qn("w:rPr"))
+        if rPr_def is not None:
+            c_el = rPr_def.find(qn("w:color"))
+            if c_el is not None and _set_color_to_black(c_el):
+                changed = True
+    for r_elem in p_elem.iter(qn("w:r")):
+        rPr = r_elem.find(qn("w:rPr"))
+        if rPr is None:
             continue
-        try:
-            c = run.font.color
-            if c.rgb is not None and c.rgb != _BLACK:
-                c.rgb = _BLACK
-                changed = True
-            elif c.theme_color is not None:
-                c.rgb = _BLACK
-                changed = True
-        except (AttributeError, TypeError):
-            pass
+        c_el = rPr.find(qn("w:color"))
+        if c_el is not None and _set_color_to_black(c_el):
+            changed = True
     if changed:
         details.append(f"{para_label}: font color -> black")
     return changed
@@ -109,13 +124,26 @@ def fix_italic_styles(doc: Document, details: list[str]) -> bool:
 
 
 def fix_remove_italic(paragraph, para_label: str, details: list[str]) -> bool:
+    p_elem = paragraph._element
     changed = False
-    for run in paragraph.runs:
-        if is_field_code_run(run):
+    pPr = p_elem.find(qn("w:pPr"))
+    if pPr is not None:
+        rPr_default = pPr.find(qn("w:rPr"))
+        if rPr_default is not None:
+            for tag in (qn("w:i"), qn("w:iCs")):
+                el = rPr_default.find(tag)
+                if el is not None:
+                    rPr_default.remove(el)
+                    changed = True
+    for r_elem in p_elem.iter(qn("w:r")):
+        rPr = r_elem.find(qn("w:rPr"))
+        if rPr is None:
             continue
-        if run.italic:
-            run.italic = False
-            changed = True
+        for tag in (qn("w:i"), qn("w:iCs")):
+            el = rPr.find(tag)
+            if el is not None:
+                rPr.remove(el)
+                changed = True
     if changed:
         details.append(f"{para_label}: italic removed")
     return changed
@@ -124,8 +152,7 @@ def fix_remove_italic(paragraph, para_label: str, details: list[str]) -> bool:
 def fix_list_indent(paragraph, para_label: str, details: list[str]) -> bool:
     pf = paragraph.paragraph_format
     changed = False
-    eff = effective_first_line_indent_mm(paragraph)
-    if abs(eff) > 0.5:
+    if abs(effective_first_line_indent_mm(paragraph)) > 0.5:
         pf.first_line_indent = Mm(0)
         changed = True
     if pf.left_indent is not None and int(pf.left_indent) > int(Mm(0.5)):
@@ -135,20 +162,16 @@ def fix_list_indent(paragraph, para_label: str, details: list[str]) -> bool:
     if pPr_el is not None:
         ind = pPr_el.find(qn("w:ind"))
         if ind is not None:
-            for attr_name in (qn("w:left"), qn("w:start")):
-                attr_val = ind.get(attr_name)
-                if attr_val is not None:
-                    try:
-                        if int(attr_val) > 0:
-                            ind.set(attr_name, "0")
-                            changed = True
-                    except (ValueError, TypeError):
-                        pass
-            hanging = ind.get(qn("w:hanging"))
-            if hanging is not None:
+            for a in (qn("w:left"), qn("w:start"), qn("w:hanging")):
+                v = ind.get(a)
+                if v is None:
+                    continue
                 try:
-                    if int(hanging) > 0:
-                        ind.attrib.pop(qn("w:hanging"), None)
+                    if int(v) > 0:
+                        if a == qn("w:hanging"):
+                            ind.attrib.pop(a, None)
+                        else:
+                            ind.set(a, "0")
                         changed = True
                 except (ValueError, TypeError):
                     pass
@@ -240,11 +263,12 @@ def fix_caption_trailing_dot(paragraph, para_label: str, details: list[str]) -> 
         return False
     if not _CAPTION_RE.match(text):
         return False
-    for run in reversed(paragraph.runs):
-        rt = run.text
-        s = rt.rstrip()
+    t_elements = list(paragraph._element.iter(qn("w:t")))
+    for t_el in reversed(t_elements):
+        s = (t_el.text or "").rstrip()
         if s and s.endswith(".") and not s.endswith(".."):
-            run.text = s[:-1] + rt[len(s):]
+            tail = (t_el.text or "")[len(s):]
+            t_el.text = s[:-1] + tail
             details.append(f"{para_label}: caption trailing dot removed")
             return True
         if s:
@@ -431,43 +455,23 @@ def min_content_width_twips(doc: Document) -> int:
 
 
 def iter_table_cell_paragraphs(doc: Document):
-    seen: set[int] = set()
+    all_paras: list = []
     for table in doc.tables:
-        yield from _walk_table_paragraphs(table, seen)
+        _collect_table_paras(table, all_paras)
+    seen: set[int] = set()
+    for p in all_paras:
+        eid = id(p._element)
+        if eid not in seen:
+            seen.add(eid)
+            yield p
 
 
-def _walk_table_paragraphs(table, seen: set[int]):
+def _collect_table_paras(table, result: list):
     for row in table.rows:
         for cell in row.cells:
-            for p in cell.paragraphs:
-                eid = id(p._element)
-                if eid not in seen:
-                    seen.add(eid)
-                    yield p
+            result.extend(cell.paragraphs)
             for nested in cell.tables:
-                yield from _walk_table_paragraphs(nested, seen)
-
-
-def fix_hyperlink_colors(paragraph, para_label: str, details: list[str]) -> bool:
-    changed = False
-    for hl in paragraph._element.findall(qn("w:hyperlink")):
-        for r_elem in hl.findall(qn("w:r")):
-            rPr = r_elem.find(qn("w:rPr"))
-            if rPr is None:
-                continue
-            color_el = rPr.find(qn("w:color"))
-            if color_el is None:
-                continue
-            val = color_el.get(qn("w:val"))
-            if val and val.lower() != "000000":
-                color_el.set(qn("w:val"), "000000")
-                for attr in (qn("w:themeColor"), qn("w:themeTint"), qn("w:themeShade")):
-                    if color_el.get(attr) is not None:
-                        del color_el.attrib[attr]
-                changed = True
-    if changed:
-        details.append(f"{para_label}: hyperlink color -> black")
-    return changed
+                _collect_table_paras(nested, result)
 
 
 def fix_section_margins(
