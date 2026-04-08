@@ -44,7 +44,33 @@ function registerPage(id, loader) {
   pageLoaders[id] = loader;
 }
 
-function navigateTo(pageId) {
+function parseHash() {
+  const raw = location.hash.replace('#', '');
+  const slashIdx = raw.indexOf('/');
+  let page, sub;
+  if (slashIdx !== -1) {
+    page = raw.substring(0, slashIdx);
+    sub = raw.substring(slashIdx + 1);
+  } else {
+    page = raw;
+    sub = null;
+  }
+  if (!page || !document.getElementById('page-' + page)) page = 'dashboard';
+  return { page, sub };
+}
+
+const entityHandlers = {};
+
+function registerEntityHandler(pageId, handler, skipLoader) {
+  entityHandlers[pageId] = { fn: handler, skipPageLoader: !!skipLoader };
+}
+
+window._modalEntityHash = false;
+
+async function navigateTo(pageId, sub) {
+  window._modalEntityHash = false;
+  closeModal();
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
 
@@ -57,9 +83,17 @@ function navigateTo(pageId) {
   const topTitle = document.getElementById('topbar-title');
   if (topTitle && link) topTitle.textContent = link.dataset.label || link.textContent.trim();
 
-  if (location.hash !== '#' + pageId) history.replaceState(null, '', '#' + pageId);
+  const hasSub = sub != null && sub !== '';
+  const hash = hasSub ? '#' + pageId + '/' + sub : '#' + pageId;
+  if (location.hash !== hash) history.replaceState(null, '', hash);
 
-  if (pageLoaders[pageId]) pageLoaders[pageId]();
+  const handler = hasSub ? entityHandlers[pageId] : null;
+  if (handler && handler.skipPageLoader) {
+    await handler.fn(sub);
+  } else {
+    if (pageLoaders[pageId]) await pageLoaders[pageId]();
+    if (handler) await handler.fn(sub);
+  }
 
   if (window.onboardingCheck) onboardingCheck(pageId);
 
@@ -129,6 +163,11 @@ function openModal(title, bodyHtml, footerHtml) {
 
 function closeModal() {
   document.getElementById('active-modal')?.remove();
+  if (window._modalEntityHash) {
+    window._modalEntityHash = false;
+    const { page } = parseHash();
+    history.replaceState(null, '', '#' + page);
+  }
 }
 
 /* ---- Login Modal ---- */
@@ -334,25 +373,24 @@ function entityTag(type, id, label) {
 function goToEntity(type, id) {
   const map = { user:'users', university:'universities', gost:'gosts', order:'orders', check:'checks', product:'products', template:'templates' };
   if (!map[type]) return;
-  navigateTo(map[type]);
-  if (!id) return;
-  const fn = { user: 'viewUserDetail', order: 'viewOrder', check: 'viewCheck' };
-  if (fn[type] && window[fn[type]]) setTimeout(() => window[fn[type]](id), 150);
+  closeModal();
+  navigateTo(map[type], id ? String(id) : undefined);
 }
 
 /* ---- Init ---- */
-function getPageFromHash() {
-  const id = location.hash.replace('#', '');
-  return document.getElementById('page-' + id) ? id : 'dashboard';
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   if (!getToken()) showLoginModal();
-  else navigateTo(getPageFromHash());
+  else {
+    const { page, sub } = parseHash();
+    navigateTo(page, sub);
+  }
 });
 
 window.addEventListener('hashchange', () => {
-  if (getToken()) navigateTo(getPageFromHash());
+  if (getToken()) {
+    const { page, sub } = parseHash();
+    navigateTo(page, sub);
+  }
 });
 
 async function apiUpload(method, path, formData) {
@@ -398,3 +436,5 @@ window.paginate = paginate;
 window.paginationHtml = paginationHtml;
 window.entityTag = entityTag;
 window.goToEntity = goToEntity;
+window.parseHash = parseHash;
+window.registerEntityHandler = registerEntityHandler;

@@ -134,6 +134,7 @@ async function filterChecks() {
 }
 
 async function viewCheck(id) {
+  history.replaceState(null, '', '#checks/' + id);
   try {
     const data = await api('GET', `/admin/checks/${id}`);
     const c = data.check || {};
@@ -216,10 +217,14 @@ async function viewCheck(id) {
           </div>` : ''}
       </div>`;
     openModal(`Проверка #${id}`, body, `<button class="btn btn-ghost" onclick="closeModal()">Закрыть</button>`);
+    window._modalEntityHash = true;
   } catch (err) {
+    history.replaceState(null, '', '#checks');
     toast('Ошибка: ' + err.message, 'error');
   }
 }
+
+registerEntityHandler('checks', (sub) => viewCheck(parseInt(sub)));
 
 window.checksGoPage = checksGoPage;
 window.filterChecks = filterChecks;

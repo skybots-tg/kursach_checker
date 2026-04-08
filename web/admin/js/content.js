@@ -5,6 +5,8 @@ registerPage('content', loadContent);
 let _contentTab = 'menu';
 
 async function loadContent() {
+  const { sub } = parseHash();
+  if (sub && ['menu', 'texts', 'system'].includes(sub)) _contentTab = sub;
   const page = $('page-content');
   page.innerHTML = loadingHtml();
   try {
@@ -35,6 +37,7 @@ function renderContentPage(bodyHtml, actionBtn) {
 
 function switchContentTab(tab) {
   _contentTab = tab;
+  history.replaceState(null, '', '#content/' + tab);
   loadContent();
 }
 

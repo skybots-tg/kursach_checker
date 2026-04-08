@@ -150,6 +150,8 @@ async function publishTemplate(id) {
   }
 }
 
+registerEntityHandler('templates', (sub) => openTemplateEditor(parseInt(sub)), true);
+
 window.templatesGoPage = templatesGoPage;
 window.showAddTemplate = showAddTemplate;
 window.createTemplate = createTemplate;

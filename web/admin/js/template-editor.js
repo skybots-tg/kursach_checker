@@ -39,7 +39,7 @@ const PARAM_LABELS = {
   doc_policy: 'Политика для .doc файлов',
   detect_course_year: 'Определять курс из документа',
   detect_authors_count: 'Определять число авторов',
-  course_year_regex: 'Регулярное выражение для курса',
+  course_year_regex: 'Правило определения курса',
   authors_labels: 'Метки для поиска авторов',
   allowed_formats: 'Разрешённые форматы работы',
   max_authors: 'Максимум авторов',
@@ -63,6 +63,9 @@ const PARAM_LABELS = {
   forbid_track_changes: 'Запретить режим правок',
   forbid_comments: 'Запретить комментарии',
   forbid_password_protection: 'Запретить защиту паролем',
+  figure_pattern: 'Формат подписи рисунков',
+  table_pattern: 'Формат подписи таблиц',
+  check_sequential_numbering: 'Проверять последовательную нумерацию',
   title_page_no_number: 'Титульный лист без номера',
   sections_requiring_break: 'Разделы с новой страницы (по названию)',
   chapters_require_break: 'Главы с новой страницы',
@@ -94,7 +97,7 @@ const PARAM_HINTS = {
   doc_policy: 'Как поступить, если пользователь загрузит файл в старом формате .doc',
   detect_course_year: 'Система попробует определить курс студента по тексту титульного листа',
   detect_authors_count: 'Система попробует определить количество авторов по титульному листу',
-  course_year_regex: 'Регулярное выражение для извлечения номера курса. Менять только если стандартный шаблон не работает',
+  course_year_regex: 'Настройка правила для определения номера курса из текста документа. Задайте диапазон курсов и ключевое слово',
   authors_labels: 'Ключевые слова для поиска авторов на титульном листе (например: «Выполнил», «Студент»)',
   allowed_formats: 'Какие форматы работ допустимы: академический (классическая структура) или проектный',
   max_authors: 'Максимальное число авторов для каждого формата. Для групповых работ — больше 1',
@@ -122,6 +125,9 @@ const PARAM_HINTS = {
   forbid_track_changes: 'Запретить наличие неприменённых правок (Track Changes)',
   forbid_comments: 'Запретить наличие комментариев в финальном документе',
   forbid_password_protection: 'Документ не должен быть защищён паролем',
+  figure_pattern: 'Задаёт ожидаемый формат подписей к рисункам. Настройте начальное слово, требование к началу строки и наличию описания',
+  table_pattern: 'Задаёт ожидаемый формат подписей к таблицам. Настройте начальное слово, требование к началу строки и наличию описания',
+  check_sequential_numbering: 'Проверять, что рисунки и таблицы пронумерованы последовательно (1, 2, 3...)',
   title_page_no_number: 'Первый (титульный) лист не нумеруется, нумерация начинается со второй страницы',
   sections_requiring_break: 'Названия разделов, которые обязательно начинаются с новой страницы (содержание, введение, заключение и т.д.)',
   chapters_require_break: 'Каждая глава (заголовок 1-го уровня) должна начинаться с новой страницы. Подпункты (1.1, 1.2) продолжают друг друга',
@@ -165,13 +171,21 @@ let _editBlocks = [];
 let _editVersionNum = 0;
 
 async function openTemplateEditor(id) {
+  const hash = '#templates/' + id;
+  if (location.hash !== hash) history.replaceState(null, '', hash);
   const page = $('page-templates');
   page.innerHTML = loadingHtml();
   try {
-    const [tpl, data] = await Promise.all([
+    const apiCalls = [
       api('GET', `/templates/${id}`),
       api('GET', `/templates/${id}/blocks`),
-    ]);
+    ];
+    if (!_universities.length) apiCalls.push(api('GET', '/universities'));
+    if (!_gosts.length) apiCalls.push(api('GET', '/gosts'));
+    const results = await Promise.all(apiCalls);
+    const [tpl, data] = results;
+    if (results.length > 2) _universities = results[2];
+    if (results.length > 3) _gosts = results[3];
     _editTplId = id;
     _editTplMeta = tpl;
     _editBlocks = JSON.parse(JSON.stringify(data.blocks || []));
@@ -452,6 +466,7 @@ async function saveTemplateChanges() {
       },
     });
     toast('Шаблон сохранён (новая версия создана)', 'success');
+    history.replaceState(null, '', '#templates');
     loadTemplates();
   } catch (err) {
     toast('Ошибка: ' + err.message, 'error');
@@ -461,6 +476,7 @@ async function saveTemplateChanges() {
 function backToTemplateList() {
   _editTplId = null;
   _editBlocks = [];
+  history.replaceState(null, '', '#templates');
   loadTemplates();
 }
 

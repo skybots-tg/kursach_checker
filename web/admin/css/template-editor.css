@@ -319,3 +319,38 @@
 .form-label .param-help,
 .toggle-title .param-help { vertical-align: baseline; }
 .tpl-param-group legend .param-help { vertical-align: baseline; }
+
+/* ---- Regex Builder (visual pattern editors) ---- */
+.regex-builder-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+.regex-builder-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.regex-builder-row .form-group { flex: 1; min-width: 0; }
+.regex-builder-sep {
+  font-size: 15px;
+  color: var(--text-muted);
+  padding-bottom: 10px;
+  flex-shrink: 0;
+}
+.regex-preview {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: var(--accent-soft, #eef1ff);
+  border-radius: var(--radius-sm, 6px);
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.5;
+}
+.regex-preview-label {
+  font-weight: 600;
+  color: var(--accent, #4f6ef7);
+  margin-right: 4px;
+}

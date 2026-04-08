@@ -100,6 +100,7 @@ async function filterOrders() {
 }
 
 async function viewOrder(id) {
+  history.replaceState(null, '', '#orders/' + id);
   try {
     const data = await api('GET', `/admin/orders/${id}`);
     const o = data.order || {};
@@ -148,7 +149,9 @@ async function viewOrder(id) {
       <button class="btn btn-ghost" onclick="closeModal()">Закрыть</button>
       <button class="btn btn-primary" onclick="updateOrderStatus(${id})">Обновить статус</button>`;
     openModal(`Заказ #${id}`, body, footer);
+    window._modalEntityHash = true;
   } catch (err) {
+    history.replaceState(null, '', '#orders');
     toast('Ошибка: ' + err.message, 'error');
   }
 }
@@ -164,6 +167,8 @@ async function updateOrderStatus(id) {
     toast('Ошибка: ' + err.message, 'error');
   }
 }
+
+registerEntityHandler('orders', (sub) => viewOrder(parseInt(sub)));
 
 window.ordersGoPage = ordersGoPage;
 window.filterOrders = filterOrders;

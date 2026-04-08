@@ -91,6 +91,8 @@ function searchUsers() {
 /* ---- User Detail Page ---- */
 
 async function viewUserDetail(id) {
+  const hash = '#users/' + id;
+  if (location.hash !== hash) history.replaceState(null, '', hash);
   const page = $('page-users');
   page.innerHTML = loadingHtml();
   try {
@@ -119,7 +121,7 @@ function renderUserDetail() {
   $('page-users').innerHTML = `
     <div class="page-header">
       <div>
-        <button class="btn btn-ghost btn-sm" onclick="loadUsers()" style="margin-bottom:8px">
+        <button class="btn btn-ghost btn-sm" onclick="backToUserList()" style="margin-bottom:8px">
           ${iconSvg('arrowLeft', 14)} Назад к списку
         </button>
         <h1 class="page-title">${u.username ? '@' + escHtml(u.username) : escHtml(u.first_name || 'Пользователь #' + u.id)}</h1>
@@ -300,6 +302,14 @@ async function setUserCredits(userId) {
   }
 }
 
+function backToUserList() {
+  _userDetailData = null;
+  history.replaceState(null, '', '#users');
+  loadUsers();
+}
+
+registerEntityHandler('users', (sub) => viewUserDetail(parseInt(sub)), true);
+
 window.searchUsers = searchUsers;
 window.usersGoPage = usersGoPage;
 window.viewUserDetail = viewUserDetail;
@@ -308,3 +318,4 @@ window.showEditUserModal = showEditUserModal;
 window.updateUser = updateUser;
 window.showCreditsModal = showCreditsModal;
 window.setUserCredits = setUserCredits;
+window.backToUserList = backToUserList;
