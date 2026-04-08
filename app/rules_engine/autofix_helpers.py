@@ -487,6 +487,54 @@ def fix_page_break_before(paragraph, para_label: str, details: list[str]) -> boo
     details.append(f"{para_label}: page break before added")
     return True
 
+def _is_removable_empty_para(para) -> bool:
+    if (para.text or "").strip():
+        return False
+    for child in para._element:
+        tag = child.tag
+        if tag == qn("w:pPr"):
+            continue
+        if tag in (qn("w:bookmarkStart"), qn("w:bookmarkEnd")):
+            continue
+        if tag == qn("w:r"):
+            for rc in child:
+                if rc.tag == qn("w:rPr"):
+                    continue
+                if rc.tag == qn("w:t") and not (rc.text or "").strip():
+                    continue
+                return False
+        else:
+            return False
+    return True
+
+def remove_empty_paras_before_page_breaks(doc, details: list[str]) -> bool:
+    paragraphs = list(doc.paragraphs)
+    body = doc.element.body
+    to_remove = []
+    seen: set[int] = set()
+
+    for i, para in enumerate(paragraphs):
+        pf = para.paragraph_format
+        if not pf.page_break_before:
+            continue
+        j = i - 1
+        while j >= 0:
+            prev = paragraphs[j]
+            if not _is_removable_empty_para(prev):
+                break
+            eid = id(prev._element)
+            if eid not in seen:
+                seen.add(eid)
+                to_remove.append(prev._element)
+            j -= 1
+
+    for elem in to_remove:
+        body.remove(elem)
+
+    if to_remove:
+        details.append(f"Removed {len(to_remove)} empty paragraphs before page breaks")
+    return len(to_remove) > 0
+
 def fix_section_margins(
     section, margins_mm: dict, sec_idx: int, details: list[str],
 ) -> bool:

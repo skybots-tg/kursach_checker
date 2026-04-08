@@ -29,6 +29,7 @@ from app.rules_engine.autofix_helpers import (
     iter_table_cell_paragraphs,
     postprocess_fixed_docx,
     preflight_margins_safe,
+    remove_empty_paras_before_page_breaks,
     remove_manual_page_breaks,
 )
 from app.rules_engine.checks_advanced import (
@@ -367,6 +368,10 @@ def apply_safe_autofixes(
 
     if cfg.normalize_table_width and not skip_tables_safety and clamp_overflow_table_widths(doc, details):
         changed = True
+
+    if changed:
+        if remove_empty_paras_before_page_breaks(doc, details):
+            pass
 
     if not changed:
         return AutoFixResult(output_file_path=None, details=[])
