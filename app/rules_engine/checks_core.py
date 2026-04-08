@@ -256,9 +256,13 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
     expected_size = float(body.get("size_pt", 14))
     expected_line_spacing = float(body.get("line_spacing", 1.5))
     expected_indent = float(body.get("first_line_indent_mm", 12.5))
-    max_samples = int(params.get("max_paragraphs_sample", 120))
+    expected_alignment = str(body.get("alignment", "JUSTIFY")).upper()
+    max_samples = int(params.get("max_paragraphs_sample", 500))
 
-    counts: dict[str, int] = {"font": 0, "size": 0, "spacing": 0, "indent": 0}
+    counts: dict[str, int] = {
+        "font": 0, "size": 0, "spacing": 0, "indent": 0,
+        "alignment": 0, "highlight": 0,
+    }
 
     checked = 0
     for paragraph in snapshot.paragraphs:
@@ -330,7 +334,40 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
                     recommendation="Установите корректный отступ первой строки",
                 )
 
-    for label, key in [("шрифт", "font"), ("размер шрифта", "size"), ("интервал", "spacing"), ("отступ", "indent")]:
+        if counts["alignment"] < _MAX_FINDINGS_PER_TYPE and len(paragraph.text) >= 50:
+            para_align = paragraph.alignment.upper() if paragraph.alignment else "LEFT"
+            if expected_alignment not in para_align:
+                counts["alignment"] += 1
+                display_align = paragraph.alignment or "LEFT (inherited)"
+                add_finding(
+                    findings,
+                    title="Выравнивание текста",
+                    category="typography",
+                    severity=severity,
+                    expected="По ширине (JUSTIFY)",
+                    found=display_align,
+                    location=f"абзац #{paragraph.index + 1}",
+                    recommendation="Выровняйте основной текст по ширине",
+                )
+
+        if paragraph.has_highlight and counts["highlight"] < _MAX_FINDINGS_PER_TYPE:
+            counts["highlight"] += 1
+            add_finding(
+                findings,
+                title="Заливка/выделение текста",
+                category="typography",
+                severity=severity,
+                expected="Текст без цветного выделения и заливки",
+                found="Обнаружена заливка или выделение цветом",
+                location=f"абзац #{paragraph.index + 1}",
+                recommendation="Уберите заливку и цветное выделение текста",
+            )
+
+    for label, key in [
+        ("шрифт", "font"), ("размер шрифта", "size"),
+        ("интервал", "spacing"), ("отступ", "indent"),
+        ("выравнивание", "alignment"), ("заливка", "highlight"),
+    ]:
         if counts[key] >= _MAX_FINDINGS_PER_TYPE:
             add_finding(
                 findings,

@@ -103,6 +103,7 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
                 "size_pt": 14,
                 "line_spacing": 1.5,
                 "first_line_indent_mm": 12.5,
+                "alignment": "JUSTIFY",
             },
         },
     ),
@@ -167,6 +168,14 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
         title="Таблицы/рисунки/объекты",
         severity="warning",
         params={"forbid_linked_media": True, "require_embedded_objects": False},
+    ),
+    RuleBlock(
+        key="text_cleanliness",
+        title="Посторонние символы",
+        severity="warning",
+        params={
+            "allowed_char_pattern": r"[\w\s\d.,;:!?\"'()\[\]{}<>@#$%^&*+=\-–—/\\|~`№«»…\u00a0\u2013\u2014\u2018\u2019\u201c\u201d\u00ab\u00bb\u2026\u0301]",
+        },
     ),
     RuleBlock(
         key="integrity",

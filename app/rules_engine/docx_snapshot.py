@@ -9,7 +9,7 @@ from pathlib import Path
 from docx import Document
 from docx.oxml.ns import qn
 
-from app.rules_engine.style_resolve import detect_toc_paragraph_indices, walk_style_pPr
+from app.rules_engine.style_resolve import detect_toc_paragraph_indices, effective_alignment, walk_style_pPr
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +46,7 @@ class ParagraphSnapshot:
     runs_bold: list[bool | None]
     is_toc_entry: bool
     page_break_before: bool
+    has_highlight: bool
 
     @property
     def is_heading(self) -> bool:
@@ -247,6 +248,29 @@ def _first_section_title_page(doc: Document) -> bool:
     return bool(doc.sections[0].different_first_page_header_footer)
 
 
+def _has_highlight_or_shading(paragraph) -> bool:
+    for run in paragraph.runs:
+        rPr = run._element.find(qn("w:rPr"))
+        if rPr is None:
+            continue
+        hl = rPr.find(qn("w:highlight"))
+        if hl is not None and hl.get(qn("w:val")) not in (None, "none"):
+            return True
+        shd = rPr.find(qn("w:shd"))
+        if shd is not None:
+            fill = shd.get(qn("w:fill"))
+            if fill and fill.lower() not in ("auto", "ffffff", ""):
+                return True
+    pPr = paragraph._element.find(qn("w:pPr"))
+    if pPr is not None:
+        shd = pPr.find(qn("w:shd"))
+        if shd is not None:
+            fill = shd.get(qn("w:fill"))
+            if fill and fill.lower() not in ("auto", "ffffff", ""):
+                return True
+    return False
+
+
 def _paragraphs(doc: Document, toc_indices: set[int]) -> list[ParagraphSnapshot]:
     result: list[ParagraphSnapshot] = []
     all_paras = doc.paragraphs
@@ -257,6 +281,7 @@ def _paragraphs(doc: Document, toc_indices: set[int]) -> list[ParagraphSnapshot]
         line_spacing = _resolve_line_spacing(paragraph)
         prev_para = all_paras[idx - 1] if idx > 0 else None
         pb_before = _detect_page_break_before(paragraph, prev_para)
+        eff_align = effective_alignment(paragraph)
 
         result.append(
             ParagraphSnapshot(
@@ -264,7 +289,7 @@ def _paragraphs(doc: Document, toc_indices: set[int]) -> list[ParagraphSnapshot]
                 text=text,
                 style_name=getattr(paragraph.style, "name", "") or "",
                 style_id=getattr(paragraph.style, "style_id", "") or "",
-                alignment=_normalize_alignment(paragraph.alignment),
+                alignment=_normalize_alignment(eff_align),
                 first_line_indent_mm=indent,
                 line_spacing=line_spacing,
                 has_explicit_before=pformat.space_before is not None,
@@ -276,6 +301,7 @@ def _paragraphs(doc: Document, toc_indices: set[int]) -> list[ParagraphSnapshot]
                 runs_bold=_extract_run_bolds(paragraph),
                 is_toc_entry=idx in toc_indices,
                 page_break_before=pb_before,
+                has_highlight=_has_highlight_or_shading(paragraph),
             )
         )
     return result

@@ -405,3 +405,67 @@ def run_objects_checks(
                 location="объекты",
                 recommendation="Добавьте иллюстрации или таблицы в документ",
             )
+
+
+_ALLOWED_CHARS_RE = re.compile(
+    r"[\u0000-\u007F"
+    r"\u0400-\u04FF"
+    r"\u00A0-\u00FF"
+    r"\u0370-\u03FF"
+    r"\u2010-\u2015"
+    r"\u2018\u2019\u201C\u201D\u00AB\u00BB\u2026"
+    r"\u2116\u0301"
+    r"\u2022\u25CF\u25CB\u25A0\u25AA\u2023"
+    r"\u2070-\u209F"
+    r"\u2200-\u22FF"
+    r"\u2150-\u218F"
+    r"]"
+)
+
+_MAX_CLEANLINESS_FINDINGS = 10
+
+
+def run_text_cleanliness_checks(
+    snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding],
+) -> None:
+    if not cfg.has("text_cleanliness"):
+        return
+
+    severity = cfg.severity("text_cleanliness", "warning")
+    count = 0
+
+    for paragraph in snapshot.paragraphs:
+        if not paragraph.text or paragraph.is_toc_entry:
+            continue
+        if count >= _MAX_CLEANLINESS_FINDINGS:
+            break
+        odd_chars: list[str] = []
+        for ch in paragraph.text:
+            if not _ALLOWED_CHARS_RE.match(ch):
+                odd_chars.append(ch)
+        if odd_chars:
+            unique = sorted(set(odd_chars))
+            sample = ", ".join(f"U+{ord(c):04X}" for c in unique[:5])
+            count += 1
+            add_finding(
+                findings,
+                title="Посторонние символы",
+                category="text_cleanliness",
+                severity=severity,
+                expected="Текст содержит только стандартные символы",
+                found=f"Обнаружены символы: {sample}",
+                location=f"абзац #{paragraph.index + 1}",
+                recommendation="Удалите или замените нестандартные символы",
+            )
+
+    if count >= _MAX_CLEANLINESS_FINDINGS:
+        add_finding(
+            findings,
+            title="Посторонние символы — ещё замечания",
+            category="text_cleanliness",
+            severity="advice",
+            expected="",
+            found=f"Показаны первые {_MAX_CLEANLINESS_FINDINGS}, проблема массовая",
+            location="весь документ",
+            recommendation="Проверьте весь документ на посторонние символы",
+        )
