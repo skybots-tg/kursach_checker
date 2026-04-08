@@ -207,6 +207,8 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
             "normalize_list_markers": True,
             "normalize_dashes": True,
             "remove_caption_trailing_dot": True,
+            "remove_highlight": True,
+            "remove_strange_chars": True,
             "space_before_pt": 0,
             "space_after_pt": 0,
         },

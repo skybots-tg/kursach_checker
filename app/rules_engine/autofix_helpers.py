@@ -474,6 +474,43 @@ def _collect_table_paras(table, result: list):
                 _collect_table_paras(nested, result)
 
 
+def fix_remove_highlight(paragraph, para_label: str, details: list[str]) -> bool:
+    changed = False
+    pPr = paragraph._element.find(qn("w:pPr"))
+    if pPr is not None:
+        for tag in (qn("w:highlight"), qn("w:shd")):
+            el = pPr.find(tag)
+            if el is not None and (tag != qn("w:shd") or (el.get(qn("w:fill")) or "").lower() not in ("", "auto", "ffffff")):
+                pPr.remove(el)
+                changed = True
+    for r in paragraph._element.iter(qn("w:r")):
+        rPr = r.find(qn("w:rPr"))
+        if rPr is None:
+            continue
+        for tag in (qn("w:highlight"), qn("w:shd")):
+            el = rPr.find(tag)
+            if el is not None and (tag != qn("w:shd") or (el.get(qn("w:fill")) or "").lower() not in ("", "auto", "ffffff")):
+                rPr.remove(el)
+                changed = True
+    if changed:
+        details.append(f"{para_label}: highlight/shading removed")
+    return changed
+
+
+def fix_remove_strange_chars(paragraph, para_label: str, details: list[str], allowed_re) -> bool:
+    changed = False
+    for run in paragraph.runs:
+        if is_field_code_run(run) or not run.text:
+            continue
+        cleaned = "".join(c for c in run.text if allowed_re.match(c))
+        if cleaned != run.text:
+            run.text = cleaned
+            changed = True
+    if changed:
+        details.append(f"{para_label}: strange chars removed")
+    return changed
+
+
 def fix_section_margins(
     section, margins_mm: dict, sec_idx: int, details: list[str],
 ) -> bool:

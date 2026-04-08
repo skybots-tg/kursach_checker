@@ -19,7 +19,9 @@ from app.rules_engine.autofix_helpers import (
     fix_list_indent,
     fix_markers_text,
     fix_numbering_bullets,
+    fix_remove_highlight,
     fix_remove_italic,
+    fix_remove_strange_chars,
     fix_section_margins,
     is_field_code_run,
     is_manual_list_para,
@@ -27,6 +29,7 @@ from app.rules_engine.autofix_helpers import (
     postprocess_fixed_docx,
     preflight_margins_safe,
 )
+from app.rules_engine.checks_advanced import _ALLOWED_CHARS_RE
 from app.rules_engine.findings import Finding
 from app.rules_engine.style_resolve import (
     detect_toc_paragraph_indices,
@@ -201,6 +204,16 @@ def apply_safe_autofixes(
 
         if cfg.remove_caption_trailing_dot:
             if fix_caption_trailing_dot(paragraph, para_label, details):
+                changed = True
+                change_count += 1
+
+        if cfg.remove_highlight:
+            if fix_remove_highlight(paragraph, para_label, details):
+                changed = True
+                change_count += 1
+
+        if cfg.remove_strange_chars:
+            if fix_remove_strange_chars(paragraph, para_label, details, _ALLOWED_CHARS_RE):
                 changed = True
                 change_count += 1
 
@@ -406,6 +419,8 @@ class _AutoFixConfig:
     list_marker_char: str
     normalize_dashes: bool
     remove_caption_trailing_dot: bool
+    remove_highlight: bool
+    remove_strange_chars: bool
     line_spacing: float
     first_line_indent_mm: float
     space_before_pt: float
@@ -456,6 +471,8 @@ class _AutoFixConfig:
             list_marker_char=str(params.get("list_marker_char", ad.get("list_marker_char", "-"))),
             normalize_dashes=bool(params.get("normalize_dashes", ad.get("normalize_dashes", True))),
             remove_caption_trailing_dot=bool(params.get("remove_caption_trailing_dot", ad.get("remove_caption_trailing_dot", True))),
+            remove_highlight=bool(params.get("remove_highlight", ad.get("remove_highlight", True))),
+            remove_strange_chars=bool(params.get("remove_strange_chars", ad.get("remove_strange_chars", True))),
             line_spacing=float(body.get("line_spacing", 1.5)),
             first_line_indent_mm=float(body.get("first_line_indent_mm", 12.5)),
             space_before_pt=float(params.get("space_before_pt", ad.get("space_before_pt", 0))),
