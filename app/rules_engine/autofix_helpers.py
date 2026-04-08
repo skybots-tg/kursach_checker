@@ -511,6 +511,15 @@ def fix_remove_strange_chars(paragraph, para_label: str, details: list[str], all
     return changed
 
 
+def fix_page_break_before(paragraph, para_label: str, details: list[str]) -> bool:
+    pf = paragraph.paragraph_format
+    if pf.page_break_before:
+        return False
+    pf.page_break_before = True
+    details.append(f"{para_label}: page break before added")
+    return True
+
+
 def fix_section_margins(
     section, margins_mm: dict, sec_idx: int, details: list[str],
 ) -> bool:

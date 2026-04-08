@@ -234,9 +234,9 @@ def _check_sequential(
 
 
 _CHAPTER_RE = re.compile(
-    r"^(?:глава|chapter|раздел)\s+\d", re.IGNORECASE
+    r"^[^\w]*(?:глава|chapter|раздел)\s+\d", re.IGNORECASE
 )
-_TOC_LINE_TAIL_RE = re.compile(r"\s{2,}\d[\d\s\-–—]*$")
+_TOC_LINE_TAIL_RE = re.compile(r"\s{2,}\d[\d\-–—]+")
 
 
 def run_section_breaks_checks(

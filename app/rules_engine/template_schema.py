@@ -209,6 +209,7 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
             "remove_caption_trailing_dot": True,
             "remove_highlight": True,
             "remove_strange_chars": True,
+            "fix_section_breaks": True,
             "space_before_pt": 0,
             "space_after_pt": 0,
         },

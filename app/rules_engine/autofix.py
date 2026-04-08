@@ -19,6 +19,7 @@ from app.rules_engine.autofix_helpers import (
     fix_list_indent,
     fix_markers_text,
     fix_numbering_bullets,
+    fix_page_break_before,
     fix_remove_highlight,
     fix_remove_italic,
     fix_remove_strange_chars,
@@ -29,7 +30,11 @@ from app.rules_engine.autofix_helpers import (
     postprocess_fixed_docx,
     preflight_margins_safe,
 )
-from app.rules_engine.checks_advanced import _ALLOWED_CHARS_RE
+from app.rules_engine.checks_advanced import (
+    _ALLOWED_CHARS_RE,
+    _CHAPTER_RE,
+    _TOC_LINE_TAIL_RE,
+)
 from app.rules_engine.findings import Finding
 from app.rules_engine.style_resolve import (
     detect_toc_paragraph_indices,
@@ -187,6 +192,13 @@ def apply_safe_autofixes(
         if cfg.remove_strange_chars:
             if fix_remove_strange_chars(paragraph, para_label, details, _ALLOWED_CHARS_RE):
                 changed = True
+        if cfg.fix_section_breaks and idx > 0 and len(text) <= 100:
+            if not _TOC_LINE_TAIL_RE.search(text):
+                needs_break = any(s in text.lower() for s in cfg.section_break_sections)
+                if not needs_break:
+                    needs_break = bool(_CHAPTER_RE.match(text))
+                if needs_break and fix_page_break_before(paragraph, para_label, details):
+                    changed = True
 
     body_start = 0
     for i, p in enumerate(doc.paragraphs):
@@ -423,6 +435,8 @@ class _AutoFixConfig:
     remove_caption_trailing_dot: bool
     remove_highlight: bool
     remove_strange_chars: bool
+    fix_section_breaks: bool
+    section_break_sections: list[str]
     line_spacing: float
     first_line_indent_mm: float
     space_before_pt: float
@@ -475,6 +489,16 @@ class _AutoFixConfig:
             remove_caption_trailing_dot=bool(params.get("remove_caption_trailing_dot", ad.get("remove_caption_trailing_dot", True))),
             remove_highlight=bool(params.get("remove_highlight", ad.get("remove_highlight", True))),
             remove_strange_chars=bool(params.get("remove_strange_chars", ad.get("remove_strange_chars", True))),
+            fix_section_breaks=bool(params.get("fix_section_breaks", ad.get("fix_section_breaks", True))),
+            section_break_sections=[
+                s.lower() for s in
+                blocks.get("section_breaks", {}).get("params", {}).get(
+                    "sections_requiring_break", [
+                        "содержание", "оглавление", "введение", "заключение",
+                        "список литературы", "список использованных источников",
+                    ]
+                )
+            ],
             line_spacing=float(body.get("line_spacing", 1.5)),
             first_line_indent_mm=float(body.get("first_line_indent_mm", 12.5)),
             space_before_pt=float(params.get("space_before_pt", ad.get("space_before_pt", 0))),
