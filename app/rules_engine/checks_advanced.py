@@ -233,6 +233,12 @@ def _check_sequential(
         )
 
 
+_CHAPTER_RE = re.compile(
+    r"^(?:глава|chapter|раздел)\s+\d", re.IGNORECASE
+)
+_TOC_LINE_TAIL_RE = re.compile(r"\s{2,}\d[\d\s\-–—]*$")
+
+
 def run_section_breaks_checks(
     snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding],
 ) -> None:
@@ -246,9 +252,13 @@ def run_section_breaks_checks(
     chapters_require = bool(params.get("chapters_require_break", True))
 
     for para in snapshot.paragraphs:
-        if not para.is_heading or not para.text:
+        if not para.text or para.index == 0:
             continue
-        if para.index == 0:
+        if para.is_toc_entry:
+            continue
+        if _TOC_LINE_TAIL_RE.search(para.text.strip()):
+            continue
+        if not para.is_heading and len(para.text.strip()) > 100:
             continue
 
         text_lower = para.text.strip().lower()
@@ -262,9 +272,10 @@ def run_section_breaks_checks(
                 match_label = para.text.strip()
                 break
 
-        if not needs_break and chapters_require and level == 1:
-            needs_break = True
-            match_label = para.text.strip()
+        if not needs_break and chapters_require:
+            if (para.is_heading and level == 1) or _CHAPTER_RE.match(para.text.strip()):
+                needs_break = True
+                match_label = para.text.strip()
 
         if needs_break and not para.page_break_before:
             short = match_label[:50]

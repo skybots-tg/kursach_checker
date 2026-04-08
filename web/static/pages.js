@@ -80,7 +80,7 @@
           tabContent.innerHTML = checks.map(function (c) {
             return '<a href="/checks/' + c.id + '" class="glass list-card">' +
               '<div class="list-card-row">' +
-                '<span class="list-card-title">Проверка #' + c.id + '</span>' +
+                '<span class="list-card-title">Проверка</span>' +
                 '<span class="chip ' + A.statusCls(c.status) + '">' + A.statusLabel(c.status) + '</span>' +
               '</div>' +
               '<div class="list-card-meta">Создано: ' + A.fmtDate(c.created_at) +
@@ -390,17 +390,17 @@
   // ---- Page: Check Result (with auto-polling) ----
 
   async function pageCheckResult(id) {
-    document.title = 'Результат #' + id + ' — Проверка оформления';
+    document.title = 'Результат — Проверка оформления';
     appEl.innerHTML = '<div class="loading-spinner"><i data-lucide="loader-2" class="spin"></i><span>Загрузка\u2026</span></div>';
     A.icons();
 
     function render(check) {
       var inProgress = check.status === 'queued' || check.status === 'running';
       appEl.innerHTML =
-        '<div class="section-label">Результат проверки #' + check.id + '</div>' +
+        '<div class="section-label">Результат проверки</div>' +
         '<section class="glass list-card">' +
           '<div class="list-card-row">' +
-            '<span class="list-card-title">Проверка #' + check.id + '</span>' +
+            '<span class="list-card-title">Проверка</span>' +
             '<span class="chip ' + A.statusCls(check.status) + '">' + A.statusLabel(check.status) + '</span>' +
           '</div>' +
           '<div class="list-card-meta">' +

@@ -176,6 +176,18 @@ def apply_safe_autofixes(
         else:
             logger.info("Autofix: margin normalization skipped — tables would overflow")
 
+    for idx, paragraph in enumerate(doc.paragraphs):
+        text = (paragraph.text or "").strip()
+        if not text:
+            continue
+        para_label = f"Paragraph #{idx + 1}"
+        if cfg.remove_highlight:
+            if fix_remove_highlight(paragraph, para_label, details):
+                changed = True
+        if cfg.remove_strange_chars:
+            if fix_remove_strange_chars(paragraph, para_label, details, _ALLOWED_CHARS_RE):
+                changed = True
+
     body_start = 0
     for i, p in enumerate(doc.paragraphs):
         if _is_heading_para(p):
@@ -204,16 +216,6 @@ def apply_safe_autofixes(
 
         if cfg.remove_caption_trailing_dot:
             if fix_caption_trailing_dot(paragraph, para_label, details):
-                changed = True
-                change_count += 1
-
-        if cfg.remove_highlight:
-            if fix_remove_highlight(paragraph, para_label, details):
-                changed = True
-                change_count += 1
-
-        if cfg.remove_strange_chars:
-            if fix_remove_strange_chars(paragraph, para_label, details, _ALLOWED_CHARS_RE):
                 changed = True
                 change_count += 1
 
