@@ -33,7 +33,6 @@ _CAPTION_RE = re.compile(
 )
 _THEME_COLOR_ATTRS = (qn("w:themeColor"), qn("w:themeTint"), qn("w:themeShade"))
 
-
 def _set_color_to_black(color_el) -> bool:
     val = color_el.get(qn("w:val"))
     needs_fix = (val and val.lower() != "000000") or color_el.get(qn("w:themeColor")) is not None
@@ -45,14 +44,12 @@ def _set_color_to_black(color_el) -> bool:
             del color_el.attrib[attr]
     return True
 
-
 def is_field_code_run(run) -> bool:
     elem = run._element
     return (
         elem.find(qn("w:fldChar")) is not None
         or elem.find(qn("w:instrText")) is not None
     )
-
 
 def is_manual_list_para(text: str) -> bool:
     stripped = text.lstrip()
@@ -64,7 +61,6 @@ def is_manual_list_para(text: str) -> bool:
         if not stripped[1].isdigit():
             return True
     return False
-
 
 def fix_font_color_styles(doc: Document, details: list[str]) -> bool:
     changed = False
@@ -85,7 +81,6 @@ def fix_font_color_styles(doc: Document, details: list[str]) -> bool:
     if changed:
         details.append("Styles: font color -> black")
     return changed
-
 
 def fix_font_color_runs(paragraph, para_label: str, details: list[str]) -> bool:
     p_elem = paragraph._element
@@ -108,7 +103,6 @@ def fix_font_color_runs(paragraph, para_label: str, details: list[str]) -> bool:
         details.append(f"{para_label}: font color -> black")
     return changed
 
-
 def fix_italic_styles(doc: Document, details: list[str]) -> bool:
     changed = False
     for style in doc.styles:
@@ -121,7 +115,6 @@ def fix_italic_styles(doc: Document, details: list[str]) -> bool:
     if changed:
         details.append("Styles: italic removed")
     return changed
-
 
 def fix_remove_italic(paragraph, para_label: str, details: list[str]) -> bool:
     p_elem = paragraph._element
@@ -147,7 +140,6 @@ def fix_remove_italic(paragraph, para_label: str, details: list[str]) -> bool:
     if changed:
         details.append(f"{para_label}: italic removed")
     return changed
-
 
 def fix_list_indent(paragraph, para_label: str, details: list[str]) -> bool:
     pf = paragraph.paragraph_format
@@ -179,9 +171,7 @@ def fix_list_indent(paragraph, para_label: str, details: list[str]) -> bool:
         details.append(f"{para_label}: list indent zeroed")
     return changed
 
-
 _ALL_MARKER_CHARS = _BULLET_CHARS | frozenset((_EN_DASH, _EM_DASH))
-
 
 def fix_markers_text(
     paragraph, para_label: str, details: list[str],
@@ -205,7 +195,6 @@ def fix_markers_text(
             return True
         break
     return False
-
 
 def fix_numbering_bullets(
     doc: Document, body_font: str, details: list[str],
@@ -242,7 +231,6 @@ def fix_numbering_bullets(
         details.append("Numbering: bullet markers -> dash")
     return changed
 
-
 def fix_dashes_in_text(paragraph, para_label: str, details: list[str]) -> bool:
     changed = False
     for run in paragraph.runs:
@@ -255,7 +243,6 @@ def fix_dashes_in_text(paragraph, para_label: str, details: list[str]) -> bool:
     if changed:
         details.append(f"{para_label}: long dashes -> short")
     return changed
-
 
 def fix_caption_trailing_dot(paragraph, para_label: str, details: list[str]) -> bool:
     text = paragraph.text.strip()
@@ -274,7 +261,6 @@ def fix_caption_trailing_dot(paragraph, para_label: str, details: list[str]) -> 
         if s:
             break
     return False
-
 
 def postprocess_fixed_docx(original: Path, output: Path) -> None:
     orig_bins: dict[str, tuple[zipfile.ZipInfo, bytes]] = {}
@@ -312,7 +298,6 @@ def postprocess_fixed_docx(original: Path, output: Path) -> None:
     _validate_docx_zip(temp_path)
     temp_path.replace(output)
 
-
 def _zip_has_toc(path: Path) -> bool:
     with zipfile.ZipFile(str(path), "r") as zf:
         if "word/document.xml" not in zf.namelist():
@@ -320,30 +305,21 @@ def _zip_has_toc(path: Path) -> bool:
         data = zf.read("word/document.xml")
         return b"TOC " in data or b"Table of Contents" in data
 
-
 def _clone_zipinfo(src: zipfile.ZipInfo) -> zipfile.ZipInfo:
     zi = zipfile.ZipInfo(src.filename)
-    zi.date_time = src.date_time
-    zi.compress_type = src.compress_type
-    zi.comment = src.comment
-    zi.extra = src.extra
-    zi.create_system = src.create_system
-    zi.external_attr = src.external_attr
+    for a in ("date_time", "compress_type", "comment", "extra", "create_system", "external_attr"):
+        setattr(zi, a, getattr(src, a))
     zi.flag_bits = src.flag_bits & 0x800
     return zi
-
 
 def _inject_update_fields(settings_bytes: bytes) -> bytes:
     root = etree.fromstring(settings_bytes)
     tag = f"{{{_W_NS}}}updateFields"
-    existing = root.find(tag)
-    if existing is None:
-        elem = etree.SubElement(root, tag)
-        elem.set(f"{{{_W_NS}}}val", "true")
-    else:
-        existing.set(f"{{{_W_NS}}}val", "true")
+    el = root.find(tag)
+    if el is None:
+        el = etree.SubElement(root, tag)
+    el.set(f"{{{_W_NS}}}val", "true")
     return etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
-
 
 def _validate_docx_zip(path: Path) -> None:
     with zipfile.ZipFile(str(path), "r") as zf:
@@ -358,20 +334,16 @@ def _validate_docx_zip(path: Path) -> None:
         if "word/settings.xml" in names:
             etree.fromstring(zf.read("word/settings.xml"))
 
-
 def preflight_margins_safe(doc: Document, target_margins_mm: dict) -> bool:
+    lt = Mm(target_margins_mm.get("left", 30)).twips
+    rt = Mm(target_margins_mm.get("right", 15)).twips
     mn = None
     for sec in doc.sections:
-        try:
-            pw = sec.page_width.twips
-        except (AttributeError, TypeError):
-            continue
-        lt = Mm(target_margins_mm.get("left", 30)).twips
-        rt = Mm(target_margins_mm.get("right", 15)).twips
+        try: pw = sec.page_width.twips
+        except (AttributeError, TypeError): continue
         content = pw - lt - rt
         if mn is None or content < mn:
             mn = content
-
     if mn is None or mn < 400:
         return False
 
@@ -396,7 +368,6 @@ def preflight_margins_safe(doc: Document, target_margins_mm: dict) -> bool:
 
     return True
 
-
 def set_table_width_pct100(tbl) -> None:
     tp = tbl.tblPr
     if tp is None:
@@ -408,7 +379,6 @@ def set_table_width_pct100(tbl) -> None:
     tw.set(qn("w:w"), "5000")
     tw.set(qn("w:type"), "pct")
     tp.append(tw)
-
 
 def clamp_overflow_table_widths(doc: Document, details: list[str]) -> bool:
     limit = min_content_width_twips(doc)
@@ -442,22 +412,23 @@ def clamp_overflow_table_widths(doc: Document, details: list[str]) -> bool:
         details.append("Tables: width clamped to text area (100%)")
     return changed_any
 
-
 def min_content_width_twips(doc: Document) -> int:
-    widths: list[int] = []
-    for sec in doc.sections:
-        try:
-            inner = sec.page_width.twips - sec.left_margin.twips - sec.right_margin.twips
-            widths.append(max(int(inner), 400))
-        except (AttributeError, TypeError, ValueError):
-            continue
-    return min(widths) if widths else 8640
-
+    w = []
+    for s in doc.sections:
+        try: w.append(max(int(s.page_width.twips - s.left_margin.twips - s.right_margin.twips), 400))
+        except (AttributeError, TypeError, ValueError): pass
+    return min(w) if w else 8640
 
 def iter_table_cell_paragraphs(doc: Document):
+    def _collect(tbl, out):
+        for row in tbl.rows:
+            for cell in row.cells:
+                out.extend(cell.paragraphs)
+                for nested in cell.tables:
+                    _collect(nested, out)
     all_paras: list = []
     for table in doc.tables:
-        _collect_table_paras(table, all_paras)
+        _collect(table, all_paras)
     seen: set[int] = set()
     for p in all_paras:
         eid = id(p._element)
@@ -465,37 +436,27 @@ def iter_table_cell_paragraphs(doc: Document):
             seen.add(eid)
             yield p
 
-
-def _collect_table_paras(table, result: list):
-    for row in table.rows:
-        for cell in row.cells:
-            result.extend(cell.paragraphs)
-            for nested in cell.tables:
-                _collect_table_paras(nested, result)
-
-
 def fix_remove_highlight(paragraph, para_label: str, details: list[str]) -> bool:
+    _HL, _SHD = qn("w:highlight"), qn("w:shd")
+    _SAFE = ("", "auto", "ffffff")
+    def _strip(parent):
+        c = False
+        for tag in (_HL, _SHD):
+            el = parent.find(tag)
+            if el is not None and (tag != _SHD or (el.get(qn("w:fill")) or "").lower() not in _SAFE):
+                parent.remove(el); c = True
+        return c
     changed = False
     pPr = paragraph._element.find(qn("w:pPr"))
     if pPr is not None:
-        for tag in (qn("w:highlight"), qn("w:shd")):
-            el = pPr.find(tag)
-            if el is not None and (tag != qn("w:shd") or (el.get(qn("w:fill")) or "").lower() not in ("", "auto", "ffffff")):
-                pPr.remove(el)
-                changed = True
+        changed |= _strip(pPr)
     for r in paragraph._element.iter(qn("w:r")):
         rPr = r.find(qn("w:rPr"))
-        if rPr is None:
-            continue
-        for tag in (qn("w:highlight"), qn("w:shd")):
-            el = rPr.find(tag)
-            if el is not None and (tag != qn("w:shd") or (el.get(qn("w:fill")) or "").lower() not in ("", "auto", "ffffff")):
-                rPr.remove(el)
-                changed = True
+        if rPr is not None:
+            changed |= _strip(rPr)
     if changed:
         details.append(f"{para_label}: highlight/shading removed")
     return changed
-
 
 def fix_remove_strange_chars(paragraph, para_label: str, details: list[str], allowed_re) -> bool:
     changed = False
@@ -510,7 +471,6 @@ def fix_remove_strange_chars(paragraph, para_label: str, details: list[str], all
         details.append(f"{para_label}: strange chars removed")
     return changed
 
-
 def fix_page_break_before(paragraph, para_label: str, details: list[str]) -> bool:
     pf = paragraph.paragraph_format
     if pf.page_break_before:
@@ -518,7 +478,6 @@ def fix_page_break_before(paragraph, para_label: str, details: list[str]) -> boo
     pf.page_break_before = True
     details.append(f"{para_label}: page break before added")
     return True
-
 
 def fix_section_margins(
     section, margins_mm: dict, sec_idx: int, details: list[str],

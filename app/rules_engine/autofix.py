@@ -95,7 +95,6 @@ def _is_heading_para(paragraph) -> bool:
                 pass
     return False
 
-
 def _should_skip_para(paragraph) -> bool:
     sid = getattr(paragraph.style, "style_id", "") or ""
     if sid in _SKIP_STYLE_IDS:
@@ -104,7 +103,6 @@ def _should_skip_para(paragraph) -> bool:
     if sname in _SKIP_STYLE_NAMES:
         return True
     return any(sname.startswith(p) for p in _SKIP_NAME_PREFIXES)
-
 
 def _is_list_para(paragraph) -> bool:
     for pPr in walk_style_pPr(paragraph):
@@ -119,12 +117,10 @@ def _is_list_para(paragraph) -> bool:
     sname = (getattr(paragraph.style, "name", "") or "").lower()
     return sname in _LIST_STYLE_NAMES
 
-
 @dataclass(slots=True)
 class AutoFixResult:
     output_file_path: str | None
     details: list[str]
-
 
 def apply_safe_autofixes(
     file_path: str, rules: dict | None, findings: list[Finding],
@@ -457,58 +453,48 @@ class _AutoFixConfig:
             if isinstance(b, dict)
         }
         auto = blocks.get("autofix", {})
-        params = auto.get("params") or {}
-        enabled = bool(auto.get("enabled", ad.get("enabled", True)))
+        p = auto.get("params") or {}
 
-        typography = blocks.get("typography", {})
-        body = (typography.get("params") or {}).get("body") or {}
+        def _b(k: str, d: bool = True) -> bool:
+            return bool(p.get(k, ad.get(k, d)))
 
-        layout = blocks.get("layout", {})
-        layout_params = layout.get("params") or {}
-
-        heading = blocks.get("heading_formatting", {})
-        heading_params = heading.get("params") or {}
+        body = ((blocks.get("typography", {}).get("params") or {}).get("body") or {})
+        lp = (blocks.get("layout", {}).get("params") or {})
+        hp = (blocks.get("heading_formatting", {}).get("params") or {})
+        sb = (blocks.get("section_breaks", {}).get("params") or {})
+        _dflt_sec = ["содержание", "оглавление", "введение", "заключение",
+                     "список литературы", "список использованных источников"]
 
         return cls(
-            enabled=enabled,
-            normalize_alignment=bool(params.get("normalize_alignment", ad.get("normalize_alignment", True))),
-            normalize_line_spacing=bool(params.get("normalize_line_spacing", ad.get("normalize_line_spacing", True))),
-            normalize_first_line_indent=bool(params.get("normalize_first_line_indent", ad.get("normalize_first_line_indent", True))),
-            normalize_spacing_before_after=bool(params.get("normalize_spacing_before_after", ad.get("normalize_spacing_before_after", True))),
-            normalize_font=bool(params.get("normalize_font", ad.get("normalize_font", True))),
-            normalize_margins=bool(params.get("normalize_margins", ad.get("normalize_margins", False))),
-            normalize_headings=bool(params.get("normalize_headings", ad.get("normalize_headings", True))),
-            normalize_table_width=bool(params.get("normalize_table_width", ad.get("normalize_table_width", True))),
-            normalize_font_color=bool(params.get("normalize_font_color", ad.get("normalize_font_color", True))),
-            target_font_color=str(params.get("target_font_color", ad.get("target_font_color", "000000"))),
-            remove_italic=bool(params.get("remove_italic", ad.get("remove_italic", True))),
-            normalize_list_indent=bool(params.get("normalize_list_indent", ad.get("normalize_list_indent", True))),
-            normalize_list_markers=bool(params.get("normalize_list_markers", ad.get("normalize_list_markers", True))),
-            list_marker_char=str(params.get("list_marker_char", ad.get("list_marker_char", "-"))),
-            normalize_dashes=bool(params.get("normalize_dashes", ad.get("normalize_dashes", True))),
-            remove_caption_trailing_dot=bool(params.get("remove_caption_trailing_dot", ad.get("remove_caption_trailing_dot", True))),
-            remove_highlight=bool(params.get("remove_highlight", ad.get("remove_highlight", True))),
-            remove_strange_chars=bool(params.get("remove_strange_chars", ad.get("remove_strange_chars", True))),
-            fix_section_breaks=bool(params.get("fix_section_breaks", ad.get("fix_section_breaks", True))),
-            section_break_sections=[
-                s.lower() for s in
-                blocks.get("section_breaks", {}).get("params", {}).get(
-                    "sections_requiring_break", [
-                        "содержание", "оглавление", "введение", "заключение",
-                        "список литературы", "список использованных источников",
-                    ]
-                )
-            ],
+            enabled=bool(auto.get("enabled", ad.get("enabled", True))),
+            normalize_alignment=_b("normalize_alignment"),
+            normalize_line_spacing=_b("normalize_line_spacing"),
+            normalize_first_line_indent=_b("normalize_first_line_indent"),
+            normalize_spacing_before_after=_b("normalize_spacing_before_after"),
+            normalize_font=_b("normalize_font"),
+            normalize_margins=_b("normalize_margins", False),
+            normalize_headings=_b("normalize_headings"),
+            normalize_table_width=_b("normalize_table_width"),
+            normalize_font_color=_b("normalize_font_color"),
+            target_font_color=str(p.get("target_font_color", ad.get("target_font_color", "000000"))),
+            remove_italic=_b("remove_italic"),
+            normalize_list_indent=_b("normalize_list_indent"),
+            normalize_list_markers=_b("normalize_list_markers"),
+            list_marker_char=str(p.get("list_marker_char", ad.get("list_marker_char", "-"))),
+            normalize_dashes=_b("normalize_dashes"),
+            remove_caption_trailing_dot=_b("remove_caption_trailing_dot"),
+            remove_highlight=_b("remove_highlight"),
+            remove_strange_chars=_b("remove_strange_chars"),
+            fix_section_breaks=_b("fix_section_breaks"),
+            section_break_sections=[s.lower() for s in sb.get("sections_requiring_break", _dflt_sec)],
             line_spacing=float(body.get("line_spacing", 1.5)),
             first_line_indent_mm=float(body.get("first_line_indent_mm", 12.5)),
-            space_before_pt=float(params.get("space_before_pt", ad.get("space_before_pt", 0))),
-            space_after_pt=float(params.get("space_after_pt", ad.get("space_after_pt", 0))),
+            space_before_pt=float(p.get("space_before_pt", ad.get("space_before_pt", 0))),
+            space_after_pt=float(p.get("space_after_pt", ad.get("space_after_pt", 0))),
             font_name=str(body.get("font", "Times New Roman")),
             font_size_pt=float(body.get("size_pt", 14)),
-            margins_mm=layout_params.get(
-                "margins_mm", {"left": 30, "right": 15, "top": 20, "bottom": 25},
-            ),
-            heading_font=str(heading_params.get("font", body.get("font", "Times New Roman"))),
-            heading_size_pt=float(heading_params.get("size_pt", body.get("size_pt", 14))),
-            heading_bold=bool(heading_params.get("require_bold", True)),
+            margins_mm=lp.get("margins_mm", {"left": 30, "right": 15, "top": 20, "bottom": 25}),
+            heading_font=str(hp.get("font", body.get("font", "Times New Roman"))),
+            heading_size_pt=float(hp.get("size_pt", body.get("size_pt", 14))),
+            heading_bold=bool(hp.get("require_bold", True)),
         )
