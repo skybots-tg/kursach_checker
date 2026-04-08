@@ -41,7 +41,7 @@ def convert_doc_to_docx(
     try:
         command = command_template.format(outdir=str(outdir), input=str(source))
     except KeyError:
-        return None, "Invalid DOC->DOCX command template"
+        return None, "\u041d\u0435\u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 \u0448\u0430\u0431\u043b\u043e\u043d \u043a\u043e\u043c\u0430\u043d\u0434\u044b DOC\u2192DOCX"
 
     try:
         completed = subprocess.run(
@@ -52,17 +52,17 @@ def convert_doc_to_docx(
             timeout=timeout_sec,
         )
     except Exception as exc:  # noqa: BLE001
-        return None, f"DOC->DOCX converter launch error: {exc}"
+        return None, f"\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u043f\u0443\u0441\u043a\u0430 \u043a\u043e\u043d\u0432\u0435\u0440\u0442\u0435\u0440\u0430 DOC\u2192DOCX: {exc}"
 
     if completed.returncode != 0:
         stderr = (completed.stderr or "").strip()
         stdout = (completed.stdout or "").strip()
         details = stderr or stdout or f"code={completed.returncode}"
-        return None, f"DOC->DOCX conversion failed: {details}"
+        return None, f"\u041a\u043e\u043d\u0432\u0435\u0440\u0442\u0430\u0446\u0438\u044f DOC\u2192DOCX \u043d\u0435 \u0443\u0434\u0430\u043b\u0430\u0441\u044c: {details}"
 
     expected = outdir / f"{source.stem}.docx"
     if not expected.exists():
-        return None, "Converter did not produce expected DOCX file"
+        return None, "\u041a\u043e\u043d\u0432\u0435\u0440\u0442\u0435\u0440 \u043d\u0435 \u0441\u043e\u0437\u0434\u0430\u043b \u043e\u0436\u0438\u0434\u0430\u0435\u043c\u044b\u0439 DOCX-\u0444\u0430\u0439\u043b"
 
     return str(expected), None
 

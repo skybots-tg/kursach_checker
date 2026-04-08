@@ -183,7 +183,7 @@ def apply_safe_autofixes(
         text = (paragraph.text or "").strip()
         if not text:
             continue
-        para_label = f"Paragraph #{idx + 1}"
+        para_label = f"\u0410\u0431\u0437\u0430\u0446 #{idx + 1}"
         if cfg.remove_highlight:
             if fix_remove_highlight(paragraph, para_label, details):
                 changed = True
@@ -223,7 +223,7 @@ def apply_safe_autofixes(
         if not text:
             continue
 
-        para_label = f"Paragraph #{idx + 1}"
+        para_label = f"\u0410\u0431\u0437\u0430\u0446 #{idx + 1}"
 
         if cfg.normalize_font_color:
             if fix_font_color_runs(paragraph, para_label, details):
@@ -283,7 +283,7 @@ def apply_safe_autofixes(
                 paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
                 changed = True
                 change_count += 1
-                details.append(f"{para_label}: alignment justify")
+                details.append(f"{para_label}: \u0432\u044b\u0440\u0430\u0432\u043d\u0438\u0432\u0430\u043d\u0438\u0435 \u043f\u043e \u0448\u0438\u0440\u0438\u043d\u0435")
 
         if cfg.normalize_line_spacing:
             eff_ls = effective_line_spacing(paragraph)
@@ -291,7 +291,7 @@ def apply_safe_autofixes(
                 pf.line_spacing = cfg.line_spacing
                 changed = True
                 change_count += 1
-                details.append(f"{para_label}: line spacing {cfg.line_spacing}")
+                details.append(f"{para_label}: \u043c\u0435\u0436\u0441\u0442\u0440\u043e\u0447\u043d\u044b\u0439 \u0438\u043d\u0442\u0435\u0440\u0432\u0430\u043b {cfg.line_spacing}")
 
         if not is_list and cfg.normalize_first_line_indent:
             eff_indent = effective_first_line_indent_mm(paragraph)
@@ -299,7 +299,7 @@ def apply_safe_autofixes(
                 pf.first_line_indent = Mm(cfg.first_line_indent_mm)
                 changed = True
                 change_count += 1
-                details.append(f"{para_label}: first line indent {cfg.first_line_indent_mm} mm")
+                details.append(f"{para_label}: \u0430\u0431\u0437\u0430\u0446\u043d\u044b\u0439 \u043e\u0442\u0441\u0442\u0443\u043f {cfg.first_line_indent_mm} \u043c\u043c")
 
         if cfg.normalize_spacing_before_after:
             eff_sb = effective_space_before_pt(paragraph)
@@ -307,13 +307,13 @@ def apply_safe_autofixes(
                 pf.space_before = Pt(cfg.space_before_pt)
                 changed = True
                 change_count += 1
-                details.append(f"{para_label}: spacing before {cfg.space_before_pt} pt")
+                details.append(f"{para_label}: \u0438\u043d\u0442\u0435\u0440\u0432\u0430\u043b \u0434\u043e {cfg.space_before_pt} \u043f\u0442")
             eff_sa = effective_space_after_pt(paragraph)
             if abs(eff_sa - cfg.space_after_pt) > 0.2:
                 pf.space_after = Pt(cfg.space_after_pt)
                 changed = True
                 change_count += 1
-                details.append(f"{para_label}: spacing after {cfg.space_after_pt} pt")
+                details.append(f"{para_label}: \u0438\u043d\u0442\u0435\u0440\u0432\u0430\u043b \u043f\u043e\u0441\u043b\u0435 {cfg.space_after_pt} \u043f\u0442")
 
         if cfg.normalize_font:
             font_changed = False
@@ -331,7 +331,7 @@ def apply_safe_autofixes(
             if font_changed:
                 changed = True
                 change_count += 1
-                details.append(f"{para_label}: font {cfg.font_name}, {cfg.font_size_pt}pt")
+                details.append(f"{para_label}: \u0448\u0440\u0438\u0444\u0442 {cfg.font_name}, {cfg.font_size_pt} \u043f\u0442")
 
     for t_idx, t_para in enumerate(iter_table_cell_paragraphs(doc)):
         if change_count >= max_changes:
@@ -339,7 +339,7 @@ def apply_safe_autofixes(
         t_text = (t_para.text or "").strip()
         if not t_text:
             continue
-        t_label = f"Table paragraph #{t_idx + 1}"
+        t_label = f"\u0410\u0431\u0437\u0430\u0446 \u0442\u0430\u0431\u043b\u0438\u0446\u044b #{t_idx + 1}"
         if cfg.normalize_font_color:
             if fix_font_color_runs(t_para, t_label, details):
                 changed = True
@@ -422,7 +422,7 @@ def _fix_heading(paragraph, idx: int, cfg: "_AutoFixConfig", details: list[str])
             changed = True
     if changed:
         details.append(
-            f"Heading #{idx + 1}: {cfg.heading_font}, {cfg.heading_size_pt}pt, bold"
+            f"\u0417\u0430\u0433\u043e\u043b\u043e\u0432\u043e\u043a #{idx + 1}: {cfg.heading_font}, {cfg.heading_size_pt} \u043f\u0442, \u043f\u043e\u043b\u0443\u0436\u0438\u0440\u043d\u044b\u0439"
         )
     return changed
 

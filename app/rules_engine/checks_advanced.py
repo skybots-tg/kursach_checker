@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 
 from app.rules_engine.docx_snapshot import DocumentSnapshot
-from app.rules_engine.findings import Finding, add_finding
+from app.rules_engine.findings import Finding, add_finding, display_alignment
 from app.rules_engine.rules_config import RulesConfig
 
 
@@ -43,8 +43,8 @@ def run_heading_formatting_checks(
                 title="Размер шрифта заголовка",
                 category="heading_formatting",
                 severity=severity,
-                expected=f"{expected_size} pt",
-                found=f"{h.font_size_pt} pt",
+                expected=f"{expected_size} \u043f\u0442",
+                found=f"{h.font_size_pt} \u043f\u0442",
                 location=loc,
                 recommendation="Установите корректный размер шрифта для заголовка",
             )
@@ -69,7 +69,7 @@ def run_heading_formatting_checks(
                     category="heading_formatting",
                     severity=severity,
                     expected="По центру",
-                    found=h.alignment,
+                    found=display_alignment(h.alignment),
                     location=loc,
                     recommendation="Выровняйте заголовки первого уровня по центру",
                 )

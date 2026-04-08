@@ -2,6 +2,25 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+_ALIGN_DISPLAY: dict[str, str] = {
+    "LEFT": "\u041f\u043e \u043b\u0435\u0432\u043e\u043c\u0443 \u043a\u0440\u0430\u044e",
+    "CENTER": "\u041f\u043e \u0446\u0435\u043d\u0442\u0440\u0443",
+    "RIGHT": "\u041f\u043e \u043f\u0440\u0430\u0432\u043e\u043c\u0443 \u043a\u0440\u0430\u044e",
+    "JUSTIFY": "\u041f\u043e \u0448\u0438\u0440\u0438\u043d\u0435",
+    "DISTRIBUTE": "\u0420\u0430\u0441\u043f\u0440\u0435\u0434\u0435\u043b\u0451\u043d\u043d\u043e\u0435",
+}
+
+
+def display_alignment(raw: str | None, *, inherited: bool = False) -> str:
+    if raw is None:
+        label = _ALIGN_DISPLAY["LEFT"]
+        return f"{label} (\u0443\u043d\u0430\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u043d\u043e)" if inherited else label
+    upper = raw.upper()
+    for key, label in _ALIGN_DISPLAY.items():
+        if key in upper:
+            return label
+    return raw
+
 
 @dataclass(slots=True)
 class Finding:

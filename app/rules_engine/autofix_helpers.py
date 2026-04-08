@@ -79,7 +79,7 @@ def fix_font_color_styles(doc: Document, details: list[str]) -> bool:
         except (AttributeError, TypeError):
             pass
     if changed:
-        details.append("Styles: font color -> black")
+        details.append("\u0421\u0442\u0438\u043b\u0438: \u0446\u0432\u0435\u0442 \u0448\u0440\u0438\u0444\u0442\u0430 -> \u0447\u0451\u0440\u043d\u044b\u0439")
     return changed
 
 def fix_font_color_runs(paragraph, para_label: str, details: list[str]) -> bool:
@@ -100,7 +100,7 @@ def fix_font_color_runs(paragraph, para_label: str, details: list[str]) -> bool:
         if c_el is not None and _set_color_to_black(c_el):
             changed = True
     if changed:
-        details.append(f"{para_label}: font color -> black")
+        details.append(f"{para_label}: \u0446\u0432\u0435\u0442 \u0448\u0440\u0438\u0444\u0442\u0430 -> \u0447\u0451\u0440\u043d\u044b\u0439")
     return changed
 
 def fix_italic_styles(doc: Document, details: list[str]) -> bool:
@@ -113,7 +113,7 @@ def fix_italic_styles(doc: Document, details: list[str]) -> bool:
         except (AttributeError, TypeError):
             pass
     if changed:
-        details.append("Styles: italic removed")
+        details.append("\u0421\u0442\u0438\u043b\u0438: \u043a\u0443\u0440\u0441\u0438\u0432 \u0443\u0431\u0440\u0430\u043d")
     return changed
 
 def fix_remove_italic(paragraph, para_label: str, details: list[str]) -> bool:
@@ -138,7 +138,7 @@ def fix_remove_italic(paragraph, para_label: str, details: list[str]) -> bool:
                 rPr.remove(el)
                 changed = True
     if changed:
-        details.append(f"{para_label}: italic removed")
+        details.append(f"{para_label}: \u043a\u0443\u0440\u0441\u0438\u0432 \u0443\u0431\u0440\u0430\u043d")
     return changed
 
 def fix_list_indent(paragraph, para_label: str, details: list[str]) -> bool:
@@ -168,7 +168,7 @@ def fix_list_indent(paragraph, para_label: str, details: list[str]) -> bool:
                 except (ValueError, TypeError):
                     pass
     if changed:
-        details.append(f"{para_label}: list indent zeroed")
+        details.append(f"{para_label}: \u043e\u0442\u0441\u0442\u0443\u043f \u0441\u043f\u0438\u0441\u043a\u0430 \u043e\u0431\u043d\u0443\u043b\u0451\u043d")
     return changed
 
 _ALL_MARKER_CHARS = _BULLET_CHARS | frozenset((_EN_DASH, _EM_DASH))
@@ -191,7 +191,7 @@ def fix_markers_text(
             ws = rt[: len(rt) - len(stripped)]
             rest = stripped[1:].lstrip()
             run.text = ws + marker_char + " " + rest
-            details.append(f"{para_label}: marker -> {marker_char}")
+            details.append(f"{para_label}: \u043c\u0430\u0440\u043a\u0435\u0440 -> {marker_char}")
             return True
         break
     return False
@@ -228,7 +228,7 @@ def fix_numbering_bullets(
                             rFonts.set(fq, body_font)
             changed = True
     if changed:
-        details.append("Numbering: bullet markers -> dash")
+        details.append("\u041d\u0443\u043c\u0435\u0440\u0430\u0446\u0438\u044f: \u043c\u0430\u0440\u043a\u0435\u0440\u044b -> \u0434\u0435\u0444\u0438\u0441")
     return changed
 
 def fix_dashes_in_text(paragraph, para_label: str, details: list[str]) -> bool:
@@ -241,7 +241,7 @@ def fix_dashes_in_text(paragraph, para_label: str, details: list[str]) -> bool:
             run.text = t.replace(_EM_DASH, _HYPHEN).replace(_EN_DASH, _HYPHEN)
             changed = True
     if changed:
-        details.append(f"{para_label}: long dashes -> short")
+        details.append(f"{para_label}: \u0434\u043b\u0438\u043d\u043d\u044b\u0435 \u0442\u0438\u0440\u0435 -> \u043a\u043e\u0440\u043e\u0442\u043a\u0438\u0435")
     return changed
 
 def fix_caption_trailing_dot(paragraph, para_label: str, details: list[str]) -> bool:
@@ -256,7 +256,7 @@ def fix_caption_trailing_dot(paragraph, para_label: str, details: list[str]) -> 
         if s and s.endswith(".") and not s.endswith(".."):
             tail = (t_el.text or "")[len(s):]
             t_el.text = s[:-1] + tail
-            details.append(f"{para_label}: caption trailing dot removed")
+            details.append(f"{para_label}: \u0442\u043e\u0447\u043a\u0430 \u0432 \u043a\u043e\u043d\u0446\u0435 \u043f\u043e\u0434\u043f\u0438\u0441\u0438 \u0443\u0431\u0440\u0430\u043d\u0430")
             return True
         if s:
             break
@@ -409,7 +409,7 @@ def clamp_overflow_table_widths(doc: Document, details: list[str]) -> bool:
         set_table_width_pct100(el)
         changed_any = True
     if changed_any:
-        details.append("Tables: width clamped to text area (100%)")
+        details.append("\u0422\u0430\u0431\u043b\u0438\u0446\u044b: \u0448\u0438\u0440\u0438\u043d\u0430 \u043f\u0440\u0438\u0432\u0435\u0434\u0435\u043d\u0430 \u043a \u043e\u0431\u043b\u0430\u0441\u0442\u0438 \u0442\u0435\u043a\u0441\u0442\u0430 (100%)")
     return changed_any
 
 def min_content_width_twips(doc: Document) -> int:
@@ -455,7 +455,7 @@ def fix_remove_highlight(paragraph, para_label: str, details: list[str]) -> bool
         if rPr is not None:
             changed |= _strip(rPr)
     if changed:
-        details.append(f"{para_label}: highlight/shading removed")
+        details.append(f"{para_label}: \u0437\u0430\u043b\u0438\u0432\u043a\u0430/\u0432\u044b\u0434\u0435\u043b\u0435\u043d\u0438\u0435 \u0443\u0431\u0440\u0430\u043d\u044b")
     return changed
 
 def fix_remove_strange_chars(paragraph, para_label: str, details: list[str], allowed_re) -> bool:
@@ -468,7 +468,14 @@ def fix_remove_strange_chars(paragraph, para_label: str, details: list[str], all
             run.text = cleaned
             changed = True
     if changed:
-        details.append(f"{para_label}: strange chars removed")
+        for run in paragraph.runs:
+            if is_field_code_run(run) or not run.text:
+                continue
+            stripped = run.text.lstrip()
+            if stripped != run.text:
+                run.text = stripped
+            break
+        details.append(f"{para_label}: \u043f\u043e\u0441\u0442\u043e\u0440\u043e\u043d\u043d\u0438\u0435 \u0441\u0438\u043c\u0432\u043e\u043b\u044b \u0443\u0431\u0440\u0430\u043d\u044b")
     return changed
 
 def remove_manual_page_breaks(paragraph) -> bool:
@@ -484,7 +491,7 @@ def fix_page_break_before(paragraph, para_label: str, details: list[str]) -> boo
     if pf.page_break_before:
         return False
     pf.page_break_before = True
-    details.append(f"{para_label}: page break before added")
+    details.append(f"{para_label}: \u0440\u0430\u0437\u0440\u044b\u0432 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u044b \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d")
     return True
 
 def _is_removable_empty_para(para) -> bool:
@@ -532,7 +539,7 @@ def remove_empty_paras_before_page_breaks(doc, details: list[str]) -> bool:
         body.remove(elem)
 
     if to_remove:
-        details.append(f"Removed {len(to_remove)} empty paragraphs before page breaks")
+        details.append(f"\u0423\u0434\u0430\u043b\u0435\u043d\u043e {len(to_remove)} \u043f\u0443\u0441\u0442\u044b\u0445 \u0430\u0431\u0437\u0430\u0446\u0435\u0432 \u043f\u0435\u0440\u0435\u0434 \u0440\u0430\u0437\u0440\u044b\u0432\u0430\u043c\u0438 \u0441\u0442\u0440\u0430\u043d\u0438\u0446")
     return len(to_remove) > 0
 
 def fix_section_margins(
@@ -550,5 +557,5 @@ def fix_section_margins(
             setattr(section, attr, target)
             changed = True
     if changed:
-        details.append(f"Section #{sec_idx + 1}: margins fixed")
+        details.append(f"\u0421\u0435\u043a\u0446\u0438\u044f #{sec_idx + 1}: \u043f\u043e\u043b\u044f \u0438\u0441\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u044b")
     return changed

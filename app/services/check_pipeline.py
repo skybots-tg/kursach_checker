@@ -58,8 +58,8 @@ async def run_check_pipeline(
             if converted_path:
                 working_path = converted_path
                 notices.append(
-                    "DOC converted to DOCX; "
-                    "check results may differ from the original document"
+                    "DOC \u043a\u043e\u043d\u0432\u0435\u0440\u0442\u0438\u0440\u043e\u0432\u0430\u043d \u0432 DOCX; "
+                    "\u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442\u044b \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438 \u043c\u043e\u0433\u0443\u0442 \u043e\u0442\u043b\u0438\u0447\u0430\u0442\u044c\u0441\u044f \u043e\u0442 \u043e\u0440\u0438\u0433\u0438\u043d\u0430\u043b\u0430"
                 )
                 logger.info("DOC converted to DOCX: %s", converted_path)
 

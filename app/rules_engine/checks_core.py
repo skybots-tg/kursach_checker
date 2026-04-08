@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 from app.rules_engine.docx_snapshot import DocumentSnapshot
-from app.rules_engine.findings import Finding, add_finding
+from app.rules_engine.findings import Finding, add_finding, display_alignment
 from app.rules_engine.rules_config import RulesConfig
 
 
@@ -80,7 +80,7 @@ def run_integrity_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings:
             title="Режим правок",
             category="integrity",
             severity=severity,
-            expected="Исправления в режиме track changes отсутствуют",
+            expected="\u0418\u0441\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f \u0432 \u0440\u0435\u0436\u0438\u043c\u0435 \u043f\u0440\u0430\u0432\u043a\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044e\u0442",
             found="Обнаружены пометки вставок/удалений",
             location="документ",
             recommendation="Примите все исправления и отключите режим правок",
@@ -295,8 +295,8 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
                     title="Размер шрифта",
                     category="typography",
                     severity=severity,
-                    expected=f"{expected_size} pt",
-                    found=f"{size} pt",
+                    expected=f"{expected_size} \u043f\u0442",
+                    found=f"{size} \u043f\u0442",
                     location=f"абзац #{paragraph.index + 1}",
                     recommendation="Установите единый размер шрифта для основного текста",
                 )
@@ -333,16 +333,15 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
             para_align = paragraph.alignment.upper() if paragraph.alignment else "LEFT"
             if expected_alignment not in para_align:
                 counts["alignment"] += 1
-                display_align = paragraph.alignment or "LEFT (inherited)"
                 add_finding(
                     findings,
-                    title="Выравнивание текста",
+                    title="\u0412\u044b\u0440\u0430\u0432\u043d\u0438\u0432\u0430\u043d\u0438\u0435 \u0442\u0435\u043a\u0441\u0442\u0430",
                     category="typography",
                     severity=severity,
-                    expected="По ширине (JUSTIFY)",
-                    found=display_align,
-                    location=f"абзац #{paragraph.index + 1}",
-                    recommendation="Выровняйте основной текст по ширине",
+                    expected="\u041f\u043e \u0448\u0438\u0440\u0438\u043d\u0435",
+                    found=display_alignment(paragraph.alignment, inherited=paragraph.alignment is None),
+                    location=f"\u0430\u0431\u0437\u0430\u0446 #{paragraph.index + 1}",
+                    recommendation="\u0412\u044b\u0440\u043e\u0432\u043d\u044f\u0439\u0442\u0435 \u043e\u0441\u043d\u043e\u0432\u043d\u043e\u0439 \u0442\u0435\u043a\u0441\u0442 \u043f\u043e \u0448\u0438\u0440\u0438\u043d\u0435",
                 )
 
         if paragraph.has_highlight and counts["highlight"] < _MAX_FINDINGS_PER_TYPE:
