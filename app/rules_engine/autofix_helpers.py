@@ -471,6 +471,14 @@ def fix_remove_strange_chars(paragraph, para_label: str, details: list[str], all
         details.append(f"{para_label}: strange chars removed")
     return changed
 
+def remove_manual_page_breaks(paragraph) -> bool:
+    changed = False
+    for br in list(paragraph._element.iter(qn("w:br"))):
+        if br.get(qn("w:type")) == "page":
+            br.getparent().remove(br)
+            changed = True
+    return changed
+
 def fix_page_break_before(paragraph, para_label: str, details: list[str]) -> bool:
     pf = paragraph.paragraph_format
     if pf.page_break_before:

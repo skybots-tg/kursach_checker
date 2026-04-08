@@ -29,6 +29,7 @@ from app.rules_engine.autofix_helpers import (
     iter_table_cell_paragraphs,
     postprocess_fixed_docx,
     preflight_margins_safe,
+    remove_manual_page_breaks,
 )
 from app.rules_engine.checks_advanced import (
     _ALLOWED_CHARS_RE,
@@ -193,8 +194,19 @@ def apply_safe_autofixes(
                 needs_break = any(s in text.lower() for s in cfg.section_break_sections)
                 if not needs_break:
                     needs_break = bool(_CHAPTER_RE.match(text))
-                if needs_break and fix_page_break_before(paragraph, para_label, details):
-                    changed = True
+                if needs_break:
+                    prev_idx = idx - 1
+                    while prev_idx >= 0:
+                        prev_para = doc.paragraphs[prev_idx]
+                        if (prev_para.text or "").strip():
+                            break
+                        if remove_manual_page_breaks(prev_para):
+                            changed = True
+                        prev_idx -= 1
+                    if remove_manual_page_breaks(paragraph):
+                        changed = True
+                    if fix_page_break_before(paragraph, para_label, details):
+                        changed = True
 
     body_start = 0
     for i, p in enumerate(doc.paragraphs):
