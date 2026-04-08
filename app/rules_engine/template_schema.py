@@ -121,7 +121,24 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
         key="page_numbering",
         title="Нумерация страниц",
         severity="warning",
-        params={"require": True, "position": "bottom_center"},
+        params={"require": True, "position": "bottom_center", "title_page_no_number": True},
+    ),
+    RuleBlock(
+        key="section_breaks",
+        title="Разделы с новой страницы",
+        severity="warning",
+        params={
+            "sections_requiring_break": [
+                "содержание",
+                "оглавление",
+                "введение",
+                "заключение",
+                "список литературы",
+                "список использованных источников",
+                "список использованных источников и литературы",
+            ],
+            "chapters_require_break": True,
+        },
     ),
     RuleBlock(
         key="toc",

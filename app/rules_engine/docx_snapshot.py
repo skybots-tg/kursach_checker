@@ -45,6 +45,7 @@ class ParagraphSnapshot:
     runs_size_pt: list[float]
     runs_bold: list[bool | None]
     is_toc_entry: bool
+    page_break_before: bool
 
     @property
     def is_heading(self) -> bool:
@@ -102,6 +103,7 @@ class DocumentSnapshot:
     captions: list[CaptionSnapshot]
     is_encrypted: bool
     is_corrupted: bool
+    first_section_title_page: bool
 
 
 def _mm_from_emu(value: int | None) -> float | None:
@@ -206,13 +208,55 @@ def _has_numbering(paragraph) -> bool:
     return False
 
 
+def _detect_page_break_before(paragraph, prev_paragraph) -> bool:
+    for pPr in walk_style_pPr(paragraph):
+        pb = pPr.find(qn("w:pageBreakBefore"))
+        if pb is not None:
+            val = pb.get(qn("w:val"))
+            if val is None or val in ("1", "true"):
+                return True
+            return False
+
+    for run in paragraph.runs:
+        for br in run._element.findall(qn("w:br")):
+            if br.get(qn("w:type")) == "page":
+                return True
+        if run.text and run.text.strip():
+            break
+
+    if prev_paragraph is not None:
+        prev_pPr = prev_paragraph._element.find(qn("w:pPr"))
+        if prev_pPr is not None:
+            sectPr = prev_pPr.find(qn("w:sectPr"))
+            if sectPr is not None:
+                sect_type = sectPr.find(qn("w:type"))
+                if sect_type is None or sect_type.get(qn("w:val")) != "continuous":
+                    return True
+
+        for run in reversed(prev_paragraph.runs):
+            for br in run._element.findall(qn("w:br")):
+                if br.get(qn("w:type")) == "page":
+                    return True
+
+    return False
+
+
+def _first_section_title_page(doc: Document) -> bool:
+    if not doc.sections:
+        return False
+    return bool(doc.sections[0].different_first_page_header_footer)
+
+
 def _paragraphs(doc: Document, toc_indices: set[int]) -> list[ParagraphSnapshot]:
     result: list[ParagraphSnapshot] = []
-    for idx, paragraph in enumerate(doc.paragraphs):
+    all_paras = doc.paragraphs
+    for idx, paragraph in enumerate(all_paras):
         text = (paragraph.text or "").strip()
         pformat = paragraph.paragraph_format
         indent = _mm_from_emu(getattr(pformat.first_line_indent, "emu", None))
         line_spacing = _resolve_line_spacing(paragraph)
+        prev_para = all_paras[idx - 1] if idx > 0 else None
+        pb_before = _detect_page_break_before(paragraph, prev_para)
 
         result.append(
             ParagraphSnapshot(
@@ -231,6 +275,7 @@ def _paragraphs(doc: Document, toc_indices: set[int]) -> list[ParagraphSnapshot]
                 runs_size_pt=_extract_run_sizes(paragraph),
                 runs_bold=_extract_run_bolds(paragraph),
                 is_toc_entry=idx in toc_indices,
+                page_break_before=pb_before,
             )
         )
     return result
@@ -335,6 +380,7 @@ def _empty_snapshot(
         captions=[],
         is_encrypted=is_encrypted,
         is_corrupted=is_corrupted,
+        first_section_title_page=False,
     )
 
 
@@ -402,4 +448,5 @@ def build_snapshot(file_path: str) -> DocumentSnapshot:
         captions=_extract_captions(paragraphs),
         is_encrypted=False,
         is_corrupted=False,
+        first_section_title_page=_first_section_title_page(doc),
     )

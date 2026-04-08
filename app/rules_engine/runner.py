@@ -11,6 +11,7 @@ from app.rules_engine.checks_advanced import (
     run_heading_formatting_checks,
     run_objects_checks,
     run_page_numbering_checks,
+    run_section_breaks_checks,
     run_toc_checks,
 )
 from app.rules_engine.checks_core import (
@@ -42,6 +43,7 @@ _CHECK_NAME_RU: dict[str, str] = {
     "bibliography": "список источников",
     "objects": "таблицы и рисунки",
     "page_numbering": "нумерация страниц",
+    "section_breaks": "разделы с новой страницы",
     "toc": "оглавление",
     "footnotes": "сноски",
     "captions": "подписи к объектам",
@@ -177,6 +179,7 @@ async def run_document_checks(
             ("bibliography", run_bibliography_checks),
             ("objects", run_objects_checks),
             ("page_numbering", run_page_numbering_checks),
+            ("section_breaks", run_section_breaks_checks),
             ("toc", run_toc_checks),
             ("footnotes", run_footnotes_checks),
             ("captions", run_captions_checks),

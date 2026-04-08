@@ -96,6 +96,19 @@ def run_page_numbering_checks(
             recommendation="Добавьте нумерацию страниц в нижний колонтитул",
         )
 
+    if params.get("title_page_no_number", True) and snapshot.has_page_numbers:
+        if not snapshot.first_section_title_page:
+            add_finding(
+                findings,
+                title="Нумерация титульного листа",
+                category="page_numbering",
+                severity=severity,
+                expected="Титульный лист не нумеруется (нумерация со второй страницы)",
+                found="Первая страница нумеруется наравне с остальными",
+                location="первая секция документа",
+                recommendation="Включите 'Особый колонтитул для первой страницы' и уберите номер с титульного листа",
+            )
+
 
 def run_toc_checks(
     snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding],
@@ -218,6 +231,53 @@ def _check_sequential(
             location="объекты",
             recommendation=f"Проверьте последовательность нумерации «{label}»",
         )
+
+
+def run_section_breaks_checks(
+    snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding],
+) -> None:
+    if not cfg.has("section_breaks"):
+        return
+
+    severity = cfg.severity("section_breaks", "warning")
+    params = cfg.params("section_breaks")
+
+    named_sections = [s.lower() for s in params.get("sections_requiring_break", [])]
+    chapters_require = bool(params.get("chapters_require_break", True))
+
+    for para in snapshot.paragraphs:
+        if not para.is_heading or not para.text:
+            continue
+        if para.index == 0:
+            continue
+
+        text_lower = para.text.strip().lower()
+        level = para.heading_level
+        needs_break = False
+        match_label = ""
+
+        for section_name in named_sections:
+            if section_name in text_lower:
+                needs_break = True
+                match_label = para.text.strip()
+                break
+
+        if not needs_break and chapters_require and level == 1:
+            needs_break = True
+            match_label = para.text.strip()
+
+        if needs_break and not para.page_break_before:
+            short = match_label[:50]
+            add_finding(
+                findings,
+                title="Раздел не с новой страницы",
+                category="section_breaks",
+                severity=severity,
+                expected="Раздел начинается с новой страницы",
+                found=f"Раздел «{short}» продолжает предыдущую страницу",
+                location=f"абзац #{para.index + 1}",
+                recommendation="Вставьте разрыв страницы перед этим разделом",
+            )
 
 
 # ── bibliography & objects (перенесены из checks_core) ──────────────

@@ -148,17 +148,22 @@ def _deep_merge_defaults(stored: dict, defaults: dict) -> dict:
 
 def _merge_blocks_with_defaults(blocks: list[dict]) -> list[dict]:
     defaults_map = {b.key: b.model_dump() for b in DEFAULT_TEMPLATE_BLOCKS}
+    stored_keys: set[str] = set()
     merged = []
     for block in blocks:
         if not isinstance(block, dict):
             merged.append(block)
             continue
         key = block.get("key")
+        stored_keys.add(key)
         if key in defaults_map:
             default_params = defaults_map[key].get("params", {})
             stored_params = block.get("params") or {}
             block["params"] = _deep_merge_defaults(stored_params, default_params)
         merged.append(block)
+    for default_block in DEFAULT_TEMPLATE_BLOCKS:
+        if default_block.key not in stored_keys:
+            merged.append(default_block.model_dump())
     return merged
 
 
