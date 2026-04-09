@@ -9,6 +9,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
+from app.rules_engine.autofix_config import AutoFixConfig as _AutoFixConfig
 from app.rules_engine.autofix_helpers import (
     clamp_overflow_table_widths,
     fix_caption_trailing_dot,
@@ -32,10 +33,11 @@ from app.rules_engine.autofix_helpers import (
     remove_empty_paras_before_page_breaks,
     remove_manual_page_breaks,
 )
-from app.rules_engine.checks_advanced import (
-    _ALLOWED_CHARS_RE,
-    _CHAPTER_RE,
-    _TOC_LINE_TAIL_RE,
+from app.rules_engine.checks_content import ALLOWED_CHARS_RE as _ALLOWED_CHARS_RE
+from app.rules_engine.heading_detection import (
+    CHAPTER_RE as _CHAPTER_RE,
+    TOC_LINE_TAIL_RE as _TOC_LINE_TAIL_RE,
+    detect_heading_candidate,
 )
 from app.rules_engine.findings import Finding
 from app.rules_engine.style_resolve import (
@@ -138,9 +140,10 @@ def apply_safe_autofixes(
         return AutoFixResult(output_file_path=None, details=[])
 
     safety = admin_cfg.get("safety_limits", {})
-    max_changes = int(safety.get("max_changes_per_document", 500))
+    max_paragraphs = int(safety.get("max_paragraphs_touched", 2000))
     skip_toc = bool(safety.get("skip_toc", True))
     skip_headings_safety = bool(safety.get("skip_headings", True))
+    allow_promote = bool(safety.get("allow_promote_heading_candidates", cfg.promote_heading_candidates))
     skip_tables_safety = bool(safety.get("skip_tables", True))
     skip_margins_safety = bool(safety.get("skip_margin_normalization", True))
 
@@ -215,8 +218,9 @@ def apply_safe_autofixes(
             body_start = i
             break
 
+    para_count = 0
     for idx, paragraph in enumerate(doc.paragraphs):
-        if change_count >= max_changes:
+        if para_count >= max_paragraphs:
             break
 
         text = (paragraph.text or "").strip()
@@ -224,40 +228,67 @@ def apply_safe_autofixes(
             continue
 
         para_label = f"\u0410\u0431\u0437\u0430\u0446 #{idx + 1}"
+        para_touched = False
 
         if cfg.normalize_font_color:
             if fix_font_color_runs(paragraph, para_label, details):
                 changed = True
-                change_count += 1
+                para_touched = True
 
         if cfg.remove_italic:
             if fix_remove_italic(paragraph, para_label, details):
                 changed = True
-                change_count += 1
+                para_touched = True
 
         if cfg.remove_caption_trailing_dot:
             if fix_caption_trailing_dot(paragraph, para_label, details):
                 changed = True
-                change_count += 1
+                para_touched = True
 
         if idx in toc_indices:
+            if para_touched:
+                para_count += 1
             continue
 
-        if _is_heading_para(paragraph):
+        is_heading = _is_heading_para(paragraph)
+        candidate_level = detect_heading_candidate(text) if not is_heading else None
+
+        if is_heading:
             if not skip_headings_safety and cfg.normalize_headings:
                 if _fix_heading(paragraph, idx, cfg, details):
                     changed = True
-                    change_count += 1
+                    para_touched = True
+            if para_touched:
+                para_count += 1
+            continue
+
+        if candidate_level is not None and allow_promote:
+            if _promote_to_heading(paragraph, candidate_level, idx, cfg, details):
+                changed = True
+                para_touched = True
+            if para_touched:
+                para_count += 1
+            continue
+
+        if candidate_level is not None:
+            if para_touched:
+                para_count += 1
             continue
 
         if _should_skip_para(paragraph):
+            if para_touched:
+                para_count += 1
             continue
 
         if idx < body_start:
+            if para_touched:
+                para_count += 1
             continue
 
         eff_align = effective_alignment(paragraph)
         if eff_align in (WD_PARAGRAPH_ALIGNMENT.CENTER, WD_PARAGRAPH_ALIGNMENT.RIGHT):
+            if para_touched:
+                para_count += 1
             continue
 
         is_list = _is_list_para(paragraph) or is_manual_list_para(text)
@@ -266,54 +297,54 @@ def apply_safe_autofixes(
         if is_list and cfg.normalize_list_markers:
             if fix_markers_text(paragraph, para_label, details, cfg.list_marker_char):
                 changed = True
-                change_count += 1
+                para_touched = True
 
         if is_list and cfg.normalize_list_indent:
             if fix_list_indent(paragraph, para_label, details):
                 changed = True
-                change_count += 1
+                para_touched = True
 
         if not is_list and cfg.normalize_dashes:
             if fix_dashes_in_text(paragraph, para_label, details):
                 changed = True
-                change_count += 1
+                para_touched = True
 
         if not is_list and cfg.normalize_alignment:
             if eff_align != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
                 paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
                 changed = True
-                change_count += 1
-                details.append(f"{para_label}: \u0432\u044b\u0440\u0430\u0432\u043d\u0438\u0432\u0430\u043d\u0438\u0435 \u043f\u043e \u0448\u0438\u0440\u0438\u043d\u0435")
+                para_touched = True
+                details.append(f"{para_label}: выравнивание по ширине")
 
         if cfg.normalize_line_spacing:
             eff_ls = effective_line_spacing(paragraph)
             if eff_ls is not None and abs(eff_ls - cfg.line_spacing) > 0.05:
                 pf.line_spacing = cfg.line_spacing
                 changed = True
-                change_count += 1
-                details.append(f"{para_label}: \u043c\u0435\u0436\u0441\u0442\u0440\u043e\u0447\u043d\u044b\u0439 \u0438\u043d\u0442\u0435\u0440\u0432\u0430\u043b {cfg.line_spacing}")
+                para_touched = True
+                details.append(f"{para_label}: межстрочный интервал {cfg.line_spacing}")
 
         if not is_list and cfg.normalize_first_line_indent:
             eff_indent = effective_first_line_indent_mm(paragraph)
             if abs(eff_indent - cfg.first_line_indent_mm) > 0.5:
                 pf.first_line_indent = Mm(cfg.first_line_indent_mm)
                 changed = True
-                change_count += 1
-                details.append(f"{para_label}: \u0430\u0431\u0437\u0430\u0446\u043d\u044b\u0439 \u043e\u0442\u0441\u0442\u0443\u043f {cfg.first_line_indent_mm} \u043c\u043c")
+                para_touched = True
+                details.append(f"{para_label}: абзацный отступ {cfg.first_line_indent_mm} мм")
 
         if cfg.normalize_spacing_before_after:
             eff_sb = effective_space_before_pt(paragraph)
             if abs(eff_sb - cfg.space_before_pt) > 0.2:
                 pf.space_before = Pt(cfg.space_before_pt)
                 changed = True
-                change_count += 1
-                details.append(f"{para_label}: \u0438\u043d\u0442\u0435\u0440\u0432\u0430\u043b \u0434\u043e {cfg.space_before_pt} \u043f\u0442")
+                para_touched = True
+                details.append(f"{para_label}: интервал до {cfg.space_before_pt} пт")
             eff_sa = effective_space_after_pt(paragraph)
             if abs(eff_sa - cfg.space_after_pt) > 0.2:
                 pf.space_after = Pt(cfg.space_after_pt)
                 changed = True
-                change_count += 1
-                details.append(f"{para_label}: \u0438\u043d\u0442\u0435\u0440\u0432\u0430\u043b \u043f\u043e\u0441\u043b\u0435 {cfg.space_after_pt} \u043f\u0442")
+                para_touched = True
+                details.append(f"{para_label}: интервал после {cfg.space_after_pt} пт")
 
         if cfg.normalize_font:
             font_changed = False
@@ -330,41 +361,47 @@ def apply_safe_autofixes(
                     font_changed = True
             if font_changed:
                 changed = True
-                change_count += 1
-                details.append(f"{para_label}: \u0448\u0440\u0438\u0444\u0442 {cfg.font_name}, {cfg.font_size_pt} \u043f\u0442")
+                para_touched = True
+                details.append(f"{para_label}: шрифт {cfg.font_name}, {cfg.font_size_pt} пт")
+
+        if para_touched:
+            para_count += 1
 
     for t_idx, t_para in enumerate(iter_table_cell_paragraphs(doc)):
-        if change_count >= max_changes:
+        if para_count >= max_paragraphs:
             break
         t_text = (t_para.text or "").strip()
         if not t_text:
             continue
-        t_label = f"\u0410\u0431\u0437\u0430\u0446 \u0442\u0430\u0431\u043b\u0438\u0446\u044b #{t_idx + 1}"
+        t_label = f"Абзац таблицы #{t_idx + 1}"
+        t_touched = False
         if cfg.normalize_font_color:
             if fix_font_color_runs(t_para, t_label, details):
                 changed = True
-                change_count += 1
+                t_touched = True
         if cfg.remove_italic:
             if fix_remove_italic(t_para, t_label, details):
                 changed = True
-                change_count += 1
+                t_touched = True
         if cfg.remove_caption_trailing_dot:
             if fix_caption_trailing_dot(t_para, t_label, details):
                 changed = True
-                change_count += 1
+                t_touched = True
         t_is_list = _is_list_para(t_para) or is_manual_list_para(t_text)
         if t_is_list and cfg.normalize_list_markers:
             if fix_markers_text(t_para, t_label, details, cfg.list_marker_char):
                 changed = True
-                change_count += 1
+                t_touched = True
         if t_is_list and cfg.normalize_list_indent:
             if fix_list_indent(t_para, t_label, details):
                 changed = True
-                change_count += 1
+                t_touched = True
         if not t_is_list and cfg.normalize_dashes:
             if fix_dashes_in_text(t_para, t_label, details):
                 changed = True
-                change_count += 1
+                t_touched = True
+        if t_touched:
+            para_count += 1
 
     if cfg.normalize_table_width and not skip_tables_safety and clamp_overflow_table_widths(doc, details):
         changed = True
@@ -422,96 +459,35 @@ def _fix_heading(paragraph, idx: int, cfg: "_AutoFixConfig", details: list[str])
             changed = True
     if changed:
         details.append(
-            f"\u0417\u0430\u0433\u043e\u043b\u043e\u0432\u043e\u043a #{idx + 1}: {cfg.heading_font}, {cfg.heading_size_pt} \u043f\u0442, \u043f\u043e\u043b\u0443\u0436\u0438\u0440\u043d\u044b\u0439"
+            f"Заголовок #{idx + 1}: {cfg.heading_font}, {cfg.heading_size_pt} пт, полужирный"
         )
     return changed
 
 
-@dataclass(slots=True)
-class _AutoFixConfig:
-    enabled: bool
-    normalize_alignment: bool
-    normalize_line_spacing: bool
-    normalize_first_line_indent: bool
-    normalize_spacing_before_after: bool
-    normalize_font: bool
-    normalize_margins: bool
-    normalize_headings: bool
-    normalize_table_width: bool
-    normalize_font_color: bool
-    target_font_color: str
-    remove_italic: bool
-    normalize_list_indent: bool
-    normalize_list_markers: bool
-    list_marker_char: str
-    normalize_dashes: bool
-    remove_caption_trailing_dot: bool
-    remove_highlight: bool
-    remove_strange_chars: bool
-    fix_section_breaks: bool
-    section_break_sections: list[str]
-    line_spacing: float
-    first_line_indent_mm: float
-    space_before_pt: float
-    space_after_pt: float
-    font_name: str
-    font_size_pt: float
-    margins_mm: dict
-    heading_font: str
-    heading_size_pt: float
-    heading_bold: bool
+def _promote_to_heading(
+    paragraph, level: int, idx: int, cfg: "_AutoFixConfig", details: list[str],
+) -> bool:
+    """Assign Word Heading style to a paragraph detected as heading candidate by text."""
+    target_style = f"Heading {level}"
+    try:
+        paragraph.style = paragraph.part.document.styles[target_style]
+    except (KeyError, AttributeError):
+        try:
+            paragraph.style = target_style
+        except Exception:
+            logger.debug("Promote: style '%s' not found in document", target_style)
+            return False
+    for run in paragraph.runs:
+        if is_field_code_run(run):
+            continue
+        if cfg.heading_font:
+            run.font.name = cfg.heading_font
+        run.font.size = Pt(cfg.heading_size_pt)
+        if cfg.heading_bold:
+            run.bold = True
+    pf = paragraph.paragraph_format
+    pf.first_line_indent = Mm(0)
+    details.append(f"Абзац #{idx + 1} → «Заголовок {level}»: {paragraph.text[:50]}")
+    return True
 
-    @classmethod
-    def from_rules(cls, rules: dict | None, admin_defaults: dict | None = None) -> "_AutoFixConfig":
-        ad = admin_defaults or {}
-        blocks = {
-            str(b.get("key")): b
-            for b in (rules or {}).get("blocks", [])
-            if isinstance(b, dict)
-        }
-        auto = blocks.get("autofix", {})
-        p = auto.get("params") or {}
 
-        def _b(k: str, d: bool = True) -> bool:
-            return bool(p.get(k, ad.get(k, d)))
-
-        body = ((blocks.get("typography", {}).get("params") or {}).get("body") or {})
-        lp = (blocks.get("layout", {}).get("params") or {})
-        hp = (blocks.get("heading_formatting", {}).get("params") or {})
-        sb = (blocks.get("section_breaks", {}).get("params") or {})
-        _dflt_sec = ["содержание", "оглавление", "введение", "заключение",
-                     "список литературы", "список использованных источников"]
-
-        return cls(
-            enabled=bool(auto.get("enabled", ad.get("enabled", True))),
-            normalize_alignment=_b("normalize_alignment"),
-            normalize_line_spacing=_b("normalize_line_spacing"),
-            normalize_first_line_indent=_b("normalize_first_line_indent"),
-            normalize_spacing_before_after=_b("normalize_spacing_before_after"),
-            normalize_font=_b("normalize_font"),
-            normalize_margins=_b("normalize_margins", False),
-            normalize_headings=_b("normalize_headings"),
-            normalize_table_width=_b("normalize_table_width"),
-            normalize_font_color=_b("normalize_font_color"),
-            target_font_color=str(p.get("target_font_color", ad.get("target_font_color", "000000"))),
-            remove_italic=_b("remove_italic"),
-            normalize_list_indent=_b("normalize_list_indent"),
-            normalize_list_markers=_b("normalize_list_markers"),
-            list_marker_char=str(p.get("list_marker_char", ad.get("list_marker_char", "-"))),
-            normalize_dashes=_b("normalize_dashes"),
-            remove_caption_trailing_dot=_b("remove_caption_trailing_dot"),
-            remove_highlight=_b("remove_highlight"),
-            remove_strange_chars=_b("remove_strange_chars"),
-            fix_section_breaks=_b("fix_section_breaks"),
-            section_break_sections=[s.lower() for s in sb.get("sections_requiring_break", _dflt_sec)],
-            line_spacing=float(body.get("line_spacing", 1.5)),
-            first_line_indent_mm=float(body.get("first_line_indent_mm", 12.5)),
-            space_before_pt=float(p.get("space_before_pt", ad.get("space_before_pt", 0))),
-            space_after_pt=float(p.get("space_after_pt", ad.get("space_after_pt", 0))),
-            font_name=str(body.get("font", "Times New Roman")),
-            font_size_pt=float(body.get("size_pt", 14)),
-            margins_mm=lp.get("margins_mm", {"left": 30, "right": 15, "top": 20, "bottom": 25}),
-            heading_font=str(hp.get("font", body.get("font", "Times New Roman"))),
-            heading_size_pt=float(hp.get("size_pt", body.get("size_pt", 14))),
-            heading_bold=bool(hp.get("require_bold", True)),
-        )

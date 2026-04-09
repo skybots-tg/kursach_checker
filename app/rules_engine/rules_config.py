@@ -51,8 +51,7 @@ class RulesConfig:
     def __init__(self, raw_rules: dict | None):
         self.raw_rules = raw_rules or {}
         blocks = self.raw_rules.get("blocks", [])
-        if blocks:
-            self.raw_rules["blocks"] = merge_blocks_with_defaults(blocks)
+        self.raw_rules["blocks"] = merge_blocks_with_defaults(blocks)
         self._blocks = self._parse_blocks(self.raw_rules)
 
     @staticmethod

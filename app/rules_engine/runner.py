@@ -5,15 +5,21 @@ from typing import Callable
 
 from app.rules_engine.autofix import apply_safe_autofixes
 from app.rules_engine.checks_advanced import (
-    run_bibliography_checks,
     run_captions_checks,
     run_footnotes_checks,
     run_heading_formatting_checks,
-    run_objects_checks,
     run_page_numbering_checks,
     run_section_breaks_checks,
-    run_text_cleanliness_checks,
     run_toc_checks,
+)
+from app.rules_engine.checks_content import (
+    run_bibliography_checks,
+    run_objects_checks,
+    run_text_cleanliness_checks,
+)
+from app.rules_engine.checks_headings import (
+    run_heading_numbering_checks,
+    run_heading_semantics_checks,
 )
 from app.rules_engine.checks_core import (
     run_context_extraction_checks,
@@ -39,6 +45,8 @@ _CHECK_NAME_RU: dict[str, str] = {
     "layout": "поля и страница",
     "typography": "шрифт и абзацы",
     "heading_formatting": "заголовки",
+    "heading_semantics": "семантика заголовков",
+    "heading_numbering": "нумерация заголовков",
     "structure": "структура работы",
     "volume": "объём текста",
     "bibliography": "список источников",
@@ -176,6 +184,8 @@ async def run_document_checks(
             ("layout", run_layout_checks),
             ("typography", run_typography_checks),
             ("heading_formatting", run_heading_formatting_checks),
+            ("heading_semantics", run_heading_semantics_checks),
+            ("heading_numbering", run_heading_numbering_checks),
             ("structure", run_structure_checks),
             ("volume", run_volume_checks),
             ("bibliography", run_bibliography_checks),
