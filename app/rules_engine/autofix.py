@@ -33,6 +33,7 @@ from app.rules_engine.autofix_helpers import (
     remove_empty_paras_before_page_breaks,
     remove_manual_page_breaks,
 )
+from app.rules_engine.autofix_lists import convert_informal_lists
 from app.rules_engine.checks_content import ALLOWED_CHARS_RE as _ALLOWED_CHARS_RE
 from app.rules_engine.heading_detection import (
     CHAPTER_RE as _CHAPTER_RE,
@@ -171,6 +172,13 @@ def apply_safe_autofixes(
 
     if cfg.normalize_list_markers:
         if fix_numbering_bullets(doc, cfg.font_name, details, cfg.list_marker_char):
+            changed = True
+
+    if cfg.convert_informal_lists:
+        if convert_informal_lists(
+            doc, cfg.informal_list_markers, cfg.list_marker_char,
+            cfg.informal_list_min_consecutive, toc_indices, details,
+        ):
             changed = True
 
     if cfg.normalize_margins and not skip_margins_safety:

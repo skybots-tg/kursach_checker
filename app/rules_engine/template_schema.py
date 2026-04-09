@@ -180,6 +180,15 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
         },
     ),
     RuleBlock(
+        key="list_formatting",
+        title="Оформление списков",
+        severity="warning",
+        params={
+            "informal_list_markers": ["\u00b7", "\u2022", "*", "-", "\u2014", "\u2013"],
+            "min_consecutive": 2,
+        },
+    ),
+    RuleBlock(
         key="objects",
         title="Таблицы/рисунки/объекты",
         severity="warning",
@@ -221,6 +230,8 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
             "remove_italic": True,
             "normalize_list_indent": True,
             "normalize_list_markers": True,
+            "list_marker_char": "\u2014",
+            "convert_informal_lists": True,
             "normalize_dashes": True,
             "remove_caption_trailing_dot": True,
             "remove_highlight": True,

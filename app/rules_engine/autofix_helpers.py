@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 _W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 _BINARY_PREFIXES = ("word/media/", "word/embeddings/")
 
-_BULLET_CHARS = frozenset("\u2022\u25cf\u25cb\u25e6\u2023\u2043\u25aa\u25ab")
+_BULLET_CHARS = frozenset("\u2022\u25cf\u25cb\u25e6\u2023\u2043\u25aa\u25ab\u00b7")
 _EM_DASH = "\u2014"
 _EN_DASH = "\u2013"
 _HYPHEN = "-"
@@ -56,6 +56,8 @@ def is_manual_list_para(text: str) -> bool:
     if not stripped:
         return False
     if stripped[0] in _BULLET_CHARS:
+        return True
+    if stripped[0] == "*" and len(stripped) > 1 and stripped[1] in (" ", "\t", "\xa0"):
         return True
     if stripped[0] in (_HYPHEN, _EN_DASH, _EM_DASH) and len(stripped) > 1:
         if not stripped[1].isdigit():
@@ -171,7 +173,7 @@ def fix_list_indent(paragraph, para_label: str, details: list[str]) -> bool:
         details.append(f"{para_label}: \u043e\u0442\u0441\u0442\u0443\u043f \u0441\u043f\u0438\u0441\u043a\u0430 \u043e\u0431\u043d\u0443\u043b\u0451\u043d")
     return changed
 
-_ALL_MARKER_CHARS = _BULLET_CHARS | frozenset((_EN_DASH, _EM_DASH))
+_ALL_MARKER_CHARS = _BULLET_CHARS | frozenset((_EN_DASH, _EM_DASH, "*"))
 
 def fix_markers_text(
     paragraph, para_label: str, details: list[str],
@@ -190,7 +192,10 @@ def fix_markers_text(
         if stripped and stripped[0] in _ALL_MARKER_CHARS:
             ws = rt[: len(rt) - len(stripped)]
             rest = stripped[1:].lstrip()
-            run.text = ws + marker_char + " " + rest
+            new_text = ws + marker_char + " " + rest
+            if new_text == rt:
+                return False
+            run.text = new_text
             details.append(f"{para_label}: \u043c\u0430\u0440\u043a\u0435\u0440 -> {marker_char}")
             return True
         break

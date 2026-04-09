@@ -1,4 +1,4 @@
-"""Content quality checks: bibliography, embedded objects, text cleanliness.
+"""Content quality checks: bibliography, embedded objects, text cleanliness, list formatting.
 
 Split from checks_advanced.py to respect the 500-line file limit.
 """
@@ -10,6 +10,8 @@ from pathlib import Path
 from app.rules_engine.docx_snapshot import DocumentSnapshot
 from app.rules_engine.findings import Finding, add_finding
 from app.rules_engine.rules_config import RulesConfig
+
+_DEFAULT_INFORMAL_MARKERS = frozenset("\u00b7\u2022*-\u2014\u2013")
 
 # ── bibliography ─────────────────────────────────────────────────────
 
@@ -225,4 +227,90 @@ def run_text_cleanliness_checks(
             found=f"Показаны первые {_MAX_CLEANLINESS_FINDINGS}, проблема массовая",
             location="весь документ",
             recommendation="Проверьте весь документ на посторонние символы",
+        )
+
+
+# ── list formatting ──────────────────────────────────────────────────
+
+_MAX_LIST_FINDINGS = 5
+
+
+def _starts_with_informal_marker(text: str, markers: frozenset[str]) -> bool:
+    stripped = text.lstrip()
+    if not stripped or len(stripped) < 2:
+        return False
+    ch = stripped[0]
+    if ch not in markers:
+        return False
+    if ch in ("-", "\u2013", "\u2014") and stripped[1].isdigit():
+        return False
+    return True
+
+
+def run_list_formatting_checks(
+    snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding],
+) -> None:
+    if not cfg.has("list_formatting"):
+        return
+
+    severity = cfg.severity("list_formatting", "warning")
+    params = cfg.params("list_formatting")
+
+    markers_raw = params.get("informal_list_markers", ["\u00b7", "\u2022", "*", "-", "\u2014", "\u2013"])
+    markers = frozenset(markers_raw) | _DEFAULT_INFORMAL_MARKERS
+    min_consecutive = int(params.get("min_consecutive", 2))
+
+    groups: list[list[int]] = []
+    current: list[int] = []
+
+    for para in snapshot.paragraphs:
+        if not para.text or para.is_heading or para.is_toc_entry:
+            if current:
+                groups.append(current)
+                current = []
+            continue
+        if para.has_numbering:
+            if current:
+                groups.append(current)
+                current = []
+            continue
+        if _starts_with_informal_marker(para.text, markers):
+            current.append(para.index)
+        else:
+            if current:
+                groups.append(current)
+                current = []
+
+    if current:
+        groups.append(current)
+
+    count = 0
+    for group in groups:
+        if len(group) < min_consecutive:
+            continue
+        count += 1
+        if count > _MAX_LIST_FINDINGS:
+            add_finding(
+                findings,
+                title="Неоформленные списки — ещё замечания",
+                category="list_formatting",
+                severity="advice",
+                expected="",
+                found=f"Показаны первые {_MAX_LIST_FINDINGS}, проблема массовая",
+                location="весь документ",
+                recommendation="Проверьте весь документ на неоформленные списки",
+            )
+            break
+        first_idx = group[0]
+        para = snapshot.paragraphs[first_idx]
+        preview = para.text[:50]
+        add_finding(
+            findings,
+            title="Неоформленный список",
+            category="list_formatting",
+            severity=severity,
+            expected="Элементы списка оформлены маркированным/нумерованным списком",
+            found=f"Текст похож на список ({len(group)} элементов) без форматирования",
+            location=f"абзац #{first_idx + 1}: \u00ab{preview}\u00bb",
+            recommendation="Оформите перечисление в виде маркированного списка с длинным тире",
         )

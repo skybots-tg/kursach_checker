@@ -27,6 +27,9 @@ class AutoFixConfig:
     remove_strange_chars: bool
     fix_section_breaks: bool
     promote_heading_candidates: bool
+    convert_informal_lists: bool
+    informal_list_markers: list[str]
+    informal_list_min_consecutive: int
     section_break_sections: list[str]
     line_spacing: float
     first_line_indent_mm: float
@@ -57,6 +60,7 @@ class AutoFixConfig:
         lp = (blocks.get("layout", {}).get("params") or {})
         hp = (blocks.get("heading_formatting", {}).get("params") or {})
         sb = (blocks.get("section_breaks", {}).get("params") or {})
+        lfp = (blocks.get("list_formatting", {}).get("params") or {})
         _dflt_sec = [
             "содержание", "оглавление", "введение", "заключение",
             "список литературы", "список использованных источников",
@@ -77,13 +81,19 @@ class AutoFixConfig:
             remove_italic=_b("remove_italic"),
             normalize_list_indent=_b("normalize_list_indent"),
             normalize_list_markers=_b("normalize_list_markers"),
-            list_marker_char=str(p.get("list_marker_char", ad.get("list_marker_char", "-"))),
+            list_marker_char=str(p.get("list_marker_char", ad.get("list_marker_char", "\u2014"))),
             normalize_dashes=_b("normalize_dashes"),
             remove_caption_trailing_dot=_b("remove_caption_trailing_dot"),
             remove_highlight=_b("remove_highlight"),
             remove_strange_chars=_b("remove_strange_chars"),
             fix_section_breaks=_b("fix_section_breaks"),
             promote_heading_candidates=_b("promote_heading_candidates"),
+            convert_informal_lists=_b("convert_informal_lists"),
+            informal_list_markers=lfp.get(
+                "informal_list_markers",
+                ["\u00b7", "\u2022", "*", "-", "\u2014", "\u2013"],
+            ),
+            informal_list_min_consecutive=int(lfp.get("min_consecutive", 2)),
             section_break_sections=[s.lower() for s in sb.get("sections_requiring_break", _dflt_sec)],
             line_spacing=float(body.get("line_spacing", 1.5)),
             first_line_indent_mm=float(body.get("first_line_indent_mm", 12.5)),

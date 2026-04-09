@@ -14,6 +14,7 @@ from app.rules_engine.checks_advanced import (
 )
 from app.rules_engine.checks_content import (
     run_bibliography_checks,
+    run_list_formatting_checks,
     run_objects_checks,
     run_text_cleanliness_checks,
 )
@@ -57,6 +58,7 @@ _CHECK_NAME_RU: dict[str, str] = {
     "footnotes": "сноски",
     "captions": "подписи к объектам",
     "text_cleanliness": "посторонние символы",
+    "list_formatting": "оформление списков",
 }
 
 CheckFunc = Callable[..., None]
@@ -196,6 +198,7 @@ async def run_document_checks(
             ("footnotes", run_footnotes_checks),
             ("captions", run_captions_checks),
             ("text_cleanliness", run_text_cleanliness_checks),
+            ("list_formatting", run_list_formatting_checks),
         ]
         for name, func in checks:
             _run_check_safe(name, func, snapshot, cfg, findings, check_errors)
