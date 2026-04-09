@@ -221,7 +221,7 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
             "remove_italic": True,
             "normalize_list_indent": True,
             "normalize_list_markers": True,
-            "normalize_dashes": False,
+            "normalize_dashes": True,
             "remove_caption_trailing_dot": True,
             "remove_highlight": True,
             "remove_strange_chars": True,

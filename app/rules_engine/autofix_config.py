@@ -78,7 +78,7 @@ class AutoFixConfig:
             normalize_list_indent=_b("normalize_list_indent"),
             normalize_list_markers=_b("normalize_list_markers"),
             list_marker_char=str(p.get("list_marker_char", ad.get("list_marker_char", "-"))),
-            normalize_dashes=_b("normalize_dashes", False),
+            normalize_dashes=_b("normalize_dashes"),
             remove_caption_trailing_dot=_b("remove_caption_trailing_dot"),
             remove_highlight=_b("remove_highlight"),
             remove_strange_chars=_b("remove_strange_chars"),
