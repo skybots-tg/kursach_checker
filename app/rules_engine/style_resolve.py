@@ -76,6 +76,22 @@ def effective_first_line_indent_mm(paragraph) -> float:
     return 0.0
 
 
+def effective_left_indent_mm(paragraph) -> float:
+    pf = paragraph.paragraph_format
+    if pf.left_indent is not None:
+        return round(float(pf.left_indent.mm), 2)
+    for pPr in walk_style_pPr(paragraph):
+        ind = pPr.find(qn("w:ind"))
+        if ind is not None:
+            left = ind.get(qn("w:left")) or ind.get(qn("w:start"))
+            if left is not None:
+                try:
+                    return round(int(left) * 25.4 / 1440.0, 2)
+                except (ValueError, TypeError):
+                    pass
+    return 0.0
+
+
 def effective_space_before_pt(paragraph) -> float:
     pf = paragraph.paragraph_format
     if pf.space_before is not None:

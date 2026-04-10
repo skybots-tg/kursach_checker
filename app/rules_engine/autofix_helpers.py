@@ -24,6 +24,9 @@ _EN_DASH = "\u2013"
 _HYPHEN = "-"
 _BLACK = RGBColor(0, 0, 0)
 
+_ENUM_LETTER_RE = re.compile(r"^[а-яёa-z]\)\s", re.IGNORECASE)
+_ENUM_DIGIT_PAREN_RE = re.compile(r"^\d{1,2}\)\s")
+
 _CAPTION_RE = re.compile(
     r"^(?:"
     r"\u0420\u0438\u0441\u0443\u043d\u043e\u043a"
@@ -62,6 +65,8 @@ def is_manual_list_para(text: str) -> bool:
     if stripped[0] in (_HYPHEN, _EN_DASH, _EM_DASH) and len(stripped) > 1:
         if not stripped[1].isdigit():
             return True
+    if _ENUM_LETTER_RE.match(stripped) or _ENUM_DIGIT_PAREN_RE.match(stripped):
+        return True
     return False
 
 def fix_font_color_styles(doc: Document, details: list[str]) -> bool:

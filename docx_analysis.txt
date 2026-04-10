@@ -1,0 +1,2490 @@
+Total paragraphs: 460
+============================================================================================================================================
+[   0] Государственное бюджетное профессиональное образовательное учреждение Псковской 
+       style='Normal'  align=CENTER
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[   1] "Псковский медицинский колледж"
+       style='Normal'  align=CENTER
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[   2] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[   3] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[   4] КУРСОВАЯ РАБОТА
+       style='Normal'  align=CENTER
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[   5] на тему:
+       style='Normal'  align=CENTER
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[   6] 
+       style='Normal'  align=CENTER
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[   7] «Роль фельдшера в профилактике
+       style='Normal'  align=CENTER
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[   8] бронхиальной астмы»
+       style='Normal'  align=CENTER
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[   9] 
+       style='Normal'  align=CENTER
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  10] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  11] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  12] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  13] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  14] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  15] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  16] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  17] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  18] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  19] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  20] Обучающаяся: Шуро Софья Александровна
+       style='Normal'  align=RIGHT
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  21] Специальность:31.02.01 «Лечебное дело»
+       style='Normal'  align=RIGHT
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  22] 301А группа дневной формы обучения
+       style='Normal'  align=RIGHT
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  23] Руководитель:Алексеева Ольга Евгеньевна
+       style='Normal'  align=RIGHT
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  24] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  25] Псков 2026 г.
+       style='Normal'  align=CENTER
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  26] Содержание
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  27] Введение  3-4
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  28] Глава 1. Общие сведения о бронхиальной астме  5-9
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  29] 1.1. Определение и классификация заболевания  
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  30] 1.2. Эпидемиология (распространенность, возрастные группы)  
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  31] 1.3. Основные причины и факторы риска  
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  32] Глава 2. Патогенез бронхиальной астмы  10-12
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  33] 2.1. Патогенез
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  34] 2.2. Механизмы воспаления в дыхательных путях
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  35] 2.3. Изменения в бронхах при астме (гиперреактивность, обструкция)  
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  36] Глава 3. Клиническая картина и диагностика  13-15
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  37] 3.1. Основные симптомы и признаки  
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  38] 3.2. Методы диагностики (спирометрия, аллергологические тесты, лабораторные иссл
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  39] Глава 4. Лечение и профилактика бронхиальной астмы  16-22
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  40] 4.1. Принципы лечения  
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  41] 4.2. Медикаментозная терапия (ингаляционные препараты, системные средства)  
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  42] 4.3. Немедикаментозные методы и профилактика (избегание аллергенов, образ жизни)
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  43] 4.4. Современные подходы и перспективы терапии  
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  44] Заключение  23-25- Основные выводы по работе  
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  45] - Значение своевременной диагностики и комплексного лечения  
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  46] - Рекомендации и перспективы 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  47]  Список терминов и сокращений  26-30
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 1 chars: '\xa0'
+
+[  48] Список использованной литературы  31
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  49] ▌Введение
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  50] Актуальность темы
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  51] Бронхиальная астма (БА) является одним из наиболее распространенных хронических 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  52] Цель и задачи работы
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  53] Цель данной курсовой работы – комплексное изучение бронхиальной астмы как хронич
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  54] 1. Дать определение бронхиальной астме и рассмотреть ее современные классификаци
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  55] 2.Охарактеризовать основные направления профилактической деятельности фельдшера 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  56] 3. Выявить основные проблемы в организации профилактической помощи пациентам с б
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  57] 4. Охарактеризовать клинические проявления бронхиальной астмы и ее классификацию
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  58] 5. Изложить современные методы диагностики бронхиальной астмы.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  59] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  60] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  61] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  62] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  63] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  64] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  65] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  66] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  67] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  68] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  69] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  70] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  71] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  72] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  73] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  74] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  75] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  76] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  77] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  78] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  79] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  80] ▌Глава 1. Общие сведения о бронхиальной астме
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  81] 1.1. Определение и классификация заболевания
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  82] БА – это гетерогенное заболевание, обычно характеризующееся хроническим воспален
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  83] Классификация бронхиальной астмы сложна и многогранна, отражая гетерогенность за
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[  84] 1. По этиологии (основные фенотипы):
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  85]   •  Аллергическая астма: Наиболее распространенный фенотип, часто начинается в 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '\xa0 '
+
+[  86]   •  Неаллергическая астма: Развивается чаще у взрослых, не связана с аллергенам
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '\xa0 '
+
+[  87]   •  Астма с поздним началом : Развивается во взрослом возрасте, чаще у женщин, 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '\xa0 '
+
+[  88]   •  Астма с фиксированной обструкцией дыхательных путей: Развивается у пациенто
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '\xa0 '
+
+[  89]   •  Астма у пациентов с ожирением: Фенотип, характеризующийся низкой эозинофили
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '\xa0 '
+
+[  90] 2. По степени контроля над заболеванием:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  91]   •  Контролируемая астма: Отсутствие или минимальное количество дневных/ночных 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '\xa0 '
+
+[  92]   •  Частично контролируемая астма: Наличие некоторых симптомов или потребность 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '\xa0 '
+
+[  93]   •  Неконтролируемая астма: Наличие трех и более признаков частично контролируе
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '\xa0 '
+
+[  94] 3. По степени тяжести (до начала лечения или при недостаточном лечении):
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[  95]   •  Интермиттирующая: Симптомы реже 1 раза в неделю, короткие обострения, ночны
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '\xa0 '
+
+[  96]   •  Легкая персистирующая: Симптомы чаще 1 раза в неделю, но реже 1 раза в день
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '\xa0 '
+
+[  97]   •  Средней тяжести персистирующая: Ежедевные симптомы; ночные симптомы чаще 1 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '\xa0 '
+
+[  98]    •  Тяжелая персистирующая: Ежедневные симптомы, частые ночные симптомы; значи
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '\xa0 \xa0'
+
+[  99] 4. По стадии обострения :
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 100] 1. Стадия обострения .Обострение — это эпизоды нарастающей одышки, кашля, свистя
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 101] Причины:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 102] · Контакт с триггерами (аллергены, холодный воздух, резкие запахи).
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 103] · Респираторная инфекция (ОРВИ).
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 104] · Неправильно подобранная базисная терапия или ее отмена.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 105] Степени тяжести обострения:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 106] В зависимости от выраженности симптомов выделяют:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 107] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 108] 1. Легкое обострение:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 109]    · Одышка при ходьбе, может лежать.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 110]    · Разговаривает предложениями, возбужден.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 111]    · Частота дыхания увеличена.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 112]    · Пиковая скорость выдоха (ПСВ) > 80% от нормы.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 113] 2. Средней тяжести:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 114]    · Одышка при разговоре, предпочитает сидеть.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 115]    · Разговаривает фразами.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 116]    · Учащен пульс.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 117]    · ПСВ = 50–80%.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 118] 3. Тяжелое обострение:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 119]    · Одышка в покое, положение ортопноэ (сидит, опираясь руками).
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 120]    · Разговаривает отдельными словами.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 121]    · ПСВ < 50%.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 122] 4. Астматический статус (жизнеугрожающее состояние):
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 123]    · Спутанное сознание или кома.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 124]    · «Немое легкое» (дыхание не прослушивается).
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 125]    · Парадоксальное дыхание.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 126] 2. Стадия ремиссии. Ремиссия — это период, когда основные симптомы болезни отсут
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 127] Виды ремиссии:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 128] 1. Медикаментозная ремиссия:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 129]    · Симптомы отсутствуют, но пациент продолжает получать базисную противовоспал
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 130]    · Это основная цель лечения — достижение контроля над болезнью на фоне минима
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 131] 2. Полная (немедикаментозная) ремиссия:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 132]    · Полное отсутствие симптомов и нормальные показатели функции внешнего дыхани
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 133]    · Достигается редко. В педиатрии возможно «перерастание» астмы, но во взросло
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 134] 5.  По провоцирующим факторам:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 135]     *   Астма физического напряжения.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 136]     *   Астма, индуцированная аспирином или НПВС.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 137]     *   Профессиональная астма.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 138]     *   Кашлевой вариант астмы.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 139] 1.2. Эпидемиология (распространенность, возрастные группы)
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 140] БА является одной из наиболее распространенных хронических болезней в мире. Ее р
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 141] •   Глобальная распространенность: По оценкам ВОЗ, БА поражает до 5-10% населени
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 142] •   Тенденции: За последние десятилетия наблюдается устойчивый рост заболеваемос
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 143] •   Возрастные группы:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 144]      Дети: БА часто дебютирует в раннем детстве. У детей младшего возраста (до 5
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 5 chars: '\xa0 \xa0  '
+
+[ 145]      Взрослые: БА может развиться в любом возрасте, включая пожилой (астма с поз
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 5 chars: '\xa0 \xa0  '
+
+[ 146] •  Социально-экономические факторы: Распространенность и тяжесть астмы могут быт
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 147] 1.3. Основные причины и факторы риска
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 148] Бронхиальная астма является многофакторным заболеванием, в развитии которого игр
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 149] 1. Генетическая предрасположенность:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 150] •   Наследственность: Риск развития астмы значительно возрастает, если ею страда
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 151] •   Генные полиморфизмы: Идентифицированы сотни генов-кандидатов, связанных с ра
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 152] 2. Факторы окружающей среды (триггеры и провокаторы):
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 153] •   Аллергены:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 154]       Бытовые: Клещи домашней пыли, тараканы, плесневые грибы, перхоть и шерсть 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 6 chars: '\xa0 \xa0 \xa0 '
+
+[ 155]      Пыльцевые: Пыльца деревьев, злаковых трав, сорных растений.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 5 chars: '\xa0 \xa0  '
+
+[ 156]      Пищевые: Реже вызывают астму напрямую, но могут быть причиной тяжелых реакц
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 5 chars: '\xa0 \xa0  '
+
+[ 157] •   Инфекции:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 158]     Вирусные респираторные инфекции: Особенно в раннем детстве (респираторно-син
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 159]   ▌Глава 2..
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: ' \xa0'
+
+[ 160] Патогенез бронхиальной астмы представляет собой сложный каскад иммунологических 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 161] 2.1.  Патогенез. Патогенез бронхиальной астмы — это механизм развития болезни. Е
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 162] 1. Предрасположенность (Основа) У человека есть генетическая склонность к аллерг
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 163] 2. Встреча с «провокатором» (Триггер) В дыхательные пути попадает вещество, кото
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 164] · Аллерген (пыльца, пыль, шерсть животных).
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 165] · Инфекция (вирус).
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 166] · Холодный воздух, резкий запах, дым.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 167] 3. Иммунная «буря» (Воспаление)В стенке бронха запускается сложная иммунная реак
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 168] 4. Три главных эффекта в бронхах (Классическая триада) Из-за действия этих вещес
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 169] · Бронхоспазм: Мышцы вокруг бронхов резко сжимаются, пережимая дыхательную трубк
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 170] · Отек: Слизистая оболочка бронха распухает (как слизистая носа при насморке), ч
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 171] · Гиперсекреция (Мокрота): Клетки начинают вырабатывать очень густую, стекловидн
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 172] 5. Результат (Удушье) Воздух проходит в легкие с трудом, а выходит с еще большим
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 173] 2.2. Механизмы воспаления в дыхательных путях.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 174] Этап 1: Сенсибилизация (Знакомство с врагом). Это происходит не в момент приступ
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 175] 1. В дыхательные пути попадает аллерген (пыльца, шерсть животных).
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 176] 2. Специальная клетка (дендритная клетка, она же «разведчик») захватывает этот а
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 177] 3. Т-лимфоциты отдают приказ: «Враг под номером таким-то опасен! Готовиться к ат
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 178] Этап 2: Ранняя фаза (Приступ удушья — первые минуты). Когда аллерген попадает в 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 179] 1. Аллерген связывается с антителами (IgE), которые сидят на поверхности тучных 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 180] 2. Тучная клетка «взрывается» (дегранулирует) и выбрасывает в ткани гистамин и д
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 181] 3. Действие гистамина:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 182]    · Заставляет мышцы бронха резко сократиться (бронхоспазм).
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 183]    · Расширяет сосуды, из-за чего стенка бронха отекает.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 184]    · Увеличивает выделение жидкой слизи.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 3 chars: '   '
+
+[ 185] Этап 3: Поздняя фаза (Хроническое воспаление — через 4–6 часов). Это самая важна
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 186] 1. Тучные клетки и эпителий бронхов выделяют специальные белки-приманки (хемокин
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 187] 2. Эозинофилы (главные клетки при аллергической астме) приходят в стенку бронха 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 188] 3. Они выбрасывают свои собственные токсичные вещества (главный белок, эозинофил
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 189] 4. Эпителий (защитный слой) повреждается, слущивается. Бронх остается «голый» и 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 190] Этап 4: Ремоделирование (Необратимые изменения). Если процесс идет годами и не л
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 191] 1. Из-за постоянной атаки эозинофилов эпителий разрушается.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 192] 2. В попытке залатать «раны» под эпителием начинает разрастаться соединительная 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 193] 3. Стенка бронха утолщается, становится жесткой, просвет сужается навсегда. Обра
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 194] 2.3. Изменения в бронхах при астме (гиперреактивность, обструкция)
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 195] Хроническое воспаление и иммунологические реакции приводят к ряду функциональных
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 196] •   Гиперреактивность бронхов (ГРБ):Это повышенная чувствительность и чрезмерная
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 197] •   Обструкция дыхательных путей: Развивается в результате нескольких взаимосвяз
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 198]     *   Бронхоспазм: Сокращение гладкой мускулатуры бронхов под действием медиат
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 199]     *   Отек слизистой оболочки: Повышение проницаемости сосудов и выход жидкост
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 200] ▌Глава 3. Клиническая картина и диагностика
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 201] Клиническая картина бронхиальной астмы характеризуется вариабельностью и приступ
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 202] 3.1. Основные симптомы и признаки.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 203] Клинические проявления бронхиальной астмы могут значительно различаться по интен
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 204] •   Одышка (диспноэ): Чувство нехватки воздуха, затрудненное дыхание, особенно н
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 205] •   Свистящие хрипы: Характерный свистящий звук при дыхании, особенно при выдохе
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 206] •   Кашель : Часто сухой, навязчивый, усиливается по ночам или рано утром, после
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 207] •   Чувство стеснения или сдавления в груди: Неприятное ощущение, вызванное брон
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 208] •   Приступообразный характер:Симптомы часто возникают в виде приступов, которые
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 209] •   Ночные и утренние симптомы: Ухудшение состояния в предутренние часы или ночь
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 210] Наряду с этими основными симптомами могут наблюдаться и другие признаки, такие к
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 211] •   Удлиненный выдох.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 212] •   Участие вспомогательной мускулатуры в акте дыхания при тяжелом приступе.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 213] •   Ощущение тревоги или страха во время приступа.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 214] •   Признаки сопутствующих аллергических заболеваний (аллергический ринит, конъю
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 215] 3.2. Методы диагностики (спирометрия, аллергологические тесты, лабораторные иссл
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 216] Диагностика бронхиальной астмы базируется на сочетании данных анамнеза, физикаль
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 217] 1.  Сбор анамнеза и физикальное обследование:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 218]     *   Анамнез: Выявление характерных симптомов (свистящие хрипы, одышка, кашел
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 219]     *   Физикальное обследование: Во время приступа могут выявляться свистящие х
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 220] 2.  Функциональные методы исследования дыхания:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 221]     *   Спирометрия: "Золотой стандарт" для диагностики астмы. Измеряет объемы и
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 222]     * Объем форсированного выдоха за 1 секунду (ОФВ1):Снижен при обструкции.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 223]     *   Форсированная жизненная емкость легких (ФЖЕЛ).
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0   '
+
+[ 224]     *   Соотношение ОФВ1/ФЖЕЛ (индекс Тиффно): Снижение этого показателя (<70-75
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 225]     *  Проба с бронходилататором (реверсивность обструкции): После ингаляции быс
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0\xa0  '
+
+[ 226]      *   Пикфлоуметрия: Измерение пиковой скорости выдоха (ПСВ). Используется дл
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 5 chars: '\xa0 \xa0  '
+
+[ 227]     *   Бронхопровокационные тесты (с метахолином, гистамином, физической нагруз
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 228] 3.  Аллергологические тесты:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 229]     Кожные прик-тесты: Наиболее распространенный метод выявления специфической с
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 230]     Определение специфических IgE в сыворотке крови (RAST-тест или аналоги): Исп
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 231]     Определение общего IgE в сыворотке крови: Повышенный уровень общего IgE част
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 232] 4. Лабораторные исследования:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 233]     Общий анализ крови:Может выявлять эозинофилию (повышенное количество эозиноф
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 234]     Исследование мокроты: Может показать повышенное содержание эозинофилов, спир
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 235]     Определение фракции оксида азота в выдыхаемом воздухе (FeNO): Повышенный уро
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 236] 5.Рентгенография органов грудной клетки:Обычно нормальная при неосложненной астм
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 237] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 238] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 239] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 240] ▌Глава 4. Лечение и профилактика бронхиальной астмы
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 241] Лечение бронхиальной астмы направлено на достижение и поддержание контроля над з
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 242] 4.1. Принципы лечения
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 243] Основные принципы лечения бронхиальной астмы:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 244] 1.Индивидуальный подход :Терапия должна быть подобрана индивидуально для каждого
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 245] 2.Достижение и поддержание контроля: Главная цель — достичь полного или максимал
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 246] 3.Ступенчатый подход :Терапия начинается с определенного шага в зависимости от и
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 247] 4.Базисная (контролирующая) терапия :Направлена на подавление хронического воспа
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 248] 5.Симптоматическая (по требованию) терапия: Используется для быстрого купировани
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 249] 6.Образование пациентов (астма-школы):Обучение пациентов самоконтролю, правилам 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 250] 7.Устранение или минимизация воздействия триггеров:Важная часть профилактики обо
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 251] 8.Регулярное наблюдение и оценка:Периодический пересмотр схемы лечения и контрол
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 252] 4.2. Медикаментозная терапия (ингаляционные препараты, системные средства)
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 253] Медикаментозное лечение БА включает два основных типа препаратов: средства для б
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 254] А. Средства для базисной (контролирующей) терапии:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 255] Назначаются ежедневно и длительно для подавления воспаления и предотвращения сим
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 256] 1.Ингаляционные глюкокортикостероиды (ИГКС):Краеугольный камень базисной терапии
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 257] 2.Длительно действующие β2-агонисты (ДДБА): Не используются в монотерапии, всегд
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 258] 3.Комбинированные препараты (ИГКС + ДДБА): Наиболее часто используемые препараты
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 259] 4.Антагонисты лейкотриеновых рецепторов (АЛТР):Блокируют действие лейкотриенов, 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 260] 5.Длительно действующие антихолинергические препараты (ДДАХП):Используются в кач
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 261] 6.Системные глюкокортикостероиды (СГКС):Назначаются короткий курсом при тяжелых 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 262] 7.Биологические препараты (моноклональные антитела): Применяются при тяжелой, ре
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 263] Б. Средства для купирования симптомов (по требованию):
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 264] 1.Короткодействующие β2-агонисты (КДБА):Быстро расширяют бронхи, купируя приступ
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 265] 4.3. Немедикаментозные методы и профилактика (избегание аллергенов, образ жизни)
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 266] Немедикаментозные подходы и профилактика играют критически важную роль в управле
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 267] 1.Элиминационные мероприятия (избегание триггеров):
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 268]     *Аллергены домашней пыли:Частая влажная уборка, стирка постельного белья при
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 269]     *Домашние животные:Ограничение контакта, а при необходимости — удаление живо
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 270]     *Плесневые грибы:Устранение влажности, регулярная уборка влажных помещений (
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 271]     *Пыльца:Ограничение пребывания на улице в период пыления, использование окон
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 272]     *Табачный дым:Категорический отказ от курения для пациента и всех членов его
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 273]     *Раздражающие вещества:Избегание контактов с сильными запахами (краски, раст
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 274] 2.Модификация образа жизни:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 275]     *Физическая активность:Регулярные умеренные физические нагрузки (плавание, х
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 276]     *Поддержание нормальной массы тела:Ожирение является фактором риска тяжелой 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 277]     *Здоровое питание:Сбалансированная диета с достаточным количеством овощей, ф
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 278]     *Отказ от вредных привычек:Курение, чрезмерное употребление алкоголя.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 279]     *Управление стрессом:Стресс может быть триггером обострений. Техники релакса
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 280]     *Вакцинация:Ежегодная вакцинация против гриппа и вакцинация против пневмокок
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 4 chars: '\xa0 \xa0 '
+
+[ 281] 3.Аллерген-специфическая иммунотерапия (АСИТ):Метод лечения аллергической астмы,
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 282] 4.4. Современные подходы и перспективы терапии
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 283] Развитие понимания гетерогенности бронхиальной астмы привело к формированию новы
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 284] 1.Фенотип- и эндотип-ориентированный подход:Основан на определении специфических
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 285] 2.Роль биологических препаратов:Расширение арсенала моноклональных антител, напр
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 286] 3.Бронхиальная термопластика:Инвазивная процедура для пациентов с тяжелой неконт
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 287] перреактивность.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 288] 4.Разработка новых ингаляционных устройств и лекарственных форм:Улучшение систем
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 289] 5.Телемедицина и цифровые технологии:Использование мобильных приложений, портати
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 290] 6.Дальнейшие исследования:Активно изучаются новые цитокины и сигнальные пути, ко
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 291] 4.5.  Роль фельдшера в профилактике бронхиальной астмы.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 292] 1. Роль фельдшера в первичной профилактике
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 293] Цель: Предотвратить развитие астмы у здоровых людей.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 294] Здесь фельдшер работает с группами риска:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 295] · Лица с наследственной предрасположенностью (если у родителей астма или аллерги
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 296] · Курильщики (активные и пассивные).
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 297] · Лица с профессиональными вредностями (работа с химикатами, пылью, на животново
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 298] · Часто болеющие ОРВИ и люди с аллергией (поллиноз, дерматит).
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 299] Действия фельдшера:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 300] · Санитарно-просветительская работа: Беседы о вреде курения, пропаганда здоровог
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 301] · Гигиеническое обучение: Рекомендации по созданию гипоаллергенного быта (убрать
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 302] · Профориентация: Рекомендации подросткам из группы риска не выбирать профессии,
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 303] 2. Роль фельдшера во вторичной профилактике
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 304] Цель: Раннее выявление заболевания, предотвращение обострений и прогрессирования
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 305] Действия фельдшера:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 306] · Ранняя диагностика:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 307]   · Сбор жалоб и анамнеза (выявление связи кашля с аллергенами, сезонность, нали
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '  '
+
+[ 308]   · Проведение пикфлоуметрии (измерение пиковой скорости выдоха) для выявления с
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '  '
+
+[ 309]   · Направление к врачу (пульмонологу/аллергологу) для уточнения диагноза.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '  '
+
+[ 310] · Диспансерное наблюдение:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 311]   · Контроль за регулярностью приема базисной терапии.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '  '
+
+[ 312]   · Обучение пациента технике ингаляции (ошибки в использовании ингалятора сводя
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '  '
+
+[ 313]   · Контроль ведения дневника пикфлоуметрии.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '  '
+
+[ 314] · Профилактика обострений:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 315]   · Проведение сезонной вакцинации (от гриппа и пневмококка), так как вирусы — ч
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '  '
+
+[ 316]   · Обучение пациентов распознаванию первых признаков обострения.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '  '
+
+[ 317] 3. Роль фельдшера в третичной профилактике (Реабилитация)
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 318] Цель: Восстановление функции дыхания, предотвращение инвалидизации.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 319] Действия фельдшера:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 320] · Реабилитационные мероприятия:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 321]   · Проведение дыхательной гимнастики.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '  '
+
+[ 322]   · Рекомендации по санаторно-курортному лечению.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 2 chars: '  '
+
+[ 323]  · Обучение в "Школе здоровья для астматиков" (если таковая организована при ФАП
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 1 chars: ' '
+
+[ 324] · Паллиативная помощь: В тяжелых случаях — уход за пациентом с дыхательной недос
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 325] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 326] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 327] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 328] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 329] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 330] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 331] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 332] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 333] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 334] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 335] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 336] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 337] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 338] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 339] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 340] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 341] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 342] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 343] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 344] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 345] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 346] ▌Заключение
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 347] Бронхиальная астма представляет собой одно из наиболее актуальных и сложных хрон
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 348] Основные выводы по работе:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 349] 1.  Бронхиальная астма – это гетерогенное хроническое воспалительное заболевание
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 350] 2.  Распространенность астмы высока во всех возрастных группах и имеет тенденцию
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 351] 3.  Этиология заболевания многофакторна, сочетая генетическую предрасположенност
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 352] 4.  В основе патогенеза лежит хроническое воспаление, опосредованное различными 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 353] 5.  Клиническая картина астмы характеризуется вариабельными и приступообразными 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 354] 6.  Диагностика астмы основывается на тщательном сборе анамнеза, физикальном обс
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 355] 7.  Лечение бронхиальной астмы является ступенчатым и направлено на достижение и
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 356] 8.  Немедикаментозные методы и профилактика, включающие элиминацию триггеров, мо
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 357] 9.  Современная терапия активно развивается, предлагая персонализированные подхо
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 358] Значение своевременной диагностики и комплексного лечения:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 359] Своевременная и точная диагностика бронхиальной астмы критически важна для ранне
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 360] Рекомендаци и и перспективы:
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 361] 1. Повышение осведомленности. Продолжение образовательных программ для населения
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 362] 2. Улучшение доступности диагностики. Расширение возможностей для проведения спи
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 363] 3. Внедрение персонализированной медицины. Развитие и более широкое применение ф
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 364] 4. Дальнейшие исследования. Продолжение научных изысканий в области этиологии, п
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 365] 5. Развитие телемедицины. Использование цифровых технологий для дистанционного м
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 366] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 367] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 368] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 369] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 370] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 371] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 372] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 373] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 374] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 375] Список сокращений.
+       style='Normal'  align=CENTER
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 376] 1. БА — Бронхиальная астма 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 377] 2. ВОЗ — Всемирная организация здравоохранения
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 378] 3. НПВС — Нестероидные противовоспалительные средства
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 379] 4. ОФВ1 — Объем форсированного выдоха за первую секунду (ключевой показатель фун
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 380] 5. MHC — Главный комплекс гистосовместимости (от англ. Major Histocompatibility 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 381] 6. IL (ИЛ) — Интерлейкин (например, IL-4, ИЛ-5) — группа цитокинов
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 382] 7. IgE — Иммуноглобулин класса Е (антитела, отвечающие за аллергические реакции)
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 383] 8. ХОБЛ — Хроническая обструктивная болезнь легких
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 384] 9. ГРБ — Гиперреактивность бронхов
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 385] 10. ФЖЕЛ — Форсированная жизненная емкость легких
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 386] 11. ПСВ — Пиковая скорость выдоха (измеряется при пикфлоуметрии)
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 387] 12. FeNO — Фракция оксида азота в выдыхаемом воздухе (от англ. Fractional exhale
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 388] 13. ИГКС — Ингаляционные глюкокортикостероиды
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 389] 14. ДДБА — Длительно действующие β2-агонисты
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 390] 15. АЛТР — Антагонисты лейкотриеновых рецепторов
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 391] 16. ДДАХП — Длительно действующие антихолинергические препараты
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 392] 17. СГКС — Системные глюкокортикостероиды
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 393] 18. КДБА — Короткодействующие β2-агонисты
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 394] 19. АСИТ — Аллерген-специфическая иммунотерапия
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       >>> NUMBERED LIST ITEM
+
+[ 395] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 396] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 397] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 398] Термины.
+       style='Normal'  align=CENTER
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 399] Атопия / Атопический-это генетическая предрасположенность к выработке избыточног
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 400] · Аускультация-это метод физикальной диагностики, выслушивание звуков, возникающ
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 401] · Диспноэ-это научное название одышки — субъективного ощущения затруднения дыхан
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 402] · Интерстиций-это рыхлая соединительная ткань, которая окружает альвеолы и сосуд
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 403] · Ремоделирование дыхательных путей-это необратимые структурные изменения стенки
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 404] · Сенсибилизация-это процесс приобретения организмом повышенной чувствительности
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 405] · Тахипноэ-это учащенное дыхание.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 406] · Эозинофилия-это повышение в крови количества эозинофилов — клеток, участвующих
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 407] · Этиология-это раздел медицины, изучающий причины и условия возникновения болез
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 408] · Антитела (IgE)-это специальные белки (иммуноглобулины), вырабатываемые иммунно
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 409] · Дендритная клетка-это клетка иммунной системы, которая "знакомит" Т-лимфоциты 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 410] · Дегрануляция тучных клеток -это процесс "взрыва" тучной клетки, при котором из
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 411] · Медиаторы воспаления-это биологически активные вещества (гистамин, лейкотриены
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 412] · Моноклональные антитела –это современные лекарства (биологическая терапия), пр
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 413] · Специфический IgE-это антитела, направленные против конкретного аллергена (нап
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 414] · Т-лимфоциты (Th2-лимфоциты)-это "Командиры" иммунной системы. Подтип Th2 отвеч
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 415] · Тучные клетки- это иммунные клетки, расположенные в тканях (в т.ч. в бронхах),
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 416] · Хемокины- это белки-сигналы, которые привлекают иммунные клетки (эозинофилы, н
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 417] · Цитокины (ИЛ-4, ИЛ-5, ИЛ-13)- это малые сигнальные молекулы, с помощью которых
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 418] · Эозинофилы -это разновидность лейкоцитов, главные клетки-эффекторы при аллерги
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 419] · Бронходилататоры- это препараты, расширяющие просвет бронхов путем расслаблени
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 420] · Бронхоспазм – это сужение просвета бронхов из-за сокращения гладких мышц в их 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 421] · Гиперреактивность бронхов (ГРБ)- это чрезмерно сильная реакция бронхов (спазм)
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 422] · Обструкция дыхательных путей- это нарушение проходимости бронхов из-за спазма,
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 423] · Обратимая обструкция- это сужение бронхов, которое проходит самостоятельно или
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 424] · Фиброз - это разрастание соединительной (рубцовой) ткани. При ремоделировании 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 425] · Бронхопровокационные тесты - это диагностические пробы (например, с метахолино
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 426] · Индекс Тиффно (ОФВ1/ФЖЕЛ) -это показатель, отражающий проходимость дыхательных
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 427] · Кожные прик-тесты – это метод аллергодиагностики, при котором на коже делаются
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 428] · ОФВ1 (Объем форсированного выдоха за 1 секунду) – это количество воздуха, кото
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 429] · Пикфлоуметрия – это метод самоконтроля с помощью портативного прибора (пикфлоу
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 430] · Проба с бронходилататором – это спирометрия до и после ингаляции лекарства, ра
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 431] · Спирометрия – это основной метод оценки функции внешнего дыхания, измеряющий о
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 432] · FeNO (Фракция оксида азота в выдыхаемом воздухе) – это неинвазивный метод оцен
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 433] · Аспириновая астма – это особый фенотип астмы, при котором приступы провоцируют
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 434] · Кашлевой вариант астмы – это фенотип, при котором единственным симптомом являе
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 435] · Профессиональная астма – это астма, вызванная воздействием химических веществ 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 436] · Фенотип - этосовокупность observable характеристик организма, сформировавшихся
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 437] · Эндотип – это подтип заболевания, выделяемый на основе специфического биологич
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 438] · Антагонисты лейкотриеновых рецепторов (АЛТР) – это препараты (например, монтел
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 439] · Бета2-агонисты (β2-агонисты) – это препараты, стимулирующие бета-2-адренорецеп
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 440] · Глюкокортикостероиды (ГКС)-это гормональные противовоспалительные препараты. П
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 441] · Комплаентность (приверженность лечению) -это степень соответствия поведения па
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 442] · Гетерогенность –это неоднородность. Термин подчеркивает, что бронхиальная астм
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 443] · Поллютанты –это загрязняющие вещества (химические, физические или биологически
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 444] -Мокрота – это патологическое вещество, секретируемое преимущественно бронхами и
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 445] -Удушье– это мучительное, жизнеугрожающее, патологическое состояние, которое хар
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 446] -Экспираторная одышка-это нарушение процесса выдоха.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 447] 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 448] Список  использованной литературы
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 449] Чучалин, А.Г. (ред.). (2024). Респираторная медицина: руководство. 3-е изд., доп
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 450] Баранов, А.А., Намазова-Баранова, Л.С. (ред.). (2025). Бронхиальная астма: руков
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 451]  Пономарева, И.Б., Коршунова, Л.В., Глотов, С.И., и др. (2024). Бронхиальная аст
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 1 chars: ' '
+
+[ 452]  Респираторная медицина : руководство : в 5 т. Т. 2. / под ред. А. Г. Чучалина (
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+       *** LEADING WHITESPACE: 1 chars: ' '
+
+[ 453] Рациональная терапия бронхиальной астмы : руководство для врачей / под ред. А. В
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 454] Уход за больными с бронхиальной астмой : учебное пособие / Е. С. Лаптева, А. И. 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 455] Симптоматология, диагностика, принципы лечения и профилактики бронхиальной астмы
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 456] Клиническая фармакология лекарственных средств, применяемых в лечении пациентов 
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 457] Методические рекомендации «Диспансерное наблюдение пациентов с бронхиальной астм
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 458] Актуальные вопросы диагностики и лечения пациентов с бронхиальной астмой с позиц
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None
+
+[ 459] Бронхиальная астма. Что нужно знать практическому врачу: учебное пособие / И. Б.
+       style='Normal'  align=None
+       left_indent=None  first_line_indent=None
+       space_before=None  space_after=None

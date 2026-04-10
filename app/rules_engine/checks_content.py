@@ -13,6 +13,9 @@ from app.rules_engine.rules_config import RulesConfig
 
 _DEFAULT_INFORMAL_MARKERS = frozenset("\u00b7\u2022*-\u2014\u2013")
 
+_ENUM_LETTER_RE = re.compile(r"^[а-яёa-z]\)\s", re.IGNORECASE)
+_ENUM_DIGIT_PAREN_RE = re.compile(r"^\d{1,2}\)\s")
+
 # ── bibliography ─────────────────────────────────────────────────────
 
 _BIBLIOGRAPHY_MARKERS = [
@@ -229,6 +232,36 @@ def run_text_cleanliness_checks(
             recommendation="Проверьте весь документ на посторонние символы",
         )
 
+    ws_count = 0
+    for paragraph in snapshot.paragraphs:
+        if not paragraph.text or paragraph.is_toc_entry or paragraph.is_heading:
+            continue
+        if ws_count >= _MAX_CLEANLINESS_FINDINGS:
+            break
+        if paragraph.has_leading_whitespace:
+            ws_count += 1
+            add_finding(
+                findings,
+                title="Ведущие пробелы в абзаце",
+                category="text_cleanliness",
+                severity=severity,
+                expected="Текст без лидирующих пробелов (используйте программный отступ)",
+                found="Пробелы/неразрывные пробелы в начале абзаца",
+                location=f"абзац #{paragraph.index + 1}",
+                recommendation="Удалите пробелы в начале и настройте отступ через Формат → Абзац",
+            )
+    if ws_count >= _MAX_CLEANLINESS_FINDINGS:
+        add_finding(
+            findings,
+            title="Ведущие пробелы — ещё замечания",
+            category="text_cleanliness",
+            severity="advice",
+            expected="",
+            found=f"Показаны первые {_MAX_CLEANLINESS_FINDINGS}, проблема массовая",
+            location="весь документ",
+            recommendation="Проверьте все абзацы на ведущие пробелы",
+        )
+
 
 # ── list formatting ──────────────────────────────────────────────────
 
@@ -245,6 +278,13 @@ def _starts_with_informal_marker(text: str, markers: frozenset[str]) -> bool:
     if ch in ("-", "\u2013", "\u2014") and stripped[1].isdigit():
         return False
     return True
+
+
+def _starts_with_enumeration(text: str) -> bool:
+    stripped = text.lstrip()
+    if not stripped or len(stripped) < 3:
+        return False
+    return bool(_ENUM_LETTER_RE.match(stripped) or _ENUM_DIGIT_PAREN_RE.match(stripped))
 
 
 def run_list_formatting_checks(
@@ -274,7 +314,7 @@ def run_list_formatting_checks(
                 groups.append(current)
                 current = []
             continue
-        if _starts_with_informal_marker(para.text, markers):
+        if _starts_with_informal_marker(para.text, markers) or _starts_with_enumeration(para.text):
             current.append(para.index)
         else:
             if current:

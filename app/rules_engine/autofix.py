@@ -10,6 +10,7 @@ from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
 from app.rules_engine.autofix_config import AutoFixConfig as _AutoFixConfig
+from app.rules_engine.autofix_headings import fix_heading as _fix_heading, promote_to_heading as _promote_to_heading
 from app.rules_engine.autofix_helpers import (
     clamp_overflow_table_widths,
     fix_caption_trailing_dot,
@@ -34,6 +35,11 @@ from app.rules_engine.autofix_helpers import (
     remove_manual_page_breaks,
 )
 from app.rules_engine.autofix_lists import convert_informal_lists
+from app.rules_engine.autofix_whitespace import (
+    collapse_excessive_empty_paras,
+    fix_normalize_left_indent,
+    fix_strip_leading_whitespace,
+)
 from app.rules_engine.checks_content import ALLOWED_CHARS_RE as _ALLOWED_CHARS_RE
 from app.rules_engine.heading_detection import (
     CHAPTER_RE as _CHAPTER_RE,
@@ -201,6 +207,9 @@ def apply_safe_autofixes(
         if cfg.remove_strange_chars:
             if fix_remove_strange_chars(paragraph, para_label, details, _ALLOWED_CHARS_RE):
                 changed = True
+        if cfg.strip_leading_whitespace and idx not in toc_indices:
+            if fix_strip_leading_whitespace(paragraph, para_label, details):
+                changed = True
         if cfg.fix_section_breaks and idx > 0 and len(text) <= 100:
             if not _TOC_LINE_TAIL_RE.search(text):
                 needs_break = any(s in text.lower() for s in cfg.section_break_sections)
@@ -340,6 +349,11 @@ def apply_safe_autofixes(
                 para_touched = True
                 details.append(f"{para_label}: абзацный отступ {cfg.first_line_indent_mm} мм")
 
+        if not is_list and cfg.normalize_body_left_indent:
+            if fix_normalize_left_indent(paragraph, para_label, details):
+                changed = True
+                para_touched = True
+
         if cfg.normalize_spacing_before_after:
             eff_sb = effective_space_before_pt(paragraph)
             if abs(eff_sb - cfg.space_before_pt) > 0.2:
@@ -414,6 +428,10 @@ def apply_safe_autofixes(
     if cfg.normalize_table_width and not skip_tables_safety and clamp_overflow_table_widths(doc, details):
         changed = True
 
+    if cfg.collapse_empty_paras:
+        if collapse_excessive_empty_paras(doc, cfg.max_consecutive_empty_paras, details):
+            changed = True
+
     if changed:
         if remove_empty_paras_before_page_breaks(doc, details):
             pass
@@ -448,54 +466,5 @@ def apply_safe_autofixes(
     )
 
     return AutoFixResult(output_file_path=str(output), details=details)
-
-
-def _fix_heading(paragraph, idx: int, cfg: "_AutoFixConfig", details: list[str]) -> bool:
-    changed = False
-    for run in paragraph.runs:
-        if is_field_code_run(run):
-            continue
-        if cfg.heading_font and run.font.name != cfg.heading_font:
-            run.font.name = cfg.heading_font
-            changed = True
-        size_pt = float(run.font.size.pt) if run.font.size else None
-        if size_pt is None or abs(size_pt - cfg.heading_size_pt) > 0.2:
-            run.font.size = Pt(cfg.heading_size_pt)
-            changed = True
-        if cfg.heading_bold and not run.bold:
-            run.bold = True
-            changed = True
-    if changed:
-        details.append(
-            f"Заголовок #{idx + 1}: {cfg.heading_font}, {cfg.heading_size_pt} пт, полужирный"
-        )
-    return changed
-
-
-def _promote_to_heading(
-    paragraph, level: int, idx: int, cfg: "_AutoFixConfig", details: list[str],
-) -> bool:
-    """Assign Word Heading style to a paragraph detected as heading candidate by text."""
-    target_style = f"Heading {level}"
-    try:
-        paragraph.style = paragraph.part.document.styles[target_style]
-    except (KeyError, AttributeError):
-        try:
-            paragraph.style = target_style
-        except Exception:
-            logger.debug("Promote: style '%s' not found in document", target_style)
-            return False
-    for run in paragraph.runs:
-        if is_field_code_run(run):
-            continue
-        if cfg.heading_font:
-            run.font.name = cfg.heading_font
-        run.font.size = Pt(cfg.heading_size_pt)
-        if cfg.heading_bold:
-            run.bold = True
-    pf = paragraph.paragraph_format
-    pf.first_line_indent = Mm(0)
-    details.append(f"Абзац #{idx + 1} → «Заголовок {level}»: {paragraph.text[:50]}")
-    return True
 
 

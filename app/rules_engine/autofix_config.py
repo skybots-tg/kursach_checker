@@ -27,6 +27,10 @@ class AutoFixConfig:
     remove_strange_chars: bool
     fix_section_breaks: bool
     promote_heading_candidates: bool
+    strip_leading_whitespace: bool
+    normalize_body_left_indent: bool
+    collapse_empty_paras: bool
+    max_consecutive_empty_paras: int
     convert_informal_lists: bool
     informal_list_markers: list[str]
     informal_list_min_consecutive: int
@@ -88,6 +92,11 @@ class AutoFixConfig:
             remove_strange_chars=_b("remove_strange_chars"),
             fix_section_breaks=_b("fix_section_breaks"),
             promote_heading_candidates=_b("promote_heading_candidates"),
+            strip_leading_whitespace=_b("strip_leading_whitespace"),
+            normalize_body_left_indent=_b("normalize_body_left_indent"),
+            collapse_empty_paras=_b("collapse_empty_paras"),
+            max_consecutive_empty_paras=int(p.get("max_consecutive_empty_paras",
+                                                   ad.get("max_consecutive_empty_paras", 1))),
             convert_informal_lists=_b("convert_informal_lists"),
             informal_list_markers=lfp.get(
                 "informal_list_markers",

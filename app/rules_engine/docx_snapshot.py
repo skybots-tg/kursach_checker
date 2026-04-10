@@ -36,7 +36,9 @@ class ParagraphSnapshot:
     style_id: str
     alignment: str | None
     first_line_indent_mm: float | None
+    left_indent_mm: float | None
     line_spacing: float | None
+    space_before_pt: float | None
     has_explicit_before: bool
     has_explicit_after: bool
     has_numbering: bool
@@ -47,6 +49,7 @@ class ParagraphSnapshot:
     is_toc_entry: bool
     page_break_before: bool
     has_highlight: bool
+    has_leading_whitespace: bool
 
     @property
     def is_heading(self) -> bool:
@@ -275,10 +278,14 @@ def _paragraphs(doc: Document, toc_indices: set[int]) -> list[ParagraphSnapshot]
     result: list[ParagraphSnapshot] = []
     all_paras = doc.paragraphs
     for idx, paragraph in enumerate(all_paras):
-        text = (paragraph.text or "").strip()
+        raw_text = paragraph.text or ""
+        text = raw_text.strip()
         pformat = paragraph.paragraph_format
         indent = _mm_from_emu(getattr(pformat.first_line_indent, "emu", None))
+        left_indent = _mm_from_emu(getattr(pformat.left_indent, "emu", None))
         line_spacing = _resolve_line_spacing(paragraph)
+        space_before = float(pformat.space_before.pt) if pformat.space_before is not None else None
+        has_leading_ws = bool(raw_text) and raw_text[0] in (" ", "\t", "\xa0")
         prev_para = all_paras[idx - 1] if idx > 0 else None
         pb_before = _detect_page_break_before(paragraph, prev_para)
         eff_align = effective_alignment(paragraph)
@@ -291,7 +298,9 @@ def _paragraphs(doc: Document, toc_indices: set[int]) -> list[ParagraphSnapshot]
                 style_id=getattr(paragraph.style, "style_id", "") or "",
                 alignment=_normalize_alignment(eff_align),
                 first_line_indent_mm=indent,
+                left_indent_mm=left_indent,
                 line_spacing=line_spacing,
+                space_before_pt=space_before,
                 has_explicit_before=pformat.space_before is not None,
                 has_explicit_after=pformat.space_after is not None,
                 has_numbering=_has_numbering(paragraph),
@@ -302,6 +311,7 @@ def _paragraphs(doc: Document, toc_indices: set[int]) -> list[ParagraphSnapshot]
                 is_toc_entry=idx in toc_indices,
                 page_break_before=pb_before,
                 has_highlight=_has_highlight_or_shading(paragraph),
+                has_leading_whitespace=has_leading_ws,
             )
         )
     return result

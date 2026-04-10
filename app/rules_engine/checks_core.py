@@ -260,7 +260,7 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
 
     counts: dict[str, int] = {
         "font": 0, "size": 0, "spacing": 0, "indent": 0,
-        "alignment": 0, "highlight": 0,
+        "alignment": 0, "highlight": 0, "left_indent": 0,
     }
 
     for paragraph in snapshot.paragraphs:
@@ -357,10 +357,27 @@ def run_typography_checks(snapshot: DocumentSnapshot, cfg: RulesConfig, findings
                 recommendation="Уберите заливку и цветное выделение текста",
             )
 
+        if (not paragraph.has_numbering
+                and paragraph.left_indent_mm is not None
+                and paragraph.left_indent_mm > 1.0
+                and counts["left_indent"] < _MAX_FINDINGS_PER_TYPE):
+            counts["left_indent"] += 1
+            add_finding(
+                findings,
+                title="Левый отступ основного текста",
+                category="typography",
+                severity=severity,
+                expected="0 мм",
+                found=f"{paragraph.left_indent_mm} мм",
+                location=f"абзац #{paragraph.index + 1}",
+                recommendation="Уберите левый отступ (Формат → Абзац → Отступ слева → 0)",
+            )
+
     for label, key in [
         ("шрифт", "font"), ("размер шрифта", "size"),
         ("интервал", "spacing"), ("отступ", "indent"),
         ("выравнивание", "alignment"), ("заливка", "highlight"),
+        ("левый отступ", "left_indent"),
     ]:
         if counts[key] >= _MAX_FINDINGS_PER_TYPE:
             add_finding(
