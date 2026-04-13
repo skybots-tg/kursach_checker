@@ -10,7 +10,11 @@ from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
 from app.rules_engine.autofix_config import AutoFixConfig as _AutoFixConfig
-from app.rules_engine.autofix_headings import fix_heading as _fix_heading, promote_to_heading as _promote_to_heading
+from app.rules_engine.autofix_headings import (
+    fix_heading as _fix_heading,
+    fix_remove_underline,
+    promote_to_heading as _promote_to_heading,
+)
 from app.rules_engine.autofix_helpers import (
     clamp_overflow_table_widths,
     fix_caption_trailing_dot,
@@ -35,6 +39,7 @@ from app.rules_engine.autofix_helpers import (
     remove_manual_page_breaks,
 )
 from app.rules_engine.autofix_lists import convert_informal_lists
+from app.rules_engine.autofix_toc import insert_toc_field
 from app.rules_engine.autofix_whitespace import (
     collapse_excessive_empty_paras,
     fix_normalize_left_indent,
@@ -257,6 +262,11 @@ def apply_safe_autofixes(
                 changed = True
                 para_touched = True
 
+        if cfg.remove_underline:
+            if fix_remove_underline(paragraph, para_label, details):
+                changed = True
+                para_touched = True
+
         if cfg.remove_caption_trailing_dot:
             if fix_caption_trailing_dot(paragraph, para_label, details):
                 changed = True
@@ -308,7 +318,9 @@ def apply_safe_autofixes(
                 para_count += 1
             continue
 
-        is_list = _is_list_para(paragraph) or is_manual_list_para(text)
+        is_word_list = _is_list_para(paragraph)
+        is_manual = not is_word_list and is_manual_list_para(text)
+        is_list = is_word_list or is_manual
         pf = paragraph.paragraph_format
 
         if is_list and cfg.normalize_list_markers:
@@ -316,7 +328,7 @@ def apply_safe_autofixes(
                 changed = True
                 para_touched = True
 
-        if is_list and cfg.normalize_list_indent:
+        if is_word_list and cfg.normalize_list_indent:
             if fix_list_indent(paragraph, para_label, details):
                 changed = True
                 para_touched = True
@@ -326,7 +338,7 @@ def apply_safe_autofixes(
                 changed = True
                 para_touched = True
 
-        if not is_list and cfg.normalize_alignment:
+        if cfg.normalize_alignment:
             if eff_align != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
                 paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
                 changed = True
@@ -341,7 +353,7 @@ def apply_safe_autofixes(
                 para_touched = True
                 details.append(f"{para_label}: межстрочный интервал {cfg.line_spacing}")
 
-        if not is_list and cfg.normalize_first_line_indent:
+        if not is_word_list and cfg.normalize_first_line_indent:
             eff_indent = effective_first_line_indent_mm(paragraph)
             if abs(eff_indent - cfg.first_line_indent_mm) > 0.5:
                 pf.first_line_indent = Mm(cfg.first_line_indent_mm)
@@ -427,6 +439,10 @@ def apply_safe_autofixes(
 
     if cfg.normalize_table_width and not skip_tables_safety and clamp_overflow_table_widths(doc, details):
         changed = True
+
+    if cfg.generate_toc:
+        if insert_toc_field(doc, toc_indices, details):
+            changed = True
 
     if cfg.collapse_empty_paras:
         if collapse_excessive_empty_paras(doc, cfg.max_consecutive_empty_paras, details):

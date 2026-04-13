@@ -1,6 +1,7 @@
 from app.api.v1 import (
     admin,
     admin_autofix,
+    admin_broadcasts,
     admin_checks,
     admin_content,
     admin_content_messages,
@@ -25,6 +26,7 @@ from app.api.v1 import (
 __all__ = [
     "admin",
     "admin_autofix",
+    "admin_broadcasts",
     "admin_checks",
     "admin_content",
     "admin_content_messages",

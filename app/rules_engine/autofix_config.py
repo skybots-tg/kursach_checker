@@ -18,6 +18,7 @@ class AutoFixConfig:
     normalize_font_color: bool
     target_font_color: str
     remove_italic: bool
+    remove_underline: bool
     normalize_list_indent: bool
     normalize_list_markers: bool
     list_marker_char: str
@@ -32,6 +33,7 @@ class AutoFixConfig:
     collapse_empty_paras: bool
     max_consecutive_empty_paras: int
     convert_informal_lists: bool
+    generate_toc: bool
     informal_list_markers: list[str]
     informal_list_min_consecutive: int
     section_break_sections: list[str]
@@ -84,9 +86,10 @@ class AutoFixConfig:
             normalize_font_color=_b("normalize_font_color"),
             target_font_color=str(p.get("target_font_color", ad.get("target_font_color", "000000"))),
             remove_italic=_b("remove_italic"),
+            remove_underline=_b("remove_underline"),
             normalize_list_indent=_b("normalize_list_indent"),
             normalize_list_markers=_b("normalize_list_markers"),
-            list_marker_char=str(p.get("list_marker_char", ad.get("list_marker_char", "\u2014"))),
+            list_marker_char=str(p.get("list_marker_char", ad.get("list_marker_char", "\u2013"))),
             normalize_dashes=_b("normalize_dashes"),
             remove_caption_trailing_dot=_b("remove_caption_trailing_dot"),
             remove_highlight=_b("remove_highlight"),
@@ -99,6 +102,7 @@ class AutoFixConfig:
             max_consecutive_empty_paras=int(p.get("max_consecutive_empty_paras",
                                                    ad.get("max_consecutive_empty_paras", 1))),
             convert_informal_lists=_b("convert_informal_lists"),
+            generate_toc=_b("generate_toc"),
             informal_list_markers=lfp.get(
                 "informal_list_markers",
                 ["\u00b7", "\u2022", "*", "-", "\u2014", "\u2013"],

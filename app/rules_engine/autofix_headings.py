@@ -6,6 +6,7 @@ import re
 
 from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
 from app.rules_engine.autofix_helpers import is_field_code_run
@@ -69,6 +70,9 @@ def fix_heading(paragraph, idx: int, cfg, details: list[str]) -> bool:
         if cfg.heading_bold and not run.bold:
             run.bold = True
             changed = True
+        if run.font.underline:
+            run.font.underline = False
+            changed = True
 
     level = _detect_heading_level(paragraph)
     if _fix_alignment(paragraph, level, cfg, details, idx):
@@ -110,3 +114,27 @@ def promote_to_heading(
 
     details.append(f"Абзац #{idx + 1} → «Заголовок {level}»: {paragraph.text[:50]}")
     return True
+
+
+def fix_remove_underline(paragraph, para_label: str, details: list[str]) -> bool:
+    p_elem = paragraph._element
+    changed = False
+    pPr = p_elem.find(qn("w:pPr"))
+    if pPr is not None:
+        rPr_default = pPr.find(qn("w:rPr"))
+        if rPr_default is not None:
+            el = rPr_default.find(qn("w:u"))
+            if el is not None:
+                rPr_default.remove(el)
+                changed = True
+    for r_elem in p_elem.iter(qn("w:r")):
+        rPr = r_elem.find(qn("w:rPr"))
+        if rPr is None:
+            continue
+        el = rPr.find(qn("w:u"))
+        if el is not None:
+            rPr.remove(el)
+            changed = True
+    if changed:
+        details.append(f"{para_label}: подчёркивание убрано")
+    return changed

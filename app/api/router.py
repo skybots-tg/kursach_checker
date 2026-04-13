@@ -4,6 +4,7 @@ from app.api.v1 import (
     admin,
     admin_analytics,
     admin_autofix,
+    admin_broadcasts,
     admin_checks,
     admin_content,
     admin_content_messages,
@@ -47,6 +48,7 @@ api_router.include_router(admin_users.router, prefix="/admin/users", tags=["admi
 api_router.include_router(admin_demo.router, prefix="/admin/demo", tags=["admin-demo"])
 api_router.include_router(admin_content.router, prefix="/admin/content", tags=["admin-content"])
 api_router.include_router(admin_content_messages.router, prefix="/admin/content", tags=["admin-content-messages"])
+api_router.include_router(admin_broadcasts.router, prefix="/admin/broadcasts", tags=["admin-broadcasts"])
 api_router.include_router(admin_autofix.router, prefix="/admin/autofix", tags=["admin-autofix"])
 api_router.include_router(admin_settings.router, prefix="/admin/settings", tags=["admin-settings"])
 api_router.include_router(admin_analytics.router, prefix="/admin/analytics", tags=["admin-analytics"])

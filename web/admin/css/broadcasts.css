@@ -1,0 +1,213 @@
+/* ============================================================
+   Broadcasts — list, editor, floating toolbar
+   ============================================================ */
+
+/* ---- List View ---- */
+.bc-list { display: flex; flex-direction: column; gap: 8px; }
+.bc-list-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 20px; cursor: pointer; transition: border-color 0.15s;
+}
+.bc-list-item:hover { border-color: var(--accent-muted); }
+.bc-list-item-info { flex: 1; min-width: 0; }
+.bc-list-item-title {
+  font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px;
+}
+.bc-list-item-meta {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; color: var(--text-muted);
+}
+.bc-list-item-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+/* ---- Editor Shell ---- */
+.bc-title-input {
+  font-size: 20px; font-weight: 700; color: var(--text);
+  border: none; background: none; outline: none;
+  width: 100%; padding: 2px 0;
+  border-bottom: 2px solid transparent; transition: border-color 0.15s;
+}
+.bc-title-input:focus { border-bottom-color: var(--accent); }
+.bc-title-input:disabled { opacity: 0.7; cursor: default; }
+
+.bc-stats-row { display: flex; gap: 16px; margin-bottom: 20px; }
+.bc-stat {
+  flex: 1; padding: 14px; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  text-align: center;
+}
+.bc-stat-val { font-size: 24px; font-weight: 800; color: var(--text); }
+.bc-stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.bc-stat-ok .bc-stat-val { color: var(--success); }
+.bc-stat-err .bc-stat-val { color: var(--danger); }
+
+.bc-progress-bar {
+  padding: 16px 20px; background: var(--info-soft);
+  border-radius: var(--radius); margin-bottom: 20px;
+}
+.bc-progress-text { font-size: 13px; color: var(--info-text); margin-bottom: 8px; }
+.bc-progress-track {
+  height: 6px; background: rgba(0,0,0,0.08); border-radius: 3px; overflow: hidden;
+}
+.bc-progress-fill {
+  height: 100%; background: var(--accent); border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* ---- Block Editor ---- */
+.bc-editor { max-width: 720px; margin: 0 auto; padding: 16px 0; }
+.bc-blocks { display: flex; flex-direction: column; gap: 2px; }
+
+.bc-block {
+  display: flex; gap: 8px; padding: 8px 12px;
+  border-radius: 8px; transition: background 0.15s;
+  position: relative;
+}
+.bc-block:hover { background: #f8fafc; }
+.bc-block.dragging { opacity: 0.4; }
+.bc-block.drag-over { box-shadow: 0 -2px 0 0 var(--accent); }
+
+.bc-block-handle {
+  flex-shrink: 0; width: 20px; padding-top: 22px;
+  cursor: grab; color: var(--text-muted); opacity: 0;
+  transition: opacity 0.15s; font-size: 14px; line-height: 1;
+  user-select: none;
+}
+.bc-block:hover .bc-block-handle { opacity: 0.6; }
+
+.bc-block-body { flex: 1; min-width: 0; }
+
+.bc-block-type-label {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px;
+}
+
+.bc-block-del {
+  flex-shrink: 0; opacity: 0; width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; color: var(--text-muted); cursor: pointer;
+  transition: all 0.15s; margin-top: 18px; background: none; border: none;
+}
+.bc-block:hover .bc-block-del { opacity: 1; }
+.bc-block-del:hover { background: var(--danger-soft); color: var(--danger); }
+
+/* ---- Text Block ---- */
+.bc-text-block {
+  font-size: 14px; line-height: 1.7; color: var(--text);
+  outline: none; padding: 8px 12px;
+  border: 1px solid transparent; border-radius: 6px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  min-height: 40px; word-break: break-word;
+}
+.bc-text-block:focus {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-focus);
+  background: white;
+}
+.bc-text-block:empty::before {
+  content: attr(data-placeholder);
+  color: #94a3b8; pointer-events: none;
+}
+.bc-text-block b, .bc-text-block strong { font-weight: 700; }
+.bc-text-block i, .bc-text-block em { font-style: italic; }
+.bc-text-block u { text-decoration: underline; }
+.bc-text-block s, .bc-text-block strike { text-decoration: line-through; }
+.bc-text-block code {
+  background: #f1f5f9; padding: 2px 6px; border-radius: 4px;
+  font-family: 'Courier New', monospace; font-size: 13px;
+}
+.bc-text-block a { color: var(--accent); text-decoration: underline; }
+.bc-caption { min-height: 30px; margin-top: 8px; font-size: 13px; }
+
+/* ---- Upload Zone ---- */
+.bc-upload-zone {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 8px; padding: 28px;
+  border: 2px dashed var(--border); border-radius: 8px;
+  cursor: pointer; transition: all 0.15s; color: var(--text-muted);
+}
+.bc-upload-zone:hover,
+.bc-upload-zone.drag-over {
+  border-color: var(--accent); background: var(--accent-soft); color: var(--accent);
+}
+.bc-upload-zone span { font-size: 13px; font-weight: 500; }
+
+/* ---- File Info ---- */
+.bc-file-info {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: var(--bg-input);
+  border: 1px solid var(--border); border-radius: 8px;
+}
+.bc-file-icon { font-size: 18px; flex-shrink: 0; }
+.bc-file-name {
+  flex: 1; font-size: 13px; font-weight: 500; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bc-no-file {
+  padding: 12px; font-size: 13px; color: var(--text-muted); font-style: italic;
+}
+
+/* ---- Add Block Button ---- */
+.bc-add-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 20px; margin: 16px auto 0;
+  border: 2px dashed var(--border); border-radius: 8px;
+  color: var(--text-muted); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+  background: none; font-family: inherit;
+}
+.bc-add-btn:hover {
+  border-color: var(--accent); color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ---- Block Type Menu ---- */
+.bc-type-menu {
+  position: fixed; z-index: 250; background: white;
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border); padding: 6px; min-width: 200px;
+  animation: fadeIn 0.12s ease;
+}
+.bc-type-menu-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 14px; font-size: 13px; font-weight: 500;
+  color: var(--text); border-radius: 8px; cursor: pointer;
+  transition: background 0.1s; background: none; border: none;
+  font-family: inherit; text-align: left;
+}
+.bc-type-menu-item:hover { background: #f1f5f9; }
+
+/* ---- Floating Toolbar ---- */
+.bc-toolbar {
+  position: fixed; z-index: 260; display: flex; gap: 2px;
+  padding: 4px 6px; background: #1e293b; border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25); animation: fadeIn 0.12s ease;
+}
+.tb-btn {
+  width: 30px; height: 28px; display: flex; align-items: center;
+  justify-content: center; border-radius: 4px; font-size: 13px;
+  color: #94a3b8; cursor: pointer; transition: all 0.1s;
+  background: none; border: none; font-family: inherit;
+}
+.tb-btn:hover { background: #334155; color: white; }
+.tb-btn-code { font-size: 11px; font-weight: 600; letter-spacing: -0.5px; }
+.tb-sep { width: 1px; background: #334155; margin: 4px 2px; }
+
+/* ---- Confirm Modal ---- */
+.bc-confirm-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0;
+}
+.bc-confirm-card {
+  padding: 16px; background: var(--bg-input); border-radius: var(--radius);
+  text-align: center;
+}
+.bc-confirm-val { font-size: 28px; font-weight: 800; color: var(--text); }
+.bc-confirm-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .bc-editor { padding: 8px 0; }
+  .bc-block { padding: 6px 8px; }
+  .bc-stats-row { flex-direction: column; gap: 8px; }
+  .bc-confirm-grid { grid-template-columns: 1fr; }
+  .bc-title-input { font-size: 16px; }
+}

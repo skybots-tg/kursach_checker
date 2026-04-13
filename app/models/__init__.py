@@ -9,6 +9,9 @@ from app.models.entities import (
     AdminUser,
     AuditLog,
     BotContent,
+    Broadcast,
+    BroadcastMessage,
+    BroadcastStatus,
     Check,
     CheckStatus,
     CheckWorkerLog,
@@ -35,6 +38,9 @@ from app.models.entities import (
 
 __all__ = [
     "User",
+    "Broadcast",
+    "BroadcastMessage",
+    "BroadcastStatus",
     "Product",
     "Order",
     "PaymentProdamus",
