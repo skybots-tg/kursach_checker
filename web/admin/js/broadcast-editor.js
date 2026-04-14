@@ -1,16 +1,27 @@
-/* Broadcast Editor — Notion-like block editor */
+/* Broadcast Editor — text + media + audience + test send */
 
-let _currentBroadcast = null;
-window._editorBlocks = [];
-let _dragBlockId = null;
+window._currentBroadcast = null;
+window._currentBcMessage = null;
+let _audienceDebounce = null;
 
 async function openBroadcastEditor(broadcastId) {
   $('page-broadcasts').innerHTML = loadingHtml();
   try {
     const data = await api('GET', `/admin/broadcasts/${broadcastId}`);
     _currentBroadcast = data;
-    window._editorBlocks = data.messages || [];
+    window._currentBcMessage = data.messages?.[0] || null;
+
+    if (!window._currentBcMessage && data.status === 'draft') {
+      const fd = new FormData();
+      fd.append('message_type', 'text');
+      fd.append('text', '');
+      window._currentBcMessage = await apiUpload(
+        'POST', `/admin/broadcasts/${broadcastId}/messages`, fd,
+      );
+    }
+
     renderBroadcastEditor();
+    if (data.status === 'draft') bcFetchAudienceCount();
   } catch (err) {
     $('page-broadcasts').innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
   }
@@ -19,6 +30,10 @@ async function openBroadcastEditor(broadcastId) {
 function renderBroadcastEditor() {
   const b = _currentBroadcast;
   const isDraft = b.status === 'draft';
+  const msg = window._currentBcMessage;
+  const hasMedia = msg && msg.message_type !== 'text';
+  const mediaType = hasMedia ? msg.message_type : '';
+  const segment = b.target_segment || { type: 'all' };
 
   $('page-broadcasts').innerHTML = `
     <div class="page-header">
@@ -31,7 +46,10 @@ function renderBroadcastEditor() {
             ${b.status === 'sent' ? `<span style="margin-left:8px;font-size:12px;color:var(--text-muted)">${formatDate(b.sent_at)}</span>` : ''}</p>
         </div>
       </div>
-      ${isDraft ? `<button class="btn btn-primary" onclick="confirmSendBroadcast(${b.id})">${iconSvg('send')} Отправить</button>` : ''}
+      ${isDraft ? `<div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="bcOpenTestModal()">${iconSvg('send')} Тест</button>
+        <button class="btn btn-primary" onclick="confirmSendBroadcast(${b.id})">${iconSvg('send')} Отправить</button>
+      </div>` : ''}
     </div>
     ${b.status === 'sending' ? `
       <div class="bc-progress-bar" id="bc-progress">
@@ -45,149 +63,297 @@ function renderBroadcastEditor() {
         <div class="bc-stat bc-stat-err"><div class="bc-stat-val">${b.failed_count}</div><div class="bc-stat-label">Ошибок</div></div>
       </div>` : ''}
     <div class="bc-editor" id="bc-editor">
-      <div class="bc-blocks" id="bc-blocks"></div>
-      ${isDraft ? `<button class="bc-add-btn" onclick="showBlockTypeMenu(event)">${iconSvg('plus')} Добавить блок</button>` : ''}
+      <div class="bc-section">
+        <div class="bc-section-header">
+          ${hasMedia ? 'Подпись' : 'Текст сообщения'}
+          ${hasMedia ? '<span class="bc-section-hint">до 1024 символов</span>' : ''}
+        </div>
+        <div class="bc-text-block" contenteditable="${isDraft}" id="bc-msg-text"
+          data-placeholder="${hasMedia ? 'Подпись к медиа (необязательно)…' : 'Введите текст сообщения…'}"
+          onblur="onMsgTextBlur()">${msg?.text || ''}</div>
+      </div>
+      <div class="bc-section">
+        <div class="bc-section-header">Медиа <span class="bc-section-hint">необязательно</span></div>
+        ${isDraft ? bcMediaTypeSelector(mediaType) : (hasMedia ? bcMediaTypeLabel(mediaType) : '')}
+        <div id="bc-media-zone">${bcRenderMediaZone(isDraft, mediaType, msg)}</div>
+      </div>
+      <div class="bc-section">
+        <div class="bc-section-header">Аудитория</div>
+        ${bcRenderAudienceSection(isDraft, segment)}
+      </div>
     </div>`;
 
-  renderEditorBlocks();
-  if (isDraft) { setupFloatingToolbar(); initBlockDrag(); }
+  if (isDraft) setupFloatingToolbar();
   if (b.status === 'sending') pollBroadcastStatus(b.id);
 }
 
-// ---- Render Blocks ----
+// ---- Audience Section ----
 
-function renderEditorBlocks() {
-  const container = $('bc-blocks');
-  if (!container) return;
-  const isDraft = _currentBroadcast?.status === 'draft';
-  const blocks = window._editorBlocks;
+const _segmentLabels = {
+  all: 'Все пользователи',
+  paid: 'Оплачивали',
+  viewers: 'Только смотрели',
+  unpaid_invoice: 'Создали счёт, но не оплатили',
+  recent: 'Зарегистрировались недавно',
+};
 
-  if (!blocks.length) {
-    container.innerHTML = isDraft
-      ? emptyHtml('Пусто', 'Добавьте первый блок сообщения')
-      : emptyHtml('Нет сообщений', '');
+function bcRenderAudienceSection(isDraft, segment) {
+  const segType = segment.type || 'all';
+  const needsDates = segType === 'unpaid_invoice' || segType === 'recent';
+  const segOpts = Object.entries(_segmentLabels)
+    .map(([k, v]) => `<option value="${k}" ${segType === k ? 'selected' : ''}>${v}</option>`)
+    .join('');
+
+  let html = '';
+  if (isDraft) {
+    html += `<select id="bc-segment-type" onchange="onSegmentTypeChange()" class="bc-media-select">${segOpts}</select>`;
+    if (needsDates) {
+      html += `<div class="bc-date-row">
+        <label>С <input type="date" id="bc-seg-from" value="${segment.date_from || ''}" onchange="onSegmentDatesChange()"></label>
+        <label>По <input type="date" id="bc-seg-to" value="${segment.date_to || ''}" onchange="onSegmentDatesChange()"></label>
+      </div>`;
+    }
+  } else {
+    html += `<div class="bc-media-type-badge">${_segmentLabels[segType] || segType}</div>`;
+  }
+  html += `<div class="bc-audience-counter" id="bc-audience-counter">
+    <span class="bc-audience-spinner"></span> Подсчёт…
+  </div>`;
+  return html;
+}
+
+async function onSegmentTypeChange() {
+  const segType = $('bc-segment-type')?.value || 'all';
+  const segment = { type: segType };
+  _currentBroadcast.target_segment = segment;
+  await api('PUT', `/admin/broadcasts/${_currentBroadcast.id}`, { target_segment: segment });
+  renderBroadcastEditor();
+  bcFetchAudienceCount();
+}
+
+async function onSegmentDatesChange() {
+  const segType = $('bc-segment-type')?.value || 'all';
+  const segment = {
+    type: segType,
+    date_from: $('bc-seg-from')?.value || undefined,
+    date_to: $('bc-seg-to')?.value || undefined,
+  };
+  _currentBroadcast.target_segment = segment;
+  await api('PUT', `/admin/broadcasts/${_currentBroadcast.id}`, { target_segment: segment });
+  bcFetchAudienceCountDebounced();
+}
+
+function bcFetchAudienceCountDebounced() {
+  clearTimeout(_audienceDebounce);
+  _audienceDebounce = setTimeout(bcFetchAudienceCount, 400);
+}
+
+async function bcFetchAudienceCount() {
+  const el = $('bc-audience-counter');
+  if (!el) return;
+  const segment = _currentBroadcast?.target_segment || { type: 'all' };
+  try {
+    const data = await api('POST', '/admin/broadcasts/audience/count', { segment });
+    if (!$('bc-audience-counter')) return;
+    $('bc-audience-counter').innerHTML = `<b>${data.total}</b> получателей`
+      + (data.total !== data.active ? ` <span class="bc-audience-active">(${data.active} активных)</span>` : '');
+  } catch {
+    if (el) el.innerHTML = '<span style="color:var(--danger)">Ошибка подсчёта</span>';
+  }
+}
+
+// ---- Test Send Modal ----
+
+let _testSelectedUsers = [];
+
+function bcOpenTestModal() {
+  _testSelectedUsers = [];
+  openModal('Тестовая отправка', `
+    <p style="margin-bottom:12px;color:var(--text-muted)">Найдите пользователей и отправьте им сообщение для проверки. Статус рассылки не изменится.</p>
+    <input class="form-input" id="bc-test-search" placeholder="Поиск по имени или username…"
+      oninput="bcSearchTestUsers()" autocomplete="off">
+    <div id="bc-test-results" class="bc-test-results"></div>
+    <div id="bc-test-selected" class="bc-test-selected"></div>
+  `, `
+    <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
+    <button class="btn btn-primary" id="bc-test-send-btn" onclick="bcDoTestSend()" disabled>Отправить тест</button>
+  `);
+}
+
+let _testSearchDebounce = null;
+function bcSearchTestUsers() {
+  clearTimeout(_testSearchDebounce);
+  _testSearchDebounce = setTimeout(async () => {
+    const q = $('bc-test-search')?.value?.trim();
+    const el = $('bc-test-results');
+    if (!el || !q || q.length < 2) { if (el) el.innerHTML = ''; return; }
+    try {
+      const users = await api('GET', `/admin/users?q=${encodeURIComponent(q)}&limit=10`);
+      el.innerHTML = (users.items || users).map(u => {
+        const checked = _testSelectedUsers.some(s => s.telegram_id === u.telegram_id);
+        const name = escHtml(u.first_name || '') + (u.username ? ` @${escHtml(u.username)}` : '');
+        return `<label class="bc-test-user ${checked ? 'selected' : ''}">
+          <input type="checkbox" ${checked ? 'checked' : ''} onchange="bcToggleTestUser(${u.telegram_id}, '${escHtml(u.first_name || '')}', '${escHtml(u.username || '')}', this.checked)">
+          <span>${name}</span> <span class="bc-test-tgid">${u.telegram_id}</span>
+        </label>`;
+      }).join('') || '<div style="padding:8px;color:var(--text-muted)">Не найдено</div>';
+    } catch { el.innerHTML = '<div style="padding:8px;color:var(--danger)">Ошибка поиска</div>'; }
+  }, 300);
+}
+
+function bcToggleTestUser(telegramId, firstName, username, checked) {
+  if (checked) {
+    if (!_testSelectedUsers.some(u => u.telegram_id === telegramId)) {
+      _testSelectedUsers.push({ telegram_id: telegramId, first_name: firstName, username });
+    }
+  } else {
+    _testSelectedUsers = _testSelectedUsers.filter(u => u.telegram_id !== telegramId);
+  }
+  bcRenderTestSelected();
+}
+
+function bcRenderTestSelected() {
+  const el = $('bc-test-selected');
+  const btn = $('bc-test-send-btn');
+  if (!el) return;
+  if (!_testSelectedUsers.length) {
+    el.innerHTML = '';
+    if (btn) btn.disabled = true;
     return;
   }
-
-  const typeLabels = { text: 'Текст', photo: 'Фото', video: 'Видео', document: 'Файл', audio: 'Аудио', animation: 'GIF' };
-  const mediaIcons = { photo: '🖼️', video: '🎬', audio: '🎵', document: '📎', animation: '🎞️' };
-
-  container.innerHTML = blocks.map(block => {
-    const label = typeLabels[block.message_type] || block.message_type;
-    const isMedia = block.message_type !== 'text';
-
-    let content = '';
-    if (!isMedia) {
-      content = `<div class="bc-text-block" contenteditable="${isDraft}" data-msg-id="${block.id}"
-        data-placeholder="Введите текст сообщения…" onblur="onBlockBlur(${block.id}, this)">${block.text || ''}</div>`;
-    } else {
-      const accept = { photo: 'image/*', video: 'video/*', audio: 'audio/*', animation: 'image/gif' }[block.message_type] || '*/*';
-      if (block.file_name) {
-        content += `<div class="bc-file-info">
-          <span class="bc-file-icon">${mediaIcons[block.message_type] || '📎'}</span>
-          <span class="bc-file-name">${escHtml(block.file_name)}</span>
-          ${isDraft ? `<button class="btn btn-sm btn-ghost" onclick="reuploadBlockFile(${block.id})">Заменить</button>` : ''}
-        </div>`;
-      } else if (isDraft) {
-        content += `<div class="bc-upload-zone" onclick="$('bc-file-${block.id}').click()"
-          ondragover="event.preventDefault();this.classList.add('drag-over')"
-          ondragleave="this.classList.remove('drag-over')"
-          ondrop="dropBlockFile(event,${block.id})">
-          <input type="file" id="bc-file-${block.id}" style="display:none" accept="${accept}"
-                 onchange="uploadBlockFile(${block.id},this.files[0])">
-          ${iconSvg('download', 24)}
-          <span>Нажмите или перетащите файл</span>
-        </div>`;
-      } else {
-        content += '<div class="bc-no-file">Файл не прикреплён</div>';
-      }
-      content += `<div class="bc-text-block bc-caption" contenteditable="${isDraft}" data-msg-id="${block.id}"
-        data-placeholder="Подпись (необязательно)…" onblur="onBlockBlur(${block.id}, this)">${block.text || ''}</div>`;
-    }
-
-    return `<div class="bc-block" data-block-id="${block.id}" draggable="${isDraft}">
-      ${isDraft ? '<div class="bc-block-handle" title="Перетащить">⠿</div>' : ''}
-      <div class="bc-block-body">
-        <div class="bc-block-type-label">${label}</div>
-        ${content}
-      </div>
-      ${isDraft ? `<button class="bc-block-del" onclick="deleteBlock(${block.id})" title="Удалить">${iconSvg('trash', 14)}</button>` : ''}
-    </div>`;
-  }).join('');
+  if (btn) btn.disabled = false;
+  el.innerHTML = '<div class="bc-test-chips">' + _testSelectedUsers.map(u => {
+    const name = u.first_name + (u.username ? ` @${u.username}` : '');
+    return `<span class="bc-test-chip">${escHtml(name)} <button onclick="bcToggleTestUser(${u.telegram_id},'','',false);bcSearchTestUsers()">×</button></span>`;
+  }).join('') + '</div>';
 }
 
-// ---- Block CRUD ----
-
-async function addBlock(type) {
-  hideBlockTypeMenu();
-  const fd = new FormData();
-  fd.append('message_type', type);
-  fd.append('text', '');
+async function bcDoTestSend() {
+  if (!_testSelectedUsers.length || !_currentBroadcast) return;
+  const ids = _testSelectedUsers.map(u => u.telegram_id);
   try {
-    const msg = await apiUpload('POST', `/admin/broadcasts/${_currentBroadcast.id}/messages`, fd);
-    window._editorBlocks.push(msg);
-    renderEditorBlocks();
-    initBlockDrag();
-    setTimeout(() => {
-      const el = document.querySelector(`[data-msg-id="${msg.id}"]`);
-      if (el) el.focus();
-    }, 50);
+    const res = await api('POST', `/admin/broadcasts/${_currentBroadcast.id}/test-send`, { telegram_ids: ids });
+    closeModal();
+    toast(`Тест отправлен: ${res.sent} доставлено, ${res.failed} ошибок`, res.failed ? 'warning' : 'success');
   } catch (err) { toast(err.message, 'error'); }
 }
 
-async function deleteBlock(msgId) {
-  if (!confirm('Удалить этот блок?')) return;
-  try {
-    await api('DELETE', `/admin/broadcasts/${_currentBroadcast.id}/messages/${msgId}`);
-    window._editorBlocks = window._editorBlocks.filter(b => b.id !== msgId);
-    renderEditorBlocks();
-    initBlockDrag();
-    toast('Блок удалён', 'success');
-  } catch (err) { toast(err.message, 'error'); }
+// ---- Media Section ----
+
+const _mediaLabels = {
+  photo: 'Фото', video: 'Видео', document: 'Документ',
+  audio: 'Аудио', animation: 'GIF',
+};
+const _mediaIcons = {
+  photo: '🖼️', video: '🎬', audio: '🎵', document: '📎', animation: '🎞️',
+};
+
+function bcMediaTypeSelector(mediaType) {
+  const opts = [['', 'Без медиа'], ['photo', '🖼️ Фото'], ['video', '🎬 Видео'],
+    ['document', '📎 Документ'], ['audio', '🎵 Аудио'], ['animation', '🎞️ GIF']];
+  return `<div class="bc-media-type-row">
+    <select id="bc-media-type" onchange="onMediaTypeChange()" class="bc-media-select">
+      ${opts.map(([v, l]) => `<option value="${v}" ${mediaType === v ? 'selected' : ''}>${l}</option>`).join('')}
+    </select>
+  </div>`;
 }
 
-function onBlockBlur(msgId, el) {
-  const block = window._editorBlocks.find(b => b.id === msgId);
-  if (!block) return;
+function bcMediaTypeLabel(mediaType) {
+  if (!mediaType) return '';
+  return `<div class="bc-media-type-row">
+    <span class="bc-media-type-badge">${_mediaIcons[mediaType] || ''} ${_mediaLabels[mediaType] || mediaType}</span>
+  </div>`;
+}
+
+function bcRenderMediaZone(isDraft, mediaType, msg) {
+  if (!mediaType) {
+    return isDraft ? '<div class="bc-no-media-hint">Выберите тип, чтобы прикрепить файл</div>' : '';
+  }
+  const accept = { photo: 'image/*', video: 'video/*', audio: 'audio/*', animation: 'image/gif' }[mediaType] || '*/*';
+  if (msg?.file_name) {
+    let html = `<div class="bc-file-info">
+      <span class="bc-file-icon">${_mediaIcons[mediaType] || '📎'}</span>
+      <span class="bc-file-name">${escHtml(msg.file_name)}</span>`;
+    if (isDraft) html += `<button class="btn btn-sm btn-ghost" onclick="bcReuploadFile()">Заменить</button>`;
+    return html + '</div>';
+  }
+  if (isDraft) {
+    return `<div class="bc-upload-zone" onclick="$('bc-file-input').click()"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')" ondrop="bcDropFile(event)">
+      <input type="file" id="bc-file-input" style="display:none" accept="${accept}" onchange="bcUploadFile(this.files[0])">
+      ${iconSvg('download', 24)} <span>Нажмите или перетащите файл</span></div>`;
+  }
+  return '<div class="bc-no-file">Файл не прикреплён</div>';
+}
+
+// ---- Save helpers ----
+
+function onMsgTextBlur() {
+  const msg = window._currentBcMessage;
+  if (!msg) return;
+  const el = $('bc-msg-text');
+  if (!el) return;
   const newText = cleanForTelegram(el.innerHTML);
-  if (newText === (block.text || '')) return;
-  block.text = newText;
-  const fd = new FormData();
-  fd.append('message_type', block.message_type);
-  fd.append('text', newText);
-  fd.append('parse_mode', block.parse_mode || 'HTML');
-  apiUpload('PUT', `/admin/broadcasts/${_currentBroadcast.id}/messages/${block.id}`, fd)
-    .catch(err => toast('Ошибка сохранения: ' + err.message, 'error'));
+  if (newText === (msg.text || '')) return;
+  msg.text = newText;
+  bcSaveMessage();
 }
 
-async function uploadBlockFile(msgId, file) {
-  if (!file) return;
-  const block = window._editorBlocks.find(b => b.id === msgId);
+async function bcSaveMessage(file) {
+  const msg = window._currentBcMessage;
+  if (!msg || !_currentBroadcast) return;
   const fd = new FormData();
-  fd.append('message_type', block?.message_type || 'document');
-  fd.append('text', block?.text || '');
+  fd.append('message_type', msg.message_type);
+  fd.append('text', msg.text || '');
+  fd.append('parse_mode', msg.parse_mode || 'HTML');
+  if (file) fd.append('file', file);
+  try {
+    const updated = await apiUpload('PUT', `/admin/broadcasts/${_currentBroadcast.id}/messages/${msg.id}`, fd);
+    window._currentBcMessage = updated;
+  } catch (err) { toast('Ошибка сохранения: ' + err.message, 'error'); }
+}
+
+async function onMediaTypeChange() {
+  const newType = $('bc-media-type')?.value || '';
+  const msg = window._currentBcMessage;
+  if (!msg) return;
+  msg.message_type = newType || 'text';
+  msg.file_name = null;
+  msg.file_path = null;
+  await bcSaveMessage();
+  renderBroadcastEditor();
+  if (_currentBroadcast?.status === 'draft') bcFetchAudienceCount();
+}
+
+async function bcUploadFile(file) {
+  if (!file || !window._currentBcMessage) return;
+  const msg = window._currentBcMessage;
+  const fd = new FormData();
+  fd.append('message_type', msg.message_type);
+  fd.append('text', msg.text || '');
+  fd.append('parse_mode', msg.parse_mode || 'HTML');
   fd.append('file', file);
   try {
-    const updated = await apiUpload('PUT', `/admin/broadcasts/${_currentBroadcast.id}/messages/${msgId}`, fd);
-    const idx = window._editorBlocks.findIndex(b => b.id === msgId);
-    if (idx !== -1) window._editorBlocks[idx] = updated;
-    renderEditorBlocks();
-    initBlockDrag();
+    const updated = await apiUpload('PUT', `/admin/broadcasts/${_currentBroadcast.id}/messages/${msg.id}`, fd);
+    window._currentBcMessage = updated;
+    renderBroadcastEditor();
+    if (_currentBroadcast?.status === 'draft') bcFetchAudienceCount();
     toast('Файл загружен', 'success');
   } catch (err) { toast(err.message, 'error'); }
 }
 
-function dropBlockFile(e, msgId) {
+function bcDropFile(e) {
   e.preventDefault();
   e.currentTarget.classList.remove('drag-over');
   const file = e.dataTransfer?.files?.[0];
-  if (file) uploadBlockFile(msgId, file);
+  if (file) bcUploadFile(file);
 }
 
-function reuploadBlockFile(msgId) {
+function bcReuploadFile() {
   const tmp = document.createElement('input');
   tmp.type = 'file';
-  tmp.onchange = () => uploadBlockFile(msgId, tmp.files[0]);
+  tmp.onchange = () => bcUploadFile(tmp.files[0]);
   tmp.click();
 }
 
@@ -200,89 +366,16 @@ async function saveBroadcastTitle() {
   } catch (err) { toast(err.message, 'error'); }
 }
 
-// ---- Block Type Menu ----
-
-function showBlockTypeMenu(e) {
-  hideBlockTypeMenu();
-  const rect = e.currentTarget.getBoundingClientRect();
-  const menu = document.createElement('div');
-  menu.className = 'bc-type-menu';
-  menu.id = 'bc-type-menu';
-  menu.innerHTML = [
-    ['text', '📝', 'Текст'],
-    ['photo', '🖼️', 'Фото'],
-    ['video', '🎬', 'Видео'],
-    ['document', '📎', 'Файл / Документ'],
-    ['audio', '🎵', 'Аудио'],
-    ['animation', '🎞️', 'GIF / Анимация'],
-  ].map(([t, icon, label]) =>
-    `<button class="bc-type-menu-item" onclick="addBlock('${t}')"><span>${icon}</span> ${label}</button>`
-  ).join('');
-  document.body.appendChild(menu);
-  menu.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
-  menu.style.top = (rect.bottom + 4) + 'px';
-  setTimeout(() => document.addEventListener('click', hideBlockTypeMenu, { once: true }), 10);
-}
-
-function hideBlockTypeMenu() { $('bc-type-menu')?.remove(); }
-
-// ---- Drag & Drop ----
-
-function initBlockDrag() {
-  const c = $('bc-blocks');
-  if (!c) return;
-  c.ondragstart = e => {
-    const bl = e.target.closest('.bc-block');
-    if (!bl) return;
-    _dragBlockId = parseInt(bl.dataset.blockId);
-    bl.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-  };
-  c.ondragend = e => {
-    e.target.closest?.('.bc-block')?.classList.remove('dragging');
-    c.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-    _dragBlockId = null;
-  };
-  c.ondragover = e => {
-    e.preventDefault();
-    const bl = e.target.closest('.bc-block');
-    if (!bl || parseInt(bl.dataset.blockId) === _dragBlockId) return;
-    c.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-    bl.classList.add('drag-over');
-  };
-  c.ondrop = async e => {
-    e.preventDefault();
-    const target = e.target.closest('.bc-block');
-    if (!target || !_dragBlockId) return;
-    const tid = parseInt(target.dataset.blockId);
-    if (tid === _dragBlockId) return;
-    const fi = window._editorBlocks.findIndex(b => b.id === _dragBlockId);
-    const ti = window._editorBlocks.findIndex(b => b.id === tid);
-    if (fi === -1 || ti === -1) return;
-    const [moved] = window._editorBlocks.splice(fi, 1);
-    window._editorBlocks.splice(ti, 0, moved);
-    renderEditorBlocks();
-    initBlockDrag();
-    try {
-      await api('POST', `/admin/broadcasts/${_currentBroadcast.id}/messages/reorder`, {
-        ids_in_order: window._editorBlocks.map(b => b.id),
-      });
-    } catch (err) { toast(err.message, 'error'); }
-  };
-}
-
 // ---- Floating Toolbar ----
 
 function setupFloatingToolbar() {
   $('bc-toolbar')?.remove();
   const tb = document.createElement('div');
-  tb.className = 'bc-toolbar';
-  tb.id = 'bc-toolbar';
-  tb.style.display = 'none';
+  tb.className = 'bc-toolbar'; tb.id = 'bc-toolbar'; tb.style.display = 'none';
   tb.innerHTML = `
-    <button class="tb-btn" onmousedown="fmtCmd(event,'bold')" title="Жирный (Ctrl+B)"><b>B</b></button>
-    <button class="tb-btn" onmousedown="fmtCmd(event,'italic')" title="Курсив (Ctrl+I)"><i>I</i></button>
-    <button class="tb-btn" onmousedown="fmtCmd(event,'underline')" title="Подчёркнутый (Ctrl+U)"><u>U</u></button>
+    <button class="tb-btn" onmousedown="fmtCmd(event,'bold')" title="Жирный"><b>B</b></button>
+    <button class="tb-btn" onmousedown="fmtCmd(event,'italic')" title="Курсив"><i>I</i></button>
+    <button class="tb-btn" onmousedown="fmtCmd(event,'underline')" title="Подчёркнутый"><u>U</u></button>
     <button class="tb-btn" onmousedown="fmtCmd(event,'strikeThrough')" title="Зачёркнутый"><s>S</s></button>
     <span class="tb-sep"></span>
     <button class="tb-btn tb-btn-code" onmousedown="fmtCode(event)" title="Код">&lt;/&gt;</button>
@@ -314,11 +407,8 @@ function fmtCode(e) {
   const range = sel.getRangeAt(0);
   const parent = range.commonAncestorContainer;
   const codeEl = (parent.nodeType === 3 ? parent.parentElement : parent)?.closest('code');
-  if (codeEl) {
-    codeEl.replaceWith(document.createTextNode(codeEl.textContent));
-  } else {
-    try { const code = document.createElement('code'); range.surroundContents(code); } catch { /* multi-element */ }
-  }
+  if (codeEl) { codeEl.replaceWith(document.createTextNode(codeEl.textContent)); }
+  else { try { const code = document.createElement('code'); range.surroundContents(code); } catch { /* multi-element */ } }
 }
 
 function fmtLink(e) {
@@ -385,14 +475,17 @@ function pollBroadcastStatus(broadcastId) {
 
 window.openBroadcastEditor = openBroadcastEditor;
 window.saveBroadcastTitle = saveBroadcastTitle;
-window.onBlockBlur = onBlockBlur;
-window.addBlock = addBlock;
-window.deleteBlock = deleteBlock;
-window.uploadBlockFile = uploadBlockFile;
-window.dropBlockFile = dropBlockFile;
-window.reuploadBlockFile = reuploadBlockFile;
-window.showBlockTypeMenu = showBlockTypeMenu;
-window.hideBlockTypeMenu = hideBlockTypeMenu;
+window.onMsgTextBlur = onMsgTextBlur;
+window.onMediaTypeChange = onMediaTypeChange;
+window.onSegmentTypeChange = onSegmentTypeChange;
+window.onSegmentDatesChange = onSegmentDatesChange;
+window.bcUploadFile = bcUploadFile;
+window.bcDropFile = bcDropFile;
+window.bcReuploadFile = bcReuploadFile;
+window.bcOpenTestModal = bcOpenTestModal;
+window.bcSearchTestUsers = bcSearchTestUsers;
+window.bcToggleTestUser = bcToggleTestUser;
+window.bcDoTestSend = bcDoTestSend;
 window.fmtCmd = fmtCmd;
 window.fmtCode = fmtCode;
 window.fmtLink = fmtLink;

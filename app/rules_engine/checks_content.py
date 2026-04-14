@@ -11,7 +11,7 @@ from app.rules_engine.docx_snapshot import DocumentSnapshot
 from app.rules_engine.findings import Finding, add_finding
 from app.rules_engine.rules_config import RulesConfig
 
-_DEFAULT_INFORMAL_MARKERS = frozenset("\u00b7\u2022*-\u2014\u2013")
+_DEFAULT_INFORMAL_MARKERS = frozenset("·•*-—–")
 
 _ENUM_LETTER_RE = re.compile(r"^[а-яёa-z]\)\s", re.IGNORECASE)
 _ENUM_DIGIT_PAREN_RE = re.compile(r"^\d{1,2}\)\s")
@@ -101,6 +101,20 @@ def run_bibliography_checks(
             recommendation="Добавьте недостающие источники в список литературы",
         )
 
+    if not refs_numbered:
+        add_finding(
+            findings,
+            title="Нумерация источников",
+            category="bibliography",
+            severity=severity,
+            expected="Источники пронумерованы (1. 2. 3. или [1] [2] [3])",
+            found="Нумерация источников не обнаружена",
+            location="список литературы",
+            recommendation="Пронумеруйте каждый источник по порядку: 1. 2. 3. и т.д.",
+        )
+
+    _check_bibliography_alphabetical_order(bib_section, refs_numbered, findings, severity)
+
     refs = refs_numbered or bib_section.strip().splitlines()[1:]
     if params.get("require_foreign_sources", False) and refs:
         latin_refs = sum(1 for r in refs if re.search(r"[A-Za-z]{3,}", r))
@@ -115,6 +129,51 @@ def run_bibliography_checks(
                 location="список литературы",
                 recommendation="Добавьте иноязычные источники в список литературы",
             )
+
+
+_NUM_PREFIX_RE = re.compile(r"^\s*(?:\[?\d{1,3}\]?)[\.)]\s*")
+
+
+def _strip_number_prefix(line: str) -> str:
+    return _NUM_PREFIX_RE.sub("", line).strip()
+
+
+def _sort_key(text: str) -> str:
+    """Lowercase key for alphabetical comparison (Russian then Latin)."""
+    return _strip_number_prefix(text).lower()
+
+
+def _check_bibliography_alphabetical_order(
+    bib_section: str,
+    refs_numbered: list[str],
+    findings: list[Finding],
+    severity: str,
+) -> None:
+    entries = refs_numbered if refs_numbered else [
+        line for line in bib_section.strip().splitlines()[1:]
+        if line.strip() and len(line.strip()) >= 10
+    ]
+    if len(entries) < 2:
+        return
+
+    keys = [_sort_key(e) for e in entries]
+    out_of_order: list[int] = []
+    for i in range(1, len(keys)):
+        if keys[i] < keys[i - 1]:
+            out_of_order.append(i + 1)
+
+    if out_of_order:
+        sample = ", ".join(str(n) for n in out_of_order[:5])
+        add_finding(
+            findings,
+            title="Алфавитный порядок источников",
+            category="bibliography",
+            severity=severity,
+            expected="Источники расположены в алфавитном порядке",
+            found=f"Нарушен порядок у источников № {sample}",
+            location="список литературы",
+            recommendation="Отсортируйте источники по алфавиту и перенумеруйте",
+        )
 
 
 # ── objects ───────────────────────────────────────────────────────────
@@ -184,6 +243,177 @@ ALLOWED_CHARS_RE = re.compile(
     r"]"
 )
 
+    bib_section = _extract_bibliography_section(snapshot.full_text)
+    if bib_section is None:
+        add_finding(
+            findings,
+            title="Раздел источников",
+            category="bibliography",
+            severity=severity,
+            expected="В документе присутствует раздел со списком источников",
+            found="Не найден",
+            location="структура",
+            recommendation="Добавьте раздел со списком литературы",
+        )
+        return
+
+    refs_numbered = re.findall(r"(?m)^\s*(?:\[?\d{1,3}\]?)[\.)]\s+.+$", bib_section)
+    refs_plain = _count_bibliography_entries(bib_section) if not refs_numbered else 0
+    found_count = len(refs_numbered) or refs_plain
+    if found_count < min_total:
+        add_finding(
+            findings,
+            title="Количество источников",
+            category="bibliography",
+            severity=severity,
+            expected=f"Не менее {min_total}",
+            found=str(found_count),
+            location="список литературы",
+            recommendation="Добавьте недостающие источники в список литературы",
+        )
+
+    if not refs_numbered:
+        add_finding(
+            findings,
+            title="Нумерация источников",
+            category="bibliography",
+            severity=severity,
+            expected="Источники пронумерованы (1. 2. 3. или [1] [2] [3])",
+            found="Нумерация источников не обнаружена",
+            location="список литературы",
+            recommendation="Пронумеруйте каждый источник по порядку: 1. 2. 3. и т.д.",
+        )
+
+    _check_bibliography_alphabetical_order(bib_section, refs_numbered, findings, severity)
+
+    refs = refs_numbered or bib_section.strip().splitlines()[1:]
+    if params.get("require_foreign_sources", False) and refs:
+        latin_refs = sum(1 for r in refs if re.search(r"[A-Za-z]{3,}", r))
+        if latin_refs == 0:
+            add_finding(
+                findings,
+                title="Иноязычные источники",
+                category="bibliography",
+                severity=severity,
+                expected="Наличие иноязычных источников",
+                found="Иноязычные источники не обнаружены",
+                location="список литературы",
+                recommendation="Добавьте иноязычные источники в список литературы",
+            )
+
+
+_NUM_PREFIX_RE = re.compile(r"^\s*(?:\[?\d{1,3}\]?)[\.)]\s*")
+
+
+def _strip_number_prefix(line: str) -> str:
+    return _NUM_PREFIX_RE.sub("", line).strip()
+
+
+def _sort_key(text: str) -> str:
+    """Lowercase key for alphabetical comparison (Russian then Latin)."""
+    return _strip_number_prefix(text).lower()
+
+
+def _check_bibliography_alphabetical_order(
+    bib_section: str,
+    refs_numbered: list[str],
+    findings: list[Finding],
+    severity: str,
+) -> None:
+    entries = refs_numbered if refs_numbered else [
+        line for line in bib_section.strip().splitlines()[1:]
+        if line.strip() and len(line.strip()) >= 10
+    ]
+    if len(entries) < 2:
+        return
+
+    keys = [_sort_key(e) for e in entries]
+    out_of_order: list[int] = []
+    for i in range(1, len(keys)):
+        if keys[i] < keys[i - 1]:
+            out_of_order.append(i + 1)
+
+    if out_of_order:
+        sample = ", ".join(str(n) for n in out_of_order[:5])
+        add_finding(
+            findings,
+            title="Алфавитный порядок источников",
+            category="bibliography",
+            severity=severity,
+            expected="Источники расположены в алфавитном порядке",
+            found=f"Нарушен порядок у источников № {sample}",
+            location="список литературы",
+            recommendation="Отсортируйте источники по алфавиту и перенумеруйте",
+        )
+
+
+# ── objects ───────────────────────────────────────────────────────────
+
+def run_objects_checks(
+    snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding],
+) -> None:
+    if not cfg.has("objects"):
+        return
+    if Path(snapshot.path).suffix.lower() != ".docx":
+        return
+
+    severity = cfg.severity("objects", "warning")
+    params = cfg.params("objects")
+
+    try:
+        raw = Path(snapshot.path).read_bytes()
+    except OSError:
+        return
+
+    if params.get("forbid_linked_media", True):
+        has_linked_media = (
+            b'TargetMode="External"' in raw
+            and (b"<wp:inline" in raw or b"<wp:anchor" in raw or b"oleObject" in raw.lower())
+        )
+        if has_linked_media:
+            add_finding(
+                findings,
+                title="Связанные внешние объекты",
+                category="objects",
+                severity=severity,
+                expected="Таблицы и изображения встроены в документ",
+                found="Обнаружены внешние ссылки на медиа-объекты",
+                location="объекты",
+                recommendation="Вставьте объекты в документ как встроенные",
+            )
+
+    if params.get("require_embedded_objects", False):
+        has_media = b"word/media/" in raw or b"<wp:inline" in raw or b"<wp:anchor" in raw
+        if not has_media:
+            add_finding(
+                findings,
+                title="Встроенные объекты",
+                category="objects",
+                severity="advice",
+                expected="В документе есть рисунки или таблицы",
+                found="Встроенные объекты не обнаружены",
+                location="объекты",
+                recommendation="Добавьте иллюстрации или таблицы в документ",
+            )
+
+
+# ── text cleanliness ─────────────────────────────────────────────────
+
+ALLOWED_CHARS_RE = re.compile(
+    r"[ -"
+    r"Ѐ-ӿ"
+    r" -ÿ"
+    r"Ͱ-Ͽ"
+    r"‐-―"
+    r"‘’“”«»…"
+    r"№́"
+    r"•●○■▪‣"
+    r"⁰-₟"
+    r"∀-⋿"
+    r"⅐-↏"
+    r"]"
+)
+
 _MAX_CLEANLINESS_FINDINGS = 10
 
 
@@ -232,6 +462,36 @@ def run_text_cleanliness_checks(
             recommendation="Проверьте весь документ на посторонние символы",
         )
 
+    em_count = 0
+    for paragraph in snapshot.paragraphs:
+        if not paragraph.text or paragraph.is_toc_entry or paragraph.is_heading:
+            continue
+        if em_count >= _MAX_CLEANLINESS_FINDINGS:
+            break
+        if "—" in paragraph.text:
+            em_count += 1
+            add_finding(
+                findings,
+                title="Длинное тире (—)",
+                category="text_cleanliness",
+                severity=severity,
+                expected="Среднее тире (–) вместо длинного (—)",
+                found="Обнаружено длинное тире (—) — признак ИИ-генерации",
+                location=f"абзац #{paragraph.index + 1}",
+                recommendation="Замените длинное тире (—) на среднее (–)",
+            )
+    if em_count >= _MAX_CLEANLINESS_FINDINGS:
+        add_finding(
+            findings,
+            title="Длинное тире — ещё замечания",
+            category="text_cleanliness",
+            severity="advice",
+            expected="",
+            found=f"Показаны первые {_MAX_CLEANLINESS_FINDINGS}, проблема массовая",
+            location="весь документ",
+            recommendation="Замените все длинные тире (—) на средние (–)",
+        )
+
     ws_count = 0
     for paragraph in snapshot.paragraphs:
         if not paragraph.text or paragraph.is_toc_entry or paragraph.is_heading:
@@ -275,7 +535,7 @@ def _starts_with_informal_marker(text: str, markers: frozenset[str]) -> bool:
     ch = stripped[0]
     if ch not in markers:
         return False
-    if ch in ("-", "\u2013", "\u2014") and stripped[1].isdigit():
+    if ch in ("-", "–", "—") and stripped[1].isdigit():
         return False
     return True
 
@@ -296,7 +556,7 @@ def run_list_formatting_checks(
     severity = cfg.severity("list_formatting", "warning")
     params = cfg.params("list_formatting")
 
-    markers_raw = params.get("informal_list_markers", ["\u00b7", "\u2022", "*", "-", "\u2014", "\u2013"])
+    markers_raw = params.get("informal_list_markers", ["·", "•", "*", "-", "—", "–"])
     markers = frozenset(markers_raw) | _DEFAULT_INFORMAL_MARKERS
     min_consecutive = int(params.get("min_consecutive", 2))
 
@@ -351,6 +611,6 @@ def run_list_formatting_checks(
             severity=severity,
             expected="Элементы списка оформлены маркированным/нумерованным списком",
             found=f"Текст похож на список ({len(group)} элементов) без форматирования",
-            location=f"абзац #{first_idx + 1}: \u00ab{preview}\u00bb",
+            location=f"абзац #{first_idx + 1}: «{preview}»",
             recommendation="Оформите перечисление в виде маркированного списка с длинным тире",
         )

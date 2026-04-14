@@ -7,6 +7,7 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart
 from aiogram.types import (
     CallbackQuery,
+    ChatMemberUpdated,
     FSInputFile,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -20,6 +21,7 @@ from app.db.session import SessionLocal
 from app.integrations.analytics_middleware import AnalyticsMiddleware
 from app.integrations.telegram_check_handler import handle_document
 from app.models import ContentMenuItem, CreditsBalance, MenuItemMessage, User
+from app.services.analytics.tracker import mark_blocked, mark_unblocked
 from app.services.bot_texts import get_text
 
 logger = logging.getLogger(__name__)
@@ -52,6 +54,25 @@ async def _ensure_user(tg_user: TgUser) -> None:
             user.username = tg_user.username
             user.last_login_at = datetime.utcnow()
         await db.commit()
+
+
+async def _handle_block_status(event: ChatMemberUpdated) -> None:
+    new_status = event.new_chat_member.status
+    old_status = event.old_chat_member.status
+    tg_id = event.from_user.id
+
+    async with SessionLocal() as db:
+        user = await db.scalar(select(User).where(User.telegram_id == tg_id))
+        if not user:
+            return
+        user_id = user.id
+
+    if new_status == "kicked":
+        await mark_blocked(user_id)
+        logger.info("User %d (tg=%d) blocked the bot", user_id, tg_id)
+    elif new_status == "member" and old_status == "kicked":
+        await mark_unblocked(user_id)
+        logger.info("User %d (tg=%d) unblocked the bot", user_id, tg_id)
 
 
 # ---------------------------------------------------------------------------
@@ -375,6 +396,10 @@ async def run_bot() -> None:
     dp = Dispatcher()
     dp.message.middleware(AnalyticsMiddleware())
     dp.callback_query.middleware(AnalyticsMiddleware())
+
+    @dp.my_chat_member()
+    async def chat_member_handler(event: ChatMemberUpdated) -> None:
+        await _handle_block_status(event)
 
     @dp.message(CommandStart())
     async def start_handler(message: Message) -> None:

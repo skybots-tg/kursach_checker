@@ -90,26 +90,37 @@ async function deleteBroadcast(id) {
 }
 
 function confirmSendBroadcast(broadcastId) {
-  const blockCount = window._editorBlocks?.length || 0;
-  if (!blockCount) { toast('Добавьте хотя бы один блок', 'error'); return; }
+  const msg = window._currentBcMessage;
+  if (!msg) { toast('Сообщение не создано', 'error'); return; }
 
-  const hasEmpty = window._editorBlocks.some(b => {
-    if (b.message_type === 'text') return !b.text;
-    return !b.file_name && !b.file_path;
-  });
-  const warn = hasEmpty
-    ? '<div class="alert warn" style="margin-bottom:12px">Некоторые блоки пустые и будут пропущены.</div>'
-    : '';
+  if (msg.message_type === 'text' && !msg.text) {
+    toast('Введите текст сообщения', 'error');
+    return;
+  }
+  if (msg.message_type !== 'text' && !msg.file_name) {
+    toast('Прикрепите файл или выберите тип «Без медиа»', 'error');
+    return;
+  }
+
+  const typeLabels = { text: 'Текст', photo: 'Фото', video: 'Видео', document: 'Документ', audio: 'Аудио', animation: 'GIF' };
+  const label = typeLabels[msg.message_type] || msg.message_type;
+  const summary = msg.message_type === 'text'
+    ? 'Текстовое сообщение'
+    : `${label}${msg.text ? ' с подписью' : ''}`;
+
+  const segLabels = { all: 'Все пользователи', paid: 'Оплачивали', viewers: 'Только смотрели',
+    unpaid_invoice: 'Создали счёт, но не оплатили', recent: 'Зарегистрировались недавно' };
+  const seg = window._currentBroadcast?.target_segment || { type: 'all' };
+  const segName = segLabels[seg.type] || seg.type;
+  const counterEl = $('bc-audience-counter');
+  const audienceInfo = counterEl ? counterEl.innerHTML : '';
 
   openModal('Отправить рассылку', `
-    ${warn}
-    <p style="margin-bottom:16px">Рассылка будет отправлена <b>всем пользователям</b> бота.<br>Это действие нельзя отменить.</p>
-    <div class="bc-confirm-grid">
-      <div class="bc-confirm-card">
-        <div class="bc-confirm-val">${blockCount}</div>
-        <div class="bc-confirm-label">Сообщений</div>
-      </div>
-    </div>
+    <p style="margin-bottom:12px">Рассылка будет отправлена выбранному сегменту.<br>
+    <span style="color:var(--text-muted)">Тип: ${summary}</span><br>
+    <span style="color:var(--text-muted)">Аудитория: ${segName}</span><br>
+    <span style="color:var(--text-muted)">Получатели: ${audienceInfo}</span></p>
+    <p style="color:var(--danger);font-weight:500">Это действие нельзя отменить.</p>
   `, `
     <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
     <button class="btn btn-primary" onclick="doSendBroadcast(${broadcastId})">Отправить</button>

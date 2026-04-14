@@ -47,8 +47,8 @@ def run_heading_formatting_checks(
                 title="Размер шрифта заголовка",
                 category="heading_formatting",
                 severity=severity,
-                expected=f"{expected_size} \u043f\u0442",
-                found=f"{h.font_size_pt} \u043f\u0442",
+                expected=f"{expected_size} пт",
+                found=f"{h.font_size_pt} пт",
                 location=loc,
                 recommendation="Установите корректный размер шрифта для заголовка",
             )
@@ -346,6 +346,67 @@ def run_section_breaks_checks(
                 location=f"абзац #{para.index + 1}",
                 recommendation="Вставьте разрыв страницы перед этим разделом",
             )
+
+
+def run_paragraph_spacing_checks(
+    snapshot: DocumentSnapshot, cfg: RulesConfig, findings: list[Finding],
+) -> None:
+    """Flag body paragraphs that use space_before/space_after instead of line breaks."""
+    if not cfg.has("typography"):
+        return
+
+    severity = cfg.severity("typography", "warning")
+    _SKIP_STYLES = frozenset({
+        "TOCHeading", "Title", "Subtitle", "Caption",
+        "Header", "Footer", "FootnoteText", "EndnoteText",
+    })
+    _SKIP_PREFIXES = ("toc ", "toc\xa0")
+    _MAX = 10
+    count = 0
+
+    for paragraph in snapshot.paragraphs:
+        if not paragraph.text or paragraph.is_heading or paragraph.is_toc_entry:
+            continue
+        if paragraph.style_id in _SKIP_STYLES:
+            continue
+        lower_name = paragraph.style_name.lower()
+        if any(lower_name.startswith(p) for p in _SKIP_PREFIXES):
+            continue
+        if count >= _MAX:
+            break
+
+        has_bad_before = paragraph.space_before_pt is not None and paragraph.space_before_pt > 0.5
+        has_bad_after = paragraph.space_after_pt is not None and paragraph.space_after_pt > 0.5
+
+        if has_bad_before or has_bad_after:
+            parts: list[str] = []
+            if has_bad_before:
+                parts.append(f"до: {paragraph.space_before_pt:.0f} пт")
+            if has_bad_after:
+                parts.append(f"после: {paragraph.space_after_pt:.0f} пт")
+            count += 1
+            add_finding(
+                findings,
+                title="Интервал до/после абзаца",
+                category="typography",
+                severity=severity,
+                expected="Интервал до и после абзаца: 0 пт (разделение абзацев переводом строки)",
+                found=f"Интервал {', '.join(parts)}",
+                location=f"абзац #{paragraph.index + 1}",
+                recommendation="Уберите интервал до/после абзаца (Формат → Абзац → Интервал → 0 пт)",
+            )
+
+    if count >= _MAX:
+        add_finding(
+            findings,
+            title="Интервалы до/после — ещё замечания",
+            category="typography",
+            severity="advice",
+            expected="",
+            found=f"Показаны первые {_MAX}, проблема массовая",
+            location="весь документ",
+            recommendation="Выделите весь текст и установите интервал до/после: 0 пт",
+        )
 
 
 # ── Re-exports from checks_content (backward compatibility for autofix imports) ──

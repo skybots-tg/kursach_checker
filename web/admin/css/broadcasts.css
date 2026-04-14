@@ -1,5 +1,5 @@
 /* ============================================================
-   Broadcasts — list, editor, floating toolbar
+   Broadcasts — list, editor (text + media), floating toolbar
    ============================================================ */
 
 /* ---- List View ---- */
@@ -53,50 +53,34 @@
   transition: width 0.5s ease;
 }
 
-/* ---- Block Editor ---- */
+/* ---- Editor Sections ---- */
 .bc-editor { max-width: 720px; margin: 0 auto; padding: 16px 0; }
-.bc-blocks { display: flex; flex-direction: column; gap: 2px; }
 
-.bc-block {
-  display: flex; gap: 8px; padding: 8px 12px;
-  border-radius: 8px; transition: background 0.15s;
-  position: relative;
+.bc-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 16px;
 }
-.bc-block:hover { background: #f8fafc; }
-.bc-block.dragging { opacity: 0.4; }
-.bc-block.drag-over { box-shadow: 0 -2px 0 0 var(--accent); }
-
-.bc-block-handle {
-  flex-shrink: 0; width: 20px; padding-top: 22px;
-  cursor: grab; color: var(--text-muted); opacity: 0;
-  transition: opacity 0.15s; font-size: 14px; line-height: 1;
-  user-select: none;
+.bc-section-header {
+  font-size: 13px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text-muted);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
 }
-.bc-block:hover .bc-block-handle { opacity: 0.6; }
-
-.bc-block-body { flex: 1; min-width: 0; }
-
-.bc-block-type-label {
-  font-size: 10px; font-weight: 600; text-transform: uppercase;
-  letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px;
+.bc-section-hint {
+  font-weight: 400; text-transform: none; letter-spacing: normal;
+  font-size: 12px; color: var(--text-muted); opacity: 0.7;
 }
-
-.bc-block-del {
-  flex-shrink: 0; opacity: 0; width: 28px; height: 28px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 6px; color: var(--text-muted); cursor: pointer;
-  transition: all 0.15s; margin-top: 18px; background: none; border: none;
-}
-.bc-block:hover .bc-block-del { opacity: 1; }
-.bc-block-del:hover { background: var(--danger-soft); color: var(--danger); }
 
 /* ---- Text Block ---- */
 .bc-text-block {
   font-size: 14px; line-height: 1.7; color: var(--text);
-  outline: none; padding: 8px 12px;
-  border: 1px solid transparent; border-radius: 6px;
+  outline: none; padding: 10px 14px;
+  border: 1px solid var(--border); border-radius: 8px;
   transition: border-color 0.15s, box-shadow 0.15s;
-  min-height: 40px; word-break: break-word;
+  min-height: 80px; word-break: break-word;
+  background: var(--bg-input);
 }
 .bc-text-block:focus {
   border-color: var(--border-focus);
@@ -116,7 +100,33 @@
   font-family: 'Courier New', monospace; font-size: 13px;
 }
 .bc-text-block a { color: var(--accent); text-decoration: underline; }
-.bc-caption { min-height: 30px; margin-top: 8px; font-size: 13px; }
+
+/* ---- Media Type Selector ---- */
+.bc-media-type-row {
+  margin-bottom: 12px;
+}
+.bc-media-select {
+  width: 100%; max-width: 280px;
+  padding: 8px 12px; font-size: 14px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg-input); color: var(--text);
+  outline: none; cursor: pointer;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+.bc-media-select:focus { border-color: var(--border-focus); }
+
+.bc-media-type-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; background: var(--bg-input);
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 13px; font-weight: 500; color: var(--text);
+}
+
+.bc-no-media-hint {
+  font-size: 13px; color: var(--text-muted);
+  padding: 8px 0; font-style: italic;
+}
 
 /* ---- Upload Zone ---- */
 .bc-upload-zone {
@@ -146,36 +156,6 @@
   padding: 12px; font-size: 13px; color: var(--text-muted); font-style: italic;
 }
 
-/* ---- Add Block Button ---- */
-.bc-add-btn {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 20px; margin: 16px auto 0;
-  border: 2px dashed var(--border); border-radius: 8px;
-  color: var(--text-muted); font-size: 13px; font-weight: 500;
-  cursor: pointer; transition: all 0.15s;
-  background: none; font-family: inherit;
-}
-.bc-add-btn:hover {
-  border-color: var(--accent); color: var(--accent);
-  background: var(--accent-soft);
-}
-
-/* ---- Block Type Menu ---- */
-.bc-type-menu {
-  position: fixed; z-index: 250; background: white;
-  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border); padding: 6px; min-width: 200px;
-  animation: fadeIn 0.12s ease;
-}
-.bc-type-menu-item {
-  display: flex; align-items: center; gap: 10px; width: 100%;
-  padding: 10px 14px; font-size: 13px; font-weight: 500;
-  color: var(--text); border-radius: 8px; cursor: pointer;
-  transition: background 0.1s; background: none; border: none;
-  font-family: inherit; text-align: left;
-}
-.bc-type-menu-item:hover { background: #f1f5f9; }
-
 /* ---- Floating Toolbar ---- */
 .bc-toolbar {
   position: fixed; z-index: 260; display: flex; gap: 2px;
@@ -192,22 +172,71 @@
 .tb-btn-code { font-size: 11px; font-weight: 600; letter-spacing: -0.5px; }
 .tb-sep { width: 1px; background: #334155; margin: 4px 2px; }
 
-/* ---- Confirm Modal ---- */
-.bc-confirm-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0;
+/* ---- Audience Counter ---- */
+.bc-audience-counter {
+  margin-top: 12px; padding: 10px 14px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 8px; font-size: 14px; color: var(--text);
 }
-.bc-confirm-card {
-  padding: 16px; background: var(--bg-input); border-radius: var(--radius);
-  text-align: center;
+.bc-audience-active { color: var(--text-muted); font-weight: 400; }
+.bc-audience-spinner {
+  display: inline-block; width: 12px; height: 12px;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 0.6s linear infinite;
 }
-.bc-confirm-val { font-size: 28px; font-weight: 800; color: var(--text); }
-.bc-confirm-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Date Row (segments) ---- */
+.bc-date-row {
+  display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;
+}
+.bc-date-row label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--text-muted);
+}
+.bc-date-row input[type="date"] {
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 13px; font-family: inherit; color: var(--text);
+  background: var(--bg-input); outline: none;
+}
+.bc-date-row input[type="date"]:focus { border-color: var(--border-focus); }
+
+/* ---- Test Send Modal ---- */
+.bc-test-results {
+  max-height: 200px; overflow-y: auto; margin-top: 10px;
+  border: 1px solid var(--border); border-radius: 8px;
+}
+.bc-test-results:empty { border: none; margin: 0; }
+.bc-test-user {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; cursor: pointer; transition: background 0.1s;
+  font-size: 13px; border-bottom: 1px solid var(--border);
+}
+.bc-test-user:last-child { border-bottom: none; }
+.bc-test-user:hover { background: #f8fafc; }
+.bc-test-user.selected { background: var(--accent-soft); }
+.bc-test-user input[type="checkbox"] { flex-shrink: 0; }
+.bc-test-tgid { margin-left: auto; font-size: 11px; color: var(--text-muted); font-family: monospace; }
+
+.bc-test-selected { margin-top: 10px; }
+.bc-test-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.bc-test-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; background: var(--accent-soft);
+  border-radius: 16px; font-size: 12px; font-weight: 500; color: var(--accent);
+}
+.bc-test-chip button {
+  background: none; border: none; cursor: pointer;
+  font-size: 14px; color: var(--accent); padding: 0 2px;
+  line-height: 1; font-weight: 600;
+}
+.bc-test-chip button:hover { color: var(--danger); }
 
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
   .bc-editor { padding: 8px 0; }
-  .bc-block { padding: 6px 8px; }
+  .bc-section { padding: 16px; }
   .bc-stats-row { flex-direction: column; gap: 8px; }
-  .bc-confirm-grid { grid-template-columns: 1fr; }
   .bc-title-input { font-size: 16px; }
+  .bc-media-select { max-width: 100%; }
 }

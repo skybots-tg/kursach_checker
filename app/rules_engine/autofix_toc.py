@@ -7,6 +7,8 @@ import re
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
+from app.rules_engine.heading_detection import TOC_LINE_TAIL_RE
+
 logger = logging.getLogger(__name__)
 
 _TOC_HEADING_RE = re.compile(r"^(содержание|оглавление)$", re.IGNORECASE)
@@ -89,6 +91,45 @@ def _build_heading_paragraph(text: str, style_id: str = "Heading1") -> OxmlEleme
     return p
 
 
+def _remove_manual_toc_entries(doc, heading_idx: int, details: list[str]) -> bool:
+    """Remove manually typed TOC lines that follow the TOC heading."""
+    body = doc.element.body
+    paragraphs = doc.paragraphs
+    to_remove: list = []
+
+    for para in paragraphs[heading_idx + 1:]:
+        text = (para.text or "").strip()
+        if not text:
+            to_remove.append(para._element)
+            continue
+        style_name = (getattr(para.style, "name", "") or "").lower()
+        is_heading = "heading" in style_name or "заголов" in style_name
+        if is_heading or len(text) > 200:
+            break
+        if TOC_LINE_TAIL_RE.search(text) or _looks_like_toc_line(text):
+            to_remove.append(para._element)
+        else:
+            break
+
+    for elem in to_remove:
+        body.remove(elem)
+
+    if to_remove:
+        details.append(f"Оглавление: удалено {len(to_remove)} ручных записей содержания")
+    return len(to_remove) > 0
+
+
+def _looks_like_toc_line(text: str) -> bool:
+    """Heuristic: short line ending with a page number or dots+number."""
+    if len(text) > 150:
+        return False
+    if re.search(r"\.{2,}\s*\d+\s*$", text):
+        return True
+    if re.search(r"\t+\d+\s*$", text):
+        return True
+    return False
+
+
 def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
     if _has_auto_toc(doc):
         return False
@@ -100,6 +141,7 @@ def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
     for idx, para in enumerate(paragraphs):
         text = (para.text or "").strip()
         if _TOC_HEADING_RE.match(text):
+            _remove_manual_toc_entries(doc, idx, details)
             para._element.addnext(toc_p)
             details.append("Оглавление: вставлено автоматическое поле TOC")
             return True

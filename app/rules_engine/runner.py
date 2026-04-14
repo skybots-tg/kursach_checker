@@ -9,6 +9,7 @@ from app.rules_engine.checks_advanced import (
     run_footnotes_checks,
     run_heading_formatting_checks,
     run_page_numbering_checks,
+    run_paragraph_spacing_checks,
     run_section_breaks_checks,
     run_toc_checks,
 )
@@ -58,7 +59,8 @@ _CHECK_NAME_RU: dict[str, str] = {
     "footnotes": "сноски",
     "captions": "подписи к объектам",
     "text_cleanliness": "посторонние символы",
-    "list_formatting": "оформление списков",
+    "list_formatting": "\u043e\u0444\u043e\u0440\u043c\u043b\u0435\u043d\u0438\u0435 \u0441\u043f\u0438\u0441\u043a\u043e\u0432",
+    "paragraph_spacing": "\u0438\u043d\u0442\u0435\u0440\u0432\u0430\u043b\u044b \u0434\u043e/\u043f\u043e\u0441\u043b\u0435 \u0430\u0431\u0437\u0430\u0446\u0430",
 }
 
 CheckFunc = Callable[..., None]
@@ -199,6 +201,7 @@ async def run_document_checks(
             ("captions", run_captions_checks),
             ("text_cleanliness", run_text_cleanliness_checks),
             ("list_formatting", run_list_formatting_checks),
+            ("paragraph_spacing", run_paragraph_spacing_checks),
         ]
         for name, func in checks:
             _run_check_safe(name, func, snapshot, cfg, findings, check_errors)

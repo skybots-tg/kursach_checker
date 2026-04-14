@@ -192,6 +192,24 @@ async def mark_blocked(user_id: int) -> None:
         await db.commit()
 
 
+async def mark_unblocked(user_id: int) -> None:
+    async with SessionLocal() as db:
+        status = await db.get(UserStatus, user_id)
+        if status:
+            status.is_blocked = False
+            status.is_active = True
+            status.unblocked_at = datetime.utcnow()
+        else:
+            db.add(UserStatus(
+                user_id=user_id,
+                is_blocked=False,
+                is_active=True,
+                first_seen_at=datetime.utcnow(),
+                unblocked_at=datetime.utcnow(),
+            ))
+        await db.commit()
+
+
 async def mark_deleted(user_id: int) -> None:
     async with SessionLocal() as db:
         status = await db.get(UserStatus, user_id)

@@ -38,6 +38,7 @@ from app.rules_engine.autofix_helpers import (
     remove_empty_paras_before_page_breaks,
     remove_manual_page_breaks,
 )
+from app.rules_engine.autofix_bibliography import fix_bibliography_order_and_numbering
 from app.rules_engine.autofix_lists import convert_informal_lists
 from app.rules_engine.autofix_toc import insert_toc_field
 from app.rules_engine.autofix_whitespace import (
@@ -442,6 +443,10 @@ def apply_safe_autofixes(
 
     if cfg.generate_toc:
         if insert_toc_field(doc, toc_indices, details):
+            changed = True
+
+    if cfg.fix_bibliography:
+        if fix_bibliography_order_and_numbering(doc, details):
             changed = True
 
     if cfg.collapse_empty_paras:

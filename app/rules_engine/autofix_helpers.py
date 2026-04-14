@@ -247,11 +247,11 @@ def fix_dashes_in_text(paragraph, para_label: str, details: list[str]) -> bool:
         if is_field_code_run(run):
             continue
         t = run.text
-        if _EM_DASH in t or _EN_DASH in t:
-            run.text = t.replace(_EM_DASH, _HYPHEN).replace(_EN_DASH, _HYPHEN)
+        if _EM_DASH in t:
+            run.text = t.replace(_EM_DASH, _EN_DASH)
             changed = True
     if changed:
-        details.append(f"{para_label}: \u0434\u043b\u0438\u043d\u043d\u044b\u0435 \u0442\u0438\u0440\u0435 -> \u043a\u043e\u0440\u043e\u0442\u043a\u0438\u0435")
+        details.append(f"{para_label}: \u0434\u043b\u0438\u043d\u043d\u043e\u0435 \u0442\u0438\u0440\u0435 (\u2014) -> \u0441\u0440\u0435\u0434\u043d\u0435\u0435 (\u2013)")
     return changed
 
 def fix_caption_trailing_dot(paragraph, para_label: str, details: list[str]) -> bool:

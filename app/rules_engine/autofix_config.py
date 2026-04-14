@@ -34,6 +34,7 @@ class AutoFixConfig:
     max_consecutive_empty_paras: int
     convert_informal_lists: bool
     generate_toc: bool
+    fix_bibliography: bool
     informal_list_markers: list[str]
     informal_list_min_consecutive: int
     section_break_sections: list[str]
@@ -103,6 +104,7 @@ class AutoFixConfig:
                                                    ad.get("max_consecutive_empty_paras", 1))),
             convert_informal_lists=_b("convert_informal_lists"),
             generate_toc=_b("generate_toc"),
+            fix_bibliography=_b("fix_bibliography"),
             informal_list_markers=lfp.get(
                 "informal_list_markers",
                 ["\u00b7", "\u2022", "*", "-", "\u2014", "\u2013"],

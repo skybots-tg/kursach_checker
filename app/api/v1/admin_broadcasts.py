@@ -2,29 +2,40 @@ from datetime import datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.admin_deps import get_current_admin
 from app.db.session import get_db
-from app.models import AdminUser, Broadcast, BroadcastMessage, BroadcastStatus, User
+from app.models import AdminUser, Broadcast, BroadcastMessage, BroadcastStatus
 from app.services.audit import log_admin_action
+from app.services.broadcast_segments import count_audience, get_segment_user_ids
 from app.storage.files import save_upload_file
 
 router = APIRouter()
 
 
 class BroadcastUpdateIn(BaseModel):
-    title: str
+    title: str | None = None
+    target_segment: dict | None = None
 
 
 class BroadcastReorderIn(BaseModel):
     ids_in_order: list[int]
 
 
+class AudienceCountIn(BaseModel):
+    segment: dict
+
+
+class TestSendIn(BaseModel):
+    telegram_ids: list[int]
+
+
 def _bc_dict(b: Broadcast) -> dict:
     return {
         "id": b.id, "title": b.title, "status": b.status,
+        "target_segment": b.target_segment or {"type": "all"},
         "total_users": b.total_users, "sent_count": b.sent_count,
         "failed_count": b.failed_count,
         "created_at": b.created_at.isoformat() if b.created_at else None,
@@ -72,6 +83,16 @@ async def create_broadcast(
     return _bc_dict(b)
 
 
+@router.post("/audience/count")
+async def audience_count(
+    payload: AudienceCountIn,
+    current_admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    _ = current_admin
+    return await count_audience(db, payload.segment)
+
+
 @router.get("/{bid}")
 async def get_broadcast(
     bid: int,
@@ -104,11 +125,18 @@ async def update_broadcast(
         raise HTTPException(status_code=404, detail="Рассылка не найдена")
     if b.status != BroadcastStatus.draft:
         raise HTTPException(status_code=400, detail="Можно редактировать только черновики")
-    b.title = payload.title
-    await log_admin_action(
-        db, current_admin.id, "broadcast.update", "broadcast",
-        str(bid), {"title": payload.title},
-    )
+    changes: dict = {}
+    if payload.title is not None:
+        b.title = payload.title
+        changes["title"] = payload.title
+    if payload.target_segment is not None:
+        b.target_segment = payload.target_segment
+        changes["target_segment"] = payload.target_segment
+    if changes:
+        await log_admin_action(
+            db, current_admin.id, "broadcast.update", "broadcast",
+            str(bid), changes,
+        )
     await db.commit()
     return {"ok": True}
 
@@ -199,6 +227,7 @@ async def update_message(
     msg = await db.get(BroadcastMessage, msg_id)
     if not msg or msg.broadcast_id != bid:
         raise HTTPException(status_code=404, detail="Блок не найден")
+    old_type = msg.message_type
     msg.message_type = message_type
     msg.text = text or None
     msg.parse_mode = parse_mode
@@ -207,6 +236,10 @@ async def update_message(
         msg.file_path = file_path
         msg.file_name = file.filename
         msg.mime_type = file.content_type
+    elif old_type != message_type:
+        msg.file_path = None
+        msg.file_name = None
+        msg.mime_type = None
     await db.commit()
     return _msg_dict(msg)
 
@@ -254,6 +287,33 @@ async def reorder_messages(
     return {"ok": True}
 
 
+# --- Test Send ---
+
+
+@router.post("/{bid}/test-send")
+async def test_send(
+    bid: int,
+    payload: TestSendIn,
+    current_admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    _ = current_admin
+    b = await db.get(Broadcast, bid)
+    if not b:
+        raise HTTPException(status_code=404, detail="Рассылка не найдена")
+    msgs = await db.scalars(
+        select(BroadcastMessage)
+        .where(BroadcastMessage.broadcast_id == bid)
+        .order_by(BroadcastMessage.position.asc())
+    )
+    messages_data = [_msg_dict(m) for m in msgs]
+    if not messages_data:
+        raise HTTPException(status_code=400, detail="Нет сообщений в рассылке")
+    from app.integrations.telegram_broadcast import test_send_broadcast
+    result = await test_send_broadcast(messages_data, payload.telegram_ids)
+    return result
+
+
 # --- Send ---
 
 
@@ -269,9 +329,11 @@ async def send_broadcast(
         raise HTTPException(status_code=404, detail="Рассылка не найдена")
     if b.status != BroadcastStatus.draft:
         raise HTTPException(status_code=400, detail="Рассылка уже отправлена или отправляется")
-    user_count = await db.scalar(select(func.count()).select_from(User))
-    if not user_count:
+    segment = b.target_segment or {"type": "all"}
+    user_pairs = await get_segment_user_ids(db, segment)
+    if not user_pairs:
         raise HTTPException(status_code=400, detail="Нет пользователей для рассылки")
+    telegram_ids = [tg_id for _, tg_id in user_pairs]
     msgs = await db.scalars(
         select(BroadcastMessage)
         .where(BroadcastMessage.broadcast_id == bid)
@@ -281,17 +343,17 @@ async def send_broadcast(
     if not messages_data:
         raise HTTPException(status_code=400, detail="Нет сообщений в рассылке")
     b.status = BroadcastStatus.sending
-    b.total_users = user_count
+    b.total_users = len(telegram_ids)
     b.sent_count = 0
     b.failed_count = 0
     await log_admin_action(
         db, current_admin.id, "broadcast.send", "broadcast",
-        str(bid), {"total_users": user_count},
+        str(bid), {"total_users": len(telegram_ids), "segment": segment},
     )
     await db.commit()
     from app.integrations.telegram_broadcast import run_broadcast
-    background_tasks.add_task(run_broadcast, bid, messages_data)
-    return {"ok": True, "total_users": user_count}
+    background_tasks.add_task(run_broadcast, bid, messages_data, telegram_ids)
+    return {"ok": True, "total_users": len(telegram_ids)}
 
 
 @router.get("/{bid}/status")

@@ -39,6 +39,7 @@ class ParagraphSnapshot:
     left_indent_mm: float | None
     line_spacing: float | None
     space_before_pt: float | None
+    space_after_pt: float | None
     has_explicit_before: bool
     has_explicit_after: bool
     has_numbering: bool
@@ -285,6 +286,7 @@ def _paragraphs(doc: Document, toc_indices: set[int]) -> list[ParagraphSnapshot]
         left_indent = _mm_from_emu(getattr(pformat.left_indent, "emu", None))
         line_spacing = _resolve_line_spacing(paragraph)
         space_before = float(pformat.space_before.pt) if pformat.space_before is not None else None
+        space_after = float(pformat.space_after.pt) if pformat.space_after is not None else None
         has_leading_ws = bool(raw_text) and raw_text[0] in (" ", "\t", "\xa0")
         prev_para = all_paras[idx - 1] if idx > 0 else None
         pb_before = _detect_page_break_before(paragraph, prev_para)
@@ -301,6 +303,7 @@ def _paragraphs(doc: Document, toc_indices: set[int]) -> list[ParagraphSnapshot]
                 left_indent_mm=left_indent,
                 line_spacing=line_spacing,
                 space_before_pt=space_before,
+                space_after_pt=space_after,
                 has_explicit_before=pformat.space_before is not None,
                 has_explicit_after=pformat.space_after is not None,
                 has_numbering=_has_numbering(paragraph),

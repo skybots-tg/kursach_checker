@@ -59,20 +59,29 @@ async def _update_progress(broadcast_id: int, sent: int, failed: int) -> None:
             await db.commit()
 
 
-async def run_broadcast(broadcast_id: int, messages: list[dict]) -> None:
+async def run_broadcast(
+    broadcast_id: int,
+    messages: list[dict],
+    telegram_ids: list[int] | None = None,
+) -> None:
+    """Send broadcast to users. If telegram_ids given, send only to them."""
     if not settings.telegram_bot_token:
         return
     bot = Bot(token=settings.telegram_bot_token)
     try:
-        async with SessionLocal() as db:
-            users = list(await db.scalars(select(User)))
+        if telegram_ids is not None:
+            tg_ids = telegram_ids
+        else:
+            async with SessionLocal() as db:
+                users = list(await db.scalars(select(User)))
+            tg_ids = [u.telegram_id for u in users]
 
         sent = 0
         failed = 0
-        for user in users:
+        for tg_id in tg_ids:
             ok = True
             for msg in messages:
-                if not await _send_one_msg(bot, user.telegram_id, msg):
+                if not await _send_one_msg(bot, tg_id, msg):
                     ok = False
                     break
             if ok:
@@ -98,5 +107,29 @@ async def run_broadcast(broadcast_id: int, messages: list[dict]) -> None:
             if b:
                 b.status = BroadcastStatus.failed
                 await db.commit()
+    finally:
+        await bot.session.close()
+
+
+async def test_send_broadcast(
+    messages: list[dict], telegram_ids: list[int],
+) -> dict:
+    """Send test broadcast to specific users. Does not update any broadcast status."""
+    if not settings.telegram_bot_token:
+        return {"sent": 0, "failed": 0}
+    bot = Bot(token=settings.telegram_bot_token)
+    try:
+        sent = 0
+        failed = 0
+        for tg_id in telegram_ids:
+            ok = True
+            for msg in messages:
+                if not await _send_one_msg(bot, tg_id, msg):
+                    ok = False
+                    break
+            sent += 1 if ok else 0
+            failed += 0 if ok else 1
+            await asyncio.sleep(0.05)
+        return {"sent": sent, "failed": failed}
     finally:
         await bot.session.close()
