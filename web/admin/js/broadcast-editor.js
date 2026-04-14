@@ -5,14 +5,14 @@ window._editorBlocks = [];
 let _dragBlockId = null;
 
 async function openBroadcastEditor(broadcastId) {
-  $('page-content').innerHTML = loadingHtml();
+  $('page-broadcasts').innerHTML = loadingHtml();
   try {
     const data = await api('GET', `/admin/broadcasts/${broadcastId}`);
     _currentBroadcast = data;
     window._editorBlocks = data.messages || [];
     renderBroadcastEditor();
   } catch (err) {
-    $('page-content').innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
+    $('page-broadcasts').innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
   }
 }
 
@@ -20,10 +20,10 @@ function renderBroadcastEditor() {
   const b = _currentBroadcast;
   const isDraft = b.status === 'draft';
 
-  $('page-content').innerHTML = `
+  $('page-broadcasts').innerHTML = `
     <div class="page-header">
       <div style="display:flex;align-items:center;gap:12px">
-        <button class="btn btn-ghost" onclick="switchContentTab('broadcasts')">${iconSvg('arrowLeft')}</button>
+        <button class="btn btn-ghost" onclick="navigateTo('broadcasts')">${iconSvg('arrowLeft')}</button>
         <div>
           <input class="bc-title-input" id="bc-title" value="${escHtml(b.title)}"
                  ${isDraft ? '' : 'disabled'} onchange="saveBroadcastTitle()" placeholder="Название рассылки">

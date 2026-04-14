@@ -1,13 +1,41 @@
-/* Broadcasts — list view, create, delete, send */
+/* Broadcasts — standalone page: list view, create, delete, send */
+
+registerPage('broadcasts', loadBroadcastsPage);
 
 let _bcPage = 1;
 
-async function loadBroadcasts() {
+function renderBroadcastsPage(bodyHtml, actionBtn) {
+  $('page-broadcasts').innerHTML = `
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Рассылки</h1>
+        <p class="page-subtitle">Создание и отправка рассылок пользователям</p>
+      </div>
+      ${actionBtn || ''}
+    </div>
+    ${bodyHtml}`;
+}
+
+async function loadBroadcastsPage() {
+  const { sub } = parseHash();
+
+  if (sub) {
+    const bid = parseInt(sub);
+    if (bid) {
+      await openBroadcastEditor(bid);
+      return;
+    }
+  }
+
+  loadBroadcastsList();
+}
+
+async function loadBroadcastsList() {
   const actionBtn = `<button class="btn btn-primary" onclick="createBroadcast()">${iconSvg('plus')} Новая рассылка</button>`;
   try {
     const list = await api('GET', '/admin/broadcasts');
     if (!list.length) {
-      renderContentPage(emptyHtml('Нет рассылок', 'Создайте первую рассылку для отправки пользователям'), actionBtn);
+      renderBroadcastsPage(emptyHtml('Нет рассылок', 'Создайте первую рассылку для отправки пользователям'), actionBtn);
       return;
     }
     const paged = paginate(list, _bcPage);
@@ -32,17 +60,16 @@ async function loadBroadcasts() {
     }
     html += '</div>';
     html += paginationHtml(paged, 'bcPageTo');
-    renderContentPage(html, actionBtn);
+    renderBroadcastsPage(html, actionBtn);
   } catch (err) {
-    renderContentPage(`<div class="alert error">${escHtml(err.message)}</div>`);
+    renderBroadcastsPage(`<div class="alert error">${escHtml(err.message)}</div>`);
   }
 }
 
-function bcPageTo(p) { _bcPage = p; loadBroadcasts(); }
+function bcPageTo(p) { _bcPage = p; loadBroadcastsList(); }
 
 function navigateToBroadcast(id) {
-  history.replaceState(null, '', '#content/broadcasts/' + id);
-  loadContent();
+  navigateTo('broadcasts', String(id));
 }
 
 async function createBroadcast() {
@@ -58,7 +85,7 @@ async function deleteBroadcast(id) {
   try {
     await api('DELETE', `/admin/broadcasts/${id}`);
     toast('Рассылка удалена', 'success');
-    loadBroadcasts();
+    loadBroadcastsList();
   } catch (err) { toast(err.message, 'error'); }
 }
 
@@ -98,7 +125,8 @@ async function doSendBroadcast(broadcastId) {
   } catch (err) { toast(err.message, 'error'); }
 }
 
-window.loadBroadcasts = loadBroadcasts;
+window.loadBroadcastsPage = loadBroadcastsPage;
+window.loadBroadcastsList = loadBroadcastsList;
 window.bcPageTo = bcPageTo;
 window.navigateToBroadcast = navigateToBroadcast;
 window.createBroadcast = createBroadcast;
