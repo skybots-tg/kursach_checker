@@ -4,11 +4,23 @@ window._currentBroadcast = null;
 window._currentBcMessage = null;
 let _audienceDebounce = null;
 
+let _bcEditorLoading = false;
+
 async function openBroadcastEditor(broadcastId) {
+  if (_bcEditorLoading) return;
+  _bcEditorLoading = true;
   $('page-broadcasts').innerHTML = loadingHtml();
   try {
     const data = await api('GET', `/admin/broadcasts/${broadcastId}`);
     _currentBroadcast = data;
+
+    if (data.status === 'draft' && data.messages?.length > 1) {
+      for (let i = 1; i < data.messages.length; i++) {
+        await api('DELETE', `/admin/broadcasts/${broadcastId}/messages/${data.messages[i].id}`);
+      }
+      data.messages = data.messages.slice(0, 1);
+    }
+
     window._currentBcMessage = data.messages?.[0] || null;
 
     if (!window._currentBcMessage && data.status === 'draft') {
@@ -24,6 +36,8 @@ async function openBroadcastEditor(broadcastId) {
     if (data.status === 'draft') bcFetchAudienceCount();
   } catch (err) {
     $('page-broadcasts').innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
+  } finally {
+    _bcEditorLoading = false;
   }
 }
 
