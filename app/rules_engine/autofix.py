@@ -160,6 +160,7 @@ def apply_safe_autofixes(
     allow_promote = bool(safety.get("allow_promote_heading_candidates", cfg.promote_heading_candidates))
     skip_tables_safety = bool(safety.get("skip_tables", True))
     skip_margins_safety = bool(safety.get("skip_margin_normalization", True))
+    use_libreoffice_refresh = bool(safety.get("libreoffice_toc_refresh", False))
 
     try:
         doc = Document(str(source))
@@ -473,7 +474,7 @@ def apply_safe_autofixes(
     except Exception:
         logger.warning("Autofix: postprocessing failed for %s, using python-docx output", output)
 
-    if cfg.generate_toc:
+    if cfg.generate_toc and use_libreoffice_refresh:
         if refresh_fields_via_libreoffice(output, details):
             logger.info("Autofix: LibreOffice refreshed fields for %s", output)
 
