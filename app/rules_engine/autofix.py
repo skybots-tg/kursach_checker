@@ -10,6 +10,7 @@ from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
 from app.rules_engine.autofix_config import AutoFixConfig as _AutoFixConfig
+from app.rules_engine.autofix_refresh import refresh_fields_via_libreoffice
 from app.rules_engine.autofix_headings import (
     fix_heading as _fix_heading,
     fix_remove_underline,
@@ -471,6 +472,10 @@ def apply_safe_autofixes(
         postprocess_fixed_docx(source, output)
     except Exception:
         logger.warning("Autofix: postprocessing failed for %s, using python-docx output", output)
+
+    if cfg.generate_toc:
+        if refresh_fields_via_libreoffice(output, details):
+            logger.info("Autofix: LibreOffice refreshed fields for %s", output)
 
     findings.append(
         Finding(
