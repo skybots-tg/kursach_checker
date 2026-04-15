@@ -41,6 +41,9 @@ async def _send_one_msg(bot: Bot, chat_id: int, msg: dict) -> bool:
         elif mtype == "animation" and f_in:
             await bot.send_animation(chat_id, f_in, caption=text or None, parse_mode=pm)
             return True
+        elif mtype == "video_note" and f_in:
+            await bot.send_video_note(chat_id, f_in)
+            return True
         elif text:
             await bot.send_message(chat_id, text, parse_mode=pm)
             return True

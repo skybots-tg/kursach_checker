@@ -46,7 +46,8 @@ function renderBroadcastEditor() {
   const isDraft = b.status === 'draft';
   const msg = window._currentBcMessage;
   const hasMedia = msg && msg.message_type !== 'text';
-  const mediaType = hasMedia ? msg.message_type : '';
+    const mediaType = hasMedia ? msg.message_type : '';
+    const noCaption = mediaType === 'video_note';
   const segment = b.target_segment || { type: 'all' };
 
   $('page-broadcasts').innerHTML = `
@@ -77,7 +78,7 @@ function renderBroadcastEditor() {
         <div class="bc-stat bc-stat-err"><div class="bc-stat-val">${b.failed_count}</div><div class="bc-stat-label">Ошибок</div></div>
       </div>` : ''}
     <div class="bc-editor" id="bc-editor">
-      <div class="bc-section">
+      ${noCaption ? '' : `<div class="bc-section">
         <div class="bc-section-header">
           ${hasMedia ? 'Подпись' : 'Текст сообщения'}
           ${hasMedia ? '<span class="bc-section-hint">до 1024 символов</span>' : ''}
@@ -85,7 +86,7 @@ function renderBroadcastEditor() {
         <div class="bc-text-block" contenteditable="${isDraft}" id="bc-msg-text"
           data-placeholder="${hasMedia ? 'Подпись к медиа (необязательно)…' : 'Введите текст сообщения…'}"
           onblur="onMsgTextBlur()">${msg?.text || ''}</div>
-      </div>
+      </div>`}
       <div class="bc-section">
         <div class="bc-section-header">Медиа <span class="bc-section-hint">необязательно</span></div>
         ${isDraft ? bcMediaTypeSelector(mediaType) : (hasMedia ? bcMediaTypeLabel(mediaType) : '')}
@@ -255,16 +256,18 @@ async function bcDoTestSend() {
 // ---- Media Section ----
 
 const _mediaLabels = {
-  photo: 'Фото', video: 'Видео', document: 'Документ',
-  audio: 'Аудио', animation: 'GIF',
+  photo: 'Фото', video: 'Видео', video_note: 'Кружок',
+  document: 'Документ', audio: 'Аудио', animation: 'GIF',
 };
 const _mediaIcons = {
-  photo: '🖼️', video: '🎬', audio: '🎵', document: '📎', animation: '🎞️',
+  photo: '🖼️', video: '🎬', video_note: '⚫', audio: '🎵',
+  document: '📎', animation: '🎞️',
 };
 
 function bcMediaTypeSelector(mediaType) {
   const opts = [['', 'Без медиа'], ['photo', '🖼️ Фото'], ['video', '🎬 Видео'],
-    ['document', '📎 Документ'], ['audio', '🎵 Аудио'], ['animation', '🎞️ GIF']];
+    ['video_note', '⚫ Кружок'], ['document', '📎 Документ'], ['audio', '🎵 Аудио'],
+    ['animation', '🎞️ GIF']];
   return `<div class="bc-media-type-row">
     <select id="bc-media-type" onchange="onMediaTypeChange()" class="bc-media-select">
       ${opts.map(([v, l]) => `<option value="${v}" ${mediaType === v ? 'selected' : ''}>${l}</option>`).join('')}
@@ -283,16 +286,18 @@ function bcRenderMediaZone(isDraft, mediaType, msg) {
   if (!mediaType) {
     return isDraft ? '<div class="bc-no-media-hint">Выберите тип, чтобы прикрепить файл</div>' : '';
   }
-  const accept = { photo: 'image/*', video: 'video/*', audio: 'audio/*', animation: 'image/gif' }[mediaType] || '*/*';
+  const noCaptionHint = mediaType === 'video_note'
+    ? '<div class="bc-no-media-hint" style="margin-bottom:8px">Кружок не поддерживает подпись</div>' : '';
+  const accept = { photo: 'image/*', video: 'video/*', video_note: 'video/*', audio: 'audio/*', animation: 'image/gif' }[mediaType] || '*/*';
   if (msg?.file_name) {
-    let html = `<div class="bc-file-info">
+    let html = noCaptionHint + `<div class="bc-file-info">
       <span class="bc-file-icon">${_mediaIcons[mediaType] || '📎'}</span>
       <span class="bc-file-name">${escHtml(msg.file_name)}</span>`;
     if (isDraft) html += `<button class="btn btn-sm btn-ghost" onclick="bcReuploadFile()">Заменить</button>`;
     return html + '</div>';
   }
   if (isDraft) {
-    return `<div class="bc-upload-zone" onclick="$('bc-file-input').click()"
+    return noCaptionHint + `<div class="bc-upload-zone" onclick="$('bc-file-input').click()"
       ondragover="event.preventDefault();this.classList.add('drag-over')"
       ondragleave="this.classList.remove('drag-over')" ondrop="bcDropFile(event)">
       <input type="file" id="bc-file-input" style="display:none" accept="${accept}" onchange="bcUploadFile(this.files[0])">
