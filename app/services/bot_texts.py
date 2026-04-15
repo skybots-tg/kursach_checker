@@ -102,6 +102,14 @@ SYSTEM_TEXTS: dict[str, dict[str, Any]] = {
         "supports_html": False,
         "variables": [],
     },
+    "check.queued": {
+        "label": "Документ принят в очередь",
+        "group": "Проверка документа",
+        "description": "Когда документ поставлен в очередь на проверку",
+        "default": "✅ Ваш документ принят в обработку!\nМы пришлём результат, как только проверка завершится.",
+        "supports_html": False,
+        "variables": [],
+    },
     "check.error": {
         "label": "Ошибка проверки",
         "group": "Проверка документа",
@@ -138,6 +146,14 @@ SYSTEM_TEXTS: dict[str, dict[str, Any]] = {
             "Если был сформирован исправленный файл, он продублирован в этом чате."
         ),
         "supports_html": True,
+        "variables": ["check_id"],
+    },
+    "notify.check_error": {
+        "label": "Уведомление об ошибке проверки",
+        "group": "Уведомления",
+        "description": "Отправляется, если проверка завершилась с ошибкой",
+        "default": "😔 К сожалению, при проверке произошла ошибка.\nПопробуйте отправить документ ещё раз.",
+        "supports_html": False,
         "variables": ["check_id"],
     },
 
@@ -181,6 +197,22 @@ SYSTEM_TEXTS: dict[str, dict[str, Any]] = {
         "default": "… и ещё {count} замечаний — подробнее в приложении",
         "supports_html": False,
         "variables": ["count"],
+    },
+    "report.all_fixed": {
+        "label": "Все замечания исправлены автоматически",
+        "group": "Отчёт",
+        "description": "Когда все найденные замечания были автоматически исправлены",
+        "default": "✅ Все замечания исправлены автоматически ({fixed} шт.).\nСкачайте исправленный документ ниже.",
+        "supports_html": False,
+        "variables": ["fixed"],
+    },
+    "report.fixed_header": {
+        "label": "Заголовок списка автоисправлений",
+        "group": "Отчёт",
+        "description": "Перед списком автоматически исправленных замечаний",
+        "default": "<b>Исправлено автоматически:</b>",
+        "supports_html": True,
+        "variables": [],
     },
 }
 

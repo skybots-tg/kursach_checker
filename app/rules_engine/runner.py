@@ -4,6 +4,7 @@ import logging
 from typing import Callable
 
 from app.rules_engine.autofix import apply_safe_autofixes
+from app.rules_engine.autofix_config import AutoFixConfig
 from app.rules_engine.checks_advanced import (
     run_captions_checks,
     run_footnotes_checks,
@@ -65,10 +66,35 @@ _CHECK_NAME_RU: dict[str, str] = {
 
 CheckFunc = Callable[..., None]
 
+_AUTOFIX_FINDING_MAP: dict[tuple[str, str], str] = {
+    ("typography", "Шрифт основного текста"): "normalize_font",
+    ("typography", "Размер шрифта"): "normalize_font",
+    ("typography", "Межстрочный интервал"): "normalize_line_spacing",
+    ("typography", "Абзацный отступ"): "normalize_first_line_indent",
+    ("typography", "Выравнивание текста"): "normalize_alignment",
+    ("typography", "Заливка/выделение текста"): "remove_highlight",
+    ("typography", "Левый отступ основного текста"): "normalize_body_left_indent",
+    ("text_cleanliness", "Посторонние символы"): "remove_strange_chars",
+    ("section_breaks", "Разрыв страницы перед разделом"): "fix_section_breaks",
+    ("paragraph_spacing", "Интервал перед абзацем"): "normalize_spacing_before_after",
+    ("paragraph_spacing", "Интервал после абзаца"): "normalize_spacing_before_after",
+    ("captions", "Точка в конце подписи"): "remove_caption_trailing_dot",
+}
+
+
+def _mark_autofixed_findings(findings: list[Finding], rules: dict | None) -> None:
+    cfg = AutoFixConfig.from_rules(rules)
+    for f in findings:
+        if f.auto_fixed or f.severity not in ("error", "warning"):
+            continue
+        flag = _AUTOFIX_FINDING_MAP.get((f.category, f.title))
+        if flag and getattr(cfg, flag, False):
+            f.auto_fixed = True
+
 
 def _summary(findings: list[Finding], size: int) -> dict:
-    errors = sum(1 for f in findings if f.severity == "error")
-    warnings = sum(1 for f in findings if f.severity == "warning")
+    errors = sum(1 for f in findings if f.severity == "error" and not f.auto_fixed)
+    warnings = sum(1 for f in findings if f.severity == "warning" and not f.auto_fixed)
     fixed = sum(1 for f in findings if f.auto_fixed)
     return {"errors": errors, "warnings": warnings, "fixed": fixed, "size": size}
 
@@ -214,6 +240,8 @@ async def run_document_checks(
                 admin_autofix_config=admin_autofix_config,
             )
             autofix_output_path = autofix.output_file_path
+            if autofix_output_path:
+                _mark_autofixed_findings(findings, rules)
         except Exception:
             logger.exception("Autofix crashed for %s", file_path)
             check_errors.append("Автоисправление завершилось с внутренней ошибкой")
