@@ -334,7 +334,7 @@ def apply_safe_autofixes(
                 changed = True
                 para_touched = True
 
-        if not is_list and cfg.normalize_dashes:
+        if cfg.normalize_dashes:
             if fix_dashes_in_text(paragraph, para_label, details):
                 changed = True
                 para_touched = True
@@ -431,7 +431,7 @@ def apply_safe_autofixes(
             if fix_list_indent(t_para, t_label, details):
                 changed = True
                 t_touched = True
-        if not t_is_list and cfg.normalize_dashes:
+        if cfg.normalize_dashes:
             if fix_dashes_in_text(t_para, t_label, details):
                 changed = True
                 t_touched = True

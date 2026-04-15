@@ -79,6 +79,10 @@ _AUTOFIX_FINDING_MAP: dict[tuple[str, str], str] = {
     ("paragraph_spacing", "Интервал перед абзацем"): "normalize_spacing_before_after",
     ("paragraph_spacing", "Интервал после абзаца"): "normalize_spacing_before_after",
     ("captions", "Точка в конце подписи"): "remove_caption_trailing_dot",
+    ("text_cleanliness", "Длинное тире (\u2014)"): "normalize_dashes",
+    ("text_cleanliness", "Длинное тире \u2014 ещё замечания"): "normalize_dashes",
+    ("toc", "Оглавление"): "generate_toc",
+    ("toc", "Содержание оформлено вручную"): "generate_toc",
 }
 
 
