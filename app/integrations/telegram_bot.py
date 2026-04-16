@@ -28,6 +28,12 @@ from app.services.bot_texts import get_text
 # приглашению загрузить новый файл (см. app/integrations/telegram_notify.py).
 CHECK_UPLOAD_NEW_CB = "check_upload_new"
 
+# Зарезервированный payload «служебного» пункта меню, содержащего сообщения,
+# которые бот должен отправить ПЕРЕД приветствием на /start. В самом меню
+# этот пункт не отображается — он редактируется только через вкладку «Тексты»
+# в админке (карточка «Стартовое сообщение /start»).
+START_ITEM_PAYLOAD = "__start__"
+
 logger = logging.getLogger(__name__)
 
 # chat_id → list of bot-sent message_ids (for cleanup on navigation)
@@ -186,6 +192,8 @@ async def build_main_keyboard() -> InlineKeyboardMarkup:
             .where(
                 ContentMenuItem.active.is_(True),
                 ContentMenuItem.parent_id.is_(None),
+                (ContentMenuItem.payload.is_(None))
+                | (ContentMenuItem.payload != START_ITEM_PAYLOAD),
             )
             .order_by(ContentMenuItem.row.asc(), ContentMenuItem.col.asc())
         )
@@ -288,6 +296,9 @@ async def _send_new_message(
                 chat_id, file_input, caption=text or None,
                 parse_mode=parse_mode, **kw,
             )
+        if mtype == "video_note" and file_input:
+            # У video_note нет подписи и parse_mode, см. Telegram Bot API.
+            return await bot.send_video_note(chat_id, file_input, **kw)
         if text:
             return await bot.send_message(
                 chat_id, text, parse_mode=parse_mode, **kw,
@@ -350,15 +361,44 @@ async def _send_content_messages(
 #  Navigation
 # ---------------------------------------------------------------------------
 
+async def _get_start_item_id() -> int | None:
+    """Return id of the reserved ``__start__`` menu item, if it exists and is active."""
+    async with SessionLocal() as db:
+        return await db.scalar(
+            select(ContentMenuItem.id).where(
+                ContentMenuItem.payload == START_ITEM_PAYLOAD,
+                ContentMenuItem.active.is_(True),
+            )
+        )
+
+
 async def _navigate_home(bot: Bot, chat_id: int) -> None:
-    """Delete tracked messages and show the main (root) menu."""
+    """Delete tracked messages and show the main (root) menu.
+
+    Порядок:
+    1. Сообщения служебного пункта ``__start__`` (если есть) — например
+       видео-кружок, прикреплённый к /start через админку.
+    2. Приветствие ``bot.welcome`` с главной клавиатурой как последнее
+       сообщение (чтобы именно к нему крепилось меню).
+    """
     await _delete_tracked(bot, chat_id)
+    sent_ids: list[int] = []
+
+    start_item_id = await _get_start_item_id()
+    if start_item_id is not None:
+        ids = await _send_content_messages(
+            bot, chat_id, start_item_id, reply_markup=None,
+        )
+        sent_ids.extend(ids)
+
     kb = await build_main_keyboard()
     welcome = await get_text("bot.welcome")
     sent = await bot.send_message(
         chat_id, welcome, reply_markup=kb, parse_mode="HTML",
     )
-    _track(chat_id, sent.message_id)
+    sent_ids.append(sent.message_id)
+
+    _track(chat_id, *sent_ids)
 
 
 async def _send_upload_prompt(bot: Bot, chat_id: int, tg_user_id: int) -> None:

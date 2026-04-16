@@ -1,18 +1,27 @@
 /* Content — Texts tab: key-value texts + menu-item message editor */
 
+// Служебный пункт меню (payload) для сообщений, отправляемых перед
+// приветствием на /start. Показываем его в этой вкладке отдельной карточкой.
+const START_PAYLOAD = '__start__';
+
 let _textsMenuItems = [];
+let _textsStartItem = null;
 
 async function loadContentTexts() {
   const [texts, menuItems] = await Promise.all([
     api('GET', '/admin/content/texts'),
     api('GET', '/admin/content/menu'),
   ]);
-  _textsMenuItems = menuItems.filter(m => m.item_type === 'text');
+  _textsStartItem = menuItems.find(m => m.payload === START_PAYLOAD) || null;
+  _textsMenuItems = menuItems.filter(
+    m => m.item_type === 'text' && m.payload !== START_PAYLOAD,
+  );
   renderContentPage(renderTextsTab(texts), '');
 }
 
 function renderTextsTab(texts) {
   let html = renderTextsTable(texts);
+  html += renderStartMessages();
   html += renderMenuMessages();
   return html;
 }
@@ -72,6 +81,44 @@ async function saveText(key) {
     toast('Текст сохранён', 'success');
     loadContent();
   } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
+}
+
+/* ---------- /start messages section ---------- */
+
+function renderStartMessages() {
+  if (!_textsStartItem) {
+    return `<div class="section-heading-wrap">
+      <h3 class="section-heading">Стартовое сообщение (/start)</h3>
+    </div>
+    <div class="card"><p class="form-hint" style="text-align:center;margin:0">
+      Служебный пункт не найден. Раскатите миграцию
+      <code>0013_start_media_item</code>.
+    </p></div>`;
+  }
+  const m = _textsStartItem;
+  return `<div class="section-heading-wrap">
+    <h3 class="section-heading">Стартовое сообщение (/start)</h3>
+  </div>
+  <div class="msg-card card" id="msg-card-${m.id}">
+    <div class="msg-card-header" onclick="toggleMsgCard(${m.id})">
+      <div class="msg-card-title">🏠 <strong>Сообщения перед приветствием</strong></div>
+      <span class="msg-card-count" id="msg-count-${m.id}">...</span>
+      <span class="msg-card-arrow">${iconSvg('chevronDown', 16)}</span>
+    </div>
+    <div class="msg-card-body" id="msg-body-${m.id}" style="display:none">
+      <p class="form-hint" style="margin-top:0">
+        Эти сообщения отправятся <strong>до</strong> приветствия при команде /start.
+        Подойдут видео-кружок, фото, GIF или дополнительный текст.
+        Само приветствие настраивается в блоке «Системные тексты», ключ
+        <code>bot.welcome</code>.
+      </p>
+      <div id="msg-list-${m.id}" class="msg-list">${loadingHtml()}</div>
+      <button class="btn btn-secondary btn-sm" style="margin-top:10px"
+        onclick="showAddMessage(${m.id})">
+        ${iconSvg('plus', 14)} Добавить сообщение
+      </button>
+    </div>
+  </div>`;
 }
 
 /* ---------- Menu-item messages section ---------- */
@@ -155,7 +202,7 @@ function sanitizeTgHtml(raw) {
 
 function renderMessageItem(msg, itemId, idx, total) {
   const typeLabels = {
-    text: 'Текст', photo: 'Фото', video: 'Видео',
+    text: 'Текст', photo: 'Фото', video: 'Видео', video_note: 'Кружок',
     audio: 'Аудио', document: 'Файл', animation: 'GIF',
   };
   const preview = msg.message_type === 'text'
@@ -185,29 +232,47 @@ function renderMessageItem(msg, itemId, idx, total) {
 
 /* ---------- Message form (create / edit) ---------- */
 
+// Telegram не принимает подпись для video_note («кружок»).
+const NO_CAPTION_TYPES = new Set(['video_note']);
+
+const MSG_TYPE_ACCEPT = {
+  photo: 'image/*',
+  video: 'video/*',
+  video_note: 'video/*',
+  audio: 'audio/*',
+  animation: 'image/gif,video/*',
+  document: '*/*',
+};
+
 function messageFormHtml(msg) {
   const t = msg?.message_type || 'text';
   const isMedia = t !== 'text';
+  const noCaption = NO_CAPTION_TYPES.has(t);
+  const accept = MSG_TYPE_ACCEPT[t] || '*/*';
   return `
     <div class="form-group">
       <label class="form-label">Тип сообщения</label>
       <select class="form-select" id="msg-type" onchange="onMsgTypeChange()">
         <option value="text" ${t === 'text' ? 'selected' : ''}>Текст</option>
-        <option value="photo" ${t === 'photo' ? 'selected' : ''}>Фото</option>
-        <option value="video" ${t === 'video' ? 'selected' : ''}>Видео</option>
-        <option value="audio" ${t === 'audio' ? 'selected' : ''}>Аудио</option>
-        <option value="document" ${t === 'document' ? 'selected' : ''}>Файл</option>
-        <option value="animation" ${t === 'animation' ? 'selected' : ''}>GIF</option>
+        <option value="photo" ${t === 'photo' ? 'selected' : ''}>🖼️ Фото</option>
+        <option value="video" ${t === 'video' ? 'selected' : ''}>🎬 Видео</option>
+        <option value="video_note" ${t === 'video_note' ? 'selected' : ''}>⚫ Кружок</option>
+        <option value="audio" ${t === 'audio' ? 'selected' : ''}>🎵 Аудио</option>
+        <option value="document" ${t === 'document' ? 'selected' : ''}>📎 Файл</option>
+        <option value="animation" ${t === 'animation' ? 'selected' : ''}>🎞️ GIF</option>
       </select>
     </div>
     <div id="msg-media-wrap" style="display:${isMedia ? 'block' : 'none'}">
       <div class="form-group">
         <label class="form-label">Файл</label>
-        <input type="file" class="form-input" id="msg-file">
+        <input type="file" class="form-input" id="msg-file" accept="${accept}">
         ${msg?.file_name ? `<div class="form-hint">Текущий: ${escHtml(msg.file_name)}</div>` : ''}
+        <div class="form-hint" id="msg-file-hint" style="display:${noCaption ? 'block' : 'none'}">
+          Кружок должен быть квадратным видео до 60 сек. Подпись не поддерживается.
+        </div>
       </div>
     </div>
-    <div id="msg-text-wrap">
+    <div id="msg-text-wrap" style="display:${noCaption ? 'none' : 'block'}">
       <div class="form-group">
         <label class="form-label">${isMedia ? 'Подпись' : 'Текст сообщения'}</label>
         <div class="rt-toolbar">
@@ -229,7 +294,13 @@ function messageFormHtml(msg) {
 function onMsgTypeChange() {
   const type = getVal('msg-type');
   const isMedia = type !== 'text';
+  const noCaption = NO_CAPTION_TYPES.has(type);
   document.getElementById('msg-media-wrap').style.display = isMedia ? 'block' : 'none';
+  document.getElementById('msg-text-wrap').style.display = noCaption ? 'none' : 'block';
+  const fileInput = document.getElementById('msg-file');
+  if (fileInput) fileInput.accept = MSG_TYPE_ACCEPT[type] || '*/*';
+  const hint = document.getElementById('msg-file-hint');
+  if (hint) hint.style.display = noCaption ? 'block' : 'none';
   const label = document.querySelector('#msg-text-wrap .form-label');
   if (label) label.textContent = isMedia ? 'Подпись' : 'Текст сообщения';
 }
@@ -325,9 +396,11 @@ async function moveMessage(itemId, msgId, direction) {
 }
 
 function buildMessageFormData() {
+  const type = getVal('msg-type');
   const fd = new FormData();
-  fd.append('message_type', getVal('msg-type'));
-  fd.append('text', getVal('msg-text'));
+  fd.append('message_type', type);
+  // video_note не поддерживает подпись — отправляем пустой текст.
+  fd.append('text', NO_CAPTION_TYPES.has(type) ? '' : getVal('msg-text'));
   fd.append('parse_mode', 'HTML');
   const fileInput = document.getElementById('msg-file');
   if (fileInput?.files?.length) {

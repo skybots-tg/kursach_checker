@@ -14,6 +14,11 @@ from app.services.bot_texts import list_system_texts
 router = APIRouter()
 
 
+# Служебные payload, которые нельзя менять/удалять через админ-API:
+# на них завязана логика бота (см. app/integrations/telegram_bot.py).
+RESERVED_PAYLOADS = {"__start__"}
+
+
 class ContentValueIn(BaseModel):
     value: str
 
@@ -155,6 +160,8 @@ async def update_menu_item(
     if not item:
         raise HTTPException(status_code=404, detail="Пункт меню не найден")
 
+    is_reserved = item.payload in RESERVED_PAYLOADS
+
     before = {
         "parent_id": item.parent_id, "title": item.title, "icon": item.icon,
         "item_type": item.item_type, "payload": item.payload,
@@ -164,6 +171,13 @@ async def update_menu_item(
     content_changed = False
     for k, v in payload.model_dump().items():
         if k == "payload" and item.item_type == "text":
+            continue
+        # Служебный пункт (__start__) редактируем только в части контента:
+        # заголовок/иконку (для отображения в админке) админ менять может,
+        # остальное — нельзя, иначе бот перестанет его находить.
+        if is_reserved and k in (
+            "parent_id", "item_type", "payload", "row", "col", "active",
+        ):
             continue
         old_val = getattr(item, k, None)
         setattr(item, k, v)
@@ -231,6 +245,11 @@ async def delete_menu_item(
     item = await db.get(ContentMenuItem, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Пункт меню не найден")
+    if item.payload in RESERVED_PAYLOADS:
+        raise HTTPException(
+            status_code=400,
+            detail="Служебный пункт меню удалять нельзя — можно только чистить его сообщения.",
+        )
     await db.delete(item)
     await log_admin_action(
         db, current_admin.id, "content.menu.delete", "content_menu_item",

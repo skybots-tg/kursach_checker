@@ -1,10 +1,15 @@
 /* Content — Menu tab: visual keyboard grid, drag-and-drop, CRUD */
 
+// Служебные payload, которые не показываются в визуальной сетке меню —
+// они управляются отдельно во вкладке «Тексты».
+const RESERVED_MENU_PAYLOADS = new Set(['__start__']);
+
 let _menuItems = [];
 let _dragItem = null;
 
 async function loadContentMenu() {
-  _menuItems = await api('GET', '/admin/content/menu');
+  const all = await api('GET', '/admin/content/menu');
+  _menuItems = all.filter(m => !RESERVED_MENU_PAYLOADS.has(m.payload));
   const actionBtn = `<button class="btn btn-primary" onclick="showAddMenuItem()">
     ${iconSvg('plus', 16)} Пункт меню
   </button>`;
