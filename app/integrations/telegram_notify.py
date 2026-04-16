@@ -2,12 +2,31 @@ import logging
 from pathlib import Path
 
 from aiogram import Bot
-from aiogram.types import FSInputFile
+from aiogram.types import FSInputFile, InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.core.config import settings
+from app.integrations.telegram_bot import CHECK_UPLOAD_NEW_CB
 from app.services.bot_texts import get_text
 
 logger = logging.getLogger(__name__)
+
+# Payload пункта меню «Заказать полноценную работу» (см. миграцию
+# alembic/versions/0012_content_rebrand.py). Совпадает со стандартным
+# callback_data, которое разрешает custom_callback_handler в telegram_bot.py.
+ORDER_FULL_PAYLOAD = "flow_order"
+
+
+async def _build_done_keyboard() -> InlineKeyboardMarkup:
+    menu = await get_text("notify.check_done_btn_menu")
+    new_file = await get_text("notify.check_done_btn_new_file")
+    order = await get_text("notify.check_done_btn_order")
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=menu, callback_data="nav_home")],
+            [InlineKeyboardButton(text=new_file, callback_data=CHECK_UPLOAD_NEW_CB)],
+            [InlineKeyboardButton(text=order, callback_data=ORDER_FULL_PAYLOAD)],
+        ]
+    )
 
 
 async def notify_check_ready(
@@ -18,18 +37,25 @@ async def notify_check_ready(
     fixed_doc_path: str | None = None,
     fixed_doc_filename: str | None = None,
 ) -> None:
-    """Send the full check report and optional fixed DOCX to the user."""
+    """Send the full check report and optional fixed DOCX to the user.
+
+    Порядок сообщений:
+    1. Подробный отчёт (если есть ``report``);
+    2. Исправленный DOCX (если есть);
+    3. Финальное «Готово ✅» с кнопками [Меню] / [Отправить новый файл] /
+       [Заказать полноценную работу].
+    """
     if not settings.telegram_bot_token:
         return
 
-    if report:
-        text = await _format_report(report)
-    else:
-        text = await get_text("notify.check_done", check_id=check_id)
-
     bot = Bot(token=settings.telegram_bot_token)
     try:
-        await bot.send_message(chat_id=telegram_id, text=text, parse_mode="HTML")
+        if report:
+            report_text = await _format_report(report)
+            await bot.send_message(
+                chat_id=telegram_id, text=report_text, parse_mode="HTML",
+            )
+
         if fixed_doc_path and fixed_doc_filename:
             path = Path(fixed_doc_path)
             if path.is_file():
@@ -46,6 +72,15 @@ async def notify_check_ready(
                         telegram_id,
                         check_id,
                     )
+
+        done_text = await get_text("notify.check_done", check_id=check_id)
+        keyboard = await _build_done_keyboard()
+        await bot.send_message(
+            chat_id=telegram_id,
+            text=done_text,
+            parse_mode="HTML",
+            reply_markup=keyboard,
+        )
     finally:
         await bot.session.close()
 

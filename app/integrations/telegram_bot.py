@@ -24,6 +24,10 @@ from app.models import ContentMenuItem, CreditsBalance, MenuItemMessage, User
 from app.services.analytics.tracker import mark_blocked, mark_unblocked
 from app.services.bot_texts import get_text
 
+# Стабильный callback, которым из уведомления «Готово ✅» возвращаемся к
+# приглашению загрузить новый файл (см. app/integrations/telegram_notify.py).
+CHECK_UPLOAD_NEW_CB = "check_upload_new"
+
 logger = logging.getLogger(__name__)
 
 # chat_id → list of bot-sent message_ids (for cleanup on navigation)
@@ -351,7 +355,31 @@ async def _navigate_home(bot: Bot, chat_id: int) -> None:
     await _delete_tracked(bot, chat_id)
     kb = await build_main_keyboard()
     welcome = await get_text("bot.welcome")
-    sent = await bot.send_message(chat_id, welcome, reply_markup=kb)
+    sent = await bot.send_message(
+        chat_id, welcome, reply_markup=kb, parse_mode="HTML",
+    )
+    _track(chat_id, sent.message_id)
+
+
+async def _send_upload_prompt(bot: Bot, chat_id: int, tg_user_id: int) -> None:
+    """Показать пользователю приглашение загрузить новый файл со счётчиком попыток."""
+    await _delete_tracked(bot, chat_id)
+
+    credits_value = 0
+    async with SessionLocal() as db:
+        user = await db.scalar(select(User).where(User.telegram_id == tg_user_id))
+        if user:
+            balance = await db.get(CreditsBalance, user.id)
+            if balance:
+                credits_value = balance.credits_available
+
+    text = await get_text("check.upload_prompt", credits=credits_value)
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🏠 Главное меню", callback_data="nav_home")],
+        ]
+    )
+    sent = await bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=kb)
     _track(chat_id, sent.message_id)
 
 
@@ -411,6 +439,15 @@ async def run_bot() -> None:
     async def home_callback_handler(callback: CallbackQuery) -> None:
         await callback.answer()
         await _navigate_home(bot, callback.message.chat.id)
+
+    @dp.callback_query(F.data == CHECK_UPLOAD_NEW_CB)
+    async def upload_new_callback_handler(callback: CallbackQuery) -> None:
+        await callback.answer()
+        if not callback.from_user:
+            return
+        await _send_upload_prompt(
+            bot, callback.message.chat.id, callback.from_user.id,
+        )
 
     @dp.callback_query(F.data.startswith("menu_"))
     async def menu_callback_handler(callback: CallbackQuery) -> None:

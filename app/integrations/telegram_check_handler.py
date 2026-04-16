@@ -63,7 +63,9 @@ async def handle_document(message: Message, bot: Bot) -> None:
 
         credits = await db.get(CreditsBalance, user.id)
         if not credits or credits.credits_available < 1:
-            await message.reply(await get_text("check.no_credits"))
+            await message.reply(
+                await get_text("check.no_credits"), parse_mode="HTML",
+            )
             return
 
         tv = await _get_default_template_version(db)
