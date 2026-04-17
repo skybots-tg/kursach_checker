@@ -167,20 +167,33 @@ def _build_empty_paragraph() -> "OxmlElement":
 
 
 def enforce_subheading_alignment(doc, cfg, details: list[str]) -> bool:
-    """Force every level-2+ heading to a specific alignment (center by default).
+    """Force every heading to a specific alignment.
+
+    * level 1 (chapters / ВВЕДЕНИЕ / ЗАКЛЮЧЕНИЕ / СПИСОК ЛИТЕРАТУРЫ) →
+      center when ``heading_level1_center`` is True.
+    * level 2+ (subsections 1.1, 1.2…) → center when
+      ``heading_level2plus_center`` is True.
 
     Runs independently of ``skip_headings`` safety flag because changing only
     alignment (and wiping red-line indent) is safe and matches the client's
-    explicit request «название параграфа по середине».
+    explicit request «название параграфа / главы по середине».
     """
-    if not getattr(cfg, "heading_level2plus_center", True):
+    center1 = bool(getattr(cfg, "heading_level1_center", True))
+    center2plus = bool(getattr(cfg, "heading_level2plus_center", True))
+    if not center1 and not center2plus:
         return False
 
-    changed = 0
+    chapters_changed = 0
+    subs_changed = 0
     for para in doc.paragraphs:
         level = _para_heading_level(para)
-        if level is None or level < 2:
+        if level is None:
             continue
+        if level == 1 and not center1:
+            continue
+        if level >= 2 and not center2plus:
+            continue
+
         touched = False
         if para.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
             para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
@@ -193,13 +206,20 @@ def enforce_subheading_alignment(doc, cfg, details: list[str]) -> bool:
             pf.left_indent = Mm(0)
             touched = True
         if touched:
-            changed += 1
+            if level == 1:
+                chapters_changed += 1
+            else:
+                subs_changed += 1
 
-    if changed:
+    if chapters_changed:
         details.append(
-            f"Подзаголовки: {changed} шт. выровнены по центру"
+            f"Главы: {chapters_changed} шт. выровнены по центру"
         )
-    return changed > 0
+    if subs_changed:
+        details.append(
+            f"Подзаголовки: {subs_changed} шт. выровнены по центру"
+        )
+    return (chapters_changed + subs_changed) > 0
 
 
 def ensure_blank_before_subheadings(doc, details: list[str]) -> bool:
@@ -253,6 +273,110 @@ def ensure_blank_before_subheadings(doc, details: list[str]) -> bool:
             f"Отступы: добавлено {inserted} пустых абзаца(ев) перед подзаголовками"
         )
     return changed
+
+
+_CHAPTER_PAGE_BREAK_RE = re.compile(
+    r"^\s*(?:"
+    r"глава\s+\d+"
+    r"|введение"
+    r"|заключение"
+    r"|содержание"
+    r"|оглавление"
+    r"|список\s+(?:использованн|используем|литератур|источник)"
+    r"|библиографическ(?:ий|ая)\s+список"
+    r"|библиография"
+    r"|приложение(?:\s+\S+)?"
+    r"|аннотация"
+    r"|реферат"
+    r"|annotation"
+    r"|abstract"
+    r"|references"
+    r")\b",
+    re.IGNORECASE | re.UNICODE,
+)
+
+
+def enforce_chapter_page_breaks(doc, details: list[str]) -> bool:
+    """Force ``page_break_before`` on every top-level heading (Heading 1) and
+    on any paragraph whose text matches a well-known chapter/section label.
+
+    This runs independently of the generic per-paragraph section-break fix
+    which is gated by a strict length limit (``len(text) <= 100``) and
+    therefore missed long chapter titles like
+    «Глава 1 Теоретические основы организации работы государственного…».
+    """
+    paragraphs = list(doc.paragraphs)
+    changed = 0
+    for idx, para in enumerate(paragraphs):
+        if idx == 0:
+            continue
+        text = (para.text or "").strip()
+        if not text:
+            continue
+
+        level = _para_heading_level(para)
+        matches_chapter = bool(_CHAPTER_PAGE_BREAK_RE.match(text))
+        if level != 1 and not matches_chapter:
+            continue
+        if len(text) > 200:
+            continue
+
+        if _para_has_page_break_before(para):
+            continue
+
+        para.paragraph_format.page_break_before = True
+        changed += 1
+
+    if changed:
+        details.append(
+            f"Разрывы страниц: {changed} заголовок(ов) вынесено на новую страницу"
+        )
+    return changed > 0
+
+
+def enforce_heading_bold(doc, cfg, details: list[str]) -> bool:
+    """Ensure every Heading 1/2/3 paragraph has all runs set to bold.
+
+    Operates at the XML level so that inherited style cascading and mixed
+    explicit run properties no longer leave part of a heading un-bold. Runs
+    independently of the ``skip_headings`` safety flag because the client
+    explicitly asked for bold chapter/subsection headings.
+    """
+    if not getattr(cfg, "heading_bold", True):
+        return False
+
+    from docx.oxml import OxmlElement
+
+    changed = 0
+    for para in doc.paragraphs:
+        level = _para_heading_level(para)
+        if level is None or level > 3:
+            continue
+        touched = False
+        for r_elem in para._element.iter(qn("w:r")):
+            rPr = r_elem.find(qn("w:rPr"))
+            if rPr is None:
+                rPr = OxmlElement("w:rPr")
+                r_elem.insert(0, rPr)
+            for tag in ("w:b", "w:bCs"):
+                el = rPr.find(qn(tag))
+                if el is None:
+                    el = OxmlElement(tag)
+                    rPr.append(el)
+                val = el.get(qn("w:val"))
+                if val in ("0", "false"):
+                    el.set(qn("w:val"), "1")
+                    touched = True
+                elif val is None:
+                    touched = True
+        if touched:
+            changed += 1
+
+    if changed:
+        details.append(
+            f"Заголовки: {changed} заголовок(ов) переведено в полужирный"
+        )
+    return changed > 0
 
 
 def fix_remove_underline(paragraph, para_label: str, details: list[str]) -> bool:

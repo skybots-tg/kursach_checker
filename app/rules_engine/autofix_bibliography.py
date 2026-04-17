@@ -10,13 +10,36 @@ logger = logging.getLogger(__name__)
 
 _BIBLIOGRAPHY_HEADINGS = frozenset({
     "список литературы",
-    "список использованных источников и литературы",
+    "список использованной литературы",
+    "список используемой литературы",
+    "список используемых источников",
     "список использованных источников",
+    "список использованных источников и литературы",
+    "список используемых источников и литературы",
+    "список использованных источников информации",
     "библиографический список",
+    "библиография",
+    "литература",
+    "references",
+    "bibliography",
     "list of references",
 })
 
+# Extra phrases to recognise bibliography headings with minor variations
+# (punctuation, extra words after the core phrase, etc.).
+_BIBLIOGRAPHY_PATTERN = re.compile(
+    r"^\s*(?:"
+    r"список(?:\s+(?:использованн(?:ых|ой)|используем(?:ых|ой)))?\s+(?:источник(?:ов|и)|литератур[ыа])"
+    r"|библиографическ(?:ий|ая)\s+список"
+    r"|библиография"
+    r"|references"
+    r"|bibliography"
+    r")\s*[:.]?\s*$",
+    re.IGNORECASE | re.UNICODE,
+)
+
 _NUM_PREFIX_RE = re.compile(r"^\s*(?:\[\d{1,3}\][\.)\s]?|\d{1,3}[\.)])\s*")
+_NUMBERED_ENTRY_RE = re.compile(r"^\s*(?:\[\d{1,3}\][\.)\s]?|\d{1,3}[\.)])\s+\S")
 _LEADING_NONWORD_RE = re.compile(r"^[\s\W_]+", re.UNICODE)
 _HEADING_STYLE_IDS = frozenset({f"Heading{i}" for i in range(1, 10)})
 
@@ -34,14 +57,19 @@ def _is_heading_para(paragraph) -> bool:
     return "heading" in sname or "заголов" in sname
 
 
-def _find_bibliography_range(doc) -> tuple[int, int] | None:
-    """Return (start_idx, end_idx) of bibliography entry paragraphs (exclusive end)."""
+def _find_bibliography_range(doc) -> tuple[int, int, int] | None:
+    """Return ``(heading_idx, start_idx, end_idx)`` for the bibliography section.
+
+    ``heading_idx`` is the paragraph index of the «Список литературы» heading,
+    ``start_idx`` is the first paragraph after it and ``end_idx`` is exclusive.
+    """
     paragraphs = doc.paragraphs
     bib_heading_idx: int | None = None
 
     for idx, para in enumerate(paragraphs):
-        text = (para.text or "").strip().lower()
-        if text in _BIBLIOGRAPHY_HEADINGS:
+        text = (para.text or "").strip()
+        low = text.lower()
+        if low in _BIBLIOGRAPHY_HEADINGS or _BIBLIOGRAPHY_PATTERN.match(low):
             bib_heading_idx = idx
             break
 
@@ -62,11 +90,23 @@ def _find_bibliography_range(doc) -> tuple[int, int] | None:
             end = idx
             break
 
-    return (start, end)
+    return (bib_heading_idx, start, end)
 
 
 def _strip_number_prefix(text: str) -> str:
-    return _NUM_PREFIX_RE.sub("", text).strip()
+    """Strip leading numeric prefixes ("1.", "[1]", "1)") one or more times.
+
+    Bibliography entries sometimes contain double-numbering like "11.\t13. Ivanov"
+    when they were manually copy-pasted; we drop every leading number so the
+    alphabetical sort sees the author surname as the first significant token.
+    """
+    result = text
+    for _ in range(4):
+        stripped = _NUM_PREFIX_RE.sub("", result)
+        if stripped == result:
+            break
+        result = stripped
+    return result.strip()
 
 
 def _sort_key(text: str) -> tuple:
@@ -111,72 +151,82 @@ def fix_bibliography_order_and_numbering(
     if rng is None:
         return False
 
-    start, end = rng
+    heading_idx, start, end = rng
     paragraphs = doc.paragraphs
-    body = doc.element.body
 
-    entries: list[tuple[int, str]] = []
+    # Group contiguous paragraphs into "entries". Each entry begins with a
+    # numbered paragraph (e.g. "1. Иванов..."); subsequent non-numbered
+    # paragraphs are treated as continuation of the previous entry and are
+    # moved together with it during sorting.
+    entries: list[dict] = []  # each: {"idxs": [...], "text": "..."}
     for idx in range(start, end):
         text = (paragraphs[idx].text or "").strip()
-        if not text or len(text) < 10:
+        if not text:
             continue
-        entries.append((idx, text))
+        if _NUMBERED_ENTRY_RE.match(text):
+            entries.append({"idxs": [idx], "text": text})
+        else:
+            if len(text) < 5:
+                continue
+            if entries:
+                entries[-1]["idxs"].append(idx)
+                entries[-1]["text"] = entries[-1]["text"] + " " + text
 
     if len(entries) < 2:
         return False
 
-    sorted_entries = sorted(entries, key=lambda e: _sort_key(e[1]))
+    sorted_entries = sorted(entries, key=lambda e: _sort_key(e["text"]))
 
     already_sorted = all(
-        _sort_key(entries[i][1]) <= _sort_key(entries[i + 1][1])
+        _sort_key(entries[i]["text"]) <= _sort_key(entries[i + 1]["text"])
         for i in range(len(entries) - 1)
     )
 
     already_numbered = all(
-        re.match(r"^\s*\d{1,3}[\.)]\s", entries[i][1])
-        for i in range(len(entries))
+        re.match(r"^\s*\d{1,3}[\.)]\s", e["text"]) for e in entries
     )
 
     if already_sorted and already_numbered:
         return False
 
     if not already_sorted:
-        entry_elements = [paragraphs[idx]._element for idx, _ in entries]
-        anchor = entry_elements[0]
-        parent = anchor.getparent()
+        heading_elem = paragraphs[heading_idx]._element
+        parent = heading_elem.getparent()
+        if parent is None:
+            return False
 
-        sorted_elements = [paragraphs[idx]._element for idx, _ in sorted_entries]
-        for elem in sorted_elements:
-            parent.remove(elem)
+        all_entry_elements: list = []
+        sorted_elements_groups: list[list] = []
+        for e in entries:
+            all_entry_elements.extend(paragraphs[i]._element for i in e["idxs"])
+        for e in sorted_entries:
+            sorted_elements_groups.append(
+                [paragraphs[i]._element for i in e["idxs"]]
+            )
 
-        insert_after = anchor
-        parent.remove(anchor)
-        insert_point = None
-        for i, child in enumerate(parent):
-            if child.tag == qn("w:p"):
-                p_text = "".join(
-                    (t.text or "") for t in child.iter(qn("w:t"))
-                ).strip().lower()
-                if p_text in _BIBLIOGRAPHY_HEADINGS:
-                    insert_point = i + 1
-                    break
+        for elem in all_entry_elements:
+            el_parent = elem.getparent()
+            if el_parent is not None:
+                el_parent.remove(elem)
 
-        if insert_point is None:
-            insert_point = len(parent)
+        heading_pos = list(parent).index(heading_elem)
+        insert_point = heading_pos + 1
+        while insert_point < len(parent):
+            child = parent[insert_point]
+            if child.tag != qn("w:p"):
+                break
+            child_text = "".join(
+                (t.text or "") for t in child.iter(qn("w:t"))
+            ).strip()
+            if child_text:
+                break
+            insert_point += 1
 
-        skip_empty = insert_point
-        while skip_empty < len(parent):
-            child = parent[skip_empty]
-            if child.tag == qn("w:p"):
-                child_text = "".join(
-                    (t.text or "") for t in child.iter(qn("w:t"))
-                ).strip()
-                if child_text:
-                    break
-            skip_empty += 1
-
-        for i, elem in enumerate(sorted_elements):
-            parent.insert(skip_empty + i, elem)
+        cursor = insert_point
+        for group in sorted_elements_groups:
+            for elem in group:
+                parent.insert(cursor, elem)
+                cursor += 1
 
         details.append(
             f"Библиография: источники отсортированы по алфавиту ({len(entries)} шт.)"
@@ -187,13 +237,16 @@ def fix_bibliography_order_and_numbering(
     if rng2 is None:
         return True
 
-    s2, e2 = rng2
+    _, s2, e2 = rng2
     num = 1
     for idx in range(s2, e2):
         text = (refreshed[idx].text or "").strip()
-        if not text or len(text) < 10:
+        if not text:
+            continue
+        if not _NUMBERED_ENTRY_RE.match(text):
             continue
         clean = _strip_number_prefix(text)
+        clean = _NUM_PREFIX_RE.sub("", clean).strip()
         new_text = f"{num}. {clean}"
         _set_paragraph_text(refreshed[idx], new_text)
         num += 1

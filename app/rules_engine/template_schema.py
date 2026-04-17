@@ -247,6 +247,7 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
             "space_after_pt": 0,
             "normalize_toc_heading": True,
             "ensure_subheading_spacing": True,
+            "fix_caption_positions": True,
         },
     ),
     RuleBlock(key="reporting", title="Отчёт и строгость", severity="advice"),

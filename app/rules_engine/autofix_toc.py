@@ -195,46 +195,85 @@ def _build_toc_heading_paragraph(text: str = "Содержание") -> OxmlElem
 
 
 def _normalize_existing_toc_heading(para, details: list[str]) -> bool:
-    """Re-format an existing «Содержание» paragraph: center + non-bold + no underline."""
+    """Re-format an existing «Содержание» paragraph: center + non-bold + no underline.
+
+    The client explicitly wants «Содержание» to look like a plain regular
+    paragraph centered on the line (see the reference photo). If the source
+    document styled it as ``Heading N`` (or our earlier passes promoted it
+    there), the heading style cascades bold onto every run. To ensure the
+    final rendering matches the requirement we:
+      1. Detach the paragraph from ``Heading N`` by switching to ``Normal``.
+      2. Explicitly set ``<w:b w:val="0"/>`` / ``<w:bCs w:val="0"/>`` /
+         ``<w:u w:val="none"/>`` on every run (inserting the element when
+         missing) so no inherited property can re-enable bold/underline.
+      3. Center alignment and wipe any red-line / left indent.
+    """
     from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+    from docx.shared import Mm
 
     changed = False
+
+    doc = para.part.document
+    try:
+        normal = doc.styles["Normal"]
+        current_sid = getattr(para.style, "style_id", "") or ""
+        if current_sid != getattr(normal, "style_id", ""):
+            para.style = normal
+            changed = True
+    except KeyError:
+        pass
+
     if para.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
         para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         changed = True
 
     pf = para.paragraph_format
     if pf.first_line_indent is not None and int(pf.first_line_indent) != 0:
-        from docx.shared import Mm
-
         pf.first_line_indent = Mm(0)
         changed = True
     if pf.left_indent is not None and int(pf.left_indent) != 0:
-        from docx.shared import Mm
-
         pf.left_indent = Mm(0)
         changed = True
 
-    for run in para.runs:
-        if run.bold:
-            run.bold = False
-            changed = True
-        if run.font.underline:
-            run.font.underline = False
-            changed = True
+    pPr = para._element.find(qn("w:pPr"))
+    if pPr is not None:
+        pPr_rPr = pPr.find(qn("w:rPr"))
+        if pPr_rPr is not None:
+            for tag in ("w:b", "w:bCs"):
+                el = pPr_rPr.find(qn(tag))
+                if el is None:
+                    el = OxmlElement(tag)
+                    pPr_rPr.append(el)
+                if el.get(qn("w:val")) != "0":
+                    el.set(qn("w:val"), "0")
+                    changed = True
+            u = pPr_rPr.find(qn("w:u"))
+            if u is None:
+                u = OxmlElement("w:u")
+                pPr_rPr.append(u)
+            if u.get(qn("w:val")) != "none":
+                u.set(qn("w:val"), "none")
+                changed = True
 
     p_elem = para._element
     for r_elem in p_elem.iter(qn("w:r")):
         rPr = r_elem.find(qn("w:rPr"))
         if rPr is None:
-            continue
+            rPr = OxmlElement("w:rPr")
+            r_elem.insert(0, rPr)
         for tag in ("w:b", "w:bCs"):
             el = rPr.find(qn(tag))
-            if el is not None and el.get(qn("w:val")) not in ("0", "false"):
+            if el is None:
+                el = OxmlElement(tag)
+                rPr.append(el)
+            if el.get(qn("w:val")) != "0":
                 el.set(qn("w:val"), "0")
                 changed = True
         u = rPr.find(qn("w:u"))
-        if u is not None and u.get(qn("w:val")) not in (None, "none"):
+        if u is None:
+            u = OxmlElement("w:u")
+            rPr.append(u)
+        if u.get(qn("w:val")) != "none":
             u.set(qn("w:val"), "none")
             changed = True
 

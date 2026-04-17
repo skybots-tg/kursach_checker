@@ -13,6 +13,8 @@ from app.rules_engine.autofix_config import AutoFixConfig as _AutoFixConfig
 from app.rules_engine.autofix_refresh import refresh_fields_via_libreoffice
 from app.rules_engine.autofix_headings import (
     ensure_blank_before_subheadings,
+    enforce_chapter_page_breaks,
+    enforce_heading_bold,
     enforce_subheading_alignment,
     fix_heading as _fix_heading,
     fix_remove_underline,
@@ -42,6 +44,7 @@ from app.rules_engine.autofix_helpers import (
     remove_manual_page_breaks,
 )
 from app.rules_engine.autofix_bibliography import fix_bibliography_order_and_numbering
+from app.rules_engine.autofix_captions import fix_caption_positions
 from app.rules_engine.autofix_lists import convert_informal_lists
 from app.rules_engine.autofix_toc import (
     insert_toc_field,
@@ -298,6 +301,14 @@ def apply_safe_autofixes(
             continue
 
         if candidate_level is not None and allow_promote:
+            # «Содержание»/«Оглавление» must stay as a plain centered paragraph
+            # (client's explicit request). Skip heading promotion for it —
+            # normalize_toc_heading_formatting will format it correctly later.
+            low = text.strip().lower().rstrip(":.")
+            if low in ("содержание", "оглавление"):
+                if para_touched:
+                    para_count += 1
+                continue
             if _promote_to_heading(paragraph, candidate_level, idx, cfg, details):
                 changed = True
                 para_touched = True
@@ -460,8 +471,19 @@ def apply_safe_autofixes(
         if fix_bibliography_order_and_numbering(doc, details):
             changed = True
 
+    if getattr(cfg, "fix_caption_positions", True):
+        if fix_caption_positions(doc, details):
+            changed = True
+
     if enforce_subheading_alignment(doc, cfg, details):
         changed = True
+
+    if enforce_heading_bold(doc, cfg, details):
+        changed = True
+
+    if cfg.fix_section_breaks:
+        if enforce_chapter_page_breaks(doc, details):
+            changed = True
 
     if cfg.ensure_subheading_spacing:
         if ensure_blank_before_subheadings(doc, details):

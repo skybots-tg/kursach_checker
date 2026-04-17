@@ -36,6 +36,7 @@ class AutoFixConfig:
     generate_toc: bool
     normalize_toc_heading: bool
     fix_bibliography: bool
+    fix_caption_positions: bool
     ensure_subheading_spacing: bool
     informal_list_markers: list[str]
     informal_list_min_consecutive: int
@@ -109,6 +110,7 @@ class AutoFixConfig:
             generate_toc=_b("generate_toc"),
             normalize_toc_heading=_b("normalize_toc_heading"),
             fix_bibliography=_b("fix_bibliography"),
+            fix_caption_positions=_b("fix_caption_positions"),
             ensure_subheading_spacing=_b("ensure_subheading_spacing"),
             informal_list_markers=lfp.get(
                 "informal_list_markers",

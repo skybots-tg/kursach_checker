@@ -158,6 +158,14 @@ AUTOFIX_RULES_CATALOG: list[AutofixRuleInfo] = [
             "убирает у них красную строку"
         ),
     ),
+    AutofixRuleInfo(
+        rule_id="fix_caption_positions",
+        title="Позиция подписей рисунков и таблиц",
+        description=(
+            "Переносит подпись «Рисунок N …» под изображение и центрирует её; "
+            "подпись «Таблица N …» ставит над таблицей и выравнивает по левому краю"
+        ),
+    ),
 ]
 
 NOT_AUTOFIXABLE_INFO: list[AutofixRuleInfo] = [
