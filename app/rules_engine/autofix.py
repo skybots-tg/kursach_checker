@@ -321,22 +321,22 @@ def apply_safe_autofixes(
             continue
 
         eff_align = effective_alignment(paragraph)
-        if eff_align in (WD_PARAGRAPH_ALIGNMENT.CENTER, WD_PARAGRAPH_ALIGNMENT.RIGHT):
-            if para_touched:
-                para_count += 1
-            continue
+        is_center_like = eff_align in (
+            WD_PARAGRAPH_ALIGNMENT.CENTER,
+            WD_PARAGRAPH_ALIGNMENT.RIGHT,
+        )
 
         is_word_list = _is_list_para(paragraph)
         is_manual = not is_word_list and is_manual_list_para(text)
         is_list = is_word_list or is_manual
         pf = paragraph.paragraph_format
 
-        if is_list and cfg.normalize_list_markers:
+        if not is_center_like and is_list and cfg.normalize_list_markers:
             if fix_markers_text(paragraph, para_label, details, cfg.list_marker_char):
                 changed = True
                 para_touched = True
 
-        if is_word_list and cfg.normalize_list_indent:
+        if not is_center_like and is_word_list and cfg.normalize_list_indent:
             if fix_list_indent(paragraph, para_label, details):
                 changed = True
                 para_touched = True
@@ -346,7 +346,7 @@ def apply_safe_autofixes(
                 changed = True
                 para_touched = True
 
-        if cfg.normalize_alignment:
+        if not is_center_like and cfg.normalize_alignment:
             if eff_align != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
                 paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
                 changed = True
@@ -361,7 +361,7 @@ def apply_safe_autofixes(
                 para_touched = True
                 details.append(f"{para_label}: межстрочный интервал {cfg.line_spacing}")
 
-        if not is_word_list and cfg.normalize_first_line_indent:
+        if not is_center_like and not is_word_list and cfg.normalize_first_line_indent:
             eff_indent = effective_first_line_indent_mm(paragraph)
             if abs(eff_indent - cfg.first_line_indent_mm) > 0.5:
                 pf.first_line_indent = Mm(cfg.first_line_indent_mm)
@@ -369,12 +369,12 @@ def apply_safe_autofixes(
                 para_touched = True
                 details.append(f"{para_label}: абзацный отступ {cfg.first_line_indent_mm} мм")
 
-        if not is_list and cfg.normalize_body_left_indent:
+        if not is_center_like and not is_list and cfg.normalize_body_left_indent:
             if fix_normalize_left_indent(paragraph, para_label, details):
                 changed = True
                 para_touched = True
 
-        if cfg.normalize_spacing_before_after:
+        if not is_center_like and cfg.normalize_spacing_before_after:
             eff_sb = effective_space_before_pt(paragraph)
             if abs(eff_sb - cfg.space_before_pt) > 0.2:
                 pf.space_before = Pt(cfg.space_before_pt)
