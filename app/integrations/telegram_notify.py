@@ -5,7 +5,7 @@ from aiogram import Bot
 from aiogram.types import FSInputFile, InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.core.config import settings
-from app.integrations.telegram_bot import CHECK_UPLOAD_NEW_CB
+from app.integrations.telegram_constants import CHECK_UPLOAD_NEW_CB
 from app.services.bot_texts import get_text
 
 logger = logging.getLogger(__name__)

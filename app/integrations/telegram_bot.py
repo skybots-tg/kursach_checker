@@ -20,19 +20,17 @@ from app.core.config import settings
 from app.db.session import SessionLocal
 from app.integrations.analytics_middleware import AnalyticsMiddleware
 from app.integrations.telegram_check_handler import handle_document
+from app.integrations.telegram_constants import (
+    CHECK_UPLOAD_NEW_CB,
+    START_ITEM_PAYLOAD,
+)
 from app.models import ContentMenuItem, CreditsBalance, MenuItemMessage, User
 from app.services.analytics.tracker import mark_blocked, mark_unblocked
 from app.services.bot_texts import get_text
 
-# Стабильный callback, которым из уведомления «Готово ✅» возвращаемся к
-# приглашению загрузить новый файл (см. app/integrations/telegram_notify.py).
-CHECK_UPLOAD_NEW_CB = "check_upload_new"
-
-# Зарезервированный payload «служебного» пункта меню, содержащего сообщения,
-# которые бот должен отправить ПЕРЕД приветствием на /start. В самом меню
-# этот пункт не отображается — он редактируется только через вкладку «Тексты»
-# в админке (карточка «Стартовое сообщение /start»).
-START_ITEM_PAYLOAD = "__start__"
+# Реэкспорт для обратной совместимости — часть кода может импортировать
+# константы из этого модуля.
+__all__ = ["CHECK_UPLOAD_NEW_CB", "START_ITEM_PAYLOAD", "run_bot", "build_main_keyboard"]
 
 logger = logging.getLogger(__name__)
 
