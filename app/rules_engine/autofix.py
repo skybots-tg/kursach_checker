@@ -13,6 +13,7 @@ from app.rules_engine.autofix_config import AutoFixConfig as _AutoFixConfig
 from app.rules_engine.autofix_refresh import refresh_fields_via_libreoffice
 from app.rules_engine.autofix_headings import (
     ensure_blank_before_subheadings,
+    enforce_subheading_alignment,
     fix_heading as _fix_heading,
     fix_remove_underline,
     promote_to_heading as _promote_to_heading,
@@ -458,6 +459,9 @@ def apply_safe_autofixes(
     if cfg.fix_bibliography:
         if fix_bibliography_order_and_numbering(doc, details):
             changed = True
+
+    if enforce_subheading_alignment(doc, cfg, details):
+        changed = True
 
     if cfg.ensure_subheading_spacing:
         if ensure_blank_before_subheadings(doc, details):

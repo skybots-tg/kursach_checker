@@ -51,6 +51,7 @@ class AutoFixConfig:
     heading_size_pt: float
     heading_bold: bool
     heading_level1_center: bool
+    heading_level2plus_center: bool
 
     @classmethod
     def from_rules(cls, rules: dict | None, admin_defaults: dict | None = None) -> "AutoFixConfig":
@@ -126,4 +127,7 @@ class AutoFixConfig:
             heading_size_pt=float(hp.get("size_pt", body.get("size_pt", 14))),
             heading_bold=bool(hp.get("require_bold", True)),
             heading_level1_center=str(hp.get("level1_alignment", "CENTER")).upper() == "CENTER",
+            heading_level2plus_center=str(
+                hp.get("level2plus_alignment", "CENTER")
+            ).upper() == "CENTER",
         )

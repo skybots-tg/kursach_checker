@@ -116,6 +116,7 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
             "size_pt": 14,
             "require_bold": True,
             "level1_alignment": "CENTER",
+            "level2plus_alignment": "CENTER",
         },
     ),
     RuleBlock(

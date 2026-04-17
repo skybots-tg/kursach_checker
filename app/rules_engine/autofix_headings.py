@@ -48,7 +48,15 @@ def _fix_alignment(paragraph, level: int | None, cfg, details: list[str], idx: i
             details.append(f"Заголовок #{idx + 1}: выравнивание по центру")
             return True
     elif level is not None and level >= 2:
-        if paragraph.alignment == WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
+        if cfg.heading_level2plus_center:
+            if paragraph.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+                paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                paragraph.paragraph_format.first_line_indent = Mm(0)
+                details.append(
+                    f"Заголовок #{idx + 1}: подзаголовок по центру"
+                )
+                return True
+        elif paragraph.alignment == WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
             paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
             details.append(f"Заголовок #{idx + 1}: выравнивание по левому краю")
             return True
@@ -110,7 +118,10 @@ def promote_to_heading(
     if level == 1 and cfg.heading_level1_center:
         paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     elif level >= 2:
-        paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        if cfg.heading_level2plus_center:
+            paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        else:
+            paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
 
     details.append(f"Абзац #{idx + 1} → «Заголовок {level}»: {paragraph.text[:50]}")
     return True
@@ -153,6 +164,42 @@ def _build_empty_paragraph() -> "OxmlElement":
     from docx.oxml import OxmlElement
 
     return OxmlElement("w:p")
+
+
+def enforce_subheading_alignment(doc, cfg, details: list[str]) -> bool:
+    """Force every level-2+ heading to a specific alignment (center by default).
+
+    Runs independently of ``skip_headings`` safety flag because changing only
+    alignment (and wiping red-line indent) is safe and matches the client's
+    explicit request «название параграфа по середине».
+    """
+    if not getattr(cfg, "heading_level2plus_center", True):
+        return False
+
+    changed = 0
+    for para in doc.paragraphs:
+        level = _para_heading_level(para)
+        if level is None or level < 2:
+            continue
+        touched = False
+        if para.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+            para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            touched = True
+        pf = para.paragraph_format
+        if pf.first_line_indent is not None and int(pf.first_line_indent) != 0:
+            pf.first_line_indent = Mm(0)
+            touched = True
+        if pf.left_indent is not None and int(pf.left_indent) != 0:
+            pf.left_indent = Mm(0)
+            touched = True
+        if touched:
+            changed += 1
+
+    if changed:
+        details.append(
+            f"Подзаголовки: {changed} шт. выровнены по центру"
+        )
+    return changed > 0
 
 
 def ensure_blank_before_subheadings(doc, details: list[str]) -> bool:

@@ -150,6 +150,14 @@ AUTOFIX_RULES_CATALOG: list[AutofixRuleInfo] = [
             "внутри главы, сохраняя разрыв страницы перед самими главами"
         ),
     ),
+    AutofixRuleInfo(
+        rule_id="heading_level2plus_center",
+        title="Подзаголовки по центру",
+        description=(
+            "Выравнивает заголовки подразделов (1.1, 1.2 …) по центру и "
+            "убирает у них красную строку"
+        ),
+    ),
 ]
 
 NOT_AUTOFIXABLE_INFO: list[AutofixRuleInfo] = [
