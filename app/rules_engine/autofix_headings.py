@@ -116,6 +116,98 @@ def promote_to_heading(
     return True
 
 
+def _para_heading_level(paragraph) -> int | None:
+    """Return Word heading level (1..9) or None if paragraph is not a heading."""
+    sid = getattr(paragraph.style, "style_id", "") or ""
+    for i in range(1, 10):
+        if sid == f"Heading{i}":
+            return i
+    sname = (getattr(paragraph.style, "name", "") or "").lower()
+    for i in range(1, 10):
+        if f"heading {i}" in sname or f"заголовок {i}" in sname:
+            return i
+    pPr = paragraph._element.find(qn("w:pPr"))
+    if pPr is not None:
+        ol = pPr.find(qn("w:outlineLvl"))
+        if ol is not None:
+            try:
+                val = int(ol.get(qn("w:val"), "9"))
+                if val < 9:
+                    return val + 1
+            except (TypeError, ValueError):
+                pass
+    return None
+
+
+def _para_has_page_break_before(paragraph) -> bool:
+    if paragraph.paragraph_format.page_break_before:
+        return True
+    for br in paragraph._element.iter(qn("w:br")):
+        if br.get(qn("w:type")) == "page":
+            return True
+    return False
+
+
+def _build_empty_paragraph() -> "OxmlElement":
+    """Build an empty <w:p/> with no runs — one blank line."""
+    from docx.oxml import OxmlElement
+
+    return OxmlElement("w:p")
+
+
+def ensure_blank_before_subheadings(doc, details: list[str]) -> bool:
+    """Ensure exactly one empty paragraph precedes every level-2+ heading
+    within a chapter.
+
+    Chapters (heading level 1) usually start on a new page via
+    ``page_break_before`` and are skipped here. For sub-headings ``1.1``,
+    ``1.2`` etc. we guarantee a single blank paragraph above, matching the
+    client's request «один пробел между параграфами внутри главы».
+    """
+    paragraphs = list(doc.paragraphs)
+    if len(paragraphs) < 2:
+        return False
+
+    changed = False
+    inserted = 0
+
+    for para in paragraphs:
+        level = _para_heading_level(para)
+        if level is None or level < 2:
+            continue
+        if _para_has_page_break_before(para):
+            continue
+
+        prev = para._element.getprevious()
+        while prev is not None and prev.tag != qn("w:p"):
+            prev = prev.getprevious()
+        if prev is None:
+            continue
+
+        prev_text = "".join(
+            (t.text or "") for t in prev.iter(qn("w:t"))
+        ).strip()
+        has_page_break = any(
+            br.get(qn("w:type")) == "page" for br in prev.iter(qn("w:br"))
+        )
+        if has_page_break:
+            continue
+
+        if prev_text == "":
+            continue
+
+        blank = _build_empty_paragraph()
+        para._element.addprevious(blank)
+        inserted += 1
+        changed = True
+
+    if inserted:
+        details.append(
+            f"Отступы: добавлено {inserted} пустых абзаца(ев) перед подзаголовками"
+        )
+    return changed
+
+
 def fix_remove_underline(paragraph, para_label: str, details: list[str]) -> bool:
     p_elem = paragraph._element
     changed = False

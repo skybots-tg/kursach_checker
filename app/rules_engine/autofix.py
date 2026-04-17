@@ -12,6 +12,7 @@ from docx.shared import Mm, Pt
 from app.rules_engine.autofix_config import AutoFixConfig as _AutoFixConfig
 from app.rules_engine.autofix_refresh import refresh_fields_via_libreoffice
 from app.rules_engine.autofix_headings import (
+    ensure_blank_before_subheadings,
     fix_heading as _fix_heading,
     fix_remove_underline,
     promote_to_heading as _promote_to_heading,
@@ -41,7 +42,10 @@ from app.rules_engine.autofix_helpers import (
 )
 from app.rules_engine.autofix_bibliography import fix_bibliography_order_and_numbering
 from app.rules_engine.autofix_lists import convert_informal_lists
-from app.rules_engine.autofix_toc import insert_toc_field
+from app.rules_engine.autofix_toc import (
+    insert_toc_field,
+    normalize_toc_heading_formatting,
+)
 from app.rules_engine.autofix_whitespace import (
     collapse_excessive_empty_paras,
     fix_normalize_left_indent,
@@ -447,8 +451,16 @@ def apply_safe_autofixes(
         if insert_toc_field(doc, toc_indices, details):
             changed = True
 
+    if cfg.normalize_toc_heading:
+        if normalize_toc_heading_formatting(doc, details):
+            changed = True
+
     if cfg.fix_bibliography:
         if fix_bibliography_order_and_numbering(doc, details):
+            changed = True
+
+    if cfg.ensure_subheading_spacing:
+        if ensure_blank_before_subheadings(doc, details):
             changed = True
 
     if cfg.collapse_empty_paras:

@@ -16,8 +16,14 @@ _BIBLIOGRAPHY_HEADINGS = frozenset({
     "list of references",
 })
 
-_NUM_PREFIX_RE = re.compile(r"^\s*(?:\[?\d{1,3}\]?)[\.)]\s*")
+_NUM_PREFIX_RE = re.compile(r"^\s*(?:\[\d{1,3}\][\.)\s]?|\d{1,3}[\.)])\s*")
+_LEADING_NONWORD_RE = re.compile(r"^[\s\W_]+", re.UNICODE)
 _HEADING_STYLE_IDS = frozenset({f"Heading{i}" for i in range(1, 10)})
+
+_RU_ALPHABET = (
+    "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+)
+_RU_ORDER = {ch: i for i, ch in enumerate(_RU_ALPHABET)}
 
 
 def _is_heading_para(paragraph) -> bool:
@@ -63,8 +69,27 @@ def _strip_number_prefix(text: str) -> str:
     return _NUM_PREFIX_RE.sub("", text).strip()
 
 
-def _sort_key(text: str) -> str:
-    return _strip_number_prefix(text).lower()
+def _sort_key(text: str) -> tuple:
+    """Locale-friendly alphabetical key for Russian/Latin bibliography entries.
+
+    Russian goes first (а–я, with «ё» sorted right after «е»), Latin second.
+    Digits, brackets and other punctuation are stripped from the head so
+    GOST-style entries like "[1] Иванов..." sort by the actual author name.
+    """
+    stripped = _strip_number_prefix(text)
+    stripped = _LEADING_NONWORD_RE.sub("", stripped)
+    lower = stripped.lower()
+    key: list[tuple[int, int]] = []
+    for ch in lower:
+        if ch in _RU_ORDER:
+            key.append((0, _RU_ORDER[ch]))
+        elif "a" <= ch <= "z":
+            key.append((1, ord(ch)))
+        elif ch.isdigit():
+            key.append((2, ord(ch)))
+        elif ch.isspace():
+            key.append((3, 0))
+    return tuple(key)
 
 
 def _set_paragraph_text(paragraph, new_text: str) -> None:

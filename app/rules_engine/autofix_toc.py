@@ -83,19 +83,36 @@ def _collect_headings(doc) -> list[tuple[str, int]]:
 
 # ── XML builders ──────────────────────────────────────────────────────
 
+def _append_no_bold_rpr(parent: OxmlElement) -> None:
+    """Append <w:rPr><w:b w:val="0"/><w:bCs w:val="0"/><w:u w:val="none"/></w:rPr>."""
+    rPr = OxmlElement("w:rPr")
+    b = OxmlElement("w:b")
+    b.set(qn("w:val"), "0")
+    rPr.append(b)
+    bCs = OxmlElement("w:bCs")
+    bCs.set(qn("w:val"), "0")
+    rPr.append(bCs)
+    u = OxmlElement("w:u")
+    u.set(qn("w:val"), "none")
+    rPr.append(u)
+    parent.append(rPr)
+
+
 def _build_toc_entry(text: str, level: int) -> OxmlElement:
-    """Build a cached TOC entry paragraph with TOCx style."""
+    """Build a cached TOC entry paragraph with TOCx style, non-bold, no indent."""
     p = OxmlElement("w:p")
     pPr = OxmlElement("w:pPr")
     pStyle = OxmlElement("w:pStyle")
     pStyle.set(qn("w:val"), f"TOC{level}")
     pPr.append(pStyle)
-    if level > 1:
-        ind = OxmlElement("w:ind")
-        ind.set(qn("w:left"), str((level - 1) * 240))
-        pPr.append(ind)
+    ind = OxmlElement("w:ind")
+    ind.set(qn("w:left"), "0")
+    ind.set(qn("w:firstLine"), "0")
+    pPr.append(ind)
+    _append_no_bold_rpr(pPr)
     p.append(pPr)
     r = OxmlElement("w:r")
+    _append_no_bold_rpr(r)
     t = OxmlElement("w:t")
     t.set(qn("xml:space"), "preserve")
     t.text = text
@@ -150,20 +167,80 @@ def _build_toc_elements(
     return begin_p, entries, end_p
 
 
-def _build_heading_paragraph(text: str, style_id: str = "Heading1") -> OxmlElement:
-    """Build a <w:p> with a heading style."""
+def _build_toc_heading_paragraph(text: str = "Содержание") -> OxmlElement:
+    """Build a plain centered TOC heading paragraph (no bold, no underline).
+
+    Matches the format requested by the user: single word "Содержание"
+    centered on the line, regular (non-bold) font.
+    """
     p = OxmlElement("w:p")
     pPr = OxmlElement("w:pPr")
-    pStyle = OxmlElement("w:pStyle")
-    pStyle.set(qn("w:val"), style_id)
-    pPr.append(pStyle)
+    jc = OxmlElement("w:jc")
+    jc.set(qn("w:val"), "center")
+    pPr.append(jc)
+    ind = OxmlElement("w:ind")
+    ind.set(qn("w:firstLine"), "0")
+    ind.set(qn("w:left"), "0")
+    pPr.append(ind)
+    _append_no_bold_rpr(pPr)
     p.append(pPr)
     r = OxmlElement("w:r")
+    _append_no_bold_rpr(r)
     t = OxmlElement("w:t")
+    t.set(qn("xml:space"), "preserve")
     t.text = text
     r.append(t)
     p.append(r)
     return p
+
+
+def _normalize_existing_toc_heading(para, details: list[str]) -> bool:
+    """Re-format an existing «Содержание» paragraph: center + non-bold + no underline."""
+    from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+
+    changed = False
+    if para.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+        para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        changed = True
+
+    pf = para.paragraph_format
+    if pf.first_line_indent is not None and int(pf.first_line_indent) != 0:
+        from docx.shared import Mm
+
+        pf.first_line_indent = Mm(0)
+        changed = True
+    if pf.left_indent is not None and int(pf.left_indent) != 0:
+        from docx.shared import Mm
+
+        pf.left_indent = Mm(0)
+        changed = True
+
+    for run in para.runs:
+        if run.bold:
+            run.bold = False
+            changed = True
+        if run.font.underline:
+            run.font.underline = False
+            changed = True
+
+    p_elem = para._element
+    for r_elem in p_elem.iter(qn("w:r")):
+        rPr = r_elem.find(qn("w:rPr"))
+        if rPr is None:
+            continue
+        for tag in ("w:b", "w:bCs"):
+            el = rPr.find(qn(tag))
+            if el is not None and el.get(qn("w:val")) not in ("0", "false"):
+                el.set(qn("w:val"), "0")
+                changed = True
+        u = rPr.find(qn("w:u"))
+        if u is not None and u.get(qn("w:val")) not in (None, "none"):
+            u.set(qn("w:val"), "none")
+            changed = True
+
+    if changed:
+        details.append("Оглавление: заголовок «Содержание» оформлен по центру без жирного")
+    return changed
 
 
 def _remove_manual_toc_entries(doc, heading_idx: int, details: list[str]) -> bool:
@@ -236,20 +313,39 @@ def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
         text = (para.text or "").strip()
         if _TOC_HEADING_RE.match(text):
             _remove_manual_toc_entries(doc, idx, details)
+            _normalize_existing_toc_heading(para, details)
             return _insert_toc_after(para._element, doc, details)
 
     for para in paragraphs:
         style_name = (getattr(para.style, "name", "") or "").lower()
         if "heading" in style_name or "заголов" in style_name:
-            heading_p = _build_heading_paragraph("СОДЕРЖАНИЕ")
+            heading_p = _build_toc_heading_paragraph("Содержание")
             para._element.addprevious(heading_p)
-            details.append("Оглавление: создан заголовок «СОДЕРЖАНИЕ»")
+            details.append("Оглавление: создан заголовок «Содержание» (по центру)")
             return _insert_toc_after(heading_p, doc, details)
 
     if len(body) > 0:
-        heading_p = _build_heading_paragraph("СОДЕРЖАНИЕ")
+        heading_p = _build_toc_heading_paragraph("Содержание")
         body.insert(0, heading_p)
-        details.append("Оглавление: создан заголовок «СОДЕРЖАНИЕ»")
+        details.append("Оглавление: создан заголовок «Содержание» (по центру)")
         return _insert_toc_after(heading_p, doc, details)
 
     return False
+
+
+def normalize_toc_heading_formatting(doc, details: list[str]) -> bool:
+    """Standalone pass: if a «Содержание»/«Оглавление» heading already exists,
+    reformat it to centered non-bold without changing TOC entries.
+
+    This runs even when ``generate_toc`` would otherwise skip the document
+    (because it already has a TOC field), ensuring the client's request
+    «убрать жирное выделение, слово Содержание по центру» is always applied.
+    """
+    changed = False
+    for para in doc.paragraphs:
+        text = (para.text or "").strip()
+        if _TOC_HEADING_RE.match(text):
+            if _normalize_existing_toc_heading(para, details):
+                changed = True
+            break
+    return changed

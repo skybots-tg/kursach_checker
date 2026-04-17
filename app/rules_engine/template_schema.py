@@ -244,6 +244,8 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
             "max_consecutive_empty_paras": 1,
             "space_before_pt": 0,
             "space_after_pt": 0,
+            "normalize_toc_heading": True,
+            "ensure_subheading_spacing": True,
         },
     ),
     RuleBlock(key="reporting", title="Отчёт и строгость", severity="advice"),

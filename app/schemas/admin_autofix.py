@@ -134,6 +134,22 @@ AUTOFIX_RULES_CATALOG: list[AutofixRuleInfo] = [
         title="Точка в подписях",
         description="Убирает завершающую точку в подписях рисунков и таблиц",
     ),
+    AutofixRuleInfo(
+        rule_id="normalize_toc_heading",
+        title="Оформление заголовка «Содержание»",
+        description=(
+            "Центрирует заголовок «Содержание»/«Оглавление», убирает жирное "
+            "выделение и подчёркивание"
+        ),
+    ),
+    AutofixRuleInfo(
+        rule_id="ensure_subheading_spacing",
+        title="Пустая строка перед подзаголовками",
+        description=(
+            "Добавляет один пустой абзац перед подразделами (1.1, 1.2 …) "
+            "внутри главы, сохраняя разрыв страницы перед самими главами"
+        ),
+    ),
 ]
 
 NOT_AUTOFIXABLE_INFO: list[AutofixRuleInfo] = [
