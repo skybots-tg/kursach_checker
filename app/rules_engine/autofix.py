@@ -46,10 +46,8 @@ from app.rules_engine.autofix_helpers import (
 from app.rules_engine.autofix_bibliography import fix_bibliography_order_and_numbering
 from app.rules_engine.autofix_captions import fix_caption_positions
 from app.rules_engine.autofix_lists import convert_informal_lists
-from app.rules_engine.autofix_toc import (
-    insert_toc_field,
-    normalize_toc_heading_formatting,
-)
+from app.rules_engine.autofix_toc import insert_toc_field
+from app.rules_engine.autofix_toc_normalize import normalize_toc_heading_formatting
 from app.rules_engine.autofix_whitespace import (
     collapse_excessive_empty_paras,
     fix_normalize_left_indent,
@@ -464,7 +462,7 @@ def apply_safe_autofixes(
             changed = True
 
     if cfg.normalize_toc_heading:
-        if normalize_toc_heading_formatting(doc, details):
+        if normalize_toc_heading_formatting(doc, details, cfg=cfg):
             changed = True
 
     if cfg.fix_bibliography:

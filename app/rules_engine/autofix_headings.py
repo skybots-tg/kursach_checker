@@ -296,6 +296,40 @@ _CHAPTER_PAGE_BREAK_RE = re.compile(
 )
 
 
+def _iter_chapter_break_paragraphs(doc):
+    """Yield every Paragraph eligible for chapter page-break enforcement.
+
+    Returns body-level ``<w:p>`` elements plus the *first* paragraph of
+    every ``<w:sdt>/<w:sdtContent>`` content control. The latter covers
+    the auto-TOC case where «Содержание» is wrapped in an SDT and would
+    otherwise be invisible to ``doc.paragraphs`` — only the first
+    paragraph is yielded so subsequent TOC entries (which match the
+    chapter regex too) do not get spurious page breaks inserted between
+    them, which would scatter the table of contents across pages.
+
+    Paragraphs nested inside tables are intentionally excluded — Word
+    silently ignores ``pageBreakBefore`` for table-cell paragraphs.
+    """
+    from docx.text.paragraph import Paragraph
+
+    body = doc.element.body
+    p_tag = qn("w:p")
+    sdt_tag = qn("w:sdt")
+    sdt_content_tag = qn("w:sdtContent")
+
+    for child in body.iterchildren():
+        if child.tag == p_tag:
+            yield Paragraph(child, doc)
+        elif child.tag == sdt_tag:
+            content = child.find(sdt_content_tag)
+            if content is None:
+                continue
+            for sub in content.iterchildren():
+                if sub.tag == p_tag:
+                    yield Paragraph(sub, doc)
+                    break
+
+
 def enforce_chapter_page_breaks(doc, details: list[str]) -> bool:
     """Force ``page_break_before`` on every top-level heading (Heading 1) and
     on any paragraph whose text matches a well-known chapter/section label.
@@ -304,8 +338,12 @@ def enforce_chapter_page_breaks(doc, details: list[str]) -> bool:
     which is gated by a strict length limit (``len(text) <= 100``) and
     therefore missed long chapter titles like
     «Глава 1 Теоретические основы организации работы государственного…».
+
+    The iteration also descends into ``<w:sdt>`` content controls so the
+    «Содержание» heading wrapped in an auto-TOC field is treated like any
+    other top-level chapter title.
     """
-    paragraphs = list(doc.paragraphs)
+    paragraphs = list(_iter_chapter_break_paragraphs(doc))
     changed = 0
     for idx, para in enumerate(paragraphs):
         if idx == 0:
