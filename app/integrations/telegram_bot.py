@@ -11,7 +11,9 @@ from aiogram.types import (
     FSInputFile,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    KeyboardButton,
     Message,
+    ReplyKeyboardMarkup,
     User as TgUser,
 )
 from sqlalchemy import select
@@ -113,10 +115,16 @@ def _make_button(m: ContentMenuItem) -> InlineKeyboardButton | None:
     return InlineKeyboardButton(text=label, callback_data=callback)
 
 
-def _fallback_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Начать", callback_data="nav_home")],
-    ])
+def _fallback_reply_keyboard() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="Начать")]],
+        resize_keyboard=True,
+        is_persistent=True,
+    )
+
+
+def _root_item_label(item: ContentMenuItem) -> str:
+    return f"{item.icon} {item.title}" if item.icon else item.title
 
 
 async def _get_item_depth(db, item: ContentMenuItem) -> int:
@@ -182,8 +190,7 @@ def _nav_row(parent_id: int | None, depth: int) -> list[InlineKeyboardButton]:
     return row
 
 
-async def build_main_keyboard() -> InlineKeyboardMarkup:
-    """Build the root-level inline keyboard (only top-level items)."""
+async def _load_root_items() -> list[ContentMenuItem]:
     async with SessionLocal() as db:
         rows = await db.scalars(
             select(ContentMenuItem)
@@ -195,23 +202,38 @@ async def build_main_keyboard() -> InlineKeyboardMarkup:
             )
             .order_by(ContentMenuItem.row.asc(), ContentMenuItem.col.asc())
         )
-        items = list(rows)
+        return list(rows)
 
+
+async def build_main_keyboard() -> ReplyKeyboardMarkup:
+    """Build the root-level reply keyboard (bottom menu, persistent)."""
+    items = await _load_root_items()
     if not items:
-        return _fallback_keyboard()
+        return _fallback_reply_keyboard()
 
-    keyboard_rows: dict[int, list[InlineKeyboardButton]] = {}
+    keyboard_rows: dict[int, list[KeyboardButton]] = {}
     for m in items:
-        btn = _make_button(m)
-        if btn:
-            keyboard_rows.setdefault(m.row, []).append(btn)
+        keyboard_rows.setdefault(m.row, []).append(
+            KeyboardButton(text=_root_item_label(m)),
+        )
 
     if not keyboard_rows:
-        return _fallback_keyboard()
+        return _fallback_reply_keyboard()
 
-    return InlineKeyboardMarkup(
-        inline_keyboard=[keyboard_rows[r] for r in sorted(keyboard_rows.keys())],
+    return ReplyKeyboardMarkup(
+        keyboard=[keyboard_rows[r] for r in sorted(keyboard_rows.keys())],
+        resize_keyboard=True,
+        is_persistent=True,
     )
+
+
+async def _find_root_item_by_label(text: str) -> ContentMenuItem | None:
+    """Match user text against active root menu items (label = icon + title)."""
+    items = await _load_root_items()
+    for item in items:
+        if _root_item_label(item) == text:
+            return item
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -421,6 +443,27 @@ async def _send_upload_prompt(bot: Bot, chat_id: int, tg_user_id: int) -> None:
     _track(chat_id, sent.message_id)
 
 
+async def _handle_root_item_tap(
+    bot: Bot, chat_id: int, item: ContentMenuItem,
+) -> None:
+    """Handle a reply-keyboard tap on a top-level menu item."""
+    if item.item_type == "link" and item.payload:
+        await _delete_tracked(bot, chat_id)
+        link_kb = InlineKeyboardMarkup(
+            inline_keyboard=[[
+                InlineKeyboardButton(
+                    text=_root_item_label(item), url=item.payload,
+                ),
+            ]],
+        )
+        sent = await bot.send_message(
+            chat_id, _root_item_label(item), reply_markup=link_kb,
+        )
+        _track(chat_id, sent.message_id)
+        return
+    await _navigate_to_item(bot, chat_id, item.id)
+
+
 async def _navigate_to_item(bot: Bot, chat_id: int, menu_item_id: int) -> None:
     """Full navigation: delete old messages → send content → attach keyboard."""
     await _delete_tracked(bot, chat_id)
@@ -515,6 +558,12 @@ async def run_bot() -> None:
     async def fallback_message_handler(message: Message) -> None:
         if message.from_user:
             await _ensure_user(message.from_user)
+        text = (message.text or "").strip()
+        if text:
+            item = await _find_root_item_by_label(text)
+            if item is not None:
+                await _handle_root_item_tap(bot, message.chat.id, item)
+                return
         await _navigate_home(bot, message.chat.id)
 
     await dp.start_polling(bot)
