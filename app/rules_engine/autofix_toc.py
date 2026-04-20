@@ -13,6 +13,7 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
 from app.rules_engine.heading_detection import TOC_LINE_TAIL_RE
+from app.rules_engine.style_resolve import detect_toc_paragraph_indices
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,44 @@ def _append_no_bold_rpr(parent: OxmlElement) -> None:
     u.set(qn("w:val"), "none")
     rPr.append(u)
     parent.append(rPr)
+
+
+def _force_no_bold_no_underline(rPr: OxmlElement) -> bool:
+    """Ensure rPr explicitly disables bold/bCs/underline. Return True if changed."""
+    changed = False
+    for tag in ("w:b", "w:bCs"):
+        el = rPr.find(qn(tag))
+        if el is None:
+            el = OxmlElement(tag)
+            rPr.append(el)
+            changed = True
+        if el.get(qn("w:val")) != "0":
+            el.set(qn("w:val"), "0")
+            changed = True
+    u = rPr.find(qn("w:u"))
+    if u is None:
+        u = OxmlElement("w:u")
+        rPr.append(u)
+        changed = True
+    if u.get(qn("w:val")) != "none":
+        u.set(qn("w:val"), "none")
+        changed = True
+    return changed
+
+
+def _clear_bold_underline_in_paragraph(p_elem: OxmlElement) -> bool:
+    """Force every <w:r> in *p_elem* (incl. inside <w:hyperlink>) to non-bold,
+    non-underlined. Returns True if anything changed."""
+    changed = False
+    for r_elem in p_elem.iter(qn("w:r")):
+        rPr = r_elem.find(qn("w:rPr"))
+        if rPr is None:
+            rPr = OxmlElement("w:rPr")
+            r_elem.insert(0, rPr)
+            changed = True
+        if _force_no_bold_no_underline(rPr):
+            changed = True
+    return changed
 
 
 def _build_toc_entry(text: str, level: int) -> OxmlElement:
@@ -238,44 +277,11 @@ def _normalize_existing_toc_heading(para, details: list[str]) -> bool:
     pPr = para._element.find(qn("w:pPr"))
     if pPr is not None:
         pPr_rPr = pPr.find(qn("w:rPr"))
-        if pPr_rPr is not None:
-            for tag in ("w:b", "w:bCs"):
-                el = pPr_rPr.find(qn(tag))
-                if el is None:
-                    el = OxmlElement(tag)
-                    pPr_rPr.append(el)
-                if el.get(qn("w:val")) != "0":
-                    el.set(qn("w:val"), "0")
-                    changed = True
-            u = pPr_rPr.find(qn("w:u"))
-            if u is None:
-                u = OxmlElement("w:u")
-                pPr_rPr.append(u)
-            if u.get(qn("w:val")) != "none":
-                u.set(qn("w:val"), "none")
-                changed = True
-
-    p_elem = para._element
-    for r_elem in p_elem.iter(qn("w:r")):
-        rPr = r_elem.find(qn("w:rPr"))
-        if rPr is None:
-            rPr = OxmlElement("w:rPr")
-            r_elem.insert(0, rPr)
-        for tag in ("w:b", "w:bCs"):
-            el = rPr.find(qn(tag))
-            if el is None:
-                el = OxmlElement(tag)
-                rPr.append(el)
-            if el.get(qn("w:val")) != "0":
-                el.set(qn("w:val"), "0")
-                changed = True
-        u = rPr.find(qn("w:u"))
-        if u is None:
-            u = OxmlElement("w:u")
-            rPr.append(u)
-        if u.get(qn("w:val")) != "none":
-            u.set(qn("w:val"), "none")
+        if pPr_rPr is not None and _force_no_bold_no_underline(pPr_rPr):
             changed = True
+
+    if _clear_bold_underline_in_paragraph(para._element):
+        changed = True
 
     if changed:
         details.append("Оглавление: заголовок «Содержание» оформлен по центру без жирного")
@@ -373,18 +379,40 @@ def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
 
 
 def normalize_toc_heading_formatting(doc, details: list[str]) -> bool:
-    """Standalone pass: if a «Содержание»/«Оглавление» heading already exists,
-    reformat it to centered non-bold without changing TOC entries.
+    """Standalone pass: ensure the «Содержание»/«Оглавление» heading is
+    centered/non-bold AND every TOC entry paragraph (auto field or manual)
+    is rendered without bold/underline.
 
-    This runs even when ``generate_toc`` would otherwise skip the document
-    (because it already has a TOC field), ensuring the client's request
-    «убрать жирное выделение, слово Содержание по центру» is always applied.
+    Runs even when ``generate_toc`` skips the document (because it already
+    has a TOC field), so the client's requirement «убрать жирное выделение
+    в содержании» is always applied to both the heading and the entries.
     """
     changed = False
+    heading_elem = None
     for para in doc.paragraphs:
         text = (para.text or "").strip()
         if _TOC_HEADING_RE.match(text):
+            heading_elem = para._element
             if _normalize_existing_toc_heading(para, details):
                 changed = True
             break
+
+    entry_paragraphs_changed = 0
+    toc_indices = detect_toc_paragraph_indices(doc)
+    if toc_indices:
+        paragraphs = doc.paragraphs
+        for idx in toc_indices:
+            if idx >= len(paragraphs):
+                continue
+            p_elem = paragraphs[idx]._element
+            if p_elem is heading_elem:
+                continue
+            if _clear_bold_underline_in_paragraph(p_elem):
+                entry_paragraphs_changed += 1
+                changed = True
+
+    if entry_paragraphs_changed:
+        details.append(
+            f"Оглавление: снято жирное/подчёркнутое начертание у {entry_paragraphs_changed} записей"
+        )
     return changed

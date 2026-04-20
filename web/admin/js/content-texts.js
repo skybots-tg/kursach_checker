@@ -4,6 +4,10 @@
 // приветствием на /start. Показываем его в этой вкладке отдельной карточкой.
 const START_PAYLOAD = '__start__';
 
+// Ключ системного текста приветствия — редактируется на вкладке
+// «Системные тексты», но мы прокидываем туда быструю кнопку из карточки /start.
+const WELCOME_TEXT_KEY = 'bot.welcome';
+
 let _textsMenuItems = [];
 let _textsStartItem = null;
 
@@ -108,15 +112,19 @@ function renderStartMessages() {
     <div class="msg-card-body" id="msg-body-${m.id}" style="display:none">
       <p class="form-hint" style="margin-top:0">
         Эти сообщения отправятся <strong>до</strong> приветствия при команде /start.
-        Подойдут видео-кружок, фото, GIF или дополнительный текст.
-        Само приветствие настраивается в блоке «Системные тексты», ключ
-        <code>bot.welcome</code>.
+        Подойдут видео-кружок, фото, GIF или дополнительный текст —
+        нажмите «Добавить сообщение» и выберите нужный тип.
       </p>
       <div id="msg-list-${m.id}" class="msg-list">${loadingHtml()}</div>
-      <button class="btn btn-secondary btn-sm" style="margin-top:10px"
-        onclick="showAddMessage(${m.id})">
-        ${iconSvg('plus', 14)} Добавить сообщение
-      </button>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+        <button class="btn btn-secondary btn-sm" onclick="showAddMessage(${m.id})">
+          ${iconSvg('plus', 14)} Добавить сообщение
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="editStartWelcomeText()"
+          title="Открыть редактор приветствия (bot.welcome) на вкладке «Системные тексты»">
+          ${iconSvg('edit', 14)} Изменить текст приветствия
+        </button>
+      </div>
     </div>
   </div>`;
 }
@@ -414,8 +422,25 @@ function updateMsgPreview() {
   if (box) box.innerHTML = sanitizeTgHtml(getVal('msg-text'));
 }
 
+async function editStartWelcomeText() {
+  if (typeof loadSystemTexts !== 'function' || typeof editSystemText !== 'function') {
+    toast('Не удалось открыть редактор приветствия', 'error');
+    return;
+  }
+  _contentTab = 'system';
+  history.replaceState(null, '', '#content/system');
+  try {
+    await loadSystemTexts();
+  } catch (err) {
+    toast('Ошибка загрузки системных текстов: ' + err.message, 'error');
+    return;
+  }
+  editSystemText(WELCOME_TEXT_KEY);
+}
+
 /* ---------- Expose ---------- */
 window.loadContentTexts = loadContentTexts;
+window.editStartWelcomeText = editStartWelcomeText;
 window.sanitizeTgHtml = sanitizeTgHtml;
 window.updateMsgPreview = updateMsgPreview;
 window.editText = editText;
