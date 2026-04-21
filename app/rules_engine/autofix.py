@@ -35,6 +35,7 @@ from app.rules_engine.autofix_helpers import (
     fix_remove_italic,
     fix_remove_strange_chars,
     fix_section_margins,
+    fix_table_cell_spacing,
     is_field_code_run,
     is_manual_list_para,
     iter_table_cell_paragraphs,
@@ -43,7 +44,10 @@ from app.rules_engine.autofix_helpers import (
     remove_empty_paras_before_page_breaks,
     remove_manual_page_breaks,
 )
-from app.rules_engine.autofix_bibliography import fix_bibliography_order_and_numbering
+from app.rules_engine.autofix_bibliography import (
+    enforce_bibliography_entry_formatting,
+    fix_bibliography_order_and_numbering,
+)
 from app.rules_engine.autofix_captions import fix_caption_positions
 from app.rules_engine.autofix_lists import convert_informal_lists
 from app.rules_engine.autofix_toc import insert_toc_field
@@ -52,6 +56,7 @@ from app.rules_engine.autofix_whitespace import (
     collapse_excessive_empty_paras,
     fix_normalize_left_indent,
     fix_strip_leading_whitespace,
+    normalize_doc_defaults_spacing,
 )
 from app.rules_engine.checks_content import ALLOWED_CHARS_RE as _ALLOWED_CHARS_RE
 from app.rules_engine.heading_detection import (
@@ -181,6 +186,12 @@ def apply_safe_autofixes(
     changed = False
     details: list[str] = []
     change_count = 0
+
+    if cfg.normalize_line_spacing or cfg.normalize_spacing_before_after:
+        if normalize_doc_defaults_spacing(
+            doc, cfg.line_spacing, cfg.space_after_pt, details,
+        ):
+            changed = True
 
     if cfg.normalize_font_color:
         if fix_font_color_styles(doc, details):
@@ -422,10 +433,18 @@ def apply_safe_autofixes(
         if para_count >= max_paragraphs:
             break
         t_text = (t_para.text or "").strip()
-        if not t_text:
-            continue
         t_label = f"Абзац таблицы #{t_idx + 1}"
         t_touched = False
+        if cfg.normalize_line_spacing:
+            if fix_table_cell_spacing(
+                t_para, cfg.table_line_spacing, t_label, details,
+            ):
+                changed = True
+                t_touched = True
+        if not t_text:
+            if t_touched:
+                para_count += 1
+            continue
         if cfg.normalize_font_color:
             if fix_font_color_runs(t_para, t_label, details):
                 changed = True
@@ -467,6 +486,16 @@ def apply_safe_autofixes(
 
     if cfg.fix_bibliography:
         if fix_bibliography_order_and_numbering(doc, details):
+            changed = True
+        if enforce_bibliography_entry_formatting(
+            doc,
+            details,
+            line_spacing=cfg.line_spacing,
+            first_line_indent_mm=cfg.first_line_indent_mm,
+            space_after_pt=cfg.space_after_pt,
+            font_name=cfg.font_name,
+            font_size_pt=cfg.font_size_pt,
+        ):
             changed = True
 
     if getattr(cfg, "fix_caption_positions", True):

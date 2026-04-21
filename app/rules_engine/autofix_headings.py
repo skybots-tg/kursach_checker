@@ -278,6 +278,7 @@ def ensure_blank_before_subheadings(doc, details: list[str]) -> bool:
 _CHAPTER_PAGE_BREAK_RE = re.compile(
     r"^\s*(?:"
     r"глава\s+\d+"
+    r"|\d+\s+глава"
     r"|введение"
     r"|заключение"
     r"|содержание"

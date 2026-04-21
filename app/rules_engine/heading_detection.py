@@ -10,7 +10,8 @@ import re
 # ── Regex patterns (moved from checks_advanced to remove private-import coupling) ──
 
 CHAPTER_RE = re.compile(
-    r"^[^\w]*(?:глава|chapter|раздел)\s+\d", re.IGNORECASE
+    r"^[^\w]*(?:(?:глава|chapter|раздел)\s+\d|\d+\s+глава)",
+    re.IGNORECASE,
 )
 TOC_LINE_TAIL_RE = re.compile(r"\s{2,}\d[\d\-–—]+")
 
@@ -46,6 +47,7 @@ KNOWN_SECTION_TITLES: frozenset[str] = frozenset({
 _LEVEL1_RE = re.compile(
     r"^(?:"
     r"глава\s+\d+\.?"
+    r"|\d+\s+глава"
     r"|введение"
     r"|заключение"
     r"|выводы"
@@ -71,7 +73,8 @@ _LEVEL3_RE = re.compile(r"^\d+\.\d+\.\d+\.?\s+\S")
 _LEVEL4_RE = re.compile(r"^\d+\.\d+\.\d+\.\d+\.?\s+\S")
 
 _CHAPTER_NUM_RE = re.compile(
-    r"^(?:глава|раздел|chapter)\s+(\d+)", re.IGNORECASE
+    r"^(?:(?:глава|раздел|chapter)\s+(\d+)|(\d+)\s+глава)",
+    re.IGNORECASE,
 )
 
 _MAX_HEADING_TEXT_LEN = 200
@@ -136,7 +139,8 @@ def extract_heading_number_parts(text: str) -> list[int] | None:
     if not m:
         chapter_m = _CHAPTER_NUM_RE.match(t)
         if chapter_m:
-            return [int(chapter_m.group(1))]
+            num = chapter_m.group(1) or chapter_m.group(2)
+            return [int(num)]
         return None
     parts = m.group(1).split(".")
     try:

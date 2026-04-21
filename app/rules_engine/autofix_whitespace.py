@@ -15,6 +15,65 @@ logger = logging.getLogger(__name__)
 _WS_CHARS = " \t\xa0"
 
 
+def normalize_doc_defaults_spacing(
+    doc, line_spacing: float, space_after_pt: float, details: list[str],
+) -> bool:
+    """Force ``<w:docDefaults>/<w:pPrDefault>/<w:pPr>/<w:spacing>`` to body values.
+
+    Word's default ``pPrDefault`` from a fresh template typically declares
+    ``after="200" line="276"`` (10 pt below every paragraph and ~1.15 line
+    height). Empty paragraphs inherit those defaults regardless of any
+    paragraph-level normalization that autofix performs only on non-empty
+    text. The accumulated 10 pt blocks at section ends produce the visible
+    «extra spacing after text» the customer reported. Rewriting the document
+    defaults removes the gap once for the whole document and keeps non-empty
+    paragraphs unchanged because they still carry their own explicit
+    ``<w:spacing>`` overrides set by the rest of autofix.
+    """
+    from docx.oxml import OxmlElement
+
+    doc_defaults = doc.styles.element.find(qn("w:docDefaults"))
+    if doc_defaults is None:
+        return False
+    pPrDefault = doc_defaults.find(qn("w:pPrDefault"))
+    if pPrDefault is None:
+        pPrDefault = OxmlElement("w:pPrDefault")
+        doc_defaults.append(pPrDefault)
+    pPr = pPrDefault.find(qn("w:pPr"))
+    if pPr is None:
+        pPr = OxmlElement("w:pPr")
+        pPrDefault.append(pPr)
+    spacing = pPr.find(qn("w:spacing"))
+    if spacing is None:
+        spacing = OxmlElement("w:spacing")
+        pPr.append(spacing)
+
+    target_after = str(int(round(space_after_pt * 20)))
+    target_line = str(int(round(line_spacing * 240)))
+
+    changed = False
+    if spacing.get(qn("w:after")) != target_after:
+        spacing.set(qn("w:after"), target_after)
+        changed = True
+    if spacing.get(qn("w:line")) != target_line:
+        spacing.set(qn("w:line"), target_line)
+        changed = True
+    if spacing.get(qn("w:lineRule")) != "auto":
+        spacing.set(qn("w:lineRule"), "auto")
+        changed = True
+    before_attr = spacing.get(qn("w:before"))
+    if before_attr is not None and before_attr != "0":
+        spacing.set(qn("w:before"), "0")
+        changed = True
+
+    if changed:
+        details.append(
+            f"Стили: интервал по умолчанию -> {line_spacing}, "
+            f"после абзаца {space_after_pt} пт"
+        )
+    return changed
+
+
 def fix_strip_leading_whitespace(
     paragraph, para_label: str, details: list[str],
 ) -> bool:

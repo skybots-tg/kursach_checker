@@ -4,7 +4,9 @@ from __future__ import annotations
 import logging
 import re
 
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
+from docx.shared import Mm, Pt
 
 logger = logging.getLogger(__name__)
 
@@ -62,17 +64,27 @@ def _find_bibliography_range(doc) -> tuple[int, int, int] | None:
 
     ``heading_idx`` is the paragraph index of the «Список литературы» heading,
     ``start_idx`` is the first paragraph after it and ``end_idx`` is exclusive.
+
+    Prefers a paragraph whose style is a real ``Heading``/``Заголовок`` over
+    plain-text matches so we ignore the «Список литературы» row inside the
+    auto-generated table of contents at the start of the document.
     """
     paragraphs = doc.paragraphs
-    bib_heading_idx: int | None = None
+    heading_match: int | None = None
+    fallback_match: int | None = None
 
     for idx, para in enumerate(paragraphs):
         text = (para.text or "").strip()
         low = text.lower()
-        if low in _BIBLIOGRAPHY_HEADINGS or _BIBLIOGRAPHY_PATTERN.match(low):
-            bib_heading_idx = idx
+        if not (low in _BIBLIOGRAPHY_HEADINGS or _BIBLIOGRAPHY_PATTERN.match(low)):
+            continue
+        if _is_heading_para(para):
+            heading_match = idx
             break
+        if fallback_match is None:
+            fallback_match = idx
 
+    bib_heading_idx = heading_match if heading_match is not None else fallback_match
     if bib_heading_idx is None:
         return None
 
@@ -255,3 +267,107 @@ def fix_bibliography_order_and_numbering(
         f"Библиография: источники пронумерованы 1–{num - 1}"
     )
     return True
+
+
+def enforce_bibliography_entry_formatting(
+    doc,
+    details: list[str],
+    *,
+    line_spacing: float,
+    first_line_indent_mm: float,
+    space_after_pt: float,
+    font_name: str,
+    font_size_pt: float,
+) -> bool:
+    """Force every bibliography entry to follow body-text formatting rules.
+
+    Customer requirement: bibliography entries must use the same paragraph
+    settings as body text (1.25 cm first-line indent, 1.5 line spacing,
+    Times New Roman 14 pt, no bold, no underline) and stay justified. The
+    «Список литературы» heading itself is left untouched — it is promoted
+    to ``Heading 1`` elsewhere and inherits its own formatting.
+    """
+    rng = _find_bibliography_range(doc)
+    if rng is None:
+        return False
+
+    _, start, end = rng
+    paragraphs = doc.paragraphs
+    touched = 0
+
+    for idx in range(start, end):
+        para = paragraphs[idx]
+        text = (para.text or "").strip()
+        if not text:
+            continue
+        if _is_heading_para(para):
+            continue
+        if _apply_entry_formatting(
+            para, line_spacing, first_line_indent_mm, space_after_pt,
+            font_name, font_size_pt,
+        ):
+            touched += 1
+
+    if touched:
+        details.append(
+            f"Библиография: {touched} записей приведено к телу "
+            f"(абзац {first_line_indent_mm} мм, интервал {line_spacing}, без жирного)"
+        )
+    return touched > 0
+
+
+def _apply_entry_formatting(
+    para,
+    line_spacing: float,
+    first_line_indent_mm: float,
+    space_after_pt: float,
+    font_name: str,
+    font_size_pt: float,
+) -> bool:
+    pf = para.paragraph_format
+    changed = False
+
+    if para.alignment != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
+        para.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
+        changed = True
+    if pf.first_line_indent is None or abs(float(pf.first_line_indent.mm) - first_line_indent_mm) > 0.5:
+        pf.first_line_indent = Mm(first_line_indent_mm)
+        changed = True
+    if pf.left_indent is not None and int(pf.left_indent) != 0:
+        pf.left_indent = Mm(0)
+        changed = True
+    if pf.line_spacing is None or abs(float(pf.line_spacing) - line_spacing) > 0.05:
+        pf.line_spacing = line_spacing
+        changed = True
+    if pf.space_after is None or abs(float(pf.space_after.pt) - space_after_pt) > 0.2:
+        pf.space_after = Pt(space_after_pt)
+        changed = True
+    if pf.space_before is not None and int(pf.space_before) != 0:
+        pf.space_before = Pt(0)
+        changed = True
+
+    pPr = para._element.find(qn("w:pPr"))
+    if pPr is not None:
+        rPr_default = pPr.find(qn("w:rPr"))
+        if rPr_default is not None:
+            for tag_name in ("w:b", "w:bCs", "w:u"):
+                el = rPr_default.find(qn(tag_name))
+                if el is not None:
+                    rPr_default.remove(el)
+                    changed = True
+
+    for run in para.runs:
+        if run.bold:
+            run.bold = False
+            changed = True
+        if run.font.underline:
+            run.font.underline = False
+            changed = True
+        if font_name and run.font.name != font_name:
+            run.font.name = font_name
+            changed = True
+        if run.font.size is None or abs(float(run.font.size.pt) - font_size_pt) > 0.2:
+            run.font.size = Pt(font_size_pt)
+            changed = True
+
+    return changed

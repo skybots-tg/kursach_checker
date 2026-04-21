@@ -8,7 +8,7 @@ from pathlib import Path
 from docx import Document
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Mm, RGBColor
+from docx.shared import Mm, Pt, RGBColor
 from lxml import etree
 
 from app.rules_engine.style_resolve import effective_first_line_indent_mm
@@ -445,6 +445,36 @@ def iter_table_cell_paragraphs(doc: Document):
         if eid not in seen:
             seen.add(eid)
             yield p
+
+
+def fix_table_cell_spacing(
+    paragraph, target_line_spacing: float, label: str, details: list[str],
+) -> bool:
+    """Force single (or configured) line spacing on a table-cell paragraph.
+
+    Body text uses 1.5 line spacing by spec, but table cells must stay
+    compact — the customer explicitly asked for «одинарный интервал в
+    таблице». The same call also wipes any inherited ``space_after`` and
+    first-line indent so cell content does not break the row layout.
+    """
+    pf = paragraph.paragraph_format
+    changed = False
+    eff_ls = pf.line_spacing
+    if eff_ls is None or abs(float(eff_ls) - target_line_spacing) > 0.05:
+        pf.line_spacing = target_line_spacing
+        changed = True
+    if pf.space_after is None or int(pf.space_after) != 0:
+        pf.space_after = Pt(0)
+        changed = True
+    if pf.space_before is not None and int(pf.space_before) != 0:
+        pf.space_before = Pt(0)
+        changed = True
+    if pf.first_line_indent is not None and int(pf.first_line_indent) != 0:
+        pf.first_line_indent = Mm(0)
+        changed = True
+    if changed:
+        details.append(f"{label}: интервал {target_line_spacing}, без отступов")
+    return changed
 
 def fix_remove_highlight(paragraph, para_label: str, details: list[str]) -> bool:
     _HL, _SHD = qn("w:highlight"), qn("w:shd")

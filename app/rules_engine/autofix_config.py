@@ -42,6 +42,7 @@ class AutoFixConfig:
     informal_list_min_consecutive: int
     section_break_sections: list[str]
     line_spacing: float
+    table_line_spacing: float
     first_line_indent_mm: float
     space_before_pt: float
     space_after_pt: float
@@ -119,6 +120,9 @@ class AutoFixConfig:
             informal_list_min_consecutive=int(lfp.get("min_consecutive", 2)),
             section_break_sections=[s.lower() for s in sb.get("sections_requiring_break", _dflt_sec)],
             line_spacing=float(body.get("line_spacing", 1.5)),
+            table_line_spacing=float(
+                p.get("table_line_spacing", ad.get("table_line_spacing", 1.0))
+            ),
             first_line_indent_mm=float(body.get("first_line_indent_mm", 12.5)),
             space_before_pt=float(p.get("space_before_pt", ad.get("space_before_pt", 0))),
             space_after_pt=float(p.get("space_after_pt", ad.get("space_after_pt", 0))),
