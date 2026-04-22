@@ -7,6 +7,9 @@ import re
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
+from docx.text.run import Run
+
+_HYPERLINK_STYLE_IDS = frozenset({"Hyperlink", "FollowedHyperlink"})
 
 logger = logging.getLogger(__name__)
 
@@ -356,18 +359,61 @@ def _apply_entry_formatting(
                     rPr_default.remove(el)
                     changed = True
 
-    for run in para.runs:
-        if run.bold:
-            run.bold = False
+    for r_el in para._element.iter(qn("w:r")):
+        if _normalize_run(r_el, para, font_name, font_size_pt):
             changed = True
-        if run.font.underline:
-            run.font.underline = False
-            changed = True
-        if font_name and run.font.name != font_name:
-            run.font.name = font_name
-            changed = True
-        if run.font.size is None or abs(float(run.font.size.pt) - font_size_pt) > 0.2:
-            run.font.size = Pt(font_size_pt)
+
+    return changed
+
+
+def _normalize_run(
+    r_el,
+    parent,
+    font_name: str,
+    font_size_pt: float,
+) -> bool:
+    """Strip hyperlink/bold/underline styling from ``<w:r>`` and enforce font.
+
+    Covers run elements nested inside ``<w:hyperlink>`` (which ``Paragraph.runs``
+    does not expose) and removes ``w:rStyle`` references to the ``Hyperlink``
+    character style together with any direct color override, so the entry is
+    rendered as plain body text even for URL links.
+    """
+    run = Run(r_el, parent)
+    changed = False
+
+    if run.bold:
+        run.bold = False
+        changed = True
+    if run.font.underline:
+        run.font.underline = False
+        changed = True
+    if font_name and run.font.name != font_name:
+        run.font.name = font_name
+        changed = True
+    if run.font.size is None or abs(float(run.font.size.pt) - font_size_pt) > 0.2:
+        run.font.size = Pt(font_size_pt)
+        changed = True
+
+    rPr = r_el.find(qn("w:rPr"))
+    if rPr is None:
+        return changed
+
+    rStyle = rPr.find(qn("w:rStyle"))
+    if rStyle is not None and rStyle.get(qn("w:val")) in _HYPERLINK_STYLE_IDS:
+        rPr.remove(rStyle)
+        changed = True
+
+    color = rPr.find(qn("w:color"))
+    if color is not None:
+        rPr.remove(color)
+        changed = True
+
+    bCs = rPr.find(qn("w:bCs"))
+    if bCs is not None:
+        val = bCs.get(qn("w:val"))
+        if val not in ("0", "false"):
+            bCs.set(qn("w:val"), "0")
             changed = True
 
     return changed
