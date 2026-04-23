@@ -168,6 +168,20 @@ class Check(Base):
     finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
+class Referral(Base):
+    __tablename__ = "referrals"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    inviter_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    # Приглашённый — ровно один инвайтер на пользователя, поэтому UNIQUE.
+    invited_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"), unique=True, index=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    bonus_granted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    bonus_amount: Mapped[int] = mapped_column(Integer, default=0)
+
+
 class BotContent(Base):
     __tablename__ = "bot_content"
 

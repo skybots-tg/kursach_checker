@@ -7,6 +7,7 @@ from aiogram.types import FSInputFile, InlineKeyboardButton, InlineKeyboardMarku
 from app.core.config import settings
 from app.integrations.telegram_constants import CHECK_UPLOAD_NEW_CB
 from app.services.bot_texts import get_text
+from app.services.referrals import REFERRAL_BONUS_AMOUNT
 
 logger = logging.getLogger(__name__)
 
@@ -164,3 +165,37 @@ def _escape(text: str) -> str:
         .replace("<", "&lt;")
         .replace(">", "&gt;")
     )
+
+
+async def notify_referral_bonus(inviter_telegram_id: int) -> None:
+    """Сообщить инвайтеру о начисленном реферальном бонусе.
+
+    Бонус фиксирован ``REFERRAL_BONUS_AMOUNT`` и выдаётся сразу при входе
+    приглашённого друга в бота (не требует проверки).
+    """
+    if not settings.telegram_bot_token:
+        return
+
+    amount = REFERRAL_BONUS_AMOUNT
+    word = "проверка" if amount == 1 else "проверки"
+    text = (
+        f"\U0001F525 <b>+{amount} бесплатная {word}</b>\n"
+        "\n"
+        "твой друг зашёл в бота по твоей реф-ссылке — "
+        f"мы начислили тебе <b>+{amount} бесплатное пользование</b>.\n"
+        "\n"
+        f"зови ещё друзей — за каждого даём +{amount} \U0001F680"
+    )
+
+    bot = Bot(token=settings.telegram_bot_token)
+    try:
+        await bot.send_message(
+            chat_id=inviter_telegram_id, text=text, parse_mode="HTML",
+        )
+    except Exception:
+        logger.exception(
+            "Failed to notify inviter telegram_id=%s about referral bonus",
+            inviter_telegram_id,
+        )
+    finally:
+        await bot.session.close()
