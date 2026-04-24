@@ -34,6 +34,7 @@ from app.rules_engine.autofix_helpers import (
     fix_remove_highlight,
     fix_remove_italic,
     fix_remove_strange_chars,
+    fix_strip_markdown_artifacts,
     fix_section_margins,
     fix_table_cell_spacing,
     is_field_code_run,
@@ -441,6 +442,10 @@ def apply_safe_autofixes(
                 changed = True
                 para_touched = True
 
+        if fix_strip_markdown_artifacts(paragraph, para_label, details):
+            changed = True
+            para_touched = True
+
         if not is_center_like and cfg.normalize_alignment:
             if eff_align != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
                 paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
@@ -545,6 +550,9 @@ def apply_safe_autofixes(
             if fix_dashes_in_text(t_para, t_label, details):
                 changed = True
                 t_touched = True
+        if fix_strip_markdown_artifacts(t_para, t_label, details):
+            changed = True
+            t_touched = True
         if t_touched:
             para_count += 1
 

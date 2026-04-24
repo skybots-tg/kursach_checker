@@ -254,6 +254,82 @@ def fix_dashes_in_text(paragraph, para_label: str, details: list[str]) -> bool:
         details.append(f"{para_label}: \u0434\u043b\u0438\u043d\u043d\u043e\u0435 \u0442\u0438\u0440\u0435 (\u2014) -> \u0441\u0440\u0435\u0434\u043d\u0435\u0435 (\u2013)")
     return changed
 
+
+# Markdown emphasis markers that frequently leak in when students paste
+# answers from ChatGPT / other LLMs. We strip the surrounding markers but
+# keep the inner text intact (pure cleanup — we do NOT try to convert the
+# emphasis to actual Word bold/italic, because GPT often over-bolds and the
+# resulting body text would look messy in academic work).
+_MD_BOLD_RE = re.compile(r"\*\*([^*\n]{1,500}?)\*\*")
+_MD_BOLD_ALT_RE = re.compile(r"__([^_\n]{1,500}?)__")
+_MD_STRIKE_RE = re.compile(r"~~([^~\n]{1,500}?)~~")
+# Single ``*foo*`` is risky — a lone ``*`` is also a common bullet glyph
+# and footnote marker. We strip it only when:
+#   * the opening ``*`` is NOT touching a word/asterisk on its left (so
+#     ``Сноска*1`` and ``a*b`` survive), and there is NO whitespace right
+#     after it (so ``* пункт`` and ``5 * 3`` survive);
+#   * the closing ``*`` is NOT touching a word/asterisk on its right and
+#     has NO whitespace right before it.
+_MD_ITALIC_STAR_RE = re.compile(r"(?<![\w*])\*(?!\s)([^*\n]{1,300}?)(?<!\s)\*(?![\w*])")
+
+
+def fix_strip_markdown_artifacts(
+    paragraph, para_label: str, details: list[str],
+) -> bool:
+    """Strip leftover Markdown emphasis markers (``**bold**`` / ``__bold__``
+    / ``~~strike~~`` / a conservative ``*italic*``) from each run's text.
+
+    Operates per-run, which covers the dominant copy-from-GPT scenario
+    where the entire pasted block lands as a single run with the markers
+    inline. The inner text is preserved verbatim; only the surrounding
+    delimiters disappear.
+    """
+    changed = False
+    removed_kinds: list[str] = []
+    for run in paragraph.runs:
+        if is_field_code_run(run):
+            continue
+        original = run.text
+        if not original:
+            continue
+        if "**" not in original and "__" not in original and "~~" not in original and "*" not in original:
+            continue
+
+        new_text = original
+        if "**" in new_text:
+            replaced = _MD_BOLD_RE.sub(r"\1", new_text)
+            if replaced != new_text:
+                if "**" not in removed_kinds:
+                    removed_kinds.append("**")
+                new_text = replaced
+        if "__" in new_text:
+            replaced = _MD_BOLD_ALT_RE.sub(r"\1", new_text)
+            if replaced != new_text:
+                if "__" not in removed_kinds:
+                    removed_kinds.append("__")
+                new_text = replaced
+        if "~~" in new_text:
+            replaced = _MD_STRIKE_RE.sub(r"\1", new_text)
+            if replaced != new_text:
+                if "~~" not in removed_kinds:
+                    removed_kinds.append("~~")
+                new_text = replaced
+        if "*" in new_text:
+            replaced = _MD_ITALIC_STAR_RE.sub(r"\1", new_text)
+            if replaced != new_text:
+                if "*" not in removed_kinds:
+                    removed_kinds.append("*")
+                new_text = replaced
+
+        if new_text != original:
+            run.text = new_text
+            changed = True
+
+    if changed:
+        kinds = ", ".join(removed_kinds) if removed_kinds else "Markdown"
+        details.append(f"{para_label}: убраны Markdown-выделения ({kinds})")
+    return changed
+
 def fix_caption_trailing_dot(paragraph, para_label: str, details: list[str]) -> bool:
     text = paragraph.text.strip()
     if not text.endswith(".") or text.endswith(".."):
