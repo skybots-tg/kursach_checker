@@ -164,31 +164,44 @@ def _build_toc_entry(text: str, level: int) -> OxmlElement:
     return p
 
 
-def _build_toc_elements(
-    headings: list[tuple[str, int]],
-) -> tuple[OxmlElement, list[OxmlElement], OxmlElement]:
-    """Return (begin_p, entry_paragraphs, end_p) for a multi-paragraph TOC field."""
+def _make_fld_run(fld_type: str) -> OxmlElement:
+    r = OxmlElement("w:r")
+    fld = OxmlElement("w:fldChar")
+    fld.set(qn("w:fldCharType"), fld_type)
+    r.append(fld)
+    return r
 
-    begin_p = OxmlElement("w:p")
-    r1 = OxmlElement("w:r")
-    fld_begin = OxmlElement("w:fldChar")
-    fld_begin.set(qn("w:fldCharType"), "begin")
-    r1.append(fld_begin)
-    begin_p.append(r1)
 
-    r2 = OxmlElement("w:r")
+def _make_instr_run(instr_text: str) -> OxmlElement:
+    r = OxmlElement("w:r")
     instr = OxmlElement("w:instrText")
     instr.set(qn("xml:space"), "preserve")
-    instr.text = r' TOC \o "1-3" \h \z \u '
-    r2.append(instr)
-    begin_p.append(r2)
+    instr.text = instr_text
+    r.append(instr)
+    return r
 
-    r3 = OxmlElement("w:r")
-    fld_sep = OxmlElement("w:fldChar")
-    fld_sep.set(qn("w:fldCharType"), "separate")
-    r3.append(fld_sep)
-    begin_p.append(r3)
 
+def _prepend_runs_after_pPr(p_elem: OxmlElement, runs: list[OxmlElement]) -> None:
+    """Insert *runs* right after ``<w:pPr>`` (or at index 0) preserving order."""
+    pPr = p_elem.find(qn("w:pPr"))
+    insert_idx = (list(p_elem).index(pPr) + 1) if pPr is not None else 0
+    for offset, r in enumerate(runs):
+        p_elem.insert(insert_idx + offset, r)
+
+
+def _build_toc_elements(
+    headings: list[tuple[str, int]],
+) -> list[OxmlElement]:
+    """Return TOC paragraphs with field markers folded into the entries.
+
+    Word allows the begin / separate / end markers of a TOC field to live
+    inside the same paragraphs as the TOC entries. We deliberately do NOT
+    emit standalone empty paragraphs for the markers because such "ghost"
+    paragraphs are not removable by the empty-paragraph cleanup (they
+    contain ``<w:fldChar>``, not ``<w:t>``) and frequently get pushed
+    onto a page of their own when the TOC fills the first page,
+    producing a blank page right after the table of contents.
+    """
     entries = [_build_toc_entry(text, level) for text, level in headings]
 
     if not entries:
@@ -200,14 +213,21 @@ def _build_toc_elements(
         fallback.append(r_fb)
         entries = [fallback]
 
-    end_p = OxmlElement("w:p")
-    r_end = OxmlElement("w:r")
-    fld_end = OxmlElement("w:fldChar")
-    fld_end.set(qn("w:fldCharType"), "end")
-    r_end.append(fld_end)
-    end_p.append(r_end)
+    # Field begin / instr / separate go BEFORE the first entry's text run,
+    # but after its <w:pPr>, so the entry text still renders correctly.
+    _prepend_runs_after_pPr(
+        entries[0],
+        [
+            _make_fld_run("begin"),
+            _make_instr_run(r' TOC \o "1-3" \h \z \u '),
+            _make_fld_run("separate"),
+        ],
+    )
 
-    return begin_p, entries, end_p
+    # Field end goes at the very end of the last entry.
+    entries[-1].append(_make_fld_run("end"))
+
+    return entries
 
 
 def _build_toc_heading_paragraph(text: str = "Содержание") -> OxmlElement:
@@ -489,10 +509,10 @@ def _remove_manual_toc_entries(doc, heading_idx: int, details: list[str]) -> boo
 def _insert_toc_after(anchor, doc, details: list[str]) -> bool:
     """Insert a multi-paragraph TOC field right after *anchor* element."""
     headings = _collect_headings(doc)
-    begin_p, entries, end_p = _build_toc_elements(headings)
+    entries = _build_toc_elements(headings)
 
     last = anchor
-    for elem in [begin_p, *entries, end_p]:
+    for elem in entries:
         last.addnext(elem)
         last = elem
 

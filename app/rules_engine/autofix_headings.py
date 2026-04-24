@@ -424,10 +424,23 @@ def enforce_chapter_page_breaks(doc, details: list[str]) -> bool:
 
     # Map body-paragraph index (as seen by doc.paragraphs) to element, so we
     # can translate detect_toc_paragraph_indices into element checks.
+    # IMPORTANT: the «Содержание»/«Оглавление» heading itself is always
+    # part of these index sets (both ``_detect_manual_toc_indices`` and
+    # ``detect_manual_toc_entry_indices`` start their range with the
+    # heading paragraph). We deliberately do NOT add it to ``toc_elements``
+    # — otherwise the heading would never receive ``page_break_before`` and
+    # the table of contents would stay glued to the title page, which is
+    # exactly the bug users keep reporting.
     body_paragraphs = doc.paragraphs
     for i in list(toc_indices):
         if 0 <= i < len(body_paragraphs):
-            toc_elements.add(body_paragraphs[i]._element)
+            para = body_paragraphs[i]
+            text_norm = re.sub(
+                r"\s+", " ", (para.text or "")
+            ).strip().lower().rstrip(":.;")
+            if text_norm in ("содержание", "оглавление"):
+                continue
+            toc_elements.add(para._element)
 
     changed = 0
     for idx, para in enumerate(paragraphs):
