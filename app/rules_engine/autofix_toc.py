@@ -12,7 +12,11 @@ import re
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-from app.rules_engine.heading_detection import TOC_LINE_TAIL_RE
+from app.rules_engine.heading_detection import (
+    TOC_LINE_TAIL_RE,
+    KNOWN_SECTION_TITLES,
+    detect_heading_candidate,
+)
 from app.rules_engine.style_resolve import detect_toc_paragraph_indices
 
 logger = logging.getLogger(__name__)
@@ -288,43 +292,198 @@ def _normalize_existing_toc_heading(para, details: list[str]) -> bool:
     return changed
 
 
-def _remove_manual_toc_entries(doc, heading_idx: int, details: list[str]) -> bool:
-    """Remove manually typed TOC lines that follow the TOC heading."""
-    body = doc.element.body
-    paragraphs = doc.paragraphs
-    to_remove: list = []
+_TOC_MAX_ENTRIES = 60
+_TOC_MAX_TRAILING_BLANKS = 4
+# «Глава N», «Раздел N», roman numerals, section numbers, appendix markers —
+# typical TOC line starts even when the author didn't type page numbers.
+_TOC_ENTRY_START_RE = re.compile(
+    r"^(?:"
+    r"глава\s+\d"
+    r"|раздел\s+\d"
+    r"|chapter\s+\d"
+    r"|\d+\s+глава"
+    r"|\d{1,2}\.\d{1,2}(?:\.\d{1,2}){0,2}\.?\s"
+    r"|[IVXLCM]{1,6}\s+[А-ЯЁA-Zа-яёa-z]"
+    r"|приложени[еяй]\s"
+    r")",
+    re.IGNORECASE,
+)
 
-    for para in paragraphs[heading_idx + 1:]:
+
+def _looks_like_toc_line(text: str) -> bool:
+    """Heuristic: does *text* look like a manual TOC entry?
+
+    Accepts three families of lines:
+      1) entries with an explicit page number tail (``\\s{2,}\\d`` / dots+num /
+         tab+num);
+      2) entries that start with a recognizable heading marker — chapter
+         keyword, section number «1.2», roman numeral chapter, «Приложение»;
+      3) short lines matching a well-known section title
+         («Введение», «Заключение», «Список литературы», …).
+    """
+    stripped = text.strip()
+    if not stripped or len(stripped) > 200:
+        return False
+
+    if TOC_LINE_TAIL_RE.search(stripped):
+        return True
+    if re.search(r"\.{2,}\s*\d+\s*$", stripped):
+        return True
+    if re.search(r"\t+\d+\s*$", stripped):
+        return True
+    if _TOC_ENTRY_START_RE.match(stripped):
+        return True
+
+    low = stripped.lower().rstrip(":.;")
+    if low in KNOWN_SECTION_TITLES:
+        return True
+    # Known section title followed by a short inline suffix, e.g.
+    # «Список использованных источников информации».
+    for title in KNOWN_SECTION_TITLES:
+        if low.startswith(title + " ") and len(low) <= len(title) + 40:
+            return True
+
+    return False
+
+
+def _is_strong_toc_break(para) -> bool:
+    """Return True when *para* is clearly the start of real body content, so
+    the TOC block must stop at this paragraph.
+    """
+    style_name = (getattr(para.style, "name", "") or "").lower()
+    style_id = (getattr(para.style, "style_id", "") or "")
+    if "heading" in style_name or "заголов" in style_name:
+        return True
+    if style_id.startswith("Heading"):
+        return True
+    pf = para.paragraph_format
+    if pf.page_break_before:
+        return True
+    return False
+
+
+def _normalize_for_dup(text: str) -> str:
+    """Collapse whitespace + lowercase + strip trailing punctuation/numbers
+    so that ``"Введение"`` and the body heading ``"ВВЕДЕНИЕ"`` (or
+    ``"Введение  3"``) compare equal. Used to detect the moment when the
+    manual TOC block ends and the body starts repeating its own titles."""
+    base = re.sub(r"\s+", " ", text).strip().lower()
+    base = re.sub(r"[\.\u2026]+\s*\d+\s*$", "", base)  # «… 12»
+    base = re.sub(r"\s{2,}\d+\s*$", "", base)         # «  12»
+    base = re.sub(r"\t+\d+\s*$", "", base)
+    base = base.rstrip(":.;\u2014\u2013- ")
+    return base
+
+
+def _scan_manual_toc_block(
+    paragraphs, heading_idx: int,
+) -> tuple[list[int], list[object]]:
+    """Walk the paragraphs after the TOC heading and collect TOC entries.
+
+    Stops when:
+      * a paragraph styled as a real heading or with a page break is met
+        (``_is_strong_toc_break``), or
+      * a non-TOC-looking paragraph appears, or
+      * the same normalized title has been seen earlier in the block —
+        this is the typical sign that the body has started repeating the
+        section name (``"Введение"`` in the TOC vs ``"ВВЕДЕНИЕ"`` in the
+        body), or
+      * we exhausted ``_TOC_MAX_ENTRIES``.
+
+    Returns (indices, elements) — the indices include the heading itself.
+    """
+    indices: list[int] = [heading_idx]
+    elements: list[object] = []
+    seen_norm: set[str] = set()
+    blank_streak = 0
+    entries_seen = 0
+
+    for offset in range(heading_idx + 1, len(paragraphs)):
+        para = paragraphs[offset]
+        if entries_seen >= _TOC_MAX_ENTRIES:
+            break
         text = (para.text or "").strip()
         if not text:
-            to_remove.append(para._element)
+            blank_streak += 1
+            if blank_streak > _TOC_MAX_TRAILING_BLANKS and entries_seen == 0:
+                break
+            indices.append(offset)
+            elements.append(para._element)
             continue
-        style_name = (getattr(para.style, "name", "") or "").lower()
-        is_heading = "heading" in style_name or "заголов" in style_name
-        if is_heading or len(text) > 200:
+        if _is_strong_toc_break(para):
             break
-        if TOC_LINE_TAIL_RE.search(text) or _looks_like_toc_line(text):
-            to_remove.append(para._element)
-        else:
+        if not _looks_like_toc_line(text):
             break
+        norm = _normalize_for_dup(text)
+        if norm and norm in seen_norm:
+            # Same title appeared earlier in the TOC list → this is the
+            # body section repeating its name. Stop here without absorbing.
+            break
+        if norm:
+            seen_norm.add(norm)
+        indices.append(offset)
+        elements.append(para._element)
+        blank_streak = 0
+        entries_seen += 1
+
+    if not elements:
+        return [heading_idx], []
+
+    # Trim purely-blank tail entries we may have accumulated.
+    while elements and not (elements[-1].itertext() and any(
+        (t or "").strip() for t in elements[-1].itertext()
+    )):
+        elements.pop()
+        indices.pop()
+
+    return indices, elements
+
+
+def detect_manual_toc_entry_indices(doc) -> set[int]:
+    """Return paragraph indices of a manual (plain-text) TOC block.
+
+    Use this alongside ``detect_toc_paragraph_indices`` so passes that
+    normally skip TOCs don't accidentally touch manual TOC text (e.g. by
+    promoting a TOC line to a ``Heading N`` style, which would later
+    prevent the TOC block from being removed before inserting the field).
+    """
+    paragraphs = doc.paragraphs
+    for idx, p in enumerate(paragraphs):
+        text = (p.text or "").strip()
+        if _TOC_HEADING_RE.match(text):
+            indices, _ = _scan_manual_toc_block(paragraphs, idx)
+            return set(indices)
+    return set()
+
+
+def _remove_manual_toc_entries(doc, heading_idx: int, details: list[str]) -> bool:
+    """Remove manually typed TOC lines that follow the TOC heading.
+
+    A single student-written TOC frequently contains a mix of entry styles:
+    the first few lines have page numbers (``Введение  3-4``), while the
+    subsequent subsection lines do not (``1.1. Определение и классификация
+    заболевания``). The previous implementation stopped at the first entry
+    without a number tail and left the rest of the TOC behind — the final
+    document then ended up with two tables of contents glued together.
+
+    This version treats any paragraph that *looks like a TOC line* (entry
+    start marker, numbered subsection, appendix, well-known section title
+    or number-tail) as still belonging to the TOC block. Up to four blank
+    or inline paragraphs in a row are also absorbed so stray empty lines
+    inside the block don't interrupt it. The block ends as soon as we see
+    a real heading, a page-break-before paragraph, or a paragraph that
+    clearly belongs to the body.
+    """
+    paragraphs = doc.paragraphs
+    _, to_remove = _scan_manual_toc_block(paragraphs, heading_idx)
 
     for elem in to_remove:
-        body.remove(elem)
+        if elem.getparent() is not None:
+            elem.getparent().remove(elem)
 
     if to_remove:
         details.append(f"Оглавление: удалено {len(to_remove)} ручных записей содержания")
     return len(to_remove) > 0
-
-
-def _looks_like_toc_line(text: str) -> bool:
-    """Heuristic: short line ending with a page number or dots+number."""
-    if len(text) > 150:
-        return False
-    if re.search(r"\.{2,}\s*\d+\s*$", text):
-        return True
-    if re.search(r"\t+\d+\s*$", text):
-        return True
-    return False
 
 
 def _insert_toc_after(anchor, doc, details: list[str]) -> bool:

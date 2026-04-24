@@ -9,6 +9,7 @@ from sqlalchemy import select
 
 from app.core.config import settings
 from app.db.session import SessionLocal
+from app.integrations.telegram_bot_factory import make_bot
 from app.models import Broadcast, BroadcastStatus, User
 
 logger = logging.getLogger(__name__)
@@ -70,7 +71,7 @@ async def run_broadcast(
     """Send broadcast to users. If telegram_ids given, send only to them."""
     if not settings.telegram_bot_token:
         return
-    bot = Bot(token=settings.telegram_bot_token)
+    bot = make_bot()
     try:
         if telegram_ids is not None:
             tg_ids = telegram_ids
@@ -120,7 +121,7 @@ async def test_send_broadcast(
     """Send test broadcast to specific users. Does not update any broadcast status."""
     if not settings.telegram_bot_token:
         return {"sent": 0, "failed": 0}
-    bot = Bot(token=settings.telegram_bot_token)
+    bot = make_bot()
     try:
         sent = 0
         failed = 0

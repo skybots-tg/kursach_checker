@@ -1,10 +1,10 @@
 import logging
 from pathlib import Path
 
-from aiogram import Bot
 from aiogram.types import FSInputFile, InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.core.config import settings
+from app.integrations.telegram_bot_factory import make_bot
 from app.integrations.telegram_constants import CHECK_UPLOAD_NEW_CB
 from app.services.bot_texts import get_text
 from app.services.referrals import REFERRAL_BONUS_AMOUNT
@@ -49,7 +49,7 @@ async def notify_check_ready(
     if not settings.telegram_bot_token:
         return
 
-    bot = Bot(token=settings.telegram_bot_token)
+    bot = make_bot()
     try:
         if report:
             report_text = await _format_report(report)
@@ -95,7 +95,7 @@ async def notify_check_error(
         return
 
     text = await get_text("notify.check_error", check_id=check_id)
-    bot = Bot(token=settings.telegram_bot_token)
+    bot = make_bot()
     try:
         await bot.send_message(chat_id=telegram_id, text=text)
     finally:
@@ -187,7 +187,7 @@ async def notify_referral_bonus(inviter_telegram_id: int) -> None:
         f"зови ещё друзей — за каждого даём +{amount} \U0001F680"
     )
 
-    bot = Bot(token=settings.telegram_bot_token)
+    bot = make_bot()
     try:
         await bot.send_message(
             chat_id=inviter_telegram_id, text=text, parse_mode="HTML",

@@ -5,9 +5,33 @@ import logging
 import re
 
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 from docx.text.run import Run
+
+
+def _force_run_underline_none(r_el) -> bool:
+    """Stamp ``<w:u w:val="none"/>`` on the run's ``<w:rPr>``.
+
+    Required because character styles like ``Hyperlink`` add underline
+    via style inheritance — only an explicit run-level ``w:u`` override
+    disables them. Returns True if anything changed.
+    """
+    rPr = r_el.find(qn("w:rPr"))
+    if rPr is None:
+        rPr = OxmlElement("w:rPr")
+        r_el.insert(0, rPr)
+    u = rPr.find(qn("w:u"))
+    if u is None:
+        u = OxmlElement("w:u")
+        rPr.append(u)
+        u.set(qn("w:val"), "none")
+        return True
+    if u.get(qn("w:val")) != "none":
+        u.set(qn("w:val"), "none")
+        return True
+    return False
 
 _HYPERLINK_STYLE_IDS = frozenset({"Hyperlink", "FollowedHyperlink"})
 
@@ -385,8 +409,14 @@ def _normalize_run(
     if run.bold:
         run.bold = False
         changed = True
-    if run.font.underline:
-        run.font.underline = False
+    # Always force ``<w:u w:val="none"/>`` — ``run.font.underline`` is
+    # ``None`` when the underline is inherited from a character style,
+    # and truthy only for explicit run-level overrides. Testing the
+    # truthiness would skip inherited cases and leave bibliography URLs
+    # underlined. We write ``None`` to drop any run-level element and
+    # then explicitly stamp ``none`` so inheritance cannot take effect.
+    run.font.underline = None
+    if _force_run_underline_none(r_el):
         changed = True
     if font_name and run.font.name != font_name:
         run.font.name = font_name

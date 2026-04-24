@@ -50,7 +50,8 @@ from app.rules_engine.autofix_bibliography import (
 )
 from app.rules_engine.autofix_captions import fix_caption_positions
 from app.rules_engine.autofix_lists import convert_informal_lists
-from app.rules_engine.autofix_toc import insert_toc_field
+from app.rules_engine.autofix_toc import insert_toc_field, detect_manual_toc_entry_indices
+from app.rules_engine.autofix_split_breaks import split_soft_break_paragraphs
 from app.rules_engine.autofix_toc_normalize import normalize_toc_heading_formatting
 from app.rules_engine.autofix_whitespace import (
     collapse_excessive_empty_paras,
@@ -63,6 +64,8 @@ from app.rules_engine.heading_detection import (
     CHAPTER_RE as _CHAPTER_RE,
     TOC_LINE_TAIL_RE as _TOC_LINE_TAIL_RE,
     detect_heading_candidate,
+    detect_heading_via_toc,
+    normalize_toc_entry,
 )
 from app.rules_engine.findings import Finding
 from app.rules_engine.style_resolve import (
@@ -146,6 +149,49 @@ def _is_list_para(paragraph) -> bool:
     sname = (getattr(paragraph.style, "name", "") or "").lower()
     return sname in _LIST_STYLE_NAMES
 
+def _collect_toc_heading_levels(doc, toc_indices: set[int]) -> dict[str, int]:
+    """Gather normalized TOC-entry titles → heading level for promotion.
+
+    Used as a *fallback* heading detector: when a body paragraph does not
+    match the normal «Глава N» / «1.2.» regexes but the document's table
+    of contents explicitly lists it as a section title, we still promote
+    it to a Word heading. This makes the autofix robust against loose
+    wordings students use — e.g. "I Организационно-технологический
+    раздел" or all-caps titles that skip the «Глава» keyword.
+
+    Returns a dict mapping ``normalize_toc_entry(text)`` → ``level`` so
+    the caller can decide how deeply to nest the heading. Level is
+    inferred from the entry prefix: ``1.2`` → 2, ``1.2.3`` → 3, otherwise
+    level 1.
+    """
+    result: dict[str, int] = {}
+    paragraphs = doc.paragraphs
+    for idx in toc_indices:
+        if idx < 0 or idx >= len(paragraphs):
+            continue
+        raw = (paragraphs[idx].text or "").strip()
+        if not raw or len(raw) > 250:
+            continue
+        key = normalize_toc_entry(raw)
+        if not key:
+            continue
+        # Skip generic TOC headers themselves.
+        if key in ("содержание", "оглавление"):
+            continue
+        level = _infer_toc_entry_level(key)
+        result[key] = level
+    return result
+
+
+def _infer_toc_entry_level(normalized: str) -> int:
+    import re as _re
+    m = _re.match(r"^(\d+(?:\.\d+)*)", normalized)
+    if m:
+        parts = m.group(1).split(".")
+        return max(1, min(len(parts), 3))
+    return 1
+
+
 @dataclass(slots=True)
 class AutoFixResult:
     output_file_path: str | None
@@ -179,13 +225,34 @@ def apply_safe_autofixes(
         logger.warning("Autofix: cannot open DOCX %s", file_path)
         return AutoFixResult(output_file_path=None, details=[])
 
+    changed = False
+    details: list[str] = []
+    change_count = 0
+
+    # Convert soft line breaks into proper paragraph marks BEFORE we compute
+    # any indices (the splitting renumbers paragraphs). Students often press
+    # Shift+Enter between sentences, which prevents the body-text indent and
+    # paragraph-style passes from working correctly because the entire
+    # introduction lives in a single ``<w:p>``.
+    if split_soft_break_paragraphs(doc, details):
+        changed = True
+
     toc_indices: set[int] = set()
     if skip_toc:
         toc_indices = detect_toc_paragraph_indices(doc)
 
-    changed = False
-    details: list[str] = []
-    change_count = 0
+    # Manual TOC lines usually don't carry a page-number tail (students just
+    # type the section titles). ``detect_toc_paragraph_indices`` only catches
+    # entries that do, so we augment ``toc_indices`` with a more permissive
+    # heuristic pass before running any heading/normalization logic. This is
+    # essential: without it, the subsequent TOC-based heading promotion would
+    # mark the manual TOC lines themselves as headings and ``_remove_manual_
+    # toc_entries`` would then refuse to delete them, leaving two tables of
+    # contents glued together in the output.
+    toc_indices |= detect_manual_toc_entry_indices(doc)
+
+    toc_heading_levels: dict[str, int] = _collect_toc_heading_levels(doc, toc_indices)
+
 
     if cfg.normalize_line_spacing or cfg.normalize_spacing_before_after:
         if normalize_doc_defaults_spacing(
@@ -235,7 +302,12 @@ def apply_safe_autofixes(
         if cfg.strip_leading_whitespace and idx not in toc_indices:
             if fix_strip_leading_whitespace(paragraph, para_label, details):
                 changed = True
-        if cfg.fix_section_breaks and idx > 0 and len(text) <= 100:
+        if (
+            cfg.fix_section_breaks
+            and idx > 0
+            and len(text) <= 100
+            and idx not in toc_indices
+        ):
             if not _TOC_LINE_TAIL_RE.search(text):
                 needs_break = any(s in text.lower() for s in cfg.section_break_sections)
                 if not needs_break:
@@ -299,6 +371,8 @@ def apply_safe_autofixes(
 
         is_heading = _is_heading_para(paragraph)
         candidate_level = detect_heading_candidate(text) if not is_heading else None
+        if not is_heading and candidate_level is None and toc_heading_levels:
+            candidate_level = detect_heading_via_toc(text, toc_heading_levels)
 
         if is_heading:
             if not skip_headings_safety and cfg.normalize_headings:

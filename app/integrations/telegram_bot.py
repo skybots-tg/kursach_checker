@@ -15,9 +15,9 @@ from aiogram.types import (
 )
 from sqlalchemy import select
 
-from app.core.config import settings
 from app.db.session import SessionLocal
 from app.integrations.analytics_middleware import AnalyticsMiddleware
+from app.integrations.telegram_bot_factory import make_bot
 from app.integrations.telegram_check_handler import handle_document
 from app.integrations.telegram_constants import (
     CHECK_UPLOAD_NEW_CB,
@@ -327,7 +327,7 @@ async def _navigate_to_item(
 # ---------------------------------------------------------------------------
 
 async def run_bot() -> None:
-    bot = Bot(token=settings.telegram_bot_token)
+    bot = make_bot()
     dp = Dispatcher()
     dp.message.middleware(AnalyticsMiddleware())
     dp.callback_query.middleware(AnalyticsMiddleware())

@@ -10,6 +10,7 @@ from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
 from app.rules_engine.autofix_helpers import is_field_code_run
+from app.rules_engine.style_resolve import detect_toc_paragraph_indices
 
 logger = logging.getLogger(__name__)
 
@@ -183,9 +184,12 @@ def enforce_subheading_alignment(doc, cfg, details: list[str]) -> bool:
     if not center1 and not center2plus:
         return False
 
+    toc_elems = _collect_toc_paragraph_elements(doc)
     chapters_changed = 0
     subs_changed = 0
     for para in doc.paragraphs:
+        if para._element in toc_elems:
+            continue
         level = _para_heading_level(para)
         if level is None:
             continue
@@ -235,10 +239,13 @@ def ensure_blank_before_subheadings(doc, details: list[str]) -> bool:
     if len(paragraphs) < 2:
         return False
 
+    toc_elems = _collect_toc_paragraph_elements(doc)
     changed = False
     inserted = 0
 
     for para in paragraphs:
+        if para._element in toc_elems:
+            continue
         level = _para_heading_level(para)
         if level is None or level < 2:
             continue
@@ -297,6 +304,66 @@ _CHAPTER_PAGE_BREAK_RE = re.compile(
 )
 
 
+def _collect_toc_paragraph_elements(doc) -> set:
+    """Return every ``<w:p>`` element that lives inside a TOC field.
+
+    Covers both shapes a TOC field can take:
+      * an inline ``<w:fldChar>``-based field that spans several body
+        paragraphs between ``begin`` and ``end``;
+      * an auto-TOC wrapped in ``<w:sdt>/<w:sdtContent>`` content control.
+
+    Also includes ``<w:p>`` elements nested inside any ``<w:sdt>`` whose
+    descendant ``<w:instrText>`` references ``TOC``.
+    """
+    result: set = set()
+    body = doc.element.body
+    fld_tag = qn("w:fldChar")
+    instr_tag = qn("w:instrText")
+    p_tag = qn("w:p")
+    sdt_tag = qn("w:sdt")
+    sdt_content_tag = qn("w:sdtContent")
+    fld_type_attr = qn("w:fldCharType")
+
+    field_stack: list[str] = []
+    in_toc = False
+    p_elements = list(body.iterchildren(p_tag))
+    for p_elem in p_elements:
+        was_in_toc = in_toc
+        for elem in p_elem.iter():
+            tag = elem.tag
+            if tag == fld_tag:
+                ftype = elem.get(fld_type_attr)
+                if ftype == "begin":
+                    field_stack.append("unknown")
+                elif ftype == "separate":
+                    if field_stack and field_stack[-1] == "unknown":
+                        field_stack[-1] = "other"
+                    if field_stack and field_stack[-1] == "TOC":
+                        in_toc = True
+                elif ftype == "end" and field_stack:
+                    ended = field_stack.pop()
+                    if ended == "TOC":
+                        in_toc = False
+            elif tag == instr_tag:
+                text = elem.text or ""
+                if field_stack and field_stack[-1] == "unknown" and "TOC" in text.upper():
+                    field_stack[-1] = "TOC"
+                    in_toc = True
+        if in_toc or was_in_toc:
+            result.add(p_elem)
+
+    for sdt in body.iter(sdt_tag):
+        instr_texts = "".join((el.text or "") for el in sdt.iter(instr_tag))
+        if "TOC" not in instr_texts.upper():
+            continue
+        content = sdt.find(sdt_content_tag)
+        if content is None:
+            continue
+        for sub in content.iter(p_tag):
+            result.add(sub)
+    return result
+
+
 def _iter_chapter_break_paragraphs(doc):
     """Yield every Paragraph eligible for chapter page-break enforcement.
 
@@ -345,9 +412,28 @@ def enforce_chapter_page_breaks(doc, details: list[str]) -> bool:
     other top-level chapter title.
     """
     paragraphs = list(_iter_chapter_break_paragraphs(doc))
+    try:
+        toc_indices = detect_toc_paragraph_indices(doc)
+    except Exception:
+        toc_indices = set()
+
+    # Build a set of <w:p> elements inside any TOC field (both inline
+    # fldChar-based and SDT-wrapped) so we can skip them regardless of the
+    # body index, which changes as the document is mutated elsewhere.
+    toc_elements = _collect_toc_paragraph_elements(doc)
+
+    # Map body-paragraph index (as seen by doc.paragraphs) to element, so we
+    # can translate detect_toc_paragraph_indices into element checks.
+    body_paragraphs = doc.paragraphs
+    for i in list(toc_indices):
+        if 0 <= i < len(body_paragraphs):
+            toc_elements.add(body_paragraphs[i]._element)
+
     changed = 0
     for idx, para in enumerate(paragraphs):
         if idx == 0:
+            continue
+        if para._element in toc_elements:
             continue
         text = (para.text or "").strip()
         if not text:
@@ -386,8 +472,11 @@ def enforce_heading_bold(doc, cfg, details: list[str]) -> bool:
 
     from docx.oxml import OxmlElement
 
+    toc_elems = _collect_toc_paragraph_elements(doc)
     changed = 0
     for para in doc.paragraphs:
+        if para._element in toc_elems:
+            continue
         level = _para_heading_level(para)
         if level is None or level > 3:
             continue

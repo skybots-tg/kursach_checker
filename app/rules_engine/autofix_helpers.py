@@ -391,6 +391,19 @@ def set_table_width_pct100(tbl) -> None:
     tp.append(tw)
 
 def clamp_overflow_table_widths(doc: Document, details: list[str]) -> bool:
+    """Force every table to fit within the page content area.
+
+    Handles three separate overflow shapes:
+      1. ``<w:tblW w:type="dxa">`` with a value larger than the content
+         width — switch the table to 100 % preferred width.
+      2. ``<w:tblW w:type="auto">`` with ``<w:tblGrid>`` columns whose
+         total width exceeds the content area. Word would render that
+         as a fixed grid sticking out past the right margin, so we
+         reset the preferred width to 100 % and scale the grid columns
+         proportionally down into the content area.
+      3. Negative or positive ``<w:tblInd>`` that shifts the table
+         outside of the left margin — force the indent back to zero.
+    """
     limit = min_content_width_twips(doc)
     slop = 72
     changed_any = False
@@ -404,23 +417,149 @@ def clamp_overflow_table_widths(doc: Document, details: list[str]) -> bool:
         tp = el.tblPr
         if tp is None:
             continue
+
+        if _reset_negative_tbl_ind(tp):
+            changed_any = True
+
         tw = tp.find(qn("w:tblW"))
-        if tw is None:
-            continue
-        if tw.get(qn("w:type")) != "dxa":
-            continue
-        wr = tw.get(qn("w:w"))
-        try:
-            wv = int(wr) if wr is not None else 0
-        except (TypeError, ValueError):
-            continue
-        if wv <= limit + slop:
-            continue
-        set_table_width_pct100(el)
-        changed_any = True
+        wv = 0
+        wtype = None
+        if tw is not None:
+            wtype = tw.get(qn("w:type"))
+            try:
+                wv = int(tw.get(qn("w:w")) or 0)
+            except (TypeError, ValueError):
+                wv = 0
+
+        grid_total = _sum_grid_cols(el)
+
+        overflow_dxa = wtype == "dxa" and wv > limit + slop
+        overflow_auto = (
+            wtype in (None, "auto")
+            and grid_total > 0
+            and grid_total > limit + slop
+        )
+
+        if overflow_dxa:
+            set_table_width_pct100(el)
+            changed_any = True
+        elif overflow_auto:
+            set_table_width_pct100(el)
+            if _scale_tbl_grid(el, limit):
+                changed_any = True
+            else:
+                changed_any = True
+
     if changed_any:
-        details.append("\u0422\u0430\u0431\u043b\u0438\u0446\u044b: \u0448\u0438\u0440\u0438\u043d\u0430 \u043f\u0440\u0438\u0432\u0435\u0434\u0435\u043d\u0430 \u043a \u043e\u0431\u043b\u0430\u0441\u0442\u0438 \u0442\u0435\u043a\u0441\u0442\u0430 (100%)")
+        details.append(
+            "Таблицы: ширина приведена к области текста (100%)"
+        )
     return changed_any
+
+
+def _reset_negative_tbl_ind(tbl_pr) -> bool:
+    """Zero out ``<w:tblInd>`` when it would push the table past the left
+    margin (negative value). Positive indents ≥ 1 cm usually are intentional
+    and get left alone.
+    """
+    ind = tbl_pr.find(qn("w:tblInd"))
+    if ind is None:
+        return False
+    try:
+        val = int(ind.get(qn("w:w")) or 0)
+    except (TypeError, ValueError):
+        return False
+    if val >= 0:
+        return False
+    ind.set(qn("w:w"), "0")
+    ind.set(qn("w:type"), "dxa")
+    return True
+
+
+def _sum_grid_cols(tbl) -> int:
+    grid = tbl.find(qn("w:tblGrid"))
+    if grid is None:
+        return 0
+    total = 0
+    for col in grid.findall(qn("w:gridCol")):
+        try:
+            total += int(col.get(qn("w:w")) or 0)
+        except (TypeError, ValueError):
+            pass
+    return total
+
+
+def _scale_tbl_grid(tbl, target_twips: int) -> bool:
+    """Scale every ``<w:gridCol>`` so the grid fits ``target_twips``.
+
+    Also scales cell-level ``<w:tcW type="dxa">`` widths in every row so
+    column widths match. Returns True on changes.
+    """
+    grid = tbl.find(qn("w:tblGrid"))
+    if grid is None:
+        return False
+    cols = grid.findall(qn("w:gridCol"))
+    widths: list[int] = []
+    for col in cols:
+        try:
+            widths.append(int(col.get(qn("w:w")) or 0))
+        except (TypeError, ValueError):
+            widths.append(0)
+    total = sum(widths)
+    if total <= 0:
+        return False
+    factor = target_twips / total
+    if factor >= 1.0:
+        return False
+    changed = False
+    new_widths = [max(1, int(w * factor)) for w in widths]
+    for col, nw in zip(cols, new_widths):
+        if col.get(qn("w:w")) != str(nw):
+            col.set(qn("w:w"), str(nw))
+            changed = True
+    for row in tbl.findall(qn("w:tr")):
+        for tc, nw in _iter_cells_with_width(row, new_widths):
+            if tc is None:
+                continue
+            tcPr = tc.find(qn("w:tcPr"))
+            if tcPr is None:
+                continue
+            tcW = tcPr.find(qn("w:tcW"))
+            if tcW is None:
+                continue
+            if tcW.get(qn("w:type")) != "dxa":
+                continue
+            if tcW.get(qn("w:w")) != str(nw):
+                tcW.set(qn("w:w"), str(nw))
+                changed = True
+    return changed
+
+
+def _iter_cells_with_width(row, new_widths: list[int]):
+    """Yield ``(tc_element, target_width)`` pairs for every ``<w:tc>`` in
+    *row*, matching them to the scaled grid columns by occupation order.
+
+    If a cell spans multiple columns (``<w:gridSpan>``), its target width
+    is the sum of the spanned column widths.
+    """
+    tcs = row.findall(qn("w:tc"))
+    col_idx = 0
+    for tc in tcs:
+        tcPr = tc.find(qn("w:tcPr"))
+        span = 1
+        if tcPr is not None:
+            gs = tcPr.find(qn("w:gridSpan"))
+            if gs is not None:
+                try:
+                    span = max(1, int(gs.get(qn("w:val")) or 1))
+                except (TypeError, ValueError):
+                    span = 1
+        if col_idx + span <= len(new_widths):
+            width = sum(new_widths[col_idx:col_idx + span])
+        else:
+            width = 0
+        yield tc, width
+        col_idx += span
 
 def min_content_width_twips(doc: Document) -> int:
     w = []
@@ -456,6 +595,12 @@ def fix_table_cell_spacing(
     compact — the customer explicitly asked for «одинарный интервал в
     таблице». The same call also wipes any inherited ``space_after`` and
     first-line indent so cell content does not break the row layout.
+
+    We always force ``first_line_indent`` and ``left_indent`` to zero at
+    the XML level, not just when already explicitly set, because cell
+    paragraphs frequently inherit the 1.25 cm red-line from the default
+    body style and keeping it collapses two-column tables into an
+    unreadable mess.
     """
     pf = paragraph.paragraph_format
     changed = False
@@ -469,11 +614,47 @@ def fix_table_cell_spacing(
     if pf.space_before is not None and int(pf.space_before) != 0:
         pf.space_before = Pt(0)
         changed = True
-    if pf.first_line_indent is not None and int(pf.first_line_indent) != 0:
-        pf.first_line_indent = Mm(0)
+    if _force_table_cell_zero_indent(paragraph):
         changed = True
     if changed:
         details.append(f"{label}: интервал {target_line_spacing}, без отступов")
+    return changed
+
+
+def _force_table_cell_zero_indent(paragraph) -> bool:
+    """Hard-zero first-line and left indents on the paragraph XML.
+
+    Rewrites ``<w:ind>`` directly so style-inherited indents (``1.25 cm``
+    from Normal) cannot seep through and re-add the red line inside a
+    table cell. Returns ``True`` when anything changed.
+    """
+    p_elem = paragraph._element
+    pPr = p_elem.find(qn("w:pPr"))
+    changed = False
+    if pPr is None:
+        pPr = OxmlElement("w:pPr")
+        p_elem.insert(0, pPr)
+        changed = True
+    ind = pPr.find(qn("w:ind"))
+    if ind is None:
+        ind = OxmlElement("w:ind")
+        pPr.append(ind)
+        changed = True
+    for attr in ("w:firstLine", "w:left", "w:start"):
+        if ind.get(qn(attr)) != "0":
+            ind.set(qn(attr), "0")
+            changed = True
+    for attr in ("w:hanging", "w:firstLineChars", "w:leftChars", "w:startChars"):
+        if ind.get(qn(attr)) is not None:
+            del ind.attrib[qn(attr)]
+            changed = True
+    pf = paragraph.paragraph_format
+    if pf.first_line_indent is not None and int(pf.first_line_indent) != 0:
+        pf.first_line_indent = Mm(0)
+        changed = True
+    if pf.left_indent is not None and int(pf.left_indent) != 0:
+        pf.left_indent = Mm(0)
+        changed = True
     return changed
 
 def fix_remove_highlight(paragraph, para_label: str, details: list[str]) -> bool:

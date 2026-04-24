@@ -47,6 +47,13 @@ async def _try_cached_send(
         # Кэшированная копия не даст подставить персональные значения,
         # поэтому для таких сообщений кешом не пользуемся.
         return None
+    if msg.message_type == "text":
+        # У ``copyMessage`` нет параметра отключения предпросмотра ссылок —
+        # копия наследует состояние оригинала. Чтобы гарантированно
+        # отправлять текст без превью (см. дефолт ``link_preview_is_disabled``
+        # в ``make_bot``), для чисто текстовых сообщений кеш не используем
+        # и каждый раз шлём заново через ``send_message``.
+        return None
     if not msg.cached_chat_id or not msg.cached_message_id:
         return None
     try:
@@ -175,9 +182,14 @@ async def send_content_messages(
                 tg_user_id=tg_user_id,
             )
             if sent_msg:
-                if not message_needs_personalization(msg):
+                cacheable = (
+                    not message_needs_personalization(msg)
+                    and msg.message_type != "text"
+                )
+                if cacheable:
                     # Персонализированные сообщения кешировать нельзя —
                     # иначе все получат копию с чужой реф-ссылкой.
+                    # Чисто текстовые тоже не кешируем: см. _try_cached_send.
                     msg.cached_chat_id = sent_msg.chat.id
                     msg.cached_message_id = sent_msg.message_id
                 sent_ids.append(sent_msg.message_id)

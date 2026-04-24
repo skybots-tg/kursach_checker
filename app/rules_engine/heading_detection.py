@@ -77,7 +77,31 @@ _CHAPTER_NUM_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Roman-numeral chapter prefix like "I Организационно-технологический раздел"
+# or "II РАСЧЕТНО-ТЕХНОЛОГИЧЕСКАЯ ЧАСТЬ" — no word «Глава», just a roman
+# numeral followed by at least one space and a substantive title.
+_ROMAN_CHAPTER_RE = re.compile(
+    r"^(?P<num>[IVXLCM]{1,6})\s+[А-ЯЁA-Z][\wА-ЯЁа-яё\- ]{2,}$",
+)
+# Appendix like "Приложение А. ..." or "Приложение А ..." (без точки)
+_APPENDIX_RE = re.compile(
+    r"^приложени[еяй]\s+[\dА-ЯЁA-Z]",
+    re.IGNORECASE,
+)
+
 _MAX_HEADING_TEXT_LEN = 200
+_ROMAN_VALID = frozenset({
+    "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX",
+    "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX",
+    "XX",
+})
+
+
+def _looks_like_roman_chapter(text: str) -> bool:
+    m = _ROMAN_CHAPTER_RE.match(text)
+    if not m:
+        return False
+    return m.group("num") in _ROMAN_VALID
 
 
 def detect_heading_candidate(text: str) -> int | None:
@@ -92,6 +116,10 @@ def detect_heading_candidate(text: str) -> int | None:
         return 1
     if _CHAPTER_NUM_RE.match(t):
         return 1
+    if _APPENDIX_RE.match(t):
+        return 1
+    if _looks_like_roman_chapter(t):
+        return 1
     if _LEVEL4_RE.match(t):
         return 4
     if _LEVEL3_RE.match(t):
@@ -99,6 +127,43 @@ def detect_heading_candidate(text: str) -> int | None:
     if _LEVEL2_RE.match(t):
         return 2
     return None
+
+
+_TOC_TAIL_STRIP_RE = re.compile(
+    r"(?:\s*\.{2,}\s*\d[\d\-\u2013\u2014]*\s*|\s{2,}\d[\d\-\u2013\u2014]*\s*|\t+\d[\d\-\u2013\u2014]*\s*)$"
+)
+
+
+def normalize_toc_entry(text: str) -> str:
+    """Strip page-number tail, trailing punctuation and outer whitespace.
+
+    Used to compare a body paragraph against a TOC entry — the TOC usually
+    types the same title but suffixes a page number or a dotted leader, so
+    a literal string equality check would fail.
+    """
+    t = text.strip()
+    if not t:
+        return ""
+    t = _TOC_TAIL_STRIP_RE.sub("", t)
+    t = t.rstrip(" .:;\t")
+    return re.sub(r"\s+", " ", t).strip().lower()
+
+
+def detect_heading_via_toc(text: str, toc_titles: set[str] | dict[str, int]) -> int | None:
+    """Return heading level when *text* matches a known TOC entry.
+
+    ``toc_titles`` may be either a ``set`` of normalized titles (all treated
+    as level 1) or a mapping ``{title -> level}`` when the caller already
+    figured out the hierarchy from section numbering.
+    """
+    if not toc_titles:
+        return None
+    key = normalize_toc_entry(text)
+    if not key:
+        return None
+    if isinstance(toc_titles, dict):
+        return toc_titles.get(key)
+    return 1 if key in toc_titles else None
 
 
 _HEADING_PREFIX_RE = re.compile(
