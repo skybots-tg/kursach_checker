@@ -52,6 +52,7 @@ from app.rules_engine.autofix_captions import fix_caption_positions
 from app.rules_engine.autofix_lists import convert_informal_lists
 from app.rules_engine.autofix_toc import insert_toc_field, detect_manual_toc_entry_indices
 from app.rules_engine.autofix_split_breaks import split_soft_break_paragraphs
+from app.rules_engine.autofix_redundant_breaks import remove_redundant_manual_page_breaks
 from app.rules_engine.autofix_toc_normalize import normalize_toc_heading_formatting
 from app.rules_engine.autofix_whitespace import (
     collapse_excessive_empty_paras,
@@ -595,6 +596,8 @@ def apply_safe_autofixes(
             changed = True
 
     if changed:
+        if remove_redundant_manual_page_breaks(doc, details):
+            pass
         if remove_empty_paras_before_page_breaks(doc, details):
             pass
 
