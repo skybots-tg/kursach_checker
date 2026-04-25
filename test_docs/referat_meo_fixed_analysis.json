@@ -1,0 +1,4248 @@
+{
+  "total_paragraphs": 178,
+  "total_tables": 6,
+  "paragraphs": [
+    {
+      "idx": 0,
+      "text": "Федеральное государственное бюджетное образовательное учреждение",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Федеральное государственное бюджетное образовательное учреждение",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 1,
+      "text": "высшего образования",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "высшего образования",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 2,
+      "text": "Российская академия народного хозяйства",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Российская академия народного хозяйства",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 3,
+      "text": "и государственной службы",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "и государственной службы",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 4,
+      "text": "при Президенте Российской Федерации",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "при Президенте Российской Федерации",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 5,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 6,
+      "text": "Институт государственной службы и управления",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Институт государственной службы и управления",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 7,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 8,
+      "text": "Факультет международного регионоведения и регионального управления",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Факультет международного регионоведения и регионального управления",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 9,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 10,
+      "text": "Направление подготовки: 41.03.01 «Зарубежное регионоведение»",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Направление подготовки: 41.03.01 «Зарубежное регионоведение»",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 11,
+      "text": "Образовательная программа «Управление международными проектами и программами»",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Образовательная программа «Управление международными проектами и программами»",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 12,
+      "text": "РЕФЕРАТ",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "РЕФЕРАТ",
+          "font": "Times New Roman",
+          "size_pt": 16.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 13,
+      "text": "по дисциплине «Мировая экономика и международные экономические отношения»",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "по дисциплине «Мировая экономика и международные экономические отношения»",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 14,
+      "text": "на тему:",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "на тему:",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 15,
+      "text": "«Международные экономические отношения на этапе постиндустриального развития мировой экономики»",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "«Международные экономические отношения на этапе постиндустриального развития мир",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 16,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 17,
+      "text": "Студентка:",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "RIGHT (2)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Студентка:",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 18,
+      "text": "студент 1 курса",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "RIGHT (2)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "студент 1 курса",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 19,
+      "text": "очной формы обучения",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "RIGHT (2)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "очной формы обучения",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 20,
+      "text": "__________________________",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "RIGHT (2)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "__________________________",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 21,
+      "text": "подпись _________",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "RIGHT (2)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "подпись _________",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 22,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "RIGHT (2)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 23,
+      "text": "Руководитель работы:",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "RIGHT (2)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Руководитель работы:",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 24,
+      "text": "__________________________",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "RIGHT (2)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "__________________________",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 25,
+      "text": "подпись ________________",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "RIGHT (2)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "подпись ________________",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 26,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 27,
+      "text": "«____» _____________ 2026 г.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "«____» _____________ 2026 г.",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 28,
+      "text": "Москва, 2026",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Москва, 2026",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 29,
+      "text": "Оглавление",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "Оглавление",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 30,
+      "text": "Введение",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        },
+        {
+          "text": "Введение",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 31,
+      "text": "1. Теоретические основы международных экономических отношений в постиндустриальной экономике",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1. Теоретические основы международных экономических отношений в постиндустриальн",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 32,
+      "text": "1.1. Понятие постиндустриального развития и его влияние на мировое хозяйство",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1.1. Понятие постиндустриального развития и его влияние на мировое хозяйство",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 33,
+      "text": "1.2. Трансформация содержания международных экономических отношений",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1.2. Трансформация содержания международных экономических отношений",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 34,
+      "text": "2. Практический анализ современных форм МЭО",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2. Практический анализ современных форм МЭО",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 35,
+      "text": "2.1. Международная торговля товарами и услугами в условиях сервитизации",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2.1. Международная торговля товарами и услугами в условиях сервитизации",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 36,
+      "text": "2.2. Цифровизация, данные и интеллектуальная собственность как новые объекты обмена",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2.2. Цифровизация, данные и интеллектуальная собственность как новые объекты обм",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 37,
+      "text": "2.3. Прямые иностранные инвестиции и глобальные производственные цепочки",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2.3. Прямые иностранные инвестиции и глобальные производственные цепочки",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 38,
+      "text": "3. Проблемы и перспективы развития МЭО",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3. Проблемы и перспективы развития МЭО",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 39,
+      "text": "3.1. Неравномерность участия стран в постиндустриальных связях",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3.1. Неравномерность участия стран в постиндустриальных связях",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 40,
+      "text": "3.2. Риски фрагментации мировой экономики и направления адаптации",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3.2. Риски фрагментации мировой экономики и направления адаптации",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 41,
+      "text": "Заключение",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Заключение",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 42,
+      "text": "Список использованных источников",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Список использованных источников",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 43,
+      "text": "Введение",
+      "style_name": "Heading 1",
+      "style_id": "Heading1",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "Введение",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 44,
+      "text": "Международные экономические отношения в начале XXI века развиваются в условиях глубокого структурного перехода мировой экономики от индустриальной модели к постиндустриальной. Если для индустриального этапа ключевыми элементами международного обмена ",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Международные экономические отношения в начале XXI века развиваются в условиях г",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 45,
+      "text": "Актуальность темы обусловлена тем, что постиндустриальное развитие меняет саму логику участия государств и компаний в мировом хозяйстве. Внешняя торговля всё меньше сводится к перемещению готовых товаров через границу. Значительная часть стоимости со",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Актуальность темы обусловлена тем, что постиндустриальное развитие меняет саму л",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 46,
+      "text": "Практическое значение исследования состоит в том, что анализ постиндустриальных изменений позволяет понять, почему одни страны усиливают позиции в мировой экономике, а другие рискуют закрепиться в роли поставщиков сырья, простой сборки или дешёвой ра",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Практическое значение исследования состоит в том, что анализ постиндустриальных ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 47,
+      "text": "Объект исследования – международные экономические отношения на современном этапе развития мировой экономики. Предмет исследования – формы, направления и противоречия трансформации международных экономических отношений в условиях постиндустриального р",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Объект исследования – международные экономические отношения на современном этапе",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 48,
+      "text": "Цель работы – проанализировать особенности международных экономических отношений на этапе постиндустриального развития мировой экономики и выявить ключевые практические изменения в мировой торговле, инвестициях, цифровых потоках и глобальных цепочках",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Цель работы – проанализировать особенности международных экономических отношений",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 49,
+      "text": "Для достижения цели необходимо решить следующие задачи: рассмотреть сущность постиндустриального этапа развития мировой экономики; определить, как меняется содержание международных экономических отношений; проанализировать современную структуру миров",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Для достижения цели необходимо решить следующие задачи: рассмотреть сущность пос",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 50,
+      "text": "Методологическую основу работы составляют системный подход, сравнительный анализ, анализ статистических данных, графическая интерпретация показателей, а также обобщение материалов международных организаций. В работе использованы данные и аналитически",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Методологическую основу работы составляют системный подход, сравнительный анализ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 51,
+      "text": "Структура работы включает введение, три главы, заключение и список использованных источников. В первой главе раскрываются теоретические основы постиндустриального развития и его влияние на международные экономические отношения. Во второй главе предст",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Структура работы включает введение, три главы, заключение и список использованны",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 52,
+      "text": "1. Теоретические основы международных экономических отношений в постиндустриальной экономике",
+      "style_name": "Heading 1",
+      "style_id": "Heading1",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "1. Теоретические основы международных экономических отношений в постиндустриальн",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 53,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 54,
+      "text": "1.1. Понятие постиндустриального развития и его влияние на мировое хозяйство",
+      "style_name": "Heading 2",
+      "style_id": "Heading2",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1.1. Понятие постиндустриального развития и его влияние на мировое хозяйство",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 55,
+      "text": "Постиндустриальная экономика представляет собой такой этап развития мирового хозяйства, при котором основным источником экономического роста становится не столько расширение материального производства, сколько создание, обработка и использование знан",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Постиндустриальная экономика представляет собой такой этап развития мирового хоз",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 56,
+      "text": "Для международных экономических отношений это означает качественное изменение структуры обмена. Товарная торговля сохраняет значение, но всё чаще становится частью более сложного комплекса: товар поставляется вместе с программным обеспечением, сервис",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Для международных экономических отношений это означает качественное изменение ст",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 57,
+      "text": "Одним из ключевых признаков постиндустриального этапа является рост доли услуг в создании добавленной стоимости. По данным Всемирного банка, в 2024 году услуги составляли около 67,9% мировой добавленной стоимости [4]. Это показывает, что мировая экон",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Одним из ключевых признаков постиндустриального этапа является рост доли услуг в",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 58,
+      "text": "Постиндустриальное развитие связано также с изменением роли человеческого капитала. В индустриальной модели конкурентоспособность часто обеспечивалась доступом к сырью, дешёвой рабочей силе и крупным производственным мощностям. В современной модели в",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Постиндустриальное развитие связано также с изменением роли человеческого капита",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 59,
+      "text": "Постиндустриальный этап также усиливает взаимозависимость стран. Современный продукт часто создаётся в рамках глобальной цепочки: идея и дизайн формируются в одной стране, комплектующие производятся в другой, сборка осуществляется в третьей, программ",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Постиндустриальный этап также усиливает взаимозависимость стран. Современный про",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 60,
+      "text": "Однако постиндустриальное развитие не отменяет индустриальную базу. Напротив, технологически развитые страны стремятся сочетать сильный сектор услуг с контролем над критически важным производством: микроэлектроникой, оборудованием для связи, медицинс",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Однако постиндустриальное развитие не отменяет индустриальную базу. Напротив, те",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 61,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 62,
+      "text": "Рисунок 1 – Эволюция международных экономических отношений в условиях постиндустриального развития",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Рисунок 1 – Эволюция международных экономических отношений в условиях постиндуст",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 63,
+      "text": "Представленная схема показывает, что эволюция международных экономических отношений проходит несколько этапов. На индустриальном этапе основой обмена были материальные товары и ресурсы. На переходном этапе усилилось значение транснациональных корпора",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Представленная схема показывает, что эволюция международных экономических отноше",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 64,
+      "text": "Таким образом, постиндустриальное развитие мировой экономики формирует новую модель международных экономических отношений. Она основана на высокой роли услуг, знаний, технологий, цифровых платформ и человеческого капитала. При этом товарная торговля ",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таким образом, постиндустриальное развитие мировой экономики формирует новую мод",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 65,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 66,
+      "text": "1.2. Трансформация содержания международных экономических отношений",
+      "style_name": "Heading 2",
+      "style_id": "Heading2",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1.2. Трансформация содержания международных экономических отношений",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 67,
+      "text": "Международные экономические отношения традиционно включают международную торговлю товарами и услугами, движение капитала, международную миграцию рабочей силы, валютно-финансовые отношения, научно-техническое сотрудничество и интеграционные процессы. ",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Международные экономические отношения традиционно включают международную торговл",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 68,
+      "text": "Первое направление трансформации – сервитизация международной торговли. Под сервитизацией понимается рост значения услуг в производстве, продаже и эксплуатации товаров. Например, промышленная компания может получать доход не только от продажи оборудо",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Первое направление трансформации – сервитизация международной торговли. Под серв",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 69,
+      "text": "Второе направление – цифровизация международных связей. Цифровые технологии позволяют поставлять услуги без физического перемещения поставщика и потребителя. Консалтинг, обучение, дизайн, программирование, бухгалтерское сопровождение, маркетинг, анал",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Второе направление – цифровизация международных связей. Цифровые технологии позв",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 70,
+      "text": "Третье направление – рост значения интеллектуальной собственности. Патенты, товарные знаки, авторские права, базы данных, алгоритмы, программное обеспечение и промышленные образцы становятся самостоятельными объектами международной торговли. Доходы о",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Третье направление – рост значения интеллектуальной собственности. Патенты, това",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 71,
+      "text": "Четвёртое направление – изменение структуры международного движения капитала. Прямые иностранные инвестиции всё чаще направляются не только в добывающие отрасли и массовое производство, но и в цифровые платформы, центры исследований и разработок, лог",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Четвёртое направление – изменение структуры международного движения капитала. Пр",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 72,
+      "text": "Пятое направление – перестройка глобальных цепочек создания стоимости. Постиндустриальная экономика делает цепочки более интеллектуально насыщенными. Наиболее доходные звенья часто находятся не в производственной сборке, а в разработке продукта, упра",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Пятое направление – перестройка глобальных цепочек создания стоимости. Постиндус",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 73,
+      "text": "Таким образом, международные экономические отношения становятся многоуровневыми. Они включают материальные потоки, финансовые потоки, потоки услуг, данных, технологий, трудовых компетенций и управленческих решений. Это требует от государств более сло",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таким образом, международные экономические отношения становятся многоуровневыми.",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 74,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 75,
+      "text": "Рисунок 2 – Ключевые факторы трансформации международных экономических отношений",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Рисунок 2 – Ключевые факторы трансформации международных экономических отношений",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 76,
+      "text": "Таблица 1 – Изменение содержания основных форм МЭО",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "LEFT (0)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таблица 1 – Изменение содержания основных форм МЭО",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 77,
+      "text": "Источник: составлено автором на основе данных и материалов, указанных в списке источников.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Источник: составлено автором на основе данных и материалов, указанных в списке и",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 78,
+      "text": "Данные таблицы показывают, что постиндустриальный этап не отменяет классические формы международных экономических отношений, а наполняет их новым содержанием. Экспорт становится более интеллектуально насыщенным, инвестиции – более технологичными, а т",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Данные таблицы показывают, что постиндустриальный этап не отменяет классические ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 79,
+      "text": "2. Практический анализ современных форм МЭО",
+      "style_name": "Heading 1",
+      "style_id": "Heading1",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "2. Практический анализ современных форм МЭО",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 80,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 81,
+      "text": "2.1. Международная торговля товарами и услугами в условиях сервитизации",
+      "style_name": "Heading 2",
+      "style_id": "Heading2",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2.1. Международная торговля товарами и услугами в условиях сервитизации",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 82,
+      "text": "Международная торговля остаётся центральной формой международных экономических отношений, однако её структура заметно меняется под влиянием постиндустриального развития. Товарная торговля по-прежнему формирует значительную часть мирового обмена, но к",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Международная торговля остаётся центральной формой международных экономических о",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 83,
+      "text": "Увеличение доли услуг объясняется несколькими причинами. Во-первых, расширяется спрос на информационные, финансовые, транспортные, деловые, образовательные и профессиональные услуги. Во-вторых, товарное производство становится зависимым от сервисного",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Увеличение доли услуг объясняется несколькими причинами. Во-первых, расширяется ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 84,
+      "text": "Практический пример сервитизации можно увидеть в промышленном экспорте. Производитель оборудования получает дополнительную выручку за счёт программного обеспечения, мониторинга состояния оборудования, дистанционной диагностики и обучения персонала. П",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Практический пример сервитизации можно увидеть в промышленном экспорте. Производ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 85,
+      "text": "Постиндустриальная модель меняет и географию торговли. Центры производства могут находиться в странах с развитой промышленной базой или низкими издержками, но центры управления стоимостью часто располагаются в экономиках, контролирующих бренды, техно",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Постиндустриальная модель меняет и географию торговли. Центры производства могут",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 86,
+      "text": "Для анализа современной торговли важно учитывать не только абсолютный объём экспорта, но и структуру экспортной корзины. Более устойчивой является та модель, где присутствуют товары высокой степени переработки, коммерческие услуги, цифровые продукты,",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Для анализа современной торговли важно учитывать не только абсолютный объём эксп",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 87,
+      "text": "Важным вызовом является и изменение торговой политики. На индустриальном этапе торговые барьеры чаще всего связывались с тарифами на товары. В современной экономике всё большее значение имеют нетарифные меры: стандарты безопасности, требования к перс",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Важным вызовом является и изменение торговой политики. На индустриальном этапе т",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 88,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 89,
+      "text": "Рисунок 3 – Доля товаров и коммерческих услуг в мировой торговле",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Рисунок 3 – Доля товаров и коммерческих услуг в мировой торговле",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 90,
+      "text": "Диаграмма показывает, что услуги уже занимают более четверти мирового обмена товарами и коммерческими услугами. Это особенно важно для понимания постиндустриального этапа: страна может наращивать международное присутствие не только через экспорт пром",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Диаграмма показывает, что услуги уже занимают более четверти мирового обмена тов",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 91,
+      "text": "Таблица 2 – Основные группы услуг в современной мировой торговле",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "LEFT (0)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таблица 2 – Основные группы услуг в современной мировой торговле",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 92,
+      "text": "Источник: составлено автором на основе данных и материалов, указанных в списке источников.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Источник: составлено автором на основе данных и материалов, указанных в списке и",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 93,
+      "text": "Следовательно, международная торговля на постиндустриальном этапе становится более комплексной. Она включает не только физическое перемещение товаров, но и трансграничное оказание услуг, передачу данных, управление клиентским опытом и интеграцию бизн",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Следовательно, международная торговля на постиндустриальном этапе становится бол",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 94,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 95,
+      "text": "2.2. Цифровизация, данные и интеллектуальная собственность как новые объекты обмена",
+      "style_name": "Heading 2",
+      "style_id": "Heading2",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2.2. Цифровизация, данные и интеллектуальная собственность как новые объекты обм",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 96,
+      "text": "Цифровизация является одним из главных факторов постиндустриальной трансформации международных экономических отношений. Она меняет не только каналы торговли, но и сами объекты обмена. Если раньше международная сделка чаще всего предполагала перемещен",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Цифровизация является одним из главных факторов постиндустриальной трансформации",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 97,
+      "text": "Особое значение имеет торговля цифровыми услугами, поставляемыми через компьютерные сети. Всемирная торговая организация оценила мировой экспорт таких услуг в 2023 году в 4,25 трлн долл. США, что составило 13,8% мирового экспорта товаров и услуг [3].",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Особое значение имеет торговля цифровыми услугами, поставляемыми через компьютер",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 98,
+      "text": "Однако трансграничные потоки данных порождают новые вопросы регулирования. Государства стремятся защитить персональную информацию граждан, обеспечить кибербезопасность, контролировать стратегически важные данные и снизить зависимость от зарубежных ци",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Однако трансграничные потоки данных порождают новые вопросы регулирования. Госуд",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 99,
+      "text": "Интеллектуальная собственность становится одним из ключевых объектов международной конкуренции. Владение патентами, программным обеспечением, брендами, промышленными образцами и авторскими правами позволяет получать доход даже без расширения физическ",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Интеллектуальная собственность становится одним из ключевых объектов международн",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 100,
+      "text": "Практическое значение интеллектуальной собственности особенно заметно в фармацевтике, электронике, программном обеспечении, медиаиндустрии, биотехнологиях и производстве высокотехнологичного оборудования. В этих секторах цена конечного продукта завис",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Практическое значение интеллектуальной собственности особенно заметно в фармацев",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 101,
+      "text": "Цифровизация также создаёт платформенную модель международных экономических отношений. Платформы соединяют производителей, потребителей, разработчиков, рекламодателей и поставщиков услуг из разных стран. Они снижают транзакционные издержки, но одновр",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Цифровизация также создаёт платформенную модель международных экономических отно",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 102,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 103,
+      "text": "Рисунок 4 – Доля цифровых услуг, поставляемых онлайн, в мировом экспорте",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Рисунок 4 – Доля цифровых услуг, поставляемых онлайн, в мировом экспорте",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 104,
+      "text": "Практический вывод из диаграммы состоит в том, что цифровые услуги становятся самостоятельным каналом включения стран и компаний в мировое хозяйство. Для участия в таких потоках не всегда требуется крупная промышленная база, но необходимы цифровая ин",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Практический вывод из диаграммы состоит в том, что цифровые услуги становятся са",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 105,
+      "text": "Таблица 3 – Новые объекты международного обмена в цифровой экономике",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "LEFT (0)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таблица 3 – Новые объекты международного обмена в цифровой экономике",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 106,
+      "text": "Источник: составлено автором на основе данных и материалов, указанных в списке источников.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Источник: составлено автором на основе данных и материалов, указанных в списке и",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 107,
+      "text": "Таким образом, цифровизация переводит международные экономические отношения в более сложную плоскость. Страны конкурируют за контроль над данными, платформами, технологиями и интеллектуальной собственностью. При этом традиционная внешнеторговая полит",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таким образом, цифровизация переводит международные экономические отношения в бо",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 108,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 109,
+      "text": "2.3. Прямые иностранные инвестиции и глобальные производственные цепочки",
+      "style_name": "Heading 2",
+      "style_id": "Heading2",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2.3. Прямые иностранные инвестиции и глобальные производственные цепочки",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 110,
+      "text": "Прямые иностранные инвестиции остаются одним из важнейших каналов международных экономических отношений. Через инвестиции компании получают доступ к новым рынкам, ресурсам, технологиям, трудовым ресурсам и инфраструктуре. Для принимающих стран ПИИ мо",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Прямые иностранные инвестиции остаются одним из важнейших каналов международных ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 111,
+      "text": "По данным ЮНКТАД, глобальные потоки прямых иностранных инвестиций в 2024 году снизились на 11%, а в 2025 году, по предварительным оценкам, выросли на 14% до 1,6 трлн долл. США [6; 7]. Такая динамика показывает, что инвестиционная среда остаётся чувст",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "По данным ЮНКТАД, глобальные потоки прямых иностранных инвестиций в 2024 году сн",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 112,
+      "text": "Постиндустриальная специфика ПИИ проявляется в том, что инвестор всё чаще ищет не только дешёвые издержки, но и доступ к знаниям. Для высокотехнологичных проектов важны университеты, исследовательские центры, квалифицированные инженеры, защита прав с",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Постиндустриальная специфика ПИИ проявляется в том, что инвестор всё чаще ищет н",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 113,
+      "text": "Практическая проблема для развивающихся стран состоит в том, что включение в глобальные цепочки не всегда означает высокую добавленную стоимость. Страна может привлекать крупные инвестиции в сборочные производства, но оставаться зависимой от импортны",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Практическая проблема для развивающихся стран состоит в том, что включение в гло",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 114,
+      "text": "Для повышения эффекта от ПИИ государствам важно выстраивать политику локализации компетенций: развивать местных поставщиков, поддерживать обучение кадров, стимулировать исследования и разработки, обеспечивать передачу технологий, формировать индустри",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Для повышения эффекта от ПИИ государствам важно выстраивать политику локализации",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 115,
+      "text": "Постиндустриальная экономика усиливает значение нематериальных активов транснациональных корпораций. Крупные компании контролируют бренды, платформы, стандарты, патенты, клиентские базы и финансовые потоки. Поэтому даже при географическом распределен",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Постиндустриальная экономика усиливает значение нематериальных активов транснаци",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 116,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 117,
+      "text": "Рисунок 5 – Динамика мировых потоков прямых иностранных инвестиций",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Рисунок 5 – Динамика мировых потоков прямых иностранных инвестиций",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 118,
+      "text": "Диаграмма отражает волатильность инвестиционных потоков. Даже при общем восстановлении в 2025 году сохраняется зависимость ПИИ от глобальной неопределённости. Для постиндустриального этапа особенно важно, что инвестиции всё чаще направляются не прост",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Диаграмма отражает волатильность инвестиционных потоков. Даже при общем восстано",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 119,
+      "text": "Таблица 4 – Распределение добавленной стоимости в глобальной цепочке",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "LEFT (0)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таблица 4 – Распределение добавленной стоимости в глобальной цепочке",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 120,
+      "text": "Источник: составлено автором на основе данных и материалов, указанных в списке источников.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Источник: составлено автором на основе данных и материалов, указанных в списке и",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 121,
+      "text": "Следовательно, задача страны на постиндустриальном этапе состоит не только в привлечении инвестиций, но и в продвижении к более доходным звеньям цепочки стоимости. Это требует развития науки, образования, цифровой инфраструктуры, предпринимательства ",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Следовательно, задача страны на постиндустриальном этапе состоит не только в при",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 122,
+      "text": "3. Проблемы и перспективы развития МЭО",
+      "style_name": "Heading 1",
+      "style_id": "Heading1",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "3. Проблемы и перспективы развития МЭО",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 123,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 124,
+      "text": "3.1. Неравномерность участия стран в постиндустриальных связях",
+      "style_name": "Heading 2",
+      "style_id": "Heading2",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3.1. Неравномерность участия стран в постиндустриальных связях",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 125,
+      "text": "Несмотря на расширение возможностей, постиндустриальное развитие мировой экономики усиливает проблему неравномерного участия стран в международных экономических отношениях. Теоретически цифровые технологии должны снижать барьеры входа на мировой рыно",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Несмотря на расширение возможностей, постиндустриальное развитие мировой экономи",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 126,
+      "text": "Неравномерность проявляется в нескольких измерениях. Во-первых, существует разрыв в структуре экспорта. Развитые страны чаще экспортируют высокотехнологичные товары, коммерческие услуги, финансовые продукты, интеллектуальную собственность и цифровые ",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Неравномерность проявляется в нескольких измерениях. Во-первых, существует разры",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 127,
+      "text": "В-четвёртых, неравномерность связана с доступом к финансированию. Постиндустриальные отрасли часто требуют венчурного капитала, долгосрочных инвестиций, поддержки исследований, защиты прав на результаты интеллектуальной деятельности и готовности рынк",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В-четвёртых, неравномерность связана с доступом к финансированию. Постиндустриал",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 128,
+      "text": "В-пятых, важна институциональная среда. Международные компании и инвесторы оценивают предсказуемость регулирования, независимость суда, защиту контрактов, прозрачность налоговой системы, уровень коррупционных рисков и качество государственного управл",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В-пятых, важна институциональная среда. Международные компании и инвесторы оцени",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 129,
+      "text": "Неравномерность участия стран в постиндустриальных связях можно представить как лестницу включения в мировую экономику. На нижнем уровне находится экспорт сырья и простой труд. На следующем уровне – участие в сборке и базовых производственных операци",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Неравномерность участия стран в постиндустриальных связях можно представить как ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 130,
+      "text": "Практическая задача экономической политики состоит в постепенном движении вверх по этой лестнице. Для этого недостаточно просто открыть рынок или привлечь иностранный капитал. Необходимы инвестиции в образование, технологическую инфраструктуру, подде",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Практическая задача экономической политики состоит в постепенном движении вверх ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 131,
+      "text": "При этом важно учитывать, что постиндустриальное развитие не должно противопоставляться промышленной политике. Сильный сектор услуг и цифровых технологий часто опирается на развитую промышленную базу. Например, производство полупроводников требует сл",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "При этом важно учитывать, что постиндустриальное развитие не должно противопоста",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 132,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.3,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 133,
+      "text": "Рисунок 6 – Доминирование сектора услуг в мировой добавленной стоимости",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Рисунок 6 – Доминирование сектора услуг в мировой добавленной стоимости",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 134,
+      "text": "Диаграмма показывает, что услуги формируют основную часть мировой добавленной стоимости. Однако сама по себе высокая доля услуг не гарантирует развитость экономики. Важно различать низкопроизводительные услуги и высокотехнологичные деловые, финансовы",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Диаграмма показывает, что услуги формируют основную часть мировой добавленной ст",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 135,
+      "text": "Таблица 5 – Уровни участия стран в постиндустриальных МЭО",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "LEFT (0)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таблица 5 – Уровни участия стран в постиндустриальных МЭО",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 136,
+      "text": "Источник: составлено автором на основе данных и материалов, указанных в списке источников.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Источник: составлено автором на основе данных и материалов, указанных в списке и",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 137,
+      "text": "Таким образом, неравномерность участия стран в международных экономических отношениях на постиндустриальном этапе связана не только с объёмом ресурсов, но и с качеством экономической структуры. Чем выше доля знаний, технологий и услуг высокой добавле",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таким образом, неравномерность участия стран в международных экономических отнош",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 138,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 139,
+      "text": "3.2. Риски фрагментации мировой экономики и направления адаптации",
+      "style_name": "Heading 2",
+      "style_id": "Heading2",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3.2. Риски фрагментации мировой экономики и направления адаптации",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 140,
+      "text": "Постиндустриальный этап развития мировой экономики сопровождается не только новыми возможностями, но и новыми рисками. Один из главных рисков – фрагментация мировой экономики. Она проявляется в усилении торговых ограничений, санкций, технологических ",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Постиндустриальный этап развития мировой экономики сопровождается не только новы",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 141,
+      "text": "Фрагментация особенно чувствительна для высокотехнологичных отраслей. Производство электроники, телекоммуникационного оборудования, программного обеспечения, фармацевтики и энергетических технологий зависит от глобального разделения труда. Ограничени",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Фрагментация особенно чувствительна для высокотехнологичных отраслей. Производст",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 142,
+      "text": "Второй риск связан с ростом цифрового протекционизма. Государства вводят требования локализации данных, регулируют работу платформ, ограничивают иностранное участие в критической цифровой инфраструктуре и усиливают контроль за трансграничными потокам",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Второй риск связан с ростом цифрового протекционизма. Государства вводят требова",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 143,
+      "text": "Третий риск – усиление зависимости от ограниченного числа платформ и технологических поставщиков. Платформенная экономика создаёт сильный сетевой эффект: чем больше пользователей у платформы, тем сложнее конкурентам выйти на рынок. Это может приводит",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Третий риск – усиление зависимости от ограниченного числа платформ и технологиче",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 144,
+      "text": "Четвёртый риск связан с социальной неоднородностью постиндустриального развития. Автоматизация, искусственный интеллект и цифровизация повышают спрос на высококвалифицированный труд, но могут вытеснять работников, занятых в рутинных операциях. Поэтом",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Четвёртый риск связан с социальной неоднородностью постиндустриального развития.",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 145,
+      "text": "Направления адаптации к новым условиям можно разделить на несколько блоков. Первый блок – развитие человеческого капитала: образование, цифровые навыки, инженерные компетенции, языковая подготовка, предпринимательские навыки. Второй блок – технологич",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Направления адаптации к новым условиям можно разделить на несколько блоков. Перв",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 146,
+      "text": "Четвёртый блок – экспортная диверсификация. Странам необходимо расширять экспорт не только за счёт товаров, но и за счёт деловых, ИТ, образовательных, инженерных, медицинских и креативных услуг. Пятый блок – участие в международных стандартах. В пост",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Четвёртый блок – экспортная диверсификация. Странам необходимо расширять экспорт",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 147,
+      "text": "Для бизнеса практическая адаптация означает переход от модели разовых поставок к модели долгосрочного присутствия в цепочке ценности. Компании должны развивать сервис, аналитику, клиентскую поддержку, цифровые каналы продаж, управление данными и межд",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Для бизнеса практическая адаптация означает переход от модели разовых поставок к",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 148,
+      "text": "На уровне государства перспективная стратегия должна сочетать открытость и устойчивость. Полная изоляция снижает доступ к рынкам, технологиям и капиталу. Но чрезмерная зависимость от одного поставщика, рынка или платформы создаёт уязвимости. Поэтому ",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "На уровне государства перспективная стратегия должна сочетать открытость и устой",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 149,
+      "text": "Таблица 6 – Риски постиндустриального этапа и способы адаптации",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "LEFT (0)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таблица 6 – Риски постиндустриального этапа и способы адаптации",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 150,
+      "text": "Источник: составлено автором на основе данных и материалов, указанных в списке источников.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Источник: составлено автором на основе данных и материалов, указанных в списке и",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 151,
+      "text": "В перспективе международные экономические отношения будут развиваться вокруг нескольких ключевых направлений: цифровой торговли, устойчивых цепочек поставок, высокотехнологичных инвестиций, искусственного интеллекта, зелёной экономики и регулирования",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В перспективе международные экономические отношения будут развиваться вокруг нес",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 152,
+      "text": "Таким образом, постиндустриальный этап не делает мировую экономику автоматически более открытой и равной. Он создаёт новые каналы включения, но одновременно повышает требования к качеству экономической системы. Успех в международных экономических отн",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таким образом, постиндустриальный этап не делает мировую экономику автоматически",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 153,
+      "text": "Заключение",
+      "style_name": "Heading 1",
+      "style_id": "Heading1",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "Заключение",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 154,
+      "text": "Международные экономические отношения на этапе постиндустриального развития мировой экономики претерпевают глубокую трансформацию. Проведённый анализ показал, что современная мировая экономика всё меньше сводится к обмену материальными товарами и всё",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Международные экономические отношения на этапе постиндустриального развития миро",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 155,
+      "text": "В первой главе было установлено, что постиндустриальное развитие связано с ростом роли знаний, информации и услуг в создании добавленной стоимости. Услуги формируют основную часть мировой экономики, а товарная торговля всё чаще включает нематериальны",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В первой главе было установлено, что постиндустриальное развитие связано с росто",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 156,
+      "text": "Во второй главе был проведён практический анализ современных форм международных экономических отношений. Рассмотрение мировой торговли показало усиление роли коммерческих услуг и сервитизации. Анализ цифровизации выявил, что данные, программное обесп",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Во второй главе был проведён практический анализ современных форм международных ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 157,
+      "text": "В третьей главе были выявлены основные проблемы и перспективы развития международных экономических отношений. Ключевой проблемой является неравномерность участия стран в постиндустриальной экономике. Страны, обладающие технологиями, платформами, пате",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В третьей главе были выявлены основные проблемы и перспективы развития междунаро",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 158,
+      "text": "Также было показано, что постиндустриальный этап сопровождается рисками фрагментации мировой экономики. Геополитические конфликты, торговые ограничения, цифровой протекционизм, технологические барьеры и климатическое регулирование усложняют междунаро",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Также было показано, что постиндустриальный этап сопровождается рисками фрагмент",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 159,
+      "text": "Главный практический вывод состоит в том, что успешное участие в международных экономических отношениях сегодня требует комплексной стратегии. Она должна включать развитие человеческого капитала, цифровой инфраструктуры, экспорта услуг, инновационной",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Главный практический вывод состоит в том, что успешное участие в международных э",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 160,
+      "text": "Таким образом, международные экономические отношения на этапе постиндустриального развития становятся более сложными, более технологичными и более зависимыми от нематериальных факторов. Мировая экономика переходит от модели обмена товарами к модели о",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таким образом, международные экономические отношения на этапе постиндустриальног",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 161,
+      "text": "Список использованных источников",
+      "style_name": "Heading 1",
+      "style_id": "Heading1",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "Список использованных источников",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 162,
+      "text": "1. Иноземцев В.Л. Постиндустриальное общество как теоретическая конструкция и современная реальность. М.: Academia, 2020.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1. Иноземцев В.Л. Постиндустриальное общество как теоретическая конструкция и со",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 163,
+      "text": "2. Кондратьев В.Б. Глобальные цепочки стоимости в мировой экономике // Мировая экономика и международные отношения. 2021. № 3. С. 5-17.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2. Кондратьев В.Б. Глобальные цепочки стоимости в мировой экономике // Мировая э",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 164,
+      "text": "3. Ломакин В.К. Мировая экономика: учебник. М.: ЮНИТИ-ДАНА, 2019.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3. Ломакин В.К. Мировая экономика: учебник. М.: ЮНИТИ-ДАНА, 2019.",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 165,
+      "text": "4. Международные экономические отношения: учебник / под ред. И.П. Фаминского. М.: Магистр, 2020.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "4. Международные экономические отношения: учебник / под ред. И.П. Фаминского. М.",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 166,
+      "text": "5. Baldwin R. The Great Convergence: Information Technology and the New Globalization. Cambridge: Harvard University Press, 2016.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "5. Baldwin R. The Great Convergence: Information Technology and the New Globaliz",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 167,
+      "text": "6. Castells M. The Rise of the Network Society. 2nd ed. Oxford: Wiley-Blackwell, 2010.",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "6. Castells M. The Rise of the Network Society. 2nd ed. Oxford: Wiley-Blackwell,",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 168,
+      "text": "7. IMF. World Economic Outlook: Global Economy in a Shifting Landscape. 2025 [Электронный ресурс]. Режим доступа: https://www.imf.org/en/Publications/WEO",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "7. IMF. World Economic Outlook: Global Economy in a Shifting Landscape. 2025 [Эл",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 169,
+      "text": "8. OECD, IMF, UNCTAD, WTO. Handbook on Measuring Digital Trade. Second Edition, revised version, 2024 [Электронный ресурс]. Режим доступа: https://www.oecd.org/en/publications/handbook-on-measuring-digital-trade-second-edition_ac99e6d3-en.html",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "8. OECD, IMF, UNCTAD, WTO. Handbook on Measuring Digital Trade. Second Edition, ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 170,
+      "text": "9. UNCTAD. Global Investment Trends Monitor, No. 50, 2026 [Электронный ресурс]. Режим доступа: https://unctad.org/publication/global-investment-trends-monitor-no-50",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "9. UNCTAD. Global Investment Trends Monitor, No. 50, 2026 [Электронный ресурс]. ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 171,
+      "text": "10. UNCTAD. World Investment Report 2025: International investment in the digital economy [Электронный ресурс]. Режим доступа: https://unctad.org/publication/world-investment-report-2025",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "10. UNCTAD. World Investment Report 2025: International investment in the digita",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 172,
+      "text": "11. World Bank. High-technology exports (current US$) [Электронный ресурс]. Режим доступа: https://data.worldbank.org/indicator/TX.VAL.TECH.CD",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "11. World Bank. High-technology exports (current US$) [Электронный ресурс]. Режи",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 173,
+      "text": "12. World Bank. Services, value added (% of GDP) [Электронный ресурс]. Режим доступа: https://data.worldbank.org/indicator/NV.SRV.TOTL.ZS",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "12. World Bank. Services, value added (% of GDP) [Электронный ресурс]. Режим дос",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 174,
+      "text": "13. World Bank. World Development Indicators [Электронный ресурс]. Режим доступа: https://databank.worldbank.org/source/world-development-indicators",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "13. World Bank. World Development Indicators [Электронный ресурс]. Режим доступа",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 175,
+      "text": "14. WTO. Global Trade Outlook and Statistics, April 2024 [Электронный ресурс]. Режим доступа: https://www.wto.org/english/res_e/booksp_e/trade_outlook24_e.pdf",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "14. WTO. Global Trade Outlook and Statistics, April 2024 [Электронный ресурс]. Р",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 176,
+      "text": "15. WTO. Global Trade Outlook and Statistics, October 2025 [Электронный ресурс]. Режим доступа: https://www.wto.org/english/news_e/news25_e/stat_07oct25_e.pdf",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "15. WTO. Global Trade Outlook and Statistics, October 2025 [Электронный ресурс].",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 177,
+      "text": "16. WTO. World Trade Statistics 2025 [Электронный ресурс]. Режим доступа: https://www.wto.org/english/res_e/statis_e/world_trade_statistics_e.htm",
+      "style_name": "Normal",
+      "style_id": "Normal",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "16. WTO. World Trade Statistics 2025 [Электронный ресурс]. Режим доступа: https:",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    }
+  ],
+  "tables_info": [
+    {
+      "index": 0,
+      "rows": 6,
+      "cols": 3,
+      "sample_rows": [
+        [
+          "Форма МЭО",
+          "Как меняется содержание",
+          "Практическое проявление"
+        ],
+        [
+          "Международная торговля",
+          "От обмена товарами к продаже комплексных решений",
+          "рост торговли услугами, цифровыми продуктами, подписками и с"
+        ],
+        [
+          "Движение капитала",
+          "От инвестиций в производство к инвестициям в технологии и да",
+          "рост значения R&D, дата-центров, платформ и нематериальных а"
+        ],
+        [
+          "Миграция труда",
+          "От физического перемещения работников к удалённой занятости",
+          "международный фриланс, аутсорсинг, распределённые команды"
+        ]
+      ]
+    },
+    {
+      "index": 1,
+      "rows": 6,
+      "cols": 3,
+      "sample_rows": [
+        [
+          "Группа услуг",
+          "Роль в МЭО",
+          "Пример"
+        ],
+        [
+          "Транспортные услуги",
+          "обслуживают движение товаров и людей",
+          "международная доставка, логистические хабы, морские перевозк"
+        ],
+        [
+          "Деловые услуги",
+          "сопровождают бизнес-процессы компаний",
+          "консалтинг, аудит, инжиниринг, маркетинг, дизайн"
+        ],
+        [
+          "ИКТ-услуги",
+          "обеспечивают цифровую поставку и управление данными",
+          "разработка ПО, облачные сервисы, кибербезопасность"
+        ]
+      ]
+    },
+    {
+      "index": 2,
+      "rows": 6,
+      "cols": 3,
+      "sample_rows": [
+        [
+          "Новый объект обмена",
+          "Содержание",
+          "Практическое значение"
+        ],
+        [
+          "Данные",
+          "информация о потребителях, транзакциях, производстве и логис",
+          "персонализация продаж, прогнозирование спроса, управление це"
+        ],
+        [
+          "Программное обеспечение",
+          "код, платформы, приложения, облачные решения",
+          "экспорт ИТ-услуг, SaaS-модели, автоматизация бизнеса"
+        ],
+        [
+          "Алгоритмы и ИИ",
+          "модели машинного обучения, аналитические системы",
+          "оптимизация торговли, финтех, цифровой маркетинг"
+        ]
+      ]
+    },
+    {
+      "index": 3,
+      "rows": 6,
+      "cols": 4,
+      "sample_rows": [
+        [
+          "Звено цепочки",
+          "Содержание",
+          "Доля добавленной стоимости",
+          "Типичные участники"
+        ],
+        [
+          "Разработка продукта",
+          "НИОКР, дизайн, прототипирование",
+          "очень высокая",
+          "развитые технологические центры"
+        ],
+        [
+          "Производство комплектующих",
+          "изготовление ключевых деталей",
+          "средняя/высокая",
+          "страны с промышленной базой"
+        ],
+        [
+          "Сборка",
+          "массовая сборка и тестирование",
+          "низкая/средняя",
+          "страны с низкими издержками"
+        ]
+      ]
+    },
+    {
+      "index": 4,
+      "rows": 5,
+      "cols": 4,
+      "sample_rows": [
+        [
+          "Модель участия",
+          "Содержание",
+          "Ограничение",
+          "Направление развития"
+        ],
+        [
+          "Сырьевая модель",
+          "экспорт ресурсов и базовых товаров",
+          "зависимость от ценовых циклов",
+          "переработка, инфраструктура, диверсификация"
+        ],
+        [
+          "Сборочная модель",
+          "участие в производственных операциях",
+          "низкая доля добавленной стоимости",
+          "локализация поставщиков, обучение кадров"
+        ],
+        [
+          "Индустриально-сервисная модель",
+          "производство + логистика + сервис",
+          "переход к более сложным операциям",
+          "инжиниринг, стандарты, экспорт услуг"
+        ]
+      ]
+    },
+    {
+      "index": 5,
+      "rows": 6,
+      "cols": 4,
+      "sample_rows": [
+        [
+          "Риск",
+          "Проявление",
+          "Последствие",
+          "Направление адаптации"
+        ],
+        [
+          "Торговая фрагментация",
+          "рост тарифных и нетарифных барьеров",
+          "снижение предсказуемости поставок",
+          "диверсификация рынков и поставщиков"
+        ],
+        [
+          "Технологические ограничения",
+          "контроль экспорта технологий и оборудования",
+          "замедление инноваций и рост затрат",
+          "развитие собственных компетенций и партнёрств"
+        ],
+        [
+          "Цифровой протекционизм",
+          "требования локализации данных и регулирование платформ",
+          "усложнение цифровой торговли",
+          "совместимость стандартов и защита данных"
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+﻿Total paragraphs: 110
+Total tables: 0
+#000 [╦рс╨рс4_уыртр] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+      run: <''  pt b=None i=None>
+#001 [Normal] align=CENTER (1) ls=1.0 sb=None sa=None fl=None
+     TEXT: '╠╚═╚╤╥┼╨╤╥┬╬ ═└╙╩╚ ╚ ┬█╤╪┼├╬ ╬┴╨└╟╬┬└═╚▀ ╨╬╤╤╚╔╤╩╬╔ ╘┼─┼╨└╓╚╚'
+      run: <'╠╚═╚╤╥┼╨╤╥┬╬ ═└╙╩╚ ╚ ┬█╤╪┼├╬ ╬┴╨└╟╬┬└═╚▀ ╨╬╤╤╚╔╤╩╬╔ ╘┼─┼╨└╓╚╚' Times New Roman pt b=None i=None>
+#002 [Normal] align=CENTER (1) ls=1.0 sb=None sa=None fl=None
+     TEXT: '╘хфхЁры№эюх уюёєфрЁёЄтхээюх ртЄюэюьэюх юсЁрчютрЄхы№эюх єўЁхцфхэшх т√ё°хую юсЁрчютрэш '
+      run: <'╘хфхЁры№эюх уюёєфрЁёЄтхээюх ртЄюэюьэюх юсЁрчютрЄхы№эюх єўЁхцфхэшх т√ё°хую юсЁрчютрэш ' Times New Roman pt b=None i=None>
+#003 [Normal] align=CENTER (1) ls=1.0 sb=None sa=None fl=None
+     TEXT: 'л─ры№эхтюёЄюўэ√щ ЇхфхЁры№э√щ єэштхЁёшЄхЄ╗'
+      run: <'л─ры№эхтюёЄюўэ√щ ЇхфхЁры№э√щ єэштхЁёшЄхЄ╗' Times New Roman 14.0pt b=True i=None>
+#004 [Normal] align=CENTER (1) ls=1.0 sb=None sa=6.0 fl=None
+     TEXT: '(─┬╘╙)'
+      run: <'' Times New Roman 16.0pt b=True i=None>
+      run: <'(─┬╘╙)' Times New Roman 14.0pt b=None i=None>
+#005 [Normal] align=CENTER (1) ls=1.0 sb=None sa=6.0 fl=None
+     TEXT: ''
+#006 [Normal] align=CENTER (1) ls=1.0 sb=None sa=6.0 fl=None
+     TEXT: '╪╩╬╦└ ▌╩╬═╬╠╚╩╚ ╚ ╠┼═┼─╞╠┼═╥└ '
+      run: <'╪╩╬╦└ ▌╩╬═╬╠╚╩╚ ╚ ╠┼═┼─╞╠┼═╥└ ' Times New Roman 16.0pt b=True i=None>
+#007 [Normal] align=CENTER (1) ls=None sb=None sa=None fl=None
+     TEXT: '─хярЁЄрьхэЄ єяЁртыхэш  эр юёэютх фрээ√ї'
+      run: <'─хярЁЄрьхэЄ єяЁртыхэш  эр юёэютх фрээ√ї' Times New Roman 14.0pt b=True i=None>
+#008 [Normal] align=CENTER (1) ls=None sb=None sa=84.0 fl=None
+     TEXT: '(Data Driven Management Department)'
+#009 [Normal] align=CENTER (1) ls=None sb=None sa=None fl=None
+     TEXT: '╩└╩ ┬█┴╨└╥▄ ╧┼╨╤╬═└╦▄═█╔ ╩╬╠╧▄▐╥┼╨'
+      run: <'╩└╩ ┬█┴╨└╥▄ ╧┼╨╤╬═└╦▄═█╔ ╩╬╠╧▄▐╥┼╨' Times New Roman 14.0pt b=None i=None>
+#010 [Normal] align=CENTER (1) ls=0.8 sb=None sa=None fl=None [SOFT-BREAK]
+python : Traceback (most recent call last):
+C:\Users\Dmitry\AppData\Local\Temp\ps-script-711d4fe3-8b86-4188-a576-eb7df9774679.ps1:84 знак:53
++ ... h_checker"; python test_docs/inspect_doc.py test_docs/referat_4.docx  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\Users\Dmitry\Telegram Bots\kursach_checker\test_docs\inspect_doc.py", line 89, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\Dmitry\Telegram Bots\kursach_checker\test_docs\inspect_doc.py", line 83, in main
+    _dump_paragraphs(doc, start=start, limit=limit)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dmitry\Telegram Bots\kursach_checker\test_docs\inspect_doc.py", line 57, in _dump_paragraphs
+    print(f"     TEXT: {text[:200]!r}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dmitry\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1251.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u23ce' in position 20: character maps to <undefined>

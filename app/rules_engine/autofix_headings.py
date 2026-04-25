@@ -87,6 +87,25 @@ def fix_heading(paragraph, idx: int, cfg, details: list[str]) -> bool:
     if _fix_alignment(paragraph, level, cfg, details, idx):
         changed = True
 
+    pf = paragraph.paragraph_format
+    target_ls = getattr(cfg, "line_spacing", 1.5)
+    cur_ls = pf.line_spacing
+    if cur_ls is None or abs(float(cur_ls) - target_ls) > 0.05:
+        pf.line_spacing = target_ls
+        changed = True
+
+    from docx.shared import Pt as _Pt
+    target_sb = getattr(cfg, "space_before_pt", 0)
+    cur_sb = pf.space_before
+    if cur_sb is not None and abs(cur_sb.pt - target_sb) > 0.2:
+        pf.space_before = _Pt(target_sb)
+        changed = True
+    target_sa = getattr(cfg, "space_after_pt", 0)
+    cur_sa = pf.space_after
+    if cur_sa is not None and abs(cur_sa.pt - target_sa) > 0.2:
+        pf.space_after = _Pt(target_sa)
+        changed = True
+
     if changed:
         details.append(
             f"Заголовок #{idx + 1}: {cfg.heading_font}, {cfg.heading_size_pt} пт, полужирный"

@@ -1,0 +1,2718 @@
+{
+  "total_paragraphs": 110,
+  "total_tables": 0,
+  "paragraphs": [
+    {
+      "idx": 0,
+      "text": "",
+      "style_name": "ЛабРаб4_глава",
+      "style_id": "4",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 1,
+      "text": "МИНИСТЕРСТВО НАУКИ И ВЫСШЕГО ОБРАЗОВАНИЯ РОССИЙСКОЙ ФЕДЕРАЦИИ",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "МИНИСТЕРСТВО НАУКИ И ВЫСШЕГО ОБРАЗОВАНИЯ РОССИЙСКОЙ ФЕДЕРАЦИИ",
+          "font": "Times New Roman",
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 2,
+      "text": "Федеральное государственное автономное образовательное учреждение высшего образования",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Федеральное государственное автономное образовательное учреждение высшего образо",
+          "font": "Times New Roman",
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 3,
+      "text": "«Дальневосточный федеральный университет»",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "«Дальневосточный федеральный университет»",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 4,
+      "text": "(ДВФУ)",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": 6.0,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 16.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "(ДВФУ)",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 5,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": 6.0,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 6,
+      "text": "ШКОЛА ЭКОНОМИКИ И МЕНЕДЖМЕНТА ",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": 6.0,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "ШКОЛА ЭКОНОМИКИ И МЕНЕДЖМЕНТА ",
+          "font": "Times New Roman",
+          "size_pt": 16.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 7,
+      "text": "Департамент управления на основе данных",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Департамент управления на основе данных",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 8,
+      "text": "(Data Driven Management Department)",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": 84.0,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "(",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "Data",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": " ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "Driven",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": " ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "Management",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 9,
+      "text": "КАК ВЫБРАТЬ ПЕРСОНАЛЬНЫЙ КОМПЬЮТЕР",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "КАК ВЫБРАТЬ ПЕРСОНАЛЬНЫЙ КОМПЬЮТЕР",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 10,
+      "text": "РЕФЕРАТ\nпо образовательной программе подготовки бакалавров\nпо направлению 38.03.02 «Менеджмент»",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 0.8,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "РЕФЕРАТ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "п",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "о образовательной программе подготовки бакалавров",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "по направлению ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 11,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "RIGHT (2)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 12,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 13,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "RIGHT (2)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 14,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "RIGHT (2)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 15,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "RIGHT (2)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 16,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "RIGHT (2)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 17,
+      "text": "Выполнила: Павлова Л.И.\n« 01 » апреля 2025 г.",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "RIGHT (2)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Выполнила",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": ": ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Павлова Л.И.",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n« ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "01",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " » ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 18,
+      "text": "Проверил: Ивин В.В.",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "RIGHT (2)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Проверил",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": ": Ивин ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "В.В.",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 19,
+      "text": "«__» ______________ 2025г.",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "RIGHT (2)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "«__» ______________ 202",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "5",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "г.",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 20,
+      "text": "\n\n\n\n\n\n\nг. Владивосток ",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 21,
+      "text": "2025",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "202",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "5",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 22,
+      "text": "Оглавление",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Оглавление",
+          "font": null,
+          "size_pt": null,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 23,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 24,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 25,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 26,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 27,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 28,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 29,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 30,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 31,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 32,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 33,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 34,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 35,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 36,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 37,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 38,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 39,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 40,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 41,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 42,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 43,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 44,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 45,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 46,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 47,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 48,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 49,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 50,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 51,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 52,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 53,
+      "text": "Введение",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Введение",
+          "font": null,
+          "size_pt": null,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 54,
+      "text": "В современном мире, где цифровые технологии пронизывают все сферы жизни, выбор персонального компьютера (ПК) становится одной из наиболее актуальных задач как для профессионалов, работающих в различных отраслях, так и для рядовых пользователей. Необх",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В современном мире, где цифровые технологии пронизывают все сферы жизни, выбор п",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nВ первую очередь, следует учитывать, что компьютер стал неотъемлемой частью пов",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nСуществует множество факторов, влияющих на выбор ПК, включая технические характ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "решение при покупке. ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 55,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 56,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 57,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 58,
+      "text": "Актуальность данной темы обусловлена тем, что технологический прогресс не стоит на месте, а рынок компьютерной техники постоянно пополняется новыми моделями с различными характеристиками. Обычному пользователю, не обладающему специальными знаниями, б",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Актуальность",
+          "font": null,
+          "size_pt": null,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": " данной темы обусловлена тем, что технологический прогресс не стоит на месте, а ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 59,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 60,
+      "text": "Цель данного исследования — изучение критериев выбора ПК и выявление ключевых факторов, влияющих на этот процесс.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Цель",
+          "font": null,
+          "size_pt": null,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": " данного исследования — изучение критериев выбора ПК и выявление ключевых фактор",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 61,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 62,
+      "text": "Задачи исследования:",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Задачи исследования:",
+          "font": null,
+          "size_pt": null,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 63,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 64,
+      "text": "Рассмотреть основные типы ПК и их различия.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Рассмотреть основные типы ПК и их различия.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 65,
+      "text": "Определить основные характеристики, влияющие на производительность и функциональность.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Определить основные характеристики, влияющие на производительность и функциональ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 66,
+      "text": "Оценить, какие параметры являются наиболее важными для разных категорий пользователей.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Оценить, какие параметры являются наиболее важными для разных категорий пользова",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 67,
+      "text": "Дать рекомендации по выбору компьютера в зависимости от поставленных задач.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Дать рекомендации по выбору компьютера в зависимости от поставленных задач.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 68,
+      "text": "Объект исследования — процесс выбора персонального компьютера.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Объект исследования — процесс выбора персонального компьютера.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 69,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 70,
+      "text": "Предмет исследования — критерии и факторы, влияющие на выбор ПК.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Предмет исследования — критерии и факторы, влияющие на выбор ПК.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 71,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 72,
+      "text": "Информационная база: материалы из интернета, включая специализированные статьи, обзоры и публикации по тематике компьютерных технологий.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Информационная база: материалы из интернета, включая специализированные статьи, ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 73,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 74,
+      "text": "Значимость информации: данная информация будет полезна широкому кругу пользователей — от студентов и офисных работников до профессионалов в сфере IT, которым важно подобрать компьютер под свои задачи.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Значимость информации: данная информация будет полезна широкому кругу пользовате",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 75,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 76,
+      "text": "Методы исследования:",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Методы исследования:",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 77,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 78,
+      "text": "Библиографический поиск — анализ материалов, доступных в сети интернет.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Библиографический поиск — анализ материалов, доступных в сети интернет.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 79,
+      "text": "Анализ — изучение характеристик различных моделей ПК и их сравнение.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Анализ — изучение характеристик различных моделей ПК и их сравнение.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 80,
+      "text": "Синтез — формирование рекомендаций по выбору на основе полученных данных.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Синтез — формирование рекомендаций по выбору на основе полученных данных.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 81,
+      "text": "Основная часть",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Основная часть",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 82,
+      "text": "1. Виды персональных компьютеров",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1. Виды персональных компьютеров",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 83,
+      "text": "Цели",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Цели",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 84,
+      "text": "Цель данной работы заключается в том, чтобы предоставить всем заинтересованным сторонам, включая как опытных пользователей, так и тех, кто только начинает свой путь в мире информационных технологий, исчерпывающие рекомендации по выбору персонального ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Цель данной работы заключается в том, чтобы предоставить всем заинтересованным с",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nОдной из основных целей работы является анализ различных типов ПК и их характер",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nКроме того, работа направлена на выявление типичных ошибок, которые люди допуск",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "задачами. Мы постараемся проанализировать основные факторы, вызывающие недовольс",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 85,
+      "text": "Задачи",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Задачи",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 86,
+      "text": "Для достижения поставленной цели в данной работе определяются несколько ключевых задач, каждая из которых направлена на глубокое понимание процесса выбора персонального компьютера и его соответствия потребностям пользователя. Эти задачи будут служить",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Для достижения поставленной цели в данной работе определяются несколько ключевых",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "структурированного обсуждения, которое поможет читателям уверенно ориентироватьс",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nПервая задача заключается в рассмотрении основных характеристик персональных ко",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nВторая задача — исследовать различные типы персональных компьютеров и их основн",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 87,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 88,
+      "text": "Основные критерии выбора ПК",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Основные критерии выбора ПК",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 89,
+      "text": "Процессор",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Процессор",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 90,
+      "text": "Процессор, также известный как центральный процессор (ЦП), является одним из самых важных компонентов персонального компьютера, выполняющим основные вычислительные задачи. Он служит \"мозгом\" устройства, отвечая за выполнение инструкций программного о",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Процессор, также известный как центральный процессор (ЦП), является одним из сам",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nСегодня на рынке представлены процессоры от нескольких ведущих ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "производителей, среди которых наиболее известны ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Intel",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " и AMD. Каждая из этих компаний предлагает широкий ассортимент моделей, подходящ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 91,
+      "text": "Оперативная память",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Оперативная память",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 92,
+      "text": "Оперативная память, или ОЗУ (оперативное запоминающее устройство), является неотъемлемой частью персонального компьютера, отвечая за временное хранение данных и программ, которые в данный момент используются процессором. Эта структура памяти играет к",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Оперативная память, или ОЗУ (оперативное запоминающее устройство), является неот",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nПервоначально, стоит отметить, что оперативная память осуществляет свою ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "работу намного быстрее, чем другие типы памяти, такие как жесткие диски или твер",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nПри выборе ОЗУ пользователи должны учитывать несколько ключевых характеристик, ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 93,
+      "text": "Графическая карта",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Графическая карта",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 94,
+      "text": "Графическая карта, или видеокарта, является важнейшим элементом современного персонального компьютера, отвечающим за обработку и вывод графических данных на экран. Для пользователей, занимающихся играми, графикой, видеообработкой и другими сложными в",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Графическая карта, или видеокарта, является важнейшим элементом современного пер",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nПервое и главное назначение графической карты — это рендеринг изображения. Она ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nОсновным критерием выбора графической карты является ее производительность, изм",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 95,
+      "text": "Типы ПК и их особенности",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Типы ПК и их особенности",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 96,
+      "text": "Настольные ПК",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Настольные ПК",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 97,
+      "text": "Настольные компьютеры, как один из самых распространенных типов ПК, занимаются важной ролью в большинстве офисов, учебных заведений и домашних условиях. Они представляют собой мощные системы, которые превосходят по производительности более компактные",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Настольные компьютеры, как один из самых распространенных типов ПК, занимаются в",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nПреимущества настольных ПК. ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n1. Производительность. Одним из ключевых преимуществ настольных ПК является их ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n2. Расширяемость и апгрейд. Настольные компьютеры значительно удобнее в плане м",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 98,
+      "text": "Ноутбуки",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Ноутбуки",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 99,
+      "text": "Ноутбуки, являясь одним из основных типов персональных компьютеров, завоевали большую популярность благодаря своей мобильности и удобству использования. Они представляют собой компактные устройства, которые можно легко переносить в разных условиях — ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Ноутбуки, являясь одним из основных типов персональных компьютеров, завоевали бо",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "     ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Преимущества ноутбуков.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n1. ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 100,
+      "text": "Компьютерные моноблоки",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Компьютерные моноблоки",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 101,
+      "text": "Компьютерные моноблоки представляют собой уникальный класс персональных компьютеров, которые объединяют все необходимые компоненты — процессор, оперативную память, хранилище данных и графику — в одном корпусе. Такие устройства привлекают внимание пол",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Компьютерные моноблоки представляют собой уникальный класс персональных компьюте",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n**Плюсы компьютерных моноблоков.** ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n1. **Компактность и экономия пространства.** Одним из главных преимуществ моноб",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n2. **Современный ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 102,
+      "text": "Заключение",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Заключение",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 103,
+      "text": "Обобщение",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Обобщение",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 104,
+      "text": "В современном мире, где технологии активно проникают во все сферы жизни, выбор персонального компьютера стал одной из наиболее значимых задач для пользователей. Независимо от того, являетесь ли вы домохозяином, студентом, профессионалом или геймером,",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В современном мире, где технологии активно проникают во все сферы жизни, выбор п",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nВ результате проведенного анализа различных типов персональных компьютеров, их ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\nОбсуждая процессоры, оперативную память и графические карты, мы поняли, насколь",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 105,
+      "text": "Список литературы",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Список литературы",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 106,
+      "text": "Не удалось сгенерировать список литературы или нам не удалось найти его под ваш запрос, обратитесь в тех. поддержку",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Не удалось сгенерировать список литературы или нам не удалось найти его под ваш ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 107,
+      "text": "Рекомендации",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Рекомендации",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 108,
+      "text": "При выборе и покупке персонального компьютера важно учитывать несколько ключевых аспектов, которые помогут вам сделать правильный выбор, учитывая ваши потребности, бюджет и планы на будущее. В этой статье мы представим ряд рекомендаций, которые помог",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "При выборе и покупке персонального компьютера важно учитывать несколько ключевых",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n1. **Определите свои ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "потребности.*",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "* Прежде чем приступить к поиску PC, уточните, для каких задач вы хотите его исп",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "или использование офисных программ, вам подойдет бюджетный настольный компьютер ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 109,
+      "text": "",
+      "style_name": "TOC Heading",
+      "style_id": "a7",
+      "alignment": "CENTER (1)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    }
+  ],
+  "tables_info": []
+}

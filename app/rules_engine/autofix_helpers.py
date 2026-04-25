@@ -247,11 +247,18 @@ def fix_dashes_in_text(paragraph, para_label: str, details: list[str]) -> bool:
         if is_field_code_run(run):
             continue
         t = run.text
-        if _EM_DASH in t:
-            run.text = t.replace(_EM_DASH, _EN_DASH)
+        if not t:
+            continue
+        new_t = t
+        if _EM_DASH in new_t:
+            new_t = new_t.replace(_EM_DASH, _EN_DASH)
+        if " - " in new_t:
+            new_t = new_t.replace(" - ", f" {_EN_DASH} ")
+        if new_t != t:
+            run.text = new_t
             changed = True
     if changed:
-        details.append(f"{para_label}: \u0434\u043b\u0438\u043d\u043d\u043e\u0435 \u0442\u0438\u0440\u0435 (\u2014) -> \u0441\u0440\u0435\u0434\u043d\u0435\u0435 (\u2013)")
+        details.append(f"{para_label}: \u0434\u0435\u0444\u0438\u0441/\u0442\u0438\u0440\u0435 \u2192 \u0441\u0440\u0435\u0434\u043d\u0435\u0435 \u0442\u0438\u0440\u0435 (\u2013)")
     return changed
 
 
@@ -325,10 +332,53 @@ def fix_strip_markdown_artifacts(
             run.text = new_text
             changed = True
 
+    # Cross-run pass: markers split across run boundaries (e.g. run1="**text",
+    # run2="more**") are invisible to per-run regex. Concatenate, clean, redistribute.
+    full_text = "".join(r.text or "" for r in paragraph.runs if not is_field_code_run(r))
+    if "**" in full_text or "__" in full_text or "~~" in full_text:
+        cleaned = full_text
+        if "**" in cleaned:
+            rep = _MD_BOLD_RE.sub(r"\1", cleaned)
+            if rep != cleaned:
+                if "**" not in removed_kinds:
+                    removed_kinds.append("**")
+                cleaned = rep
+        if "__" in cleaned:
+            rep = _MD_BOLD_ALT_RE.sub(r"\1", cleaned)
+            if rep != cleaned:
+                if "__" not in removed_kinds:
+                    removed_kinds.append("__")
+                cleaned = rep
+        if "~~" in cleaned:
+            rep = _MD_STRIKE_RE.sub(r"\1", cleaned)
+            if rep != cleaned:
+                if "~~" not in removed_kinds:
+                    removed_kinds.append("~~")
+                cleaned = rep
+        if cleaned != full_text:
+            _redistribute_text(paragraph, cleaned)
+            changed = True
+
     if changed:
         kinds = ", ".join(removed_kinds) if removed_kinds else "Markdown"
         details.append(f"{para_label}: убраны Markdown-выделения ({kinds})")
     return changed
+
+
+def _redistribute_text(paragraph, cleaned_text: str) -> None:
+    """Distribute *cleaned_text* back across existing runs, preserving formatting."""
+    runs = [r for r in paragraph.runs if not is_field_code_run(r)]
+    if not runs:
+        return
+    pos = 0
+    for i, run in enumerate(runs):
+        orig_len = len(run.text or "")
+        if i < len(runs) - 1:
+            run.text = cleaned_text[pos:pos + orig_len] if pos + orig_len <= len(cleaned_text) else cleaned_text[pos:]
+            pos += orig_len
+        else:
+            run.text = cleaned_text[pos:]
+
 
 def fix_caption_trailing_dot(paragraph, para_label: str, details: list[str]) -> bool:
     text = paragraph.text.strip()

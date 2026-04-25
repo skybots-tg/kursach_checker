@@ -1,0 +1,4961 @@
+{
+  "total_paragraphs": 159,
+  "total_tables": 0,
+  "paragraphs": [
+    {
+      "idx": 0,
+      "text": "",
+      "style_name": "ЛабРаб4_глава",
+      "style_id": "4",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 1,
+      "text": "МИНИСТЕРСТВО НАУКИ И ВЫСШЕГО ОБРАЗОВАНИЯ РОССИЙСКОЙ ФЕДЕРАЦИИ",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "МИНИСТЕРСТВО НАУКИ И ВЫСШЕГО ОБРАЗОВАНИЯ РОССИЙСКОЙ ФЕДЕРАЦИИ",
+          "font": "Times New Roman",
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 2,
+      "text": "Федеральное государственное автономное образовательное учреждение высшего образования",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Федеральное государственное автономное образовательное учреждение высшего образо",
+          "font": "Times New Roman",
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 3,
+      "text": "«Дальневосточный федеральный университет»",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "«Дальневосточный федеральный университет»",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 4,
+      "text": "(ДВФУ)",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": 6.0,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 16.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "(ДВФУ)",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 5,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": 6.0,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 6,
+      "text": "ШКОЛА ЭКОНОМИКИ И МЕНЕДЖМЕНТА ",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": 6.0,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "ШКОЛА ЭКОНОМИКИ И МЕНЕДЖМЕНТА ",
+          "font": "Times New Roman",
+          "size_pt": 16.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 7,
+      "text": "Департамент управления на основе данных",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Департамент управления на основе данных",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 8,
+      "text": "(Data Driven Management Department)",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "(",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "Data",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": " ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "Driven",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": " ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "Management",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 9,
+      "text": "КАК ВЫБРАТЬ ПЕРСОНАЛЬНЫЙ КОМПЬЮТЕР",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "КАК ВЫБРАТЬ ПЕРСОНАЛЬНЫЙ КОМПЬЮТЕР",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 10,
+      "text": "РЕФЕРАТ\nпо образовательной программе подготовки бакалавров\nпо направлению 38.03.02 «Менеджмент»",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "РЕФЕРАТ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "п",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "о образовательной программе подготовки бакалавров",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": "по направлению ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 11,
+      "text": "",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "RIGHT (2)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 12,
+      "text": "Выполнила: Павлова Л.И.\n« 01 » апреля 2025 г.",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "RIGHT (2)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Выполнила",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": ": ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Павлова Л.И.",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n« ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "01",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " » ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 13,
+      "text": "Проверил: Ивин В.В.",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "RIGHT (2)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Проверил",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": ": Ивин ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "В.В.",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 14,
+      "text": "«__» ______________ 2025г.",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "RIGHT (2)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "«__» ______________ 202",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "5",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "г.",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 15,
+      "text": "\n\n\n\n\n\n\nг. Владивосток ",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": true,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "\n",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 16,
+      "text": "2025",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.0,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "202",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "5",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 17,
+      "text": "Оглавление",
+      "style_name": "Normal",
+      "style_id": "a",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "Оглавление",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": false,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 18,
+      "text": "Введение",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "Введение",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 19,
+      "text": "В современном мире, где цифровые технологии пронизывают все сферы жизни, выбор персонального компьютера (ПК) становится одной из наиболее актуальных задач как для профессионалов, работающих в различных отраслях, так и для рядовых пользователей. Необх",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В современном мире, где цифровые технологии пронизывают все сферы жизни, выбор п",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 20,
+      "text": "В первую очередь, следует учитывать, что компьютер стал неотъемлемой частью повседневной жизни. Он используется для работы, учебы, развлечений и общения. Особенно это проявляется в условиях глобализации и перехода многих сфер деятельности в онлайн-фо",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В первую очередь, следует учитывать, что компьютер стал неотъемлемой частью повс",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 21,
+      "text": "Существует множество факторов, влияющих на выбор ПК, включая технические характеристики, цель использования, бюджет и предпочтения в дизайне. Потребители должны быть осведомлены о современных тенденциях и инновациях в области компьютерной техники, чт",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Существует множество факторов, влияющих на выбор ПК, включая технические характе",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "решение при покупке. ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 22,
+      "text": "Кроме того, актуальность этой темы также подчеркивается стремительным развитием технологий. Каждый год на рынке появляются новые компоненты, усовершенствованные архитектуры процессоров, графические карты с повышенной производительностью и новые форма",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Кроме того, актуальность этой темы также подчеркивается стремительным развитием ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 23,
+      "text": "Таким образом, проблемы выбора и актуальности современного ПК становятся все более значительными в условиях постоянно изменяющегося технологического ландшафта. Понимание специфики требований к ПК, грамотный анализ рынка и четкое определение собственн",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таким образом, проблемы выбора и актуальности современного ПК становятся все бол",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 24,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 25,
+      "text": "Актуальность данной темы обусловлена тем, что технологический прогресс не стоит на месте, а рынок компьютерной техники постоянно пополняется новыми моделями с различными характеристиками. Обычному пользователю, не обладающему специальными знаниями, б",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Актуальность",
+          "font": null,
+          "size_pt": null,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": " данной темы обусловлена тем, что технологический прогресс не стоит на месте, а ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 26,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 27,
+      "text": "Цель данного исследования – изучение критериев выбора ПК и выявление ключевых факторов, влияющих на этот процесс.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Цель",
+          "font": null,
+          "size_pt": null,
+          "bold": true,
+          "italic": null
+        },
+        {
+          "text": " данного исследования – изучение критериев выбора ПК и выявление ключевых фактор",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 28,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 29,
+      "text": "Задачи исследования:",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Задачи исследования:",
+          "font": null,
+          "size_pt": null,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 30,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 31,
+      "text": "Рассмотреть основные типы ПК и их различия.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Рассмотреть основные типы ПК и их различия.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 32,
+      "text": "Определить основные характеристики, влияющие на производительность и функциональность.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Определить основные характеристики, влияющие на производительность и функциональ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 33,
+      "text": "Оценить, какие параметры являются наиболее важными для разных категорий пользователей.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Оценить, какие параметры являются наиболее важными для разных категорий пользова",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 34,
+      "text": "Дать рекомендации по выбору компьютера в зависимости от поставленных задач.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Дать рекомендации по выбору компьютера в зависимости от поставленных задач.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 35,
+      "text": "Объект исследования – процесс выбора персонального компьютера.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Объект исследования – процесс выбора персонального компьютера.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 36,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 37,
+      "text": "Предмет исследования – критерии и факторы, влияющие на выбор ПК.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Предмет исследования – критерии и факторы, влияющие на выбор ПК.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 38,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 39,
+      "text": "Информационная база: материалы из интернета, включая специализированные статьи, обзоры и публикации по тематике компьютерных технологий.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Информационная база: материалы из интернета, включая специализированные статьи, ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 40,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 41,
+      "text": "Значимость информации: данная информация будет полезна широкому кругу пользователей – от студентов и офисных работников до профессионалов в сфере IT, которым важно подобрать компьютер под свои задачи.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Значимость информации: данная информация будет полезна широкому кругу пользовате",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 42,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 43,
+      "text": "Методы исследования:",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Методы исследования:",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 44,
+      "text": "",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": null,
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    },
+    {
+      "idx": 45,
+      "text": "Библиографический поиск – анализ материалов, доступных в сети интернет.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Библиографический поиск – анализ материалов, доступных в сети интернет.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 46,
+      "text": "Анализ – изучение характеристик различных моделей ПК и их сравнение.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Анализ – изучение характеристик различных моделей ПК и их сравнение.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 47,
+      "text": "Синтез – формирование рекомендаций по выбору на основе полученных данных.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Синтез – формирование рекомендаций по выбору на основе полученных данных.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 48,
+      "text": "Основная часть",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Основная часть",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 49,
+      "text": "1. Виды персональных компьютеров",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1. Виды персональных компьютеров",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 50,
+      "text": "Цели",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Цели",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 51,
+      "text": "Цель данной работы заключается в том, чтобы предоставить всем заинтересованным сторонам, включая как опытных пользователей, так и тех, кто только начинает свой путь в мире информационных технологий, исчерпывающие рекомендации по выбору персонального ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Цель данной работы заключается в том, чтобы предоставить всем заинтересованным с",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 52,
+      "text": "Одной из основных целей работы является анализ различных типов ПК и их характеристик, что позволит пользователям понять, какие именно технические параметры следует учитывать в зависимости от индивидуальных потребностей. В этом контексте мы рассмотрим",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Одной из основных целей работы является анализ различных типов ПК и их характери",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 53,
+      "text": "Кроме того, работа направлена на выявление типичных ошибок, которые люди допускают при выборе ПК. Неверное понимание своих потребностей или недостаточное внимание к техническим характеристикам может привести к приобретению устройства, которое не буде",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Кроме того, работа направлена на выявление типичных ошибок, которые люди допуска",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "задачами. Мы постараемся проанализировать основные факторы, вызывающие недовольс",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 54,
+      "text": "Даже опытные пользователи могут столкнуться с dilemmas при выборе нового ПК, особенно в ситуации насыщенного рынка, когда множество моделей могут запутать даже самых предусмотрительных. Мы ставим цель помочь потребителям разработать стратегию выбора,",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Даже опытные пользователи могут столкнуться с ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "dilemmas",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " при выборе нового ПК, особенно в ситуации насыщенного рынка, когда множество мо",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 55,
+      "text": "Работа также будет включать рекомендации по выбору между различными типами ПК – настольными компьютерами, ноутбуками и моноблоками. Мы проанализируем, в каких случаях каждое из этих устройств будет наиболее целесообразным в зависимости от образа жизн",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Работа также будет включать рекомендации по выбору между различными типами ПК – ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 56,
+      "text": "Таким образом, наша цель заключается в том, чтобы сделать процесс выбора персонального компьютера более информированным, структурированным и эффективным. Мы стремимся помочь читателю не просто разобраться в вопросах выбора ПК, но и почувствовать увер",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Таким образом, наша цель заключается в том, чтобы сделать процесс выбора персона",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 57,
+      "text": "Задачи",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Задачи",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 58,
+      "text": "Для достижения поставленной цели в данной работе определяются несколько ключевых задач, каждая из которых направлена на глубокое понимание процесса выбора персонального компьютера и его соответствия потребностям пользователя. Эти задачи будут служить",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Для достижения поставленной цели в данной работе определяются несколько ключевых",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "структурированного обсуждения, которое поможет читателям уверенно ориентироватьс",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 59,
+      "text": "Первая задача заключается в рассмотрении основных характеристик персональных компьютеров, таких как процессор, оперативная память, видеокарта, накопители и материнская плата. Мы подробно проанализируем, как каждый из этих компонентов влияет на произв",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Первая задача заключается в рассмотрении основных характеристик персональных ком",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 60,
+      "text": "Вторая задача – исследовать различные типы персональных компьютеров и их основные особенности. Мы постараемся детально охарактеризовать настольные ПК, ноутбуки и моноблоки, выделяя их плюсы и минусы в зависимости от условий и целей использования. Важ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Вторая задача – исследовать различные типы персональных компьютеров и их основны",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 61,
+      "text": "Третья задача – предоставить практические советы по покупке. Мы обсудим, на что обращать внимание при покупке ПК, включая изучение репутации производителя, чтение отзывов пользователей, а также использование специализированных сайтов для сравнения мо",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Третья задача – предоставить практические советы по покупке. Мы обсудим, на что ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "множество вариаций и моделей, при этом многие из них могут оказаться неадекватны",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 62,
+      "text": "Четвертая задача – обучить пользователей методам оценки соотношения цена-качество. Понимание стоимости отдельных компонентов и их влияния на общую цену ПК поможет в дальнейшем не только приобретать оборудование, но и при модернизации уже существующих",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Четвертая задача – обучить пользователей методам оценки соотношения цена-качеств",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 63,
+      "text": "Таким образом, выполнение этих задач позволит читателям глубже понять, как выбрать персональный компьютер, соответствующий их требованиям и предпочтениям. Это, в свою очередь, снизит количество ошибок, связанных с покупкой, и обеспечит необходимую ув",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Таким образом, выполнение этих задач позволит читателям глубже понять, как выбра",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 64,
+      "text": "Основные критерии выбора ПК",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "CENTER (1)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "Основные критерии выбора ПК",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 65,
+      "text": "Процессор",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Процессор",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 66,
+      "text": "Процессор, также известный как центральный процессор (ЦП), является одним из самых важных компонентов персонального компьютера, выполняющим основные вычислительные задачи. Он служит \"мозгом\" устройства, отвечая за выполнение инструкций программного о",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Процессор, также известный как центральный процессор (ЦП), является одним из сам",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 67,
+      "text": "Сегодня на рынке представлены процессоры от нескольких ведущих производителей, среди которых наиболее известны Intel и AMD. Каждая из этих компаний предлагает широкий ассортимент моделей, подходящих для различных нужд пользователей. Процессоры Intel,",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Сегодня на рынке представлены процессоры от нескольких ведущих ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "производителей, среди которых наиболее известны ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Intel",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " и AMD. Каждая из этих компаний предлагает широкий ассортимент моделей, подходящ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Intel",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": ", например, можно разделить на несколько ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 68,
+      "text": "Сравнимо, процессоры AMD тоже имеют свои линейки, среди которых наиболее популярными являются Ryzen 3, Ryzen 5, Ryzen 7 и Ryzen 9. Ryzen 3 ориентирован на начальный уровень и подходит для базовых задач, таких как работа с документами и интернет-серфи",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Сравнимо, процессоры AMD тоже имеют свои линейки, среди которых наиболее популяр",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Ryzen",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " 3, ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Ryzen",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " 5, ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Ryzen",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 69,
+      "text": "Важной характеристикой процессора является количество ядер и потоков. Современные процессоры могут быть как с несколькими ядрами, так и с поддержкой многопоточности, что позволяет увеличивать производительность при выполнении нескольких задач одновре",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Важной характеристикой процессора является количество ядер и потоков. Современны",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 70,
+      "text": "Частота процессора также имеет значительное влияние на его производительность. Измеряется в гигагерцах (ГГц) и указывает, сколько циклов обработки данных может выполнить процессор за одну секунду. Более высокая тактовая частота обычно указывает на лу",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Частота процессора также имеет значительное влияние на его производительность. И",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "высокая тактовая частота обычно указывает на лучшую производительность, однако в",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 71,
+      "text": "Кроме того, стоит обратить внимание на кэш-память, которая используется для временного хранения часто используемых данных непосредственно в процессоре. Обычно чем больше кэш, тем быстрее процессор может получать доступ к данным и выполнять команды. ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Кроме того, стоит обратить внимание на кэш-память, которая используется для врем",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 72,
+      "text": "В заключение, при выборе процессора для своего ПК, важно учитывать не только его характеристики, такие как количество ядер, тактовая частота и объем кэш-памяти, но и будущие потребности. Если пользователь планирует заниматься ресурсоемкими приложения",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В заключение, при выборе процессора для своего ПК, важно учитывать не только его",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 73,
+      "text": "Оперативная память",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Оперативная память",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 74,
+      "text": "Оперативная память, или ОЗУ (оперативное запоминающее устройство), является неотъемлемой частью персонального компьютера, отвечая за временное хранение данных и программ, которые в данный момент используются процессором. Эта структура памяти играет к",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Оперативная память, или ОЗУ (оперативное запоминающее устройство), является неот",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 75,
+      "text": "Первоначально, стоит отметить, что оперативная память осуществляет свою работу намного быстрее, чем другие типы памяти, такие как жесткие диски или твердотельные накопители (SSD). Это связано с тем, что ОЗУ обеспечивает процессору мгновенный доступ к",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Первоначально, стоит отметить, что оперативная память осуществляет свою ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "работу намного быстрее, чем другие типы памяти, такие как жесткие диски или твер",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 76,
+      "text": "При выборе ОЗУ пользователи должны учитывать несколько ключевых характеристик, включая объем, тип памяти, скорость и архитектуру.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "При выборе ОЗУ пользователи должны учитывать несколько ключевых характеристик, в",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 77,
+      "text": "1. Объем оперативной памяти. Объем ОЗУ измеряется в гигабайтах (ГБ), и в зависимости от задач, которые будут выполняться, объем памяти может варьироваться. Например, для базового использования, такого как веб-серфинг и работа с документами, достаточн",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1. Объем оперативной памяти. Объем ОЗУ измеряется в гигабайтах (ГБ), и в зависим",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "ресурсозатратными",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " приложениями, такими как 3D-моделирование или работа с большими наборами данных",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 78,
+      "text": "2. Тип памяти. Современные ПК используют разные типы оперативной памяти, среди которых наиболее распространены DDR4 и, относительно недавно, DDR5. DDR4 является стандартом для большинства систем, обеспечивая хорошую производительность и достаточную с",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2. Тип памяти. Современные ПК используют разные типы оперативной памяти, среди к",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 79,
+      "text": "3. Скорость работы. Скорость ОЗУ измеряется в мегагерцах (МГц) и указывает, сколько операций памяти может выполнить модуль в секунду. Более высокая скорость может привести к увеличению производительности, особенно в требовательных приложениях. Однако",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "3. Скорость работы. Скорость ОЗУ измеряется в мегагерцах (МГц) и указывает, скол",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 80,
+      "text": "4. Архитектура. Современные компьютеры могут поддерживать многоканальную архитектуру, такую как двукратное или четырехкратное взаимодействие, что позволяет ОЗУ работать более эффективно. Использование нескольких модулей памяти одновременно может знач",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "4. Архитектура. Современные компьютеры могут поддерживать многоканальную архитек",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 81,
+      "text": "Важно учитывать, что оперативная память работает в тандеме с другими компонентами компьютера, такими как процессор и видеокарта. Нехватка оперативной памяти может стать узким местом в производительности системы, даже если другие компоненты достаточно",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Важно учитывать, что оперативная память работает в тандеме с другими компонентам",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 82,
+      "text": "В заключение, оперативная память – это ключевой аспект, который необходимо учитывать при выборе персонального компьютера. Правильный объем, тип и скорость ОЗУ могут позитивно сказаться на производительности системы и комфортности работы. Учитывая сво",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В заключение, оперативная память – это ключевой аспект, который необходимо учиты",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 83,
+      "text": "Графическая карта",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Графическая карта",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 84,
+      "text": "Графическая карта, или видеокарта, является важнейшим элементом современного персонального компьютера, отвечающим за обработку и вывод графических данных на экран. Для пользователей, занимающихся играми, графикой, видеообработкой и другими сложными в",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Графическая карта, или видеокарта, является важнейшим элементом современного пер",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 85,
+      "text": "Первое и главное назначение графической карты – это рендеринг изображения. Она обеспечивает обработку больших объемов данных, связанных с изображением, что особенно актуально для современных игр и выражается в создании детализированных и реалистичных",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Первое и главное назначение графической карты – это рендеринг изображения. Она о",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 86,
+      "text": "Основным критерием выбора графической карты является ее производительность, измеряемая в тактовой частоте, количестве ядер и шине памяти. Тактовая частота, измеряемая в мегагерцах (МГц), указывает на скорость работы графического процессора (GPU). Чем",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Основным критерием выбора графической карты является ее производительность, изме",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 87,
+      "text": "Также стоит обратить внимание на объем видеопамяти (VRAM). Эта память используется для хранения текстур, шейдеров и других данных, необходимых для рендеринга графики. Более высокий объем видеопамяти позволяет работать с более высокими разрешениями и ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Также стоит обратить внимание на объем видеопамяти (VRAM). Эта память использует",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "важно для современного гейминга. На данный момент для комфортной игры в современ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "тайтлах",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " рекомендуется иметь от 6 до 8 ГБ VRAM, тогда как для профессиональной работы с ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 88,
+      "text": "Еще одним важным аспектом является поддержка различных технологий, таких как Ray Tracing, DLSS и другие. Ray Tracing – это технология трассировки лучей, которая обеспечивает реалистичное освещение и тени, добавляя уровень реализма в графику. Видеокар",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Еще одним важным аспектом является поддержка различных технологий, таких как ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Ray",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Tracing",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": ", DLSS и другие. ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Ray",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 89,
+      "text": "Не стоит забывать и о подключении видеокарты. Она должна иметь необходимые разъемы для подключения к монитору, такие как HDMI, DisplayPort или DVI. Важно проверить, поддерживает ли видеокарта требуемое разрешение и частоту обновления экрана для вашег",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Не стоит забывать и о подключении видеокарты. Она должна иметь необходимые разъе",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "DisplayPort",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " или DVI. Важно проверить, поддерживает ли видеокарта требуемое разрешение и час",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 90,
+      "text": "Альтернативный аспект, о котором стоит помнить при выборе графической карты, – это тепловыделение и потребление энергии. Мощные видеокарты могут потреблять значительное количество энергии и требовать качественного блока питания, а также системы охлаж",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Альтернативный аспект, о котором стоит помнить при выборе графической карты, – э",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 91,
+      "text": "В заключение, графическая карта имеет огромное значение для общей производительности вашего компьютера, особенно в контексте игр и графических приложений. При выборе видеокарты необходимо учитывать ее характеристики, технологии и совместимость с оста",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В заключение, графическая карта имеет огромное значение для общей производительн",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "графических приложений. При выборе видеокарты необходимо учитывать ее характерис",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 92,
+      "text": "Типы ПК и их особенности",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Типы ПК и их особенности",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 93,
+      "text": "Настольные ПК",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Настольные ПК",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 94,
+      "text": "Настольные компьютеры, как один из самых распространенных типов ПК, занимаются важной ролью в большинстве офисов, учебных заведений и домашних условиях. Они представляют собой мощные системы, которые превосходят по производительности более компактные",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Настольные компьютеры, как один из самых распространенных типов ПК, занимаются в",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 95,
+      "text": "Преимущества настольных ПК. ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Преимущества настольных ПК. ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 96,
+      "text": "1. Производительность. Одним из ключевых преимуществ настольных ПК является их высокая производительность. Обычно они оборудованы мощными процессорами, большой оперативной памятью и производительными видеокартами. Это делает их идеальными для решения",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1. Производительность. Одним из ключевых преимуществ настольных ПК является их в",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 97,
+      "text": "2. Расширяемость и апгрейд. Настольные компьютеры значительно удобнее в плане модернизации. Есть возможность замены или добавления компонентов, таких как жесткие диски, графические карты, блоки питания и материнские платы. Это позволяет пользователям",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2. Расширяемость и апгрейд. Настольные компьютеры значительно удобнее в плане мо",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 98,
+      "text": "3. Комфорт и эргономика. Настольные ПК обеспечивают более удобное рабочее пространство. Клавиатура, мышь и монитор можно расположить в удобном для пользователя положении, что снижает нагрузки на спину и запястья по сравнению с ноутбуками. Кроме того,",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3. Комфорт и эргономика. Настольные ПК обеспечивают более удобное рабочее простр",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 99,
+      "text": "4. Цена. В большинстве случаев настольные компьютеры предоставляют лучшее соотношение цена-качество по сравнению с переносными устройствами. За ту же сумму денег можно получить более мощное оборудование, что делает настольные ПК привлекательным вариа",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "4. Цена. В большинстве случаев настольные компьютеры предоставляют лучшее соотно",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 100,
+      "text": "Недостатки настольных ПК. ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Недостатки настольных ПК. ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 101,
+      "text": "1. Мобильность. Одним из самых явных недостатков настольных ПК является их громоздкость и отсутствие мобильности. Эти устройства предназначены для стационарной установки, и их неудобно перемещать. Это создает проблемы для пользователей, которые нужда",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1. Мобильность.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Одним из самых явных недостатков настольных ПК является их громоздкость и отсутс",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 102,
+      "text": "2. Объем и место. Настольные ПК занимают значительное пространство, что может быть проблемой для дизайнеров интерьеров или в небольших помещениях. Пользователям может потребоваться отдельный стол или место для установки компьютера, что может ограничи",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2. Объем и место. Настольные ПК занимают значительное пространство, что может бы",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 103,
+      "text": "3. Энергопотребление. Обычно настольные компьютеры потребляют больше энергии по сравнению с ноутбуками, что может играть роль при планировании расходов на электроэнергию. ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3. Энергопотребление. Обычно настольные компьютеры потребляют больше энергии по ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 104,
+      "text": "4. Алертация к шуму и теплоотведению. Настольные ПК часто оборудованы более мощными вентиляторами для охлаждения, которые могут создавать больше шума, чем в мобильных устройствах. Это может быть особенно заметно в тихой обстановке, где комфортная раб",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "4.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Алертация",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " к шуму и ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "теплоотведению",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": ". ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 105,
+      "text": "В заключение, настольные ПК представляют собой отличный выбор для пользователей, нуждающихся в необходимой мощности и производительности для выполнения разнообразных задач. Они идеальны для использования в офисах, учебных заведениях и домашних услови",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В заключение, настольные ПК представляют собой отличный выбор для пользователей,",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "computing",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": ", особенно для тех, кто ценит производительность и возможности модернизации.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 106,
+      "text": "Ноутбуки",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Ноутбуки",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 107,
+      "text": "Ноутбуки, являясь одним из основных типов персональных компьютеров, завоевали большую популярность благодаря своей мобильности и удобству использования. Они представляют собой компактные устройства, которые можно легко переносить в разных условиях – ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Ноутбуки, являясь одним из основных типов персональных компьютеров, завоевали бо",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 108,
+      "text": "Преимущества ноутбуков.",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Преимущества ноутбуков.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 109,
+      "text": "1.   Мобильность.Основным преимуществом ноутбуков является их портативность. Компактные размеры и встроенные аккумуляторы позволяют легко брать устройства с собой, что делает их идеальными для людей, работающих в пути или жаждущих мобильности. Это ос",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1. ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "  ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Мобильность.Основным",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " преимуществом ноутбуков является их портативность. Компактные размеры и встроен",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 110,
+      "text": "2. Универсальность. Ноутбуки бывают разных категорий и могут удовлетворять различные потребности пользователей. Существуют легкие ультрабуки для офисной работы и серфинга в интернете, мощные игровые ноутбуки для любителей видеоигр и профессиональные ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "2. Универсальность. Ноутбуки бывают разных категорий и могут удовлетворять разли",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 111,
+      "text": "3. Встроенные компоненты. В отличие от настольных ПК, где компоненты можно легко заменять и модернизировать, ноутбуки часто имеют более интегрированную архитектуру. Это позволяет производителям снижать размеры устройств, хотя и ограничивает возможнос",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3. Встроенные компоненты. В отличие от настольных ПК, где компоненты можно легко",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 112,
+      "text": "4. Простота использования. Ноутбуки предлагают удобное решение «все в одном»: встроенные клавиатура, тачпад и экран делают их готовыми к использованию сразу после покупки. Как правило, пользователям не требуется дополнительно приобретать периферийные",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "4. Простота использования. Ноутбуки предлагают удобное решение «все в одном»: вс",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 113,
+      "text": "Недостатки ноутбуков. ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Недостатки ноутбуков. ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 114,
+      "text": "1. Производительность. Хотя ноутбуки могут быть довольно мощными, они часто уступают настольным ПК по производительности за ту же цену. Это связано с ограничениями в охлаждении и энергопотреблении, что может привести к принуждению производства более ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1. Производительность. Хотя ноутбуки могут быть довольно мощными, они часто усту",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "более менее",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " мощной техники. Игровые и графические ноутбуки могут требовать значительных инв",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 115,
+      "text": "2. Модернизация. Возможности модернизации ноутбуков ограничены по сравнению с настольными ПК. Хотя некоторые модели позволяют менять оперативную память или накопитель, многие компоненты, такие как процессор или видеокарта, в большинстве случаев нельз",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2. Модернизация. Возможности модернизации ноутбуков ограничены по сравнению с на",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "необходимости полностью менять устройство, если оно не удовлетворяет текущим тре",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 116,
+      "text": "3. Цены. На рынке ноутбуки часто имеют более высокую цену по сравнению с аналогичными настольными ПК. Это относится как к базовым моделям, так и к более производительным вариантам, особенно в случаях, когда требуется графическая карта, способная обес",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3. Цены. На рынке ноутбуки часто имеют более высокую цену по сравнению с аналоги",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 117,
+      "text": "4. Комфорт работы. Хотя ноутбуки и обеспечивают мобильность, работа за ними в течение продолжительного времени может быть менее комфортной по сравнению с настольными ПК. Размеры экрана и клавиатуры могут оказывать влияние на удобство работы, и исполь",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "4",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": ". ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "Комфорт работы. Хотя ноутбуки и обеспечивают мобильность, работа за ними в течен",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 118,
+      "text": "Рекомендации по выбору ноутбукаПри выборе ноутбука важно определить, для каких целей он будет использоваться. Если устройство необходимо для повседневной работы, таких как работа с текстами и серфинг в интернете, достаточно базовой модели с хорошей п",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Рекомендации по выбору ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "ноутбукаПри",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": " выборе ноутбука важно определить, для каких целей он будет использоваться. Если",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 119,
+      "text": "Также стоит уделить внимание размеру экрана и типу клавиатуры, учитывая, как долго планируется использовать устройство за один раз. Кроме того, рекомендуется обратить внимание на срок службы батареи, что особенно актуально для пользователей, которые ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Также стоит уделить внимание размеру экрана и типу клавиатуры, учитывая, как дол",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 120,
+      "text": "В заключение, ноутбуки – это отличное решение для пользователей, которым важна мобильность и универсальность. Несмотря на некоторые ограничения, связанные с производительностью и модернизацией, они остаются великолепным выбором для студентов, офисных",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В заключение, ноутбуки – это отличное решение для пользователей, которым ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "важна мобильность и универсальность. Несмотря на некоторые ограничения, связанны",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "удаленке",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": ".",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 121,
+      "text": "Компьютерные моноблоки",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Компьютерные моноблоки",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 122,
+      "text": "Компьютерные моноблоки представляют собой уникальный класс персональных компьютеров, которые объединяют все необходимые компоненты – процессор, оперативную память, хранилище данных и графику – в одном корпусе. Такие устройства привлекают внимание пол",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Компьютерные моноблоки представляют собой уникальный класс персональных компьюте",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 123,
+      "text": "Плюсы компьютерных моноблоков. ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Плюсы компьютерных моноблоков. ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 124,
+      "text": "1. Компактность и экономия пространства. Одним из главных преимуществ моноблоков является их компактный размер. Все компоненты размещаются в одном корпусе, что позволяет экономить пространство на столе и минимизировать беспорядок, связанный с подключ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1. Компактность и экономия пространства. Одним из главных преимуществ моноблоков",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 125,
+      "text": "2. Современный дизайн. Моноблоки обычно имеют элегантный и современный внешний вид. Многие из них предлагаются в стильных корпусах с тонкими рамками вокруг дисплея, что делает их привлекательными для потребителей, желающих создать эстетически приятну",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2. Современный ди",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "зайн. Мо",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "ноблоки обычно имеют элегантный и современный внешний вид. Многие из них предлаг",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 126,
+      "text": "3. Простота использования. Как и ноутбуки, моноблоки готовы к работе сразу после распаковки – пользователю не нужно подключать отдельные компоненты, такие как клавиатура и мышь, хотя такие устройства часто идут в комплекте. Это делает моноблоки удобн",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3. Простота использования. Как и ноутбуки, моноблоки готовы к работе сразу после",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "компоненты, такие как клавиатура и мышь, хотя такие устройства часто идут в комп",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 127,
+      "text": "4. Относительная энергоэффективность. Многие современные моноблоки оборудованы компонентами, разработанными с учетом низкого энергопотребления, что позволяет сократить расходы на электроэнергию и уменьшить тепловыделение по сравнению с традиционными ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "4. Относительная энергоэффективность. Многие современные моноблоки оборудованы к",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 128,
+      "text": "Минусы компьютерных моноблоков. ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Минусы компьютерных моноблоков. ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 129,
+      "text": "1. Ограниченные возможности модернизации. Одним из значительных недостатков моноблоков является их ограниченная возможность обновления компонентов. Хотя некоторые модели позволяют увеличивать объем оперативной памяти или заменять накопитель, процессо",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1. Ограниченные возможности модернизации. Одним из значительных недостатков моно",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 130,
+      "text": "2. Производительность. Моноблоки, как правило, предлагают меньшую производительность по сравнению с традиционными настольными ПК. Это связано с их компактными размерами и необходимостью использовать более компактные и менее производительные компонент",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2. Пр",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "оизводительность. Мо",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "ноблоки, как правило, предлагают меньшую производительность по сравнению с тради",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 131,
+      "text": "3. Цена. Моноблоки часто стоят дороже по сравнению с аналогичными настольными ПК, обладающими сопоставимой производительностью. Это связано с затратами на дизайн и интеграцию всех компонентов в один корпус, что может не всегда быть оправданным для по",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3. Це",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "на. Мо",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "ноблоки часто стоят дороже по сравнению с аналогичными настольными ПК, обладающи",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "номить.",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 132,
+      "text": "4. Возможные проблемы с ремонтом. В случае поломки какого-либо компонента, ремонт моноблока может быть более сложным и дорогостоящим. Нередко следует обращаться к специалистам для диагностики и замены деталей, что может привести к большему времени пр",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "4. Возможные проблемы с ре",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "монтом. В ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "случае поломки какого-либо компонента, ремонт моноблока может быть более сложным",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 133,
+      "text": "Рекомендации по выбору моноблока. ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Рекомендации по выбору мо",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "ноблока. ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 134,
+      "text": "Если вы рассматриваете возможность приобретения моноблока, важно учитывать свои потребности. Убедитесь, что модель, которую вы выбираете, соответствует требованиям по производительности для задач, которые вы планируете выполнять. Обратите внимание на",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Если вы рассматриваете возможность приобретения моноблока, важно учитывать свои ",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 135,
+      "text": "Также не забывайте о системе охлаждения. Некоторые моноблоки могут перегреваться при длительной работе, что сказывается на их производительности. Выбор модели с хорошей системой охлаждения очень важен, особенно если намерены нагружать устройство во в",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Также не забывайте о системе охлаждения. Некоторые моноблоки могут перегреваться",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 136,
+      "text": "В заключение, компьютерные моноблоки являются хорошим выбором для пользователей, которым важна экономия места, стильный дизайн и простота использования. Однако перед покупкой стоит учитывать их ограничения в плане модернизации и производительности. П",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В заключение, компьютерные моноблоки являются хорошим выбором для пользователей,",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 137,
+      "text": "Заключение",
+      "style_name": "Heading 1",
+      "style_id": "1",
+      "alignment": "CENTER (1)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "Заключение",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 138,
+      "text": "Обобщение",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Обобщение",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 139,
+      "text": "В современном мире, где технологии активно проникают во все сферы жизни, выбор персонального компьютера стал одной из наиболее значимых задач для пользователей. Независимо от того, являетесь ли вы домохозяином, студентом, профессионалом или геймером,",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В современном мире, где технологии активно проникают во все сферы жизни, выбор п",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 140,
+      "text": "В результате проведенного анализа различных типов персональных компьютеров, их компонентов, состояний и предназначения, было выявлено несколько ключевых аспектов, на которые стоит обратить внимание при покупке. Первое и, вероятно, самое важное – это ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В результате проведенного анализа различных типов персональных компьютеров, их к",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 141,
+      "text": "Обсуждая процессоры, оперативную память и графические карты, мы поняли, насколько критически важны их характеристики для общего функционирования и производительности системы. Каждый из этих компонентов имеет свои параметры и требования, которые следу",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Обсуждая процессоры, оперативную память и графические карты, мы поняли, наскольк",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 142,
+      "text": "Не менее важно учитывать тип ПК, которым вы собираетесь пользоваться. Будь то настольный компьютер, ноутбук или моноблок, каждый из этих вариантов имеет свои преимущества и недостатки. Настольные ПК предлагают высокую производительность и возможности",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Не менее важно учитывать тип ПК, которым вы собираетесь пользоваться. Будь то на",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 143,
+      "text": "Также следует упомянуть о теперешних тенденциях и технологиях, таких как поддержка VR, использование SSD и значимые соотношения цена-качество, которые стали важными факторами при выборе спроса на компьютеры. С учетом стремительного развития технологи",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Также следует упомянуть о теперешних тенденциях и технологиях, таких как поддерж",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 144,
+      "text": "В заключение, правильный выбор персонального компьютера – это многофакторный процесс, требующий внимательности, анализа и понимания своих потребностей и бюджета. Выбор ПК – не просто покупка техники, а инвестиция в свое время и продуктивность, и непр",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "В заключение, правильный выбор персонального компьютера – это многофакторный про",
+          "font": null,
+          "size_pt": null,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 145,
+      "text": "Список литературы",
+      "style_name": "Heading 1",
+      "style_id": "1",
+      "alignment": "CENTER (1)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": true,
+      "runs": [
+        {
+          "text": "Список литературы",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": true,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 146,
+      "text": "1. Изучите характеристики компонентов. Подробно разберитесь в характеристиках ключевых компонентов: процессора, видеокарты и оперативной памяти. Обратите внимание на тактовую частоту процессора, объем и тип оперативной памяти, а также на характеристи",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "1. Изучите характеристики компонентов. Подробно разберитесь в характеристиках кл",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 147,
+      "text": "2. Не забывайте о периферийных устройствах. При покупке компьютера также важно заранее продумать, какие дополнительные устройства вам могут понадобиться. Это может включать монитор, клавиатуру, мышь и акустическую систему. Необходимо учитывать качест",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "2. Не забывайте о периферийных устройствах. При покупке компьютера также важно з",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 148,
+      "text": "Следуя этим рекомендациям, вы значительно упростите процесс выбора и покупки персонального компьютера, что в дальнейшем принесет вам радость и удобство в работе. Правильный выбор обеспечит вас всем необходимым для эффективного выполнения задач в повс",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Следуя этим рекомендациям, вы значительно упростите процесс выбора и покупки пер",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 149,
+      "text": "3. Определите свои потребности. Прежде чем приступить к поиску PC, уточните, для каких задач вы хотите его использовать. Если планируете выполнять рутинные задачи, такие как серфинг в интернете, работа с текстами или использование офисных программ, в",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "3. Определите свои потребности. Прежде чем приступить к поиску PC, уточните, для",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 150,
+      "text": "4. Проверяйте отзывы и обзоры. Перед покупкой настоятельно рекомендуем ознакомиться с отзывами пользователей и профессиональными обзорами на модели, которые вам интересны. Это позволит вам получить представление о реальных оценках производительности,",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "4. Проверяйте отзывы и обзоры. Перед покупкой настоятельно рекомендуем ознакомит",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 151,
+      "text": "5. Рассмотрите возможность сборки компьютера. Если у вас есть определенные технические знания и опыт, вы можете рассмотреть возможность сборки собственного ПК. Это позволит вам сэкономить деньги и выбрать компоненты, которые наилучшим образом соответ",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "5. Рассмотрите возможность сборки компьютера. Если у вас есть определенные техни",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 152,
+      "text": "6. Следите за акциями и скидками. Покупка компьютера – это серьезные расходы, и не лишним будет следить за акциями и специальными предложениями в магазинах. Часто компании проводят распродажи, что может значительно снизить цену на интересующие вас мо",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "6. Следите за акциями и скидками. Покупка компьютера – это серьезные расходы, и ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 153,
+      "text": "7. Сравнивайте предложения в нескольких магазинах. Перед окончательным выбором уделите время сравнению цен и условий в разных магазинах. Онлайн-магазины могут предложить более привлекательные условия, а также лучшее соотношение цена-качество, чем обы",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "7. Сравнивайте предложения в нескольких магазинах. Перед окончательным выбором у",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 154,
+      "text": "8. Установите бюджет. Определите, сколько вы готовы потратить на новый ПК. Установление бюджета поможет сузить выбор и избежать чрезмерных трат на оборудование, которое может оказаться избыточным для ваших нужд. Имейте в виду, что не всегда высокая ц",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "8. Установите бюджет. Определите, сколько вы готовы потратить на новый ПК. Устан",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 155,
+      "text": "Не удалось сгенерировать список литературы или нам не удалось найти его под ваш запрос, обратитесь в тех. поддержку",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Не удалось сгенерировать список литературы или нам не удалось найти его под ваш ",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 156,
+      "text": "Рекомендации",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "Рекомендации",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 157,
+      "text": "При выборе и покупке персонального компьютера важно учитывать несколько ключевых аспектов, которые помогут вам сделать правильный выбор, учитывая ваши потребности, бюджет и планы на будущее. В этой статье мы представим ряд рекомендаций, которые помог",
+      "style_name": "основной",
+      "style_id": "af0",
+      "alignment": "JUSTIFY (3)",
+      "line_spacing": 1.5,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": 35.45,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": [
+        {
+          "text": "При выборе и покупке персонального компьютера важно учитывать несколько ключевых",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        },
+        {
+          "text": "",
+          "font": "Times New Roman",
+          "size_pt": 14.0,
+          "bold": null,
+          "italic": null
+        }
+      ]
+    },
+    {
+      "idx": 158,
+      "text": "",
+      "style_name": "TOC Heading",
+      "style_id": "a7",
+      "alignment": "CENTER (1)",
+      "line_spacing": null,
+      "space_before_pt": null,
+      "space_after_pt": null,
+      "first_line_indent_pt": null,
+      "has_page_break": false,
+      "has_soft_break": false,
+      "has_page_break_before": false,
+      "runs": []
+    }
+  ],
+  "tables_info": []
+}

@@ -1,0 +1,284 @@
+Total paragraphs: 110
+Total tables: 0
+#000 [ЛабРаб4_глава] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+      run: <''  pt b=None i=None>
+#001 [Normal] align=CENTER (1) ls=1.0 sb=None sa=None fl=None
+     TEXT: 'МИНИСТЕРСТВО НАУКИ И ВЫСШЕГО ОБРАЗОВАНИЯ РОССИЙСКОЙ ФЕДЕРАЦИИ'
+      run: <'МИНИСТЕРСТВО НАУКИ И ВЫСШЕГО ОБРАЗОВАНИЯ РОССИЙСКОЙ ФЕДЕРАЦИИ' Times New Roman pt b=None i=None>
+#002 [Normal] align=CENTER (1) ls=1.0 sb=None sa=None fl=None
+     TEXT: 'Федеральное государственное автономное образовательное учреждение высшего образования'
+      run: <'Федеральное государственное автономное образовательное учреждение высшего образования' Times New Roman pt b=None i=None>
+#003 [Normal] align=CENTER (1) ls=1.0 sb=None sa=None fl=None
+     TEXT: '«Дальневосточный федеральный университет»'
+      run: <'«Дальневосточный федеральный университет»' Times New Roman 14.0pt b=True i=None>
+#004 [Normal] align=CENTER (1) ls=1.0 sb=None sa=6.0 fl=None
+     TEXT: '(ДВФУ)'
+      run: <'' Times New Roman 16.0pt b=True i=None>
+      run: <'(ДВФУ)' Times New Roman 14.0pt b=None i=None>
+#005 [Normal] align=CENTER (1) ls=1.0 sb=None sa=6.0 fl=None
+     TEXT: ''
+#006 [Normal] align=CENTER (1) ls=1.0 sb=None sa=6.0 fl=None
+     TEXT: 'ШКОЛА ЭКОНОМИКИ И МЕНЕДЖМЕНТА '
+      run: <'ШКОЛА ЭКОНОМИКИ И МЕНЕДЖМЕНТА ' Times New Roman 16.0pt b=True i=None>
+#007 [Normal] align=CENTER (1) ls=None sb=None sa=None fl=None
+     TEXT: 'Департамент управления на основе данных'
+      run: <'Департамент управления на основе данных' Times New Roman 14.0pt b=True i=None>
+#008 [Normal] align=CENTER (1) ls=None sb=None sa=84.0 fl=None
+     TEXT: '(Data Driven Management Department)'
+#009 [Normal] align=CENTER (1) ls=None sb=None sa=None fl=None
+     TEXT: 'КАК ВЫБРАТЬ ПЕРСОНАЛЬНЫЙ КОМПЬЮТЕР'
+      run: <'КАК ВЫБРАТЬ ПЕРСОНАЛЬНЫЙ КОМПЬЮТЕР' Times New Roman 14.0pt b=None i=None>
+#010 [Normal] align=CENTER (1) ls=0.8 sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'РЕФЕРАТ <BR> по образовательной программе подготовки бакалавров <BR> по направлению 38.03.02 «Менеджмент»'
+#011 [Normal] align=RIGHT (2) ls=None sb=None sa=None fl=None
+     TEXT: ''
+#012 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#013 [Normal] align=RIGHT (2) ls=None sb=None sa=None fl=None
+     TEXT: ''
+#014 [Normal] align=RIGHT (2) ls=None sb=None sa=None fl=None
+     TEXT: ''
+#015 [Normal] align=RIGHT (2) ls=None sb=None sa=None fl=None
+     TEXT: ''
+#016 [Normal] align=RIGHT (2) ls=None sb=None sa=None fl=None
+     TEXT: ''
+#017 [Normal] align=RIGHT (2) ls=None sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'Выполнила: Павлова Л.И. <BR> « 01 » апреля 2025 г.'
+      run: <'Выполнила' Times New Roman 14.0pt b=None i=None>
+      run: <': ' Times New Roman 14.0pt b=None i=None>
+      run: <'Павлова Л.И.' Times New Roman 14.0pt b=None i=None>
+      run: <'\n« ' Times New Roman 14.0pt b=None i=None>
+      run: <'01' Times New Roman 14.0pt b=None i=None>
+      run: <' » ' Times New Roman 14.0pt b=None i=None>
+      run: <'апреля 2025' Times New Roman 14.0pt b=None i=None>
+      run: <' г.' Times New Roman 14.0pt b=None i=None>
+#018 [Normal] align=RIGHT (2) ls=None sb=None sa=None fl=None
+     TEXT: 'Проверил: Ивин В.В.'
+      run: <'Проверил' Times New Roman 14.0pt b=None i=None>
+      run: <': Ивин ' Times New Roman 14.0pt b=None i=None>
+      run: <'В.В.' Times New Roman 14.0pt b=None i=None>
+#019 [Normal] align=RIGHT (2) ls=None sb=None sa=None fl=None
+     TEXT: '«__» ______________ 2025г.'
+      run: <'«__» ______________ 202' Times New Roman 14.0pt b=None i=None>
+      run: <'5' Times New Roman 14.0pt b=None i=None>
+      run: <'г.' Times New Roman 14.0pt b=None i=None>
+#020 [Normal] align=CENTER (1) ls=1.0 sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: ' <BR>  <BR>  <BR>  <BR>  <BR>  <BR>  <BR> г. Владивосток '
+#021 [Normal] align=CENTER (1) ls=1.0 sb=None sa=None fl=None
+     TEXT: '2025'
+      run: <'202' Times New Roman 14.0pt b=None i=None>
+      run: <'5' Times New Roman 14.0pt b=None i=None>
+#022 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Оглавление'
+      run: <'Оглавление'  pt b=True i=None>
+#023 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#024 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#025 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#026 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#027 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#028 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#029 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#030 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#031 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#032 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#033 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#034 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#035 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#036 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#037 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#038 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#039 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#040 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#041 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#042 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#043 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#044 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#045 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#046 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#047 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#048 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#049 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#050 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#051 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#052 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#053 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Введение'
+      run: <'Введение'  pt b=True i=None>
+#054 [основной] align=None ls=None sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'В современном мире, где цифровые технологии пронизывают все сферы жизни, выбор персонального компьютера (ПК) становится одной из наиболее актуальных задач как для профессионалов, работающих в различны'
+#055 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#056 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#057 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#058 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Актуальность данной темы обусловлена тем, что технологический прогресс не стоит на месте, а рынок компьютерной техники постоянно пополняется новыми моделями с различными характеристиками. Обычному пол'
+      run: <'Актуальность'  pt b=True i=None>
+      run: <' данной темы обусловлена тем, что технологический прогресс не стоит на месте, а рынок компьютерной техники постоянно пополняется новыми моделями с различными характеристиками. Обычному пользователю, не обладающему специальными знаниями, бывает трудно разобраться в многообразии предложений и выбрать оптимальный вариант.'  pt b=None i=None>
+#059 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#060 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Цель данного исследования — изучение критериев выбора ПК и выявление ключевых факторов, влияющих на этот процесс.'
+      run: <'Цель'  pt b=True i=None>
+      run: <' данного исследования — изучение критериев выбора ПК и выявление ключевых факторов, влияющих на этот процесс.'  pt b=None i=None>
+#061 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#062 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Задачи исследования:'
+      run: <'Задачи исследования:'  pt b=True i=None>
+#063 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#064 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Рассмотреть основные типы ПК и их различия.'
+      run: <'Рассмотреть основные типы ПК и их различия.'  pt b=None i=None>
+#065 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Определить основные характеристики, влияющие на производительность и функциональность.'
+      run: <'Определить основные характеристики, влияющие на производительность и функциональность.'  pt b=None i=None>
+#066 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Оценить, какие параметры являются наиболее важными для разных категорий пользователей.'
+      run: <'Оценить, какие параметры являются наиболее важными для разных категорий пользователей.'  pt b=None i=None>
+#067 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Дать рекомендации по выбору компьютера в зависимости от поставленных задач.'
+      run: <'Дать рекомендации по выбору компьютера в зависимости от поставленных задач.'  pt b=None i=None>
+#068 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Объект исследования — процесс выбора персонального компьютера.'
+      run: <'Объект исследования — процесс выбора персонального компьютера.'  pt b=None i=None>
+#069 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#070 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Предмет исследования — критерии и факторы, влияющие на выбор ПК.'
+      run: <'Предмет исследования — критерии и факторы, влияющие на выбор ПК.'  pt b=None i=None>
+#071 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#072 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Информационная база: материалы из интернета, включая специализированные статьи, обзоры и публикации по тематике компьютерных технологий.'
+      run: <'Информационная база: материалы из интернета, включая специализированные статьи, обзоры и публикации по тематике компьютерных технологий.'  pt b=None i=None>
+#073 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#074 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Значимость информации: данная информация будет полезна широкому кругу пользователей — от студентов и офисных работников до профессионалов в сфере IT, которым важно подобрать компьютер под свои задачи.'
+      run: <'Значимость информации: данная информация будет полезна широкому кругу пользователей — от студентов и офисных работников до профессионалов в сфере IT, которым важно подобрать компьютер под свои задачи.'  pt b=None i=None>
+#075 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#076 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Методы исследования:'
+      run: <'Методы исследования:'  pt b=None i=None>
+#077 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#078 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Библиографический поиск — анализ материалов, доступных в сети интернет.'
+      run: <'Библиографический поиск — анализ материалов, доступных в сети интернет.'  pt b=None i=None>
+#079 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Анализ — изучение характеристик различных моделей ПК и их сравнение.'
+      run: <'Анализ — изучение характеристик различных моделей ПК и их сравнение.'  pt b=None i=None>
+#080 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Синтез — формирование рекомендаций по выбору на основе полученных данных.'
+      run: <'Синтез — формирование рекомендаций по выбору на основе полученных данных.'  pt b=None i=None>
+#081 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Основная часть'
+      run: <'Основная часть'  pt b=None i=None>
+#082 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: '1. Виды персональных компьютеров'
+      run: <'1. Виды персональных компьютеров'  pt b=None i=None>
+#083 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Цели'
+      run: <'Цели'  pt b=None i=None>
+#084 [основной] align=None ls=None sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'Цель данной работы заключается в том, чтобы предоставить всем заинтересованным сторонам, включая как опытных пользователей, так и тех, кто только начинает свой путь в мире информационных технологий, и'
+#085 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Задачи'
+      run: <'Задачи'  pt b=None i=None>
+#086 [основной] align=None ls=None sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'Для достижения поставленной цели в данной работе определяются несколько ключевых задач, каждая из которых направлена на глубокое понимание процесса выбора персонального компьютера и его соответствия п'
+#087 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: ''
+#088 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Основные критерии выбора ПК'
+      run: <'Основные критерии выбора ПК'  pt b=None i=None>
+#089 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Процессор'
+      run: <'Процессор'  pt b=None i=None>
+#090 [основной] align=None ls=None sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'Процессор, также известный как центральный процессор (ЦП), является одним из самых важных компонентов персонального компьютера, выполняющим основные вычислительные задачи. Он служит "мозгом" устройств'
+#091 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Оперативная память'
+      run: <'Оперативная память'  pt b=None i=None>
+#092 [основной] align=None ls=None sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'Оперативная память, или ОЗУ (оперативное запоминающее устройство), является неотъемлемой частью персонального компьютера, отвечая за временное хранение данных и программ, которые в данный момент испол'
+#093 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Графическая карта'
+      run: <'Графическая карта'  pt b=None i=None>
+#094 [основной] align=None ls=None sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'Графическая карта, или видеокарта, является важнейшим элементом современного персонального компьютера, отвечающим за обработку и вывод графических данных на экран. Для пользователей, занимающихся игра'
+#095 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Типы ПК и их особенности'
+      run: <'Типы ПК и их особенности'  pt b=None i=None>
+#096 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Настольные ПК'
+      run: <'Настольные ПК'  pt b=None i=None>
+#097 [основной] align=None ls=None sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'Настольные компьютеры, как один из самых распространенных типов ПК, занимаются важной ролью в большинстве офисов, учебных заведений и домашних условиях. Они представляют собой мощные системы, которые '
+#098 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Ноутбуки'
+      run: <'Ноутбуки'  pt b=None i=None>
+#099 [основной] align=None ls=None sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'Ноутбуки, являясь одним из основных типов персональных компьютеров, завоевали большую популярность благодаря своей мобильности и удобству использования. Они представляют собой компактные устройства, к'
+#100 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Компьютерные моноблоки'
+      run: <'Компьютерные моноблоки'  pt b=None i=None>
+#101 [основной] align=None ls=None sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'Компьютерные моноблоки представляют собой уникальный класс персональных компьютеров, которые объединяют все необходимые компоненты — процессор, оперативную память, хранилище данных и графику — в одном'
+#102 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Заключение'
+      run: <'Заключение'  pt b=None i=None>
+#103 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Обобщение'
+      run: <'Обобщение'  pt b=None i=None>
+#104 [основной] align=None ls=None sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'В современном мире, где технологии активно проникают во все сферы жизни, выбор персонального компьютера стал одной из наиболее значимых задач для пользователей. Независимо от того, являетесь ли вы дом'
+#105 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Список литературы'
+      run: <'Список литературы'  pt b=None i=None>
+#106 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Не удалось сгенерировать список литературы или нам не удалось найти его под ваш запрос, обратитесь в тех. поддержку'
+      run: <'Не удалось сгенерировать список литературы или нам не удалось найти его под ваш запрос, обратитесь в тех. поддержку'  pt b=None i=None>
+#107 [основной] align=None ls=None sb=None sa=None fl=None
+     TEXT: 'Рекомендации'
+      run: <'Рекомендации'  pt b=None i=None>
+#108 [основной] align=None ls=None sb=None sa=None fl=None [SOFT-BREAK]
+     TEXT: 'При выборе и покупке персонального компьютера важно учитывать несколько ключевых аспектов, которые помогут вам сделать правильный выбор, учитывая ваши потребности, бюджет и планы на будущее. В этой ст'
+#109 [TOC Heading] align=CENTER (1) ls=None sb=None sa=None fl=None
+     TEXT: ''
+

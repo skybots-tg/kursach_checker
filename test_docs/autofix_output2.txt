@@ -1,0 +1,39 @@
+﻿
+============================================================
+  ╨хЇхЁрЄ 4: C:\Users\Dmitry\Telegram Bots\kursach_checker\test_docs\referat_4.docx
+============================================================
+  Output: C:\Users\Dmitry\Telegram Bots\kursach_checker\test_docs\referat_4.fixed.docx
+  Details (198):
+    - ╥хъёЄ: ЁрчсшЄю 11 рсчрЎ(хт) ё ь уъшьш яхЁхэюёрьш эр юЄфхы№э√х рсчрЎ√
+    - ╤Єшыш: шэЄхЁтры яю єьюыўрэш■ -> 1.5, яюёых рсчрЎр 0.0 яЄ
+    - ╤Єшыш: ЎтхЄ °ЁшЇЄр -> ў╕Ёэ√щ
+    - ═єьхЁрЎш : ьрЁъхЁ√ -> фхЇшё
+    - ╤хъЎш  #1: яюы  шёяЁртыхэ√
+    - ╤хъЎш  #2: яюы  шёяЁртыхэ√
+    - └счрЎ #54: ЁрчЁ√т ёЄЁрэшЎ√ фюсртыхэ
+    - └счрЎ #147: тхфє∙шх яЁюсхы√ єсЁрэ√
+    - └счрЎ #176: ЁрчЁ√т ёЄЁрэшЎ√ фюсртыхэ
+    - └счрЎ #184: ЁрчЁ√т ёЄЁрэшЎ√ фюсртыхэ
+    - ╥шЄєы№э√щ ышёЄ: єсЁрэ√ ыш°эшх юЄёЄєя√/шэЄхЁтры√
+    - ╟руюыютюъ #54: Times New Roman, 14.0 яЄ, яюыєцшЁэ√щ
+    - └счрЎ #55: т√Ёртэштрэшх яю °шЁшэх
+    - └счрЎ #56: т√Ёртэштрэшх яю °шЁшэх
+    - └счрЎ #57: т√Ёртэштрэшх яю °шЁшэх
+    - └счрЎ #58: т√Ёртэштрэшх яю °шЁшэх
+python : Traceback (most recent call last):
+C:\Users\Dmitry\AppData\Local\Temp\ps-script-9b8c05bd-18b0-4d1d-8a56-6552456532f1.ps1:84 знак:53
++ ... ursach_checker"; python -u test_docs/run_autofix_test.py 2>&1 | Out-F ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\Users\Dmitry\Telegram Bots\kursach_checker\test_docs\run_autofix_test.py", line 83, in <module>
+    r1 = run_test(str(test_dir / "referat_4.docx"), "╨хЇхЁрЄ 4")
+         ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dmitry\Telegram Bots\kursach_checker\test_docs\run_autofix_test.py", line 74, in run_test
+    print(f"    - {d}")
+    ~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Dmitry\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1251.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 28: character maps to <undefined>
