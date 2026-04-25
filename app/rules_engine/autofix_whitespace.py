@@ -1,14 +1,16 @@
 """Whitespace and indent normalization for autofix.
 
 Handles leading whitespace stripping, left indent normalization for body text,
-and collapsing of excessive consecutive empty paragraphs.
+collapsing of excessive consecutive empty paragraphs, title page spacing,
+and source-line single-spacing.
 """
 from __future__ import annotations
 
 import logging
+import re
 
 from docx.oxml.ns import qn
-from docx.shared import Mm
+from docx.shared import Mm, Pt
 
 logger = logging.getLogger(__name__)
 
@@ -178,3 +180,47 @@ def collapse_excessive_empty_paras(
     if to_remove:
         details.append(f"Удалено {len(to_remove)} лишних пустых абзацев")
     return len(to_remove) > 0
+
+
+_SOURCE_LINE_RE = re.compile(r"^источник", re.IGNORECASE)
+
+
+def normalize_title_page_spacing(doc, body_start: int, details: list[str]) -> bool:
+    """Reduce excessive spacing on title page so it fits on one page."""
+    changed = False
+    for i in range(body_start):
+        p = doc.paragraphs[i]
+        pf = p.paragraph_format
+        sa = pf.space_after
+        if sa is not None and sa.pt > 12:
+            pf.space_after = Pt(0)
+            changed = True
+        sb = pf.space_before
+        if sb is not None and sb.pt > 12:
+            pf.space_before = Pt(0)
+            changed = True
+        ls = pf.line_spacing
+        if ls is not None and isinstance(ls, float) and ls < 1.0:
+            pf.line_spacing = 1.0
+            changed = True
+    if changed:
+        details.append("Титульный лист: убраны лишние отступы/интервалы")
+    return changed
+
+
+def normalize_source_line_spacing(doc, details: list[str]) -> bool:
+    """Set single (1.0) line spacing on 'Источник:...' paragraphs under tables."""
+    changed = False
+    count = 0
+    for p in doc.paragraphs:
+        text = (p.text or "").strip()
+        if _SOURCE_LINE_RE.match(text):
+            pf = p.paragraph_format
+            cur_ls = pf.line_spacing
+            if cur_ls is None or abs(float(cur_ls) - 1.0) > 0.05:
+                pf.line_spacing = 1.0
+                changed = True
+                count += 1
+    if changed:
+        details.append(f"«Источник…»: одинарный интервал ({count} шт.)")
+    return changed

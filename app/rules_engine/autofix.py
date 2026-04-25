@@ -6,7 +6,6 @@ from pathlib import Path
 
 from docx import Document
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
 from app.rules_engine.autofix_config import AutoFixConfig as _AutoFixConfig
@@ -36,10 +35,8 @@ from app.rules_engine.autofix_helpers import (
     fix_remove_strange_chars,
     fix_strip_markdown_artifacts,
     fix_section_margins,
-    fix_table_cell_spacing,
     is_field_code_run,
     is_manual_list_para,
-    iter_table_cell_paragraphs,
     postprocess_fixed_docx,
     preflight_margins_safe,
     remove_empty_paras_before_page_breaks,
@@ -50,6 +47,7 @@ from app.rules_engine.autofix_bibliography import (
     fix_bibliography_order_and_numbering,
 )
 from app.rules_engine.autofix_captions import fix_caption_positions
+from app.rules_engine.autofix_table_pass import process_table_cells
 from app.rules_engine.autofix_lists import convert_informal_lists
 from app.rules_engine.autofix_toc import insert_toc_field, detect_manual_toc_entry_indices
 from app.rules_engine.autofix_split_breaks import split_soft_break_paragraphs
@@ -60,14 +58,21 @@ from app.rules_engine.autofix_whitespace import (
     fix_normalize_left_indent,
     fix_strip_leading_whitespace,
     normalize_doc_defaults_spacing,
+    normalize_source_line_spacing,
+    normalize_title_page_spacing,
 )
 from app.rules_engine.checks_content import ALLOWED_CHARS_RE as _ALLOWED_CHARS_RE
+from app.rules_engine.autofix_para_classify import (
+    collect_toc_heading_levels,
+    is_heading_para,
+    is_list_para,
+    should_skip_para,
+)
 from app.rules_engine.heading_detection import (
     CHAPTER_RE as _CHAPTER_RE,
     TOC_LINE_TAIL_RE as _TOC_LINE_TAIL_RE,
     detect_heading_candidate,
     detect_heading_via_toc,
-    normalize_toc_entry,
 )
 from app.rules_engine.findings import Finding
 from app.rules_engine.style_resolve import (
@@ -79,119 +84,9 @@ from app.rules_engine.style_resolve import (
     effective_line_spacing,
     effective_space_after_pt,
     effective_space_before_pt,
-    walk_style_pPr,
 )
 
 logger = logging.getLogger(__name__)
-
-_HEADING_STYLE_IDS = frozenset(
-    {f"Heading{i}" for i in range(1, 10)}
-)
-_SKIP_STYLE_IDS = frozenset(
-    {f"TOC{i}" for i in range(1, 10)}
-    | {"TOCHeading", "TableofFigures", "TableofAuthorities", "Caption", "Title",
-       "Subtitle", "NoSpacing", "BalloonText", "MacroText", "EndnoteText",
-       "FootnoteText", "Header", "Footer", "CommentText"}
-)
-_SKIP_STYLE_NAMES = frozenset({
-    "toc heading", "table of figures", "table of authorities", "caption",
-    "title", "subtitle", "no spacing", "balloon text", "macro text",
-    "endnote text", "footnote text", "header", "footer", "annotation text",
-})
-_SKIP_NAME_PREFIXES = ("toc ", "toc\xa0", "index ")
-_LIST_STYLE_IDS = frozenset({
-    "ListParagraph", "ListBullet", "ListBullet2", "ListBullet3",
-    "ListNumber", "ListNumber2", "ListNumber3",
-    "ListContinue", "ListContinue2", "ListContinue3",
-})
-_LIST_STYLE_NAMES = frozenset({
-    "list paragraph", "list bullet", "list bullet 2", "list bullet 3",
-    "list number", "list number 2", "list number 3",
-    "list continue", "list continue 2", "list continue 3",
-})
-
-
-def _is_heading_para(paragraph) -> bool:
-    sid = getattr(paragraph.style, "style_id", "") or ""
-    if sid in _HEADING_STYLE_IDS:
-        return True
-    sname = (getattr(paragraph.style, "name", "") or "").lower()
-    if "heading" in sname or "\u0437\u0430\u0433\u043e\u043b\u043e\u0432" in sname:
-        return True
-    for pPr in walk_style_pPr(paragraph):
-        ol = pPr.find(qn("w:outlineLvl"))
-        if ol is not None:
-            val = ol.get(qn("w:val"))
-            try:
-                if val is not None and int(val) < 9:
-                    return True
-            except (TypeError, ValueError):
-                pass
-    return False
-
-def _should_skip_para(paragraph) -> bool:
-    sid = getattr(paragraph.style, "style_id", "") or ""
-    if sid in _SKIP_STYLE_IDS:
-        return True
-    sname = (getattr(paragraph.style, "name", "") or "").lower()
-    if sname in _SKIP_STYLE_NAMES:
-        return True
-    return any(sname.startswith(p) for p in _SKIP_NAME_PREFIXES)
-
-def _is_list_para(paragraph) -> bool:
-    for pPr in walk_style_pPr(paragraph):
-        numPr = pPr.find(qn("w:numPr"))
-        if numPr is not None:
-            numId = numPr.find(qn("w:numId"))
-            if numId is not None and numId.get(qn("w:val")) != "0":
-                return True
-    sid = getattr(paragraph.style, "style_id", "") or ""
-    if sid in _LIST_STYLE_IDS:
-        return True
-    sname = (getattr(paragraph.style, "name", "") or "").lower()
-    return sname in _LIST_STYLE_NAMES
-
-def _collect_toc_heading_levels(doc, toc_indices: set[int]) -> dict[str, int]:
-    """Gather normalized TOC-entry titles → heading level for promotion.
-
-    Used as a *fallback* heading detector: when a body paragraph does not
-    match the normal «Глава N» / «1.2.» regexes but the document's table
-    of contents explicitly lists it as a section title, we still promote
-    it to a Word heading. This makes the autofix robust against loose
-    wordings students use — e.g. "I Организационно-технологический
-    раздел" or all-caps titles that skip the «Глава» keyword.
-
-    Returns a dict mapping ``normalize_toc_entry(text)`` → ``level`` so
-    the caller can decide how deeply to nest the heading. Level is
-    inferred from the entry prefix: ``1.2`` → 2, ``1.2.3`` → 3, otherwise
-    level 1.
-    """
-    result: dict[str, int] = {}
-    paragraphs = doc.paragraphs
-    for idx in toc_indices:
-        if idx < 0 or idx >= len(paragraphs):
-            continue
-        raw = (paragraphs[idx].text or "").strip()
-        if not raw or len(raw) > 250:
-            continue
-        key = normalize_toc_entry(raw)
-        if not key:
-            continue
-        # Skip generic TOC headers themselves.
-        if key in ("содержание", "оглавление"):
-            continue
-        level = _infer_toc_entry_level(key)
-        result[key] = level
-    return result
-
-
-def _infer_toc_entry_level(normalized: str) -> int:
-    import re as _re
-    m = _re.match(r"^(\d+(?:\.\d+)*)", normalized)
-    if m:
-        parts = m.group(1).split(".")
-        return max(1, min(len(parts), 3))
-    return 1
 
 
 @dataclass(slots=True)
@@ -253,8 +148,7 @@ def apply_safe_autofixes(
     # contents glued together in the output.
     toc_indices |= detect_manual_toc_entry_indices(doc)
 
-    toc_heading_levels: dict[str, int] = _collect_toc_heading_levels(doc, toc_indices)
-
+    toc_heading_levels: dict[str, int] = collect_toc_heading_levels(doc, toc_indices)
 
     if cfg.normalize_line_spacing or cfg.normalize_spacing_before_after:
         if normalize_doc_defaults_spacing(
@@ -262,17 +156,12 @@ def apply_safe_autofixes(
         ):
             changed = True
 
-    if cfg.normalize_font_color:
-        if fix_font_color_styles(doc, details):
-            changed = True
-
-    if cfg.remove_italic:
-        if fix_italic_styles(doc, details):
-            changed = True
-
-    if cfg.normalize_list_markers:
-        if fix_numbering_bullets(doc, cfg.font_name, details, cfg.list_marker_char):
-            changed = True
+    if cfg.normalize_font_color and fix_font_color_styles(doc, details):
+        changed = True
+    if cfg.remove_italic and fix_italic_styles(doc, details):
+        changed = True
+    if cfg.normalize_list_markers and fix_numbering_bullets(doc, cfg.font_name, details, cfg.list_marker_char):
+        changed = True
 
     if cfg.convert_informal_lists:
         if convert_informal_lists(
@@ -330,9 +219,13 @@ def apply_safe_autofixes(
 
     body_start = 0
     for i, p in enumerate(doc.paragraphs):
-        if _is_heading_para(p):
+        if is_heading_para(p):
             body_start = i
             break
+
+    if body_start > 0 and cfg.normalize_spacing_before_after:
+        if normalize_title_page_spacing(doc, body_start, details):
+            changed = True
 
     para_count = 0
     for idx, paragraph in enumerate(doc.paragraphs):
@@ -371,7 +264,7 @@ def apply_safe_autofixes(
                 para_count += 1
             continue
 
-        is_heading = _is_heading_para(paragraph)
+        is_heading = is_heading_para(paragraph)
         candidate_level = detect_heading_candidate(text) if not is_heading else None
         if not is_heading and candidate_level is None and toc_heading_levels:
             candidate_level = detect_heading_via_toc(text, toc_heading_levels)
@@ -379,6 +272,10 @@ def apply_safe_autofixes(
         if is_heading:
             if not skip_headings_safety and cfg.normalize_headings:
                 if _fix_heading(paragraph, idx, cfg, details):
+                    changed = True
+                    para_touched = True
+            if cfg.normalize_dashes:
+                if fix_dashes_in_text(paragraph, para_label, details):
                     changed = True
                     para_touched = True
             if para_touched:
@@ -406,7 +303,7 @@ def apply_safe_autofixes(
                 para_count += 1
             continue
 
-        if _should_skip_para(paragraph):
+        if should_skip_para(paragraph):
             if para_touched:
                 para_count += 1
             continue
@@ -422,7 +319,7 @@ def apply_safe_autofixes(
             WD_PARAGRAPH_ALIGNMENT.RIGHT,
         )
 
-        is_word_list = _is_list_para(paragraph)
+        is_word_list = is_list_para(paragraph)
         is_manual = not is_word_list and is_manual_list_para(text)
         is_list = is_word_list or is_manual
         pf = paragraph.paragraph_format
@@ -509,67 +406,21 @@ def apply_safe_autofixes(
         if para_touched:
             para_count += 1
 
-    for t_idx, t_para in enumerate(iter_table_cell_paragraphs(doc)):
-        if para_count >= max_paragraphs:
-            break
-        t_text = (t_para.text or "").strip()
-        t_label = f"Абзац таблицы #{t_idx + 1}"
-        t_touched = False
-        if cfg.normalize_line_spacing:
-            if fix_table_cell_spacing(
-                t_para, cfg.table_line_spacing, t_label, details,
-            ):
-                changed = True
-                t_touched = True
-        if not t_text:
-            if t_touched:
-                para_count += 1
-            continue
-        if cfg.normalize_font_color:
-            if fix_font_color_runs(t_para, t_label, details):
-                changed = True
-                t_touched = True
-        if cfg.remove_italic:
-            if fix_remove_italic(t_para, t_label, details):
-                changed = True
-                t_touched = True
-        if cfg.remove_caption_trailing_dot:
-            if fix_caption_trailing_dot(t_para, t_label, details):
-                changed = True
-                t_touched = True
-        t_is_list = _is_list_para(t_para) or is_manual_list_para(t_text)
-        if t_is_list and cfg.normalize_list_markers:
-            if fix_markers_text(t_para, t_label, details, cfg.list_marker_char):
-                changed = True
-                t_touched = True
-        if t_is_list and cfg.normalize_list_indent:
-            if fix_list_indent(t_para, t_label, details):
-                changed = True
-                t_touched = True
-        if cfg.normalize_dashes:
-            if fix_dashes_in_text(t_para, t_label, details):
-                changed = True
-                t_touched = True
-        if fix_strip_markdown_artifacts(t_para, t_label, details):
-            changed = True
-            t_touched = True
-        if t_touched:
-            para_count += 1
+    table_changed, para_count = process_table_cells(
+        doc, cfg, max_paragraphs, para_count, details,
+    )
+    changed |= table_changed
 
     if cfg.normalize_table_width and not skip_tables_safety and clamp_overflow_table_widths(doc, details):
         changed = True
 
-    if cfg.generate_toc:
-        if insert_toc_field(doc, toc_indices, details):
-            changed = True
-
-    if cfg.normalize_toc_heading:
-        if normalize_toc_heading_formatting(doc, details, cfg=cfg):
-            changed = True
+    if cfg.generate_toc and insert_toc_field(doc, toc_indices, details):
+        changed = True
+    if cfg.normalize_toc_heading and normalize_toc_heading_formatting(doc, details, cfg=cfg):
+        changed = True
 
     if cfg.fix_bibliography:
-        if fix_bibliography_order_and_numbering(doc, details):
-            changed = True
+        changed |= fix_bibliography_order_and_numbering(doc, details)
         if enforce_bibliography_entry_formatting(
             doc,
             details,
@@ -581,27 +432,17 @@ def apply_safe_autofixes(
         ):
             changed = True
 
-    if getattr(cfg, "fix_caption_positions", True):
-        if fix_caption_positions(doc, details):
-            changed = True
-
-    if enforce_subheading_alignment(doc, cfg, details):
+    if getattr(cfg, "fix_caption_positions", True) and fix_caption_positions(doc, details):
         changed = True
-
-    if enforce_heading_bold(doc, cfg, details):
+    changed |= normalize_source_line_spacing(doc, details)
+    changed |= enforce_subheading_alignment(doc, cfg, details)
+    changed |= enforce_heading_bold(doc, cfg, details)
+    if cfg.fix_section_breaks and enforce_chapter_page_breaks(doc, details):
         changed = True
-
-    if cfg.fix_section_breaks:
-        if enforce_chapter_page_breaks(doc, details):
-            changed = True
-
-    if cfg.ensure_subheading_spacing:
-        if ensure_blank_before_subheadings(doc, details):
-            changed = True
-
-    if cfg.collapse_empty_paras:
-        if collapse_excessive_empty_paras(doc, cfg.max_consecutive_empty_paras, details):
-            changed = True
+    if cfg.ensure_subheading_spacing and ensure_blank_before_subheadings(doc, details):
+        changed = True
+    if cfg.collapse_empty_paras and collapse_excessive_empty_paras(doc, cfg.max_consecutive_empty_paras, details):
+        changed = True
 
     if changed:
         if remove_redundant_manual_page_breaks(doc, details):
