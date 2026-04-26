@@ -187,13 +187,14 @@ def collapse_excessive_empty_paras(
 
 _SOURCE_LINE_RE = re.compile(r"^источник", re.IGNORECASE)
 
-# Push «г. …» / year to the lower part of the title page (replaces fake w:r with \n).
+# Clean «г. Город» line: strip fake leading w:r with \n (does not set space_before —
+# large space_before conflicts with typography checks and visually detaches only the
+# city line from the REFERAT block).
 _TITLE_CITY_RE = re.compile(
     r"^г\.\s*[А-ЯЁа-яЁё][А-ЯЁа-яЁё\-\s\w]*\s*$",
     re.IGNORECASE | re.UNICODE,
 )
 _YEAR_ONLY_RE = re.compile(r"^\d{4}\s*$")
-_TITLE_PAGE_CITY_SPACE_BEFORE_PT = 260
 
 
 def _collapse_title_text_for_match(text: str) -> str:
@@ -233,9 +234,9 @@ def _strip_leading_soft_vertical_runs_from_paragraph(p_element) -> int:
 
 
 def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -> bool:
-    """Turn fake leading newlines before «г. Город» into ``space_before`` so the
-    city/year block sits at the bottom of the title page (students often insert
-    many ``\\n`` runs that do not match real bottom alignment).
+    """Strip fake leading line-break runs before «г. Город»; center city/year.
+    Vertical position of the date is left to the author (empty lines / шаблон ВУЗа):
+    forcing ``space_before`` here broke layout and triggered «интервал до абзаца» checks.
     """
     changed = False
     if body_start <= 0:
@@ -248,9 +249,10 @@ def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -
             continue
         n_strip = _strip_leading_soft_vertical_runs_from_paragraph(p._element)
         pf = p.paragraph_format
-        cur_sb = pf.space_before
-        if n_strip or cur_sb is None or abs(cur_sb.pt - _TITLE_PAGE_CITY_SPACE_BEFORE_PT) > 1.0:
-            pf.space_before = Pt(_TITLE_PAGE_CITY_SPACE_BEFORE_PT)
+        if n_strip:
+            changed = True
+        if pf.space_before is not None and pf.space_before.pt > 0.05:
+            pf.space_before = Pt(0)
             changed = True
         if p.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
             p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
@@ -268,7 +270,7 @@ def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -
         break
     if changed:
         details.append(
-            "Титульный лист: город и дата выставлены внизу страницы (интервал перед «г. …»)"
+            "Титульный лист: убраны лишние переносы перед «г. …», город и год по центру"
         )
     return changed
 
@@ -315,12 +317,6 @@ def normalize_title_page_spacing(doc, body_start: int, details: list[str]) -> bo
     last_plain = (doc.paragraphs[body_start - 1].text or "").strip()
     toc_heading_last = bool(_TOC_HEADING_RE.match(last_plain))
 
-    city_idx: int | None = None
-    for _ci in range(body_start):
-        if _TITLE_CITY_RE.match(_collapse_title_text_for_match(doc.paragraphs[_ci].text or "")):
-            city_idx = _ci
-            break
-
     loop_changed = False
     for i in range(body_start):
         p = doc.paragraphs[i]
@@ -333,11 +329,8 @@ def normalize_title_page_spacing(doc, body_start: int, details: list[str]) -> bo
             loop_changed = True
         sb = pf.space_before
         if sb is not None and sb.pt > 0.05:
-            if city_idx is not None and (i == city_idx or i == city_idx + 1):
-                pass
-            else:
-                pf.space_before = Pt(0)
-                loop_changed = True
+            pf.space_before = Pt(0)
+            loop_changed = True
         ls = pf.line_spacing
         skip_ls_compress = toc_heading_last and i == body_start - 1
         if not skip_ls_compress:

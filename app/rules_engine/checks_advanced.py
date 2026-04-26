@@ -364,8 +364,16 @@ def run_paragraph_spacing_checks(
     _MAX = 10
     count = 0
 
+    title_end: int | None = None
+    for p in snapshot.paragraphs:
+        if p.text and p.is_heading:
+            title_end = p.index
+            break
+
     for paragraph in snapshot.paragraphs:
         if not paragraph.text or paragraph.is_heading or paragraph.is_toc_entry:
+            continue
+        if title_end is not None and paragraph.index < title_end:
             continue
         if paragraph.style_id in _SKIP_STYLES:
             continue
