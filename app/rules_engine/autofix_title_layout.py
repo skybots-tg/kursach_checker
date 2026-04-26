@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 import re
 
-from docx.shared import Pt
+from docx.shared import Emu, Pt
 
 logger = logging.getLogger(__name__)
 
@@ -213,9 +213,22 @@ def _rough_title_content_pt(doc, body_start: int) -> float:
     return tot
 
 
+def _length_like_to_pt(val) -> float:
+    """python-docx: вычитание Length иногда даёт int (EMU) без атрибута .pt."""
+    if val is None:
+        return 0.0
+    if hasattr(val, "pt"):
+        return float(val.pt)
+    return float(Emu(val).pt)
+
+
 def _usable_page_inner_pt(doc) -> float:
     sec = doc.sections[0]
-    return (sec.page_height - sec.top_margin - sec.bottom_margin).pt
+    return (
+        _length_like_to_pt(sec.page_height)
+        - _length_like_to_pt(sec.top_margin)
+        - _length_like_to_pt(sec.bottom_margin)
+    )
 
 
 def distribute_title_page_vertical_blocks(
