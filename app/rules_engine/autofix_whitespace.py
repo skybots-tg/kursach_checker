@@ -12,6 +12,8 @@ import re
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
+from app.rules_engine.autofix_toc import _TOC_HEADING_RE
+
 logger = logging.getLogger(__name__)
 
 _WS_CHARS = " \t\xa0"
@@ -186,25 +188,45 @@ _SOURCE_LINE_RE = re.compile(r"^источник", re.IGNORECASE)
 
 
 def normalize_title_page_spacing(doc, body_start: int, details: list[str]) -> bool:
-    """Reduce excessive spacing on title page so it fits on one page."""
+    """Reduce excessive spacing on title page so it fits on one page.
+
+    Also clears ``pageBreakBefore`` and small (e.g. 6 pt) space-after values
+    that previously slipped under a 12 pt threshold — students often get a
+    second title page from a mid-block page break plus accumulated spacing.
+    """
     changed = False
+    if body_start <= 0:
+        return False
+    last_plain = (doc.paragraphs[body_start - 1].text or "").strip()
+    toc_heading_last = bool(_TOC_HEADING_RE.match(last_plain))
+
     for i in range(body_start):
         p = doc.paragraphs[i]
         pf = p.paragraph_format
+        if pf.page_break_before:
+            pf.page_break_before = False
+            changed = True
         sa = pf.space_after
-        if sa is not None and sa.pt > 12:
+        if sa is not None and sa.pt > 0.05:
             pf.space_after = Pt(0)
             changed = True
         sb = pf.space_before
-        if sb is not None and sb.pt > 12:
+        if sb is not None and sb.pt > 0.05:
             pf.space_before = Pt(0)
             changed = True
         ls = pf.line_spacing
-        if ls is not None and isinstance(ls, float) and ls < 1.0:
+        skip_ls_compress = toc_heading_last and i == body_start - 1
+        if not skip_ls_compress:
+            if ls is None or (isinstance(ls, float) and ls > 1.01):
+                pf.line_spacing = 1.0
+                changed = True
+        elif ls is not None and isinstance(ls, float) and ls < 1.0:
             pf.line_spacing = 1.0
             changed = True
     if changed:
-        details.append("Титульный лист: убраны лишние отступы/интервалы")
+        details.append(
+            "Титульный лист: убраны лишние интервалы и разрывы страницы в блоке титула"
+        )
     return changed
 
 

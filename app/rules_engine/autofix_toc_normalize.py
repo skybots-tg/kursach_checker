@@ -9,6 +9,8 @@ from __future__ import annotations
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
+from docx.text.paragraph import Paragraph
+
 from app.rules_engine.autofix_toc import (
     _TOC_HEADING_RE,
     _clear_bold_underline_in_paragraph,
@@ -98,8 +100,6 @@ def _iter_sdt_toc_paragraphs(doc):
     heading nor any of the TOC entries would be visible to the formatting
     pass.
     """
-    from docx.text.paragraph import Paragraph
-
     body = doc.element.body
     p_tag = qn("w:p")
     sdt_content_tag = qn("w:sdtContent")
@@ -131,6 +131,42 @@ def _normalize_toc_entry(p_elem: OxmlElement, font_name: str | None,
     return changed
 
 
+def remove_duplicate_toc_heading_inside_sdt(doc, details: list[str]) -> bool:
+    """Remove extra «Содержание»/«Оглавление» line inside TOC SDT when the same
+    heading already exists as the preceding body paragraph (common Word
+    layout: centered heading + duplicate inside the TOC control, wrong font).
+    """
+    body = doc.element.body
+    changed = False
+    prev_el = None
+    for el in body:
+        if el.tag != qn("w:sdt"):
+            prev_el = el
+            continue
+        content = el.find(qn("w:sdtContent"))
+        if content is None or prev_el is None or prev_el.tag != qn("w:p"):
+            prev_el = el
+            continue
+        first_p = None
+        for sub in content.iterchildren():
+            if sub.tag == qn("w:p"):
+                first_p = sub
+                break
+        if first_p is None:
+            prev_el = el
+            continue
+        inner = Paragraph(first_p, doc).text.strip()
+        outer = Paragraph(prev_el, doc).text.strip()
+        if _TOC_HEADING_RE.match(inner) and _TOC_HEADING_RE.match(outer):
+            content.remove(first_p)
+            changed = True
+            details.append(
+                "Оглавление: удалён дублирующий заголовок внутри поля оглавления"
+            )
+        prev_el = el
+    return changed
+
+
 def normalize_toc_heading_formatting(doc, details: list[str], *, cfg=None) -> bool:
     """Standalone pass: ensure the «Содержание»/«Оглавление» heading is
     centered/non-bold AND every TOC entry paragraph (auto field or manual)
@@ -145,7 +181,7 @@ def normalize_toc_heading_formatting(doc, details: list[str], *, cfg=None) -> bo
     were the reason TOC entries kept appearing in the heading/theme font
     after autofix.
     """
-    changed = False
+    changed = remove_duplicate_toc_heading_inside_sdt(doc, details)
     processed_elems: set = set()
 
     font_name = getattr(cfg, "font_name", None) if cfg is not None else None
