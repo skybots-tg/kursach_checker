@@ -187,6 +187,36 @@ def collapse_excessive_empty_paras(
 _SOURCE_LINE_RE = re.compile(r"^источник", re.IGNORECASE)
 
 
+def strip_paragraph_page_breaks(paragraph) -> bool:
+    """Remove page breaks on a paragraph.
+
+    python-docx sets ``paragraph_format.page_break_before = False`` but often
+    leaves ``<w:pageBreakBefore/>`` in ``<w:pPr>`` — Word still breaks the
+    page. Also strips explicit ``<w:br w:type="page"/>`` in runs.
+    """
+    changed = False
+    pf = paragraph.paragraph_format
+    if pf.page_break_before:
+        pf.page_break_before = False
+        changed = True
+    pPr = paragraph._element.find(qn("w:pPr"))
+    if pPr is not None:
+        pb = pPr.find(qn("w:pageBreakBefore"))
+        if pb is not None:
+            pPr.remove(pb)
+            changed = True
+    r_tag = qn("w:r")
+    br_tag = qn("w:br")
+    for child in paragraph._element.iterchildren():
+        if child.tag != r_tag:
+            continue
+        for br in list(child.findall(br_tag)):
+            if br.get(qn("w:type")) == "page":
+                child.remove(br)
+                changed = True
+    return changed
+
+
 def normalize_title_page_spacing(doc, body_start: int, details: list[str]) -> bool:
     """Reduce excessive spacing on title page so it fits on one page.
 
@@ -202,10 +232,9 @@ def normalize_title_page_spacing(doc, body_start: int, details: list[str]) -> bo
 
     for i in range(body_start):
         p = doc.paragraphs[i]
-        pf = p.paragraph_format
-        if pf.page_break_before:
-            pf.page_break_before = False
+        if strip_paragraph_page_breaks(p):
             changed = True
+        pf = p.paragraph_format
         sa = pf.space_after
         if sa is not None and sa.pt > 0.05:
             pf.space_after = Pt(0)

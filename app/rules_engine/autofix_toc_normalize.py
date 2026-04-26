@@ -195,6 +195,12 @@ def normalize_toc_heading_formatting(doc, details: list[str], *, cfg=None) -> bo
             heading_elem = para._element
             if _normalize_existing_toc_heading(para, details):
                 changed = True
+            if font_name and font_size_pt:
+                if _normalize_toc_entry_run_font(heading_elem, font_name, font_size_pt):
+                    changed = True
+            if line_spacing:
+                if _normalize_toc_entry_paragraph_format(heading_elem, line_spacing):
+                    changed = True
             break
 
     sdt_entries_changed = 0
@@ -209,6 +215,12 @@ def normalize_toc_heading_formatting(doc, details: list[str], *, cfg=None) -> bo
                 heading_elem = elem
                 if _normalize_existing_toc_heading(sdt_para, details):
                     changed = True
+                if font_name and font_size_pt:
+                    if _normalize_toc_entry_run_font(heading_elem, font_name, font_size_pt):
+                        changed = True
+                if line_spacing:
+                    if _normalize_toc_entry_paragraph_format(heading_elem, line_spacing):
+                        changed = True
             continue
         if _normalize_toc_entry(elem, font_name, font_size_pt, line_spacing):
             sdt_entries_changed += 1

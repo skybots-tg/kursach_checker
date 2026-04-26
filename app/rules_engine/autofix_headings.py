@@ -10,6 +10,7 @@ from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
 from app.rules_engine.autofix_helpers import is_field_code_run
+from app.rules_engine.autofix_para_classify import is_heading_para
 from app.rules_engine.style_resolve import detect_toc_paragraph_indices
 
 logger = logging.getLogger(__name__)
@@ -383,6 +384,21 @@ def _collect_toc_paragraph_elements(doc) -> set:
     return result
 
 
+def _first_body_heading_paragraph_index(doc) -> int | None:
+    """Index in ``doc.paragraphs`` of the first paragraph that opens the body."""
+    for i, p in enumerate(doc.paragraphs):
+        if is_heading_para(p):
+            return i
+    return None
+
+
+def _paragraph_index_in_doc_paragraphs(doc, p_elem) -> int | None:
+    for i, p in enumerate(doc.paragraphs):
+        if p._element is p_elem:
+            return i
+    return None
+
+
 def _iter_chapter_break_paragraphs(doc):
     """Yield every Paragraph eligible for chapter page-break enforcement.
 
@@ -461,12 +477,18 @@ def enforce_chapter_page_breaks(doc, details: list[str]) -> bool:
                 continue
             toc_elements.add(para._element)
 
+    title_cutoff = _first_body_heading_paragraph_index(doc)
+
     changed = 0
     for idx, para in enumerate(paragraphs):
         if idx == 0:
             continue
         if para._element in toc_elements:
             continue
+        if title_cutoff is not None:
+            doc_idx = _paragraph_index_in_doc_paragraphs(doc, para._element)
+            if doc_idx is not None and doc_idx < title_cutoff:
+                continue
         text = (para.text or "").strip()
         if not text:
             continue
