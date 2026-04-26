@@ -13,8 +13,6 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
-from app.rules_engine.autofix_toc import _TOC_HEADING_RE
-
 logger = logging.getLogger(__name__)
 
 _WS_CHARS = " \t\xa0"
@@ -187,9 +185,9 @@ def collapse_excessive_empty_paras(
 
 _SOURCE_LINE_RE = re.compile(r"^источник", re.IGNORECASE)
 
-# Clean «г. Город» line: strip fake leading w:r with \n (does not set space_before —
-# large space_before conflicts with typography checks and visually detaches only the
-# city line from the REFERAT block).
+# Clean «г. Город» line: strip fake leading w:r with \n. Интервалы до абзаца не трогаем —
+# на титуле они задают вертикальную «растяжку» (город/год внизу), проверка интервалов
+# для титула в checks_advanced отключена.
 _TITLE_CITY_RE = re.compile(
     r"^г\.\s*[А-ЯЁа-яЁё][А-ЯЁа-яЁё\-\s\w]*\s*$",
     re.IGNORECASE | re.UNICODE,
@@ -235,8 +233,6 @@ def _strip_leading_soft_vertical_runs_from_paragraph(p_element) -> int:
 
 def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -> bool:
     """Strip fake leading line-break runs before «г. Город»; center city/year.
-    Vertical position of the date is left to the author (empty lines / шаблон ВУЗа):
-    forcing ``space_before`` here broke layout and triggered «интервал до абзаца» checks.
     """
     changed = False
     if body_start <= 0:
@@ -251,9 +247,6 @@ def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -
         pf = p.paragraph_format
         if n_strip:
             changed = True
-        if pf.space_before is not None and pf.space_before.pt > 0.05:
-            pf.space_before = Pt(0)
-            changed = True
         if p.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
             p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             changed = True
@@ -262,10 +255,6 @@ def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -
             if _YEAR_ONLY_RE.match((p2.text or "").strip()):
                 if p2.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
                     p2.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-                    changed = True
-                pf2 = p2.paragraph_format
-                if pf2.space_before is not None and pf2.space_before.pt > 0.05:
-                    pf2.space_before = Pt(0)
                     changed = True
         break
     if changed:
@@ -306,46 +295,24 @@ def strip_paragraph_page_breaks(paragraph) -> bool:
 
 
 def normalize_title_page_spacing(doc, body_start: int, details: list[str]) -> bool:
-    """Reduce excessive spacing on title page so it fits on one page.
+    """Убрать только разрывы страницы внутри титула.
 
-    Also clears ``pageBreakBefore`` and small (e.g. 6 pt) space-after values
-    that previously slipped under a 12 pt threshold — students often get a
-    second title page from a mid-block page break plus accumulated spacing.
+    Интервалы до/после абзаца и межстрочный интервал на титуле не меняем — шаблоны ВУЗа
+    задают вертикальные блоки и «низ» с городом/годом именно ими (см. типовой титульник).
+    Ранее обнуление всех интервалов схлопывало страницу в кучу у верхнего поля.
     """
     if body_start <= 0:
         return False
-    last_plain = (doc.paragraphs[body_start - 1].text or "").strip()
-    toc_heading_last = bool(_TOC_HEADING_RE.match(last_plain))
 
     loop_changed = False
-    for i in range(body_start):
-        p = doc.paragraphs[i]
+    for idx in range(body_start):
+        p = doc.paragraphs[idx]
         if strip_paragraph_page_breaks(p):
-            loop_changed = True
-        pf = p.paragraph_format
-        sa = pf.space_after
-        if sa is not None and sa.pt > 0.05:
-            pf.space_after = Pt(0)
-            loop_changed = True
-        sb = pf.space_before
-        if sb is not None and sb.pt > 0.05:
-            pf.space_before = Pt(0)
-            loop_changed = True
-        ls = pf.line_spacing
-        skip_ls_compress = toc_heading_last and i == body_start - 1
-        if not skip_ls_compress:
-            if ls is None or (isinstance(ls, float) and ls > 1.01):
-                pf.line_spacing = 1.0
-                loop_changed = True
-        elif ls is not None and isinstance(ls, float) and ls < 1.0:
-            pf.line_spacing = 1.0
             loop_changed = True
     footer_changed = normalize_title_page_city_footer(doc, body_start, details)
     changed = loop_changed or footer_changed
     if loop_changed:
-        details.append(
-            "Титульный лист: убраны лишние интервалы и разрывы страницы в блоке титула"
-        )
+        details.append("Титульный лист: убраны разрывы страницы внутри блока титула")
     return changed
 
 
