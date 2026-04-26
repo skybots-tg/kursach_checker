@@ -13,6 +13,8 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
+from app.rules_engine.autofix_title_layout import distribute_title_page_vertical_blocks
+
 logger = logging.getLogger(__name__)
 
 _WS_CHARS = " \t\xa0"
@@ -406,11 +408,11 @@ def strip_paragraph_page_breaks(paragraph) -> bool:
 
 
 def normalize_title_page_spacing(doc, body_start: int, details: list[str]) -> bool:
-    """Убрать только разрывы страницы внутри титула.
+    """Титул: снять разрывы страницы; распределить интервалы между блоками; подвал город/год.
 
-    Интервалы до/после абзаца и межстрочный интервал на титуле не меняем — шаблоны ВУЗа
-    задают вертикальные блоки и «низ» с городом/годом именно ими (см. типовой титульник).
-    Ранее обнуление всех интервалов схлопывало страницу в кучу у верхнего поля.
+    Межблочные интервалы (шапка — тема — реферат — исполнитель — город) задаются через
+    ``space_before`` на первых абзацах блоков — оценка свободного места по полям страницы.
+    Остальные интервалы/межстрочный интервал у неграничных абзацев не трогаем.
     """
     if body_start <= 0:
         return False
@@ -420,8 +422,9 @@ def normalize_title_page_spacing(doc, body_start: int, details: list[str]) -> bo
         p = doc.paragraphs[idx]
         if strip_paragraph_page_breaks(p):
             loop_changed = True
+    layout_changed = distribute_title_page_vertical_blocks(doc, body_start, details)
     footer_changed = normalize_title_page_city_footer(doc, body_start, details)
-    changed = loop_changed or footer_changed
+    changed = loop_changed or layout_changed or footer_changed
     if loop_changed:
         details.append("Титульный лист: убраны разрывы страницы внутри блока титула")
     return changed
