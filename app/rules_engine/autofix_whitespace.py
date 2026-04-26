@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 import re
 
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
@@ -186,6 +187,91 @@ def collapse_excessive_empty_paras(
 
 _SOURCE_LINE_RE = re.compile(r"^источник", re.IGNORECASE)
 
+# Push «г. …» / year to the lower part of the title page (replaces fake w:r with \n).
+_TITLE_CITY_RE = re.compile(
+    r"^г\.\s*[А-ЯЁа-яЁё][А-ЯЁа-яЁё\-\s\w]*\s*$",
+    re.IGNORECASE | re.UNICODE,
+)
+_YEAR_ONLY_RE = re.compile(r"^\d{4}\s*$")
+_TITLE_PAGE_CITY_SPACE_BEFORE_PT = 260
+
+
+def _collapse_title_text_for_match(text: str) -> str:
+    return re.sub(r"[\n\r\t\xa0]+", " ", (text or "")).strip()
+
+
+def _run_is_only_soft_vertical_space(r_elem) -> bool:
+    """True if the run only draws blank lines / soft breaks (not page/column)."""
+    br_tag = qn("w:br")
+    for br in r_elem.findall(br_tag):
+        bt = br.get(qn("w:type"))
+        if bt in ("page", "column"):
+            return False
+    texts = "".join((t.text or "") for t in r_elem.findall(qn("w:t")))
+    if any(c not in "\n\r \t\xa0" for c in texts):
+        return False
+    return True
+
+
+def _strip_leading_soft_vertical_runs_from_paragraph(p_element) -> int:
+    """Remove leading w:r that only add line breaks / vertical whitespace."""
+    r_tag = qn("w:r")
+    removed = 0
+    while True:
+        stripped = False
+        for child in list(p_element.iterchildren()):
+            if child.tag != r_tag:
+                continue
+            if _run_is_only_soft_vertical_space(child):
+                p_element.remove(child)
+                removed += 1
+                stripped = True
+                break
+        if not stripped:
+            break
+    return removed
+
+
+def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -> bool:
+    """Turn fake leading newlines before «г. Город» into ``space_before`` so the
+    city/year block sits at the bottom of the title page (students often insert
+    many ``\\n`` runs that do not match real bottom alignment).
+    """
+    changed = False
+    if body_start <= 0:
+        return False
+    paras = doc.paragraphs
+    for i in range(body_start):
+        p = paras[i]
+        collapsed = _collapse_title_text_for_match(p.text or "")
+        if not _TITLE_CITY_RE.match(collapsed):
+            continue
+        n_strip = _strip_leading_soft_vertical_runs_from_paragraph(p._element)
+        pf = p.paragraph_format
+        cur_sb = pf.space_before
+        if n_strip or cur_sb is None or abs(cur_sb.pt - _TITLE_PAGE_CITY_SPACE_BEFORE_PT) > 1.0:
+            pf.space_before = Pt(_TITLE_PAGE_CITY_SPACE_BEFORE_PT)
+            changed = True
+        if p.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+            p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            changed = True
+        if i + 1 < body_start:
+            p2 = paras[i + 1]
+            if _YEAR_ONLY_RE.match((p2.text or "").strip()):
+                if p2.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+                    p2.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                    changed = True
+                pf2 = p2.paragraph_format
+                if pf2.space_before is not None and pf2.space_before.pt > 0.05:
+                    pf2.space_before = Pt(0)
+                    changed = True
+        break
+    if changed:
+        details.append(
+            "Титульный лист: город и дата выставлены внизу страницы (интервал перед «г. …»)"
+        )
+    return changed
+
 
 def strip_paragraph_page_breaks(paragraph) -> bool:
     """Remove page breaks on a paragraph.
@@ -224,35 +310,46 @@ def normalize_title_page_spacing(doc, body_start: int, details: list[str]) -> bo
     that previously slipped under a 12 pt threshold — students often get a
     second title page from a mid-block page break plus accumulated spacing.
     """
-    changed = False
     if body_start <= 0:
         return False
     last_plain = (doc.paragraphs[body_start - 1].text or "").strip()
     toc_heading_last = bool(_TOC_HEADING_RE.match(last_plain))
 
+    city_idx: int | None = None
+    for _ci in range(body_start):
+        if _TITLE_CITY_RE.match(_collapse_title_text_for_match(doc.paragraphs[_ci].text or "")):
+            city_idx = _ci
+            break
+
+    loop_changed = False
     for i in range(body_start):
         p = doc.paragraphs[i]
         if strip_paragraph_page_breaks(p):
-            changed = True
+            loop_changed = True
         pf = p.paragraph_format
         sa = pf.space_after
         if sa is not None and sa.pt > 0.05:
             pf.space_after = Pt(0)
-            changed = True
+            loop_changed = True
         sb = pf.space_before
         if sb is not None and sb.pt > 0.05:
-            pf.space_before = Pt(0)
-            changed = True
+            if city_idx is not None and (i == city_idx or i == city_idx + 1):
+                pass
+            else:
+                pf.space_before = Pt(0)
+                loop_changed = True
         ls = pf.line_spacing
         skip_ls_compress = toc_heading_last and i == body_start - 1
         if not skip_ls_compress:
             if ls is None or (isinstance(ls, float) and ls > 1.01):
                 pf.line_spacing = 1.0
-                changed = True
+                loop_changed = True
         elif ls is not None and isinstance(ls, float) and ls < 1.0:
             pf.line_spacing = 1.0
-            changed = True
-    if changed:
+            loop_changed = True
+    footer_changed = normalize_title_page_city_footer(doc, body_start, details)
+    changed = loop_changed or footer_changed
+    if loop_changed:
         details.append(
             "Титульный лист: убраны лишние интервалы и разрывы страницы в блоке титула"
         )
