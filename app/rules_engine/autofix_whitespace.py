@@ -185,18 +185,63 @@ def collapse_excessive_empty_paras(
 
 _SOURCE_LINE_RE = re.compile(r"^источник", re.IGNORECASE)
 
-# Clean «г. Город» line: strip fake leading w:r with \n. Интервалы до абзаца не трогаем —
-# на титуле они задают вертикальную «растяжку» (город/год внизу), проверка интервалов
-# для титула в checks_advanced отключена.
+# Подвал титула (типовая методичка): город без «г.»; в одну строку — «Город, год»
+# с запятой; в две строки — запятая после города не ставится. По центру.
+# Шапка и блок РЕФЕРАТ/исполнитель не нормализуем — шаблоны ВУЗов расходятся.
+# Интервалы до/после на титуле не трогаем; checks_advanced их не проверяет.
 _TITLE_CITY_RE = re.compile(
-    r"^г\.\s*[А-ЯЁа-яЁё][А-ЯЁа-яЁё\-\s\w]*\s*$",
+    r"^г\.\s*[А-ЯЁа-яЁё][А-ЯЁа-яЁё\-\s\w]*\s*,?\s*$",
     re.IGNORECASE | re.UNICODE,
 )
 _YEAR_ONLY_RE = re.compile(r"^\d{4}\s*$")
+_CITY_YEAR_ONE_LINE_RE = re.compile(
+    r"^(?:г\.\s*)?([А-ЯЁа-яЁё][А-ЯЁа-яЁё\-\s\w]*)\s*,\s*(\d{4})\s*$",
+    re.IGNORECASE | re.UNICODE,
+)
+_CITY_FOOTER_NOISE_RE = re.compile(
+    r"программ|направлен|дисциплин|кафедр|факультет|университет|институт|"
+    r"реферат|выполн|проверил|студент|групп|министерство|образован",
+    re.IGNORECASE,
+)
 
 
 def _collapse_title_text_for_match(text: str) -> str:
     return re.sub(r"[\n\r\t\xa0]+", " ", (text or "")).strip()
+
+
+def _replace_paragraph_plain_text(paragraph, new_text: str) -> None:
+    runs = paragraph.runs
+    if not runs:
+        return
+    runs[0].text = new_text
+    for run in runs[1:]:
+        run.text = ""
+
+
+def _strip_title_city_g_prefix(collapsed: str) -> str:
+    return re.sub(r"^г\.\s*", "", (collapsed or "").strip(), flags=re.IGNORECASE).strip()
+
+
+def _normalize_city_comma_year_one_line(collapsed: str) -> str | None:
+    m = _CITY_YEAR_ONE_LINE_RE.match((collapsed or "").strip())
+    if not m:
+        return None
+    return f"{m.group(1).strip()}, {m.group(2).strip()}"
+
+
+def _is_probable_footer_city_line(collapsed: str) -> bool:
+    if not collapsed or len(collapsed) > 80:
+        return False
+    if _CITY_FOOTER_NOISE_RE.search(collapsed):
+        return False
+    if _TITLE_CITY_RE.match(collapsed):
+        return True
+    stripped = _strip_title_city_g_prefix(collapsed)
+    if not stripped or _CITY_FOOTER_NOISE_RE.search(stripped):
+        return False
+    return bool(
+        re.match(r"^[А-ЯЁа-яЁё][А-ЯЁа-яЁё\-\s]{0,78}$", stripped, re.UNICODE),
+    )
 
 
 def _run_is_only_soft_vertical_space(r_elem) -> bool:
@@ -232,20 +277,86 @@ def _strip_leading_soft_vertical_runs_from_paragraph(p_element) -> int:
 
 
 def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -> bool:
-    """Strip fake leading line-break runs before «г. Город»; center city/year.
-    """
+    """Подвал: город без «г.», год; одна строка «Город, год» или две строки; по центру."""
     changed = False
     if body_start <= 0:
         return False
     paras = doc.paragraphs
+
+    footer_idx: int | None = None
+    one_line = False
+    for i in range(body_start - 1, -1, -1):
+        raw = (paras[i].text or "").strip()
+        if not raw:
+            continue
+        collapsed = _collapse_title_text_for_match(paras[i].text or "")
+        if _normalize_city_comma_year_one_line(collapsed) is not None:
+            footer_idx = i
+            one_line = True
+            break
+        if _YEAR_ONLY_RE.match(raw):
+            footer_idx = i
+            one_line = False
+            break
+
+    if footer_idx is not None and one_line:
+        p = paras[footer_idx]
+        collapsed = _collapse_title_text_for_match(p.text or "")
+        want = _normalize_city_comma_year_one_line(collapsed)
+        if want is None:
+            return False
+        if _strip_leading_soft_vertical_runs_from_paragraph(p._element):
+            changed = True
+        cur = _collapse_title_text_for_match(p.text or "")
+        if cur.replace("\xa0", " ").strip() != want:
+            _replace_paragraph_plain_text(p, want)
+            changed = True
+        if p.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+            p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            changed = True
+        if changed:
+            details.append(
+                "Титульный лист: подвал — «город, год» в одну строку без «г.», по центру"
+            )
+        return changed
+
+    if footer_idx is not None and not one_line:
+        yp = paras[footer_idx]
+        if _strip_leading_soft_vertical_runs_from_paragraph(yp._element):
+            changed = True
+        if yp.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+            yp.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            changed = True
+        city_idx = footer_idx - 1
+        if city_idx >= 0:
+            cp = paras[city_idx]
+            c_collapsed = _collapse_title_text_for_match(cp.text or "")
+            if _is_probable_footer_city_line(c_collapsed):
+                if _strip_leading_soft_vertical_runs_from_paragraph(cp._element):
+                    changed = True
+                new_city = _strip_title_city_g_prefix(c_collapsed).rstrip(",").strip()
+                if new_city and _collapse_title_text_for_match(cp.text or "") != new_city:
+                    _replace_paragraph_plain_text(cp, new_city)
+                    changed = True
+                if cp.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+                    cp.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                    changed = True
+        if changed:
+            details.append(
+                "Титульный лист: подвал — город без «г.», год на следующей строке, по центру"
+            )
+        return changed
+
     for i in range(body_start):
         p = paras[i]
         collapsed = _collapse_title_text_for_match(p.text or "")
         if not _TITLE_CITY_RE.match(collapsed):
             continue
-        n_strip = _strip_leading_soft_vertical_runs_from_paragraph(p._element)
-        pf = p.paragraph_format
-        if n_strip:
+        if _strip_leading_soft_vertical_runs_from_paragraph(p._element):
+            changed = True
+        new_city = _strip_title_city_g_prefix(collapsed).rstrip(",").strip()
+        if new_city and collapsed != new_city:
+            _replace_paragraph_plain_text(p, new_city)
             changed = True
         if p.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
             p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
@@ -259,7 +370,7 @@ def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -
         break
     if changed:
         details.append(
-            "Титульный лист: убраны лишние переносы перед «г. …», город и год по центру"
+            "Титульный лист: подвал — убраны лишние переносы, «г.» перед городом снято, по центру"
         )
     return changed
 
