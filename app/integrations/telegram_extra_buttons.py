@@ -61,32 +61,36 @@ def _subscribe_open_available() -> bool:
 EXTRA_BUTTON_CODES: list[dict[str, Any]] = [
     {
         "code": "subscribe_check",
-        "label_ru": "Проверить подписку",
+        "label_ru": "Проверить подписку на канал",
         "hint_ru": (
-            "Добавит inline-кнопку, по которой бот проверит подписку "
-            "пользователя на канал и при первом успехе начислит бонус."
+            "Покажет кнопку «Проверить подписку». Если человек подписан "
+            "на ваш канал — он автоматически получит бонусные попытки "
+            "(один раз)."
         ),
         "available": _subscribe_check_available,
     },
     {
         "code": "subscribe_open",
         "label_ru": "Перейти в канал",
-        "hint_ru": "Inline-кнопка-ссылка на канал из настройки SUBSCRIBE_BONUS_CHANNEL_USERNAME.",
+        "hint_ru": "Покажет кнопку-ссылку на ваш Telegram-канал.",
         "available": _subscribe_open_available,
     },
     {
         "code": "pay",
-        "label_ru": "Оплатить (открыть Mini App)",
+        "label_ru": "Оплатить",
         "hint_ru": (
-            "WebApp-кнопка открытия Mini App по APP_BASE_URL. "
-            "Появится только если URL начинается с https://."
+            "Покажет кнопку оплаты — по нажатию пользователь сразу "
+            "попадёт в окно покупки попыток."
         ),
         "available": _pay_available,
     },
     {
         "code": "referral",
         "label_ru": "Пригласить друга",
-        "hint_ru": "Переход в раздел реферальной программы (с твоей реф-ссылкой).",
+        "hint_ru": (
+            "Покажет кнопку перехода в раздел реферальной программы — "
+            "там у пользователя будет его личная ссылка-приглашение."
+        ),
         "available": _referral_available,
     },
 ]

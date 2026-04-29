@@ -240,7 +240,7 @@ function menuItemForm(m) {
     ? meta.map(b => `
         <div class="toggle" style="border:none">
           <div class="toggle-info">
-            <div class="toggle-title">${escHtml(b.label)}${b.available ? '' : ' <span class="badge badge-warn" style="font-size:10px;vertical-align:middle">недоступно</span>'}</div>
+            <div class="toggle-title">${escHtml(b.label)}${b.available ? '' : ' <span class="badge badge-gray" style="font-size:10px;vertical-align:middle;margin-left:4px">пока не настроено</span>'}</div>
             <div class="toggle-sub">${escHtml(b.hint || '')}</div>
           </div>
           <label class="switch">
@@ -251,7 +251,7 @@ function menuItemForm(m) {
           </label>
         </div>
       `).join('')
-    : '<div class="form-hint">Реестр кнопок не загружен.</div>';
+    : '<div class="form-hint">Список кнопок не загрузился. Обновите страницу.</div>';
 
   return `
     <div class="form-group">
@@ -283,9 +283,9 @@ function menuItemForm(m) {
         <span class="slider"></span>
       </label>
     </div>
-    <h4 class="form-section-title">Дополнительные inline-кнопки</h4>
+    <h4 class="form-section-title">Дополнительные кнопки под сообщением</h4>
     <div class="form-hint" style="margin:-4px 0 8px">
-      Появятся под основной клавиатурой пункта меню при отправке его пользователю.
+      Когда пользователь откроет этот пункт меню, выбранные кнопки покажутся прямо под сообщением.
     </div>
     <div id="mi-extra-buttons" class="extra-buttons-list">${extraRows}</div>
     <input type="hidden" id="mi-row" value="${m?.row ?? ''}">
