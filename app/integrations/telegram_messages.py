@@ -52,17 +52,28 @@ async def personalize_text(text: str, *, tg_user_id: int | None) -> str:
     * ``{ref_link}`` — личная реферальная ссылка пользователя;
     * ``{credits}`` и ``{N}`` — текущее количество попыток.
     """
-    if REF_LINK_PLACEHOLDER in text and tg_user_id:
+    has_ref = REF_LINK_PLACEHOLDER in text
+    has_credits = any(p in text for p in CREDITS_PLACEHOLDERS)
+
+    if has_ref and tg_user_id:
         text = text.replace(
             REF_LINK_PLACEHOLDER, build_ref_link(tg_user_id),
         )
 
-    if any(p in text for p in CREDITS_PLACEHOLDERS):
+    if has_credits:
         credits_value = (
             await _get_user_credits(tg_user_id) if tg_user_id else 0
         )
         for placeholder in CREDITS_PLACEHOLDERS:
             text = text.replace(placeholder, str(credits_value))
+
+    if has_ref or has_credits:
+        # Диагностика: видна в логах бота. Если в логе нет этой строки,
+        # значит выполняется СТАРАЯ версия модуля (без поддержки {credits}).
+        logger.info(
+            "personalize_text applied: ref=%s credits=%s tg_user_id=%s",
+            has_ref, has_credits, tg_user_id,
+        )
 
     return text
 
