@@ -6,6 +6,7 @@ const RESERVED_MENU_PAYLOADS = new Set(['__start__']);
 
 let _menuItems = [];
 let _dragItem = null;
+let _extraButtonMeta = null;
 
 async function loadContentMenu() {
   const all = await api('GET', '/admin/content/menu');
@@ -14,6 +15,17 @@ async function loadContentMenu() {
     ${iconSvg('plus', 16)} Пункт меню
   </button>`;
   renderContentPage(renderMenuGrid(), actionBtn);
+}
+
+async function _ensureExtraButtonMeta() {
+  if (_extraButtonMeta) return _extraButtonMeta;
+  try {
+    _extraButtonMeta = await api('GET', '/admin/content/menu/extra-buttons');
+  } catch (err) {
+    console.error('Failed to load extra-buttons meta', err);
+    _extraButtonMeta = [];
+  }
+  return _extraButtonMeta;
 }
 
 /* ---------- Visual grid (Telegram-style keyboard) ---------- */
@@ -199,6 +211,7 @@ async function ctxToggleItem(id, active) {
     const data = {
       title: item.title, icon: item.icon, item_type: item.item_type,
       payload: item.payload, row: item.row, col: item.col, active,
+      extra_buttons: Array.isArray(item.extra_buttons) ? item.extra_buttons : [],
     };
     await api('PUT', `/admin/content/menu/${id}`, data);
     toast(active ? 'Пункт показан' : 'Пункт скрыт', 'success');
@@ -221,6 +234,25 @@ async function ctxDeleteItem(id) {
 function menuItemForm(m) {
   const isText = (!m && true) || m?.item_type === 'text';
   const isLink = m?.item_type === 'link';
+  const enabled = new Set(Array.isArray(m?.extra_buttons) ? m.extra_buttons : []);
+  const meta = Array.isArray(_extraButtonMeta) ? _extraButtonMeta : [];
+  const extraRows = meta.length
+    ? meta.map(b => `
+        <div class="toggle" style="border:none">
+          <div class="toggle-info">
+            <div class="toggle-title">${escHtml(b.label)}${b.available ? '' : ' <span class="badge badge-warn" style="font-size:10px;vertical-align:middle">недоступно</span>'}</div>
+            <div class="toggle-sub">${escHtml(b.hint || '')}</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" data-extra-btn="${escHtml(b.code)}"
+              ${enabled.has(b.code) ? 'checked' : ''}
+              ${b.available ? '' : 'disabled'}>
+            <span class="slider"></span>
+          </label>
+        </div>
+      `).join('')
+    : '<div class="form-hint">Реестр кнопок не загружен.</div>';
+
   return `
     <div class="form-group">
       <label class="form-label">Заголовок</label>
@@ -251,6 +283,11 @@ function menuItemForm(m) {
         <span class="slider"></span>
       </label>
     </div>
+    <h4 class="form-section-title">Дополнительные inline-кнопки</h4>
+    <div class="form-hint" style="margin:-4px 0 8px">
+      Появятся под основной клавиатурой пункта меню при отправке его пользователю.
+    </div>
+    <div id="mi-extra-buttons" class="extra-buttons-list">${extraRows}</div>
     <input type="hidden" id="mi-row" value="${m?.row ?? ''}">
     <input type="hidden" id="mi-col" value="${m?.col ?? ''}">`;
 }
@@ -285,6 +322,9 @@ function onMenuTypeChange() {
 
 function getMenuItemData() {
   const type = getVal('mi-type');
+  const extra = Array.from(
+    document.querySelectorAll('#mi-extra-buttons input[data-extra-btn]:checked'),
+  ).map(el => el.dataset.extraBtn);
   return {
     title: getVal('mi-title').trim(),
     icon: getVal('mi-icon').trim() || null,
@@ -293,10 +333,12 @@ function getMenuItemData() {
     row: getVal('mi-row') !== '' ? parseInt(getVal('mi-row')) : 0,
     col: getVal('mi-col') !== '' ? parseInt(getVal('mi-col')) : 0,
     active: isChecked('mi-active'),
+    extra_buttons: extra,
   };
 }
 
-function showAddMenuItem(row, col) {
+async function showAddMenuItem(row, col) {
+  await _ensureExtraButtonMeta();
   const item = row != null ? { row, col, item_type: 'text', active: true } : null;
   const footer = `
     <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
@@ -304,7 +346,8 @@ function showAddMenuItem(row, col) {
   openModal('Новый пункт меню', menuItemForm(item), footer);
 }
 
-function showEditMenuItem(m) {
+async function showEditMenuItem(m) {
+  await _ensureExtraButtonMeta();
   const footer = `
     <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
     <button class="btn btn-primary" onclick="updateMenuItem(${m.id})">Сохранить</button>`;

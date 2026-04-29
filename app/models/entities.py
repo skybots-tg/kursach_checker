@@ -204,6 +204,10 @@ class ContentMenuItem(Base):
     row: Mapped[int] = mapped_column(Integer, default=0)
     col: Mapped[int] = mapped_column(Integer, default=0)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+    # Список кодов «дополнительных» inline-кнопок, которые бот добавляет
+    # к этому пункту меню под основной клавиатурой. Допустимые значения
+    # см. в EXTRA_BUTTON_CODES (app/integrations/telegram_extra_buttons.py).
+    extra_buttons: Mapped[list] = mapped_column(JSON, default=list)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 

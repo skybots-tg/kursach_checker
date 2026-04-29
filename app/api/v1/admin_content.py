@@ -7,6 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.admin_deps import get_current_admin
 from app.db.session import get_db
+from app.integrations.telegram_extra_buttons import (
+    list_extra_button_meta,
+    normalize_extra_buttons,
+)
 from app.models import AdminUser, BotContent, ContentMenuItem, ContentVersion, MenuItemMessage
 from app.services.audit import log_admin_action
 from app.services.bot_texts import list_system_texts
@@ -32,6 +36,9 @@ class MenuItemIn(BaseModel):
     row: int = 0
     col: int = 0
     active: bool = True
+    # Список кодов «дополнительных» inline-кнопок (например ['subscribe_check', 'pay']).
+    # Неизвестные коды отбрасываются на сервере; см. EXTRA_BUTTON_CODES.
+    extra_buttons: list[str] = Field(default_factory=list)
 
 
 class MenuReorderIn(BaseModel):
@@ -121,9 +128,19 @@ async def list_menu(
             "row": m.row,
             "col": m.col,
             "active": m.active,
+            "extra_buttons": normalize_extra_buttons(m.extra_buttons),
         }
         for m in rows
     ]
+
+
+@router.get("/menu/extra-buttons")
+async def list_extra_buttons(
+    current_admin: AdminUser = Depends(get_current_admin),
+) -> list[dict]:
+    """Реестр доступных дополнительных кнопок для UI админки."""
+    _ = current_admin
+    return list_extra_button_meta()
 
 
 @router.post("/menu")
@@ -134,6 +151,7 @@ async def create_menu_item(
 ) -> dict:
     data = payload.model_dump()
     data["position"] = data["row"] * 100 + data["col"]
+    data["extra_buttons"] = normalize_extra_buttons(data.get("extra_buttons"))
     item = ContentMenuItem(**data)
     db.add(item)
     await db.flush()
@@ -166,10 +184,15 @@ async def update_menu_item(
         "parent_id": item.parent_id, "title": item.title, "icon": item.icon,
         "item_type": item.item_type, "payload": item.payload,
         "row": item.row, "col": item.col, "active": item.active,
+        "extra_buttons": normalize_extra_buttons(item.extra_buttons),
     }
 
     content_changed = False
-    for k, v in payload.model_dump().items():
+    payload_data = payload.model_dump()
+    payload_data["extra_buttons"] = normalize_extra_buttons(
+        payload_data.get("extra_buttons")
+    )
+    for k, v in payload_data.items():
         if k == "payload" and item.item_type == "text":
             continue
         # Служебный пункт (__start__) редактируем только в части контента:
@@ -195,7 +218,7 @@ async def update_menu_item(
 
     await log_admin_action(
         db, current_admin.id, "content.menu.update", "content_menu_item",
-        str(item.id), {"before": before, "after": payload.model_dump()},
+        str(item.id), {"before": before, "after": payload_data},
     )
     await db.commit()
     return {"ok": True}

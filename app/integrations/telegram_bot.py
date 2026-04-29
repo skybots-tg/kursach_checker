@@ -25,24 +25,15 @@ from app.integrations.telegram_constants import (
     SUBSCRIBE_BONUS_PAYLOAD,
     SUBSCRIBE_CHECK_CB,
 )
-from app.integrations.telegram_messages import (
-    SUBSCRIBE_BTN_PLACEHOLDER,
-    send_content_messages,
-)
+from app.integrations.telegram_extra_buttons import build_extra_buttons
+from app.integrations.telegram_messages import send_content_messages
 from app.integrations.telegram_notify import notify_referral_bonus
 from app.integrations.telegram_subscribe import (
     build_subscribe_menu_keyboard,
-    build_subscribe_retry_keyboard,
     handle_subscribe_check,
 )
 from app.integrations.telegram_users import ensure_user, handle_block_status
-from app.models import (
-    ContentMenuItem,
-    CreditsBalance,
-    MenuItemMessage,
-    User,
-)
-from app.services import subscribe_bonus
+from app.models import ContentMenuItem, CreditsBalance, User
 from app.services.bot_texts import get_text
 from app.services.referrals import parse_ref_payload
 
@@ -319,15 +310,8 @@ async def _navigate_to_item(
         parent_id = item.parent_id
         item_title = item.title
         item_payload = item.payload
+        item_extra_buttons = list(item.extra_buttons or [])
         children_rows = await _build_children_rows(db, menu_item_id)
-        has_subscribe_btn_marker = await db.scalar(
-            select(MenuItemMessage.id)
-            .where(MenuItemMessage.menu_item_id == menu_item_id)
-            .where(MenuItemMessage.text.like(
-                f"%{SUBSCRIBE_BTN_PLACEHOLDER}%"
-            ))
-            .limit(1)
-        ) is not None
 
     inline_keyboard: list[list[InlineKeyboardButton]] = list(children_rows)
 
@@ -338,12 +322,12 @@ async def _navigate_to_item(
         subscribe_kb = await build_subscribe_menu_keyboard()
         if subscribe_kb is not None:
             inline_keyboard.extend(subscribe_kb.inline_keyboard)
-    elif has_subscribe_btn_marker and subscribe_bonus.is_enabled():
-        # Любой другой пункт с маркером {subscribe_btn} в тексте получает
-        # одну кнопку «Проверить подписку» — для CTA в инфо-пунктах
-        # типа «Мои попытки», «Польза для студентов» и т.п.
-        retry_kb = await build_subscribe_retry_keyboard()
-        inline_keyboard.extend(retry_kb.inline_keyboard)
+
+    # Дополнительные inline-кнопки, включённые свитчами в админке
+    # (поле ContentMenuItem.extra_buttons): «Проверить подписку»,
+    # «Оплатить», «Пригласить друга» и т.п.
+    if item_extra_buttons:
+        inline_keyboard.extend(await build_extra_buttons(item_extra_buttons))
 
     inline_keyboard.append(_nav_row(parent_id, depth))
     keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)

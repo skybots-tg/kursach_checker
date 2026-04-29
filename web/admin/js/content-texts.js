@@ -257,6 +257,9 @@ function messageFormHtml(msg) {
   const isMedia = t !== 'text';
   const noCaption = NO_CAPTION_TYPES.has(t);
   const accept = MSG_TYPE_ACCEPT[t] || '*/*';
+  const placeholder = isMedia
+    ? 'Подпись к медиа (необязательно)'
+    : 'Введите текст сообщения. Используйте панель сверху для форматирования.';
   return `
     <div class="form-group">
       <label class="form-label">Тип сообщения</label>
@@ -282,26 +285,17 @@ function messageFormHtml(msg) {
     </div>
     <div id="msg-text-wrap" style="display:${noCaption ? 'none' : 'block'}">
       <div class="form-group">
-        <label class="form-label">${isMedia ? 'Подпись' : 'Текст сообщения'}</label>
-        <div class="rt-toolbar">
-          <button type="button" class="rt-btn" onclick="rtWrap('msg-text','<b>','</b>')" title="Жирный"><b>B</b></button>
-          <button type="button" class="rt-btn" onclick="rtWrap('msg-text','<i>','</i>')" title="Курсив"><i>I</i></button>
-          <button type="button" class="rt-btn" onclick="rtWrap('msg-text','<u>','</u>')" title="Подчёркнутый"><u>U</u></button>
-          <button type="button" class="rt-btn" onclick="rtInsertLink('msg-text')" title="Ссылка">🔗</button>
+        <label class="form-label" id="msg-text-label">${isMedia ? 'Подпись' : 'Текст сообщения'}</label>
+        ${WysiwygEditor.buildHtml('msg-text-editor', 'msg-text', { placeholder })}
+        <textarea class="form-textarea" id="msg-text" rows="6">${escHtml(msg?.text || '')}</textarea>
+        <div class="form-hint" style="margin-top:6px">
+          Доступные переменные в тексте:
+          <code>{ref_link}</code> — персональная реф-ссылка,
+          <code>{credits}</code> или <code>{N}</code> — оставшиеся попытки.
+          <br>Дополнительные кнопки (например «Проверить подписку»,
+          «Оплатить») включаются в настройках пункта меню — вкладка
+          <strong>Меню</strong> → правка пункта.
         </div>
-        <textarea class="form-textarea" id="msg-text" rows="5" oninput="updateMsgPreview()">${escHtml(msg?.text || '')}</textarea>
-        <div class="form-hint">Поддерживается HTML: &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;a href="..."&gt;</div>
-        <div class="form-hint">
-          Доступные переменные:
-          <code>{ref_link}</code> — персональная реф-ссылка пользователя,
-          <code>{credits}</code> или <code>{N}</code> — количество оставшихся попыток,
-          <code>{subscribe_btn}</code> — добавит к пункту меню кнопку «Проверить подписку»
-          (сам маркер из текста удалится).
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Предпросмотр</label>
-        <div id="msg-preview-box" class="msg-preview-box" style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;min-height:40px;background:var(--bg-subtle);line-height:1.5">${sanitizeTgHtml(msg?.text || '')}</div>
       </div>
     </div>`;
 }
@@ -316,7 +310,7 @@ function onMsgTypeChange() {
   if (fileInput) fileInput.accept = MSG_TYPE_ACCEPT[type] || '*/*';
   const hint = document.getElementById('msg-file-hint');
   if (hint) hint.style.display = noCaption ? 'block' : 'none';
-  const label = document.querySelector('#msg-text-wrap .form-label');
+  const label = document.getElementById('msg-text-label');
   if (label) label.textContent = isMedia ? 'Подпись' : 'Текст сообщения';
 }
 
@@ -348,11 +342,20 @@ function rtInsertLink(textareaId) {
   updateMsgPreview();
 }
 
+function _setupMsgEditor() {
+  // attach редактор к скрытому textarea + повесить переключатель «raw HTML».
+  WysiwygEditor.attach('msg-text-editor', 'msg-text', {
+    placeholder: 'Введите текст сообщения. Используйте панель сверху для форматирования.',
+  });
+  WysiwygEditor.bindRawToggle('msg-text-editor', 'msg-text');
+}
+
 function showAddMessage(itemId) {
   const footer = `
     <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
     <button class="btn btn-primary" onclick="createMessage(${itemId})">Создать</button>`;
   openModal('Новое сообщение', messageFormHtml(null), footer);
+  _setupMsgEditor();
 }
 
 async function showEditMessage(itemId, msgId) {
@@ -364,6 +367,7 @@ async function showEditMessage(itemId, msgId) {
       <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
       <button class="btn btn-primary" onclick="updateMessage(${itemId},${msgId})">Сохранить</button>`;
     openModal('Редактировать сообщение', messageFormHtml(msg), footer);
+    _setupMsgEditor();
   } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
 }
 
