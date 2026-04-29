@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
+import unicodedata
 import zipfile
 from pathlib import Path
 
@@ -805,12 +806,25 @@ def fix_remove_highlight(paragraph, para_label: str, details: list[str]) -> bool
         details.append(f"{para_label}: \u0437\u0430\u043b\u0438\u0432\u043a\u0430/\u0432\u044b\u0434\u0435\u043b\u0435\u043d\u0438\u0435 \u0443\u0431\u0440\u0430\u043d\u044b")
     return changed
 
+def _is_safe_to_strip(ch: str) -> bool:
+    """Дополнительный предохранитель: даже если whitelist окажется неполным,
+    автоисправление не должно вырезать буквы и иероглифы. Удаляем только
+    действительно мусорные символы — управляющие, приватные области,
+    суррогаты, символы-форматирования и непечатные пробелы.
+    """
+    cat = unicodedata.category(ch)
+    return cat[0] in ("C", "Z") and ch not in (" ", "\t", "\n")
+
+
 def fix_remove_strange_chars(paragraph, para_label: str, details: list[str], allowed_re) -> bool:
     changed = False
     for run in paragraph.runs:
         if is_field_code_run(run) or not run.text:
             continue
-        cleaned = "".join(c for c in run.text if allowed_re.match(c))
+        cleaned = "".join(
+            c for c in run.text
+            if allowed_re.match(c) or not _is_safe_to_strip(c)
+        )
         if cleaned != run.text:
             run.text = cleaned
             changed = True

@@ -240,6 +240,23 @@ ALLOWED_CHARS_RE = re.compile(
     r"\u2070-\u209F"
     r"\u2200-\u22FF"
     r"\u2150-\u218F"
+    # CJK / Hangul / Kana — нужны для работ по корееведению,
+    # японистике, китаистике, классической филологии. Без этих
+    # диапазонов автоисправление физически удаляло иероглифы из
+    # текста (см. главу о корейской сказке: 옛이야기, 설화, 三國史記).
+    r"\u1100-\u11FF"   # Hangul Jamo
+    r"\u3000-\u303F"   # CJK Symbols and Punctuation (включая 「」、・)
+    r"\u3040-\u309F"   # Hiragana
+    r"\u30A0-\u30FF"   # Katakana
+    r"\u3130-\u318F"   # Hangul Compatibility Jamo
+    r"\u31F0-\u31FF"   # Katakana Phonetic Extensions
+    r"\u3400-\u4DBF"   # CJK Unified Ideographs Extension A
+    r"\u4E00-\u9FFF"   # CJK Unified Ideographs
+    r"\uA960-\uA97F"   # Hangul Jamo Extended-A
+    r"\uAC00-\uD7AF"   # Hangul Syllables
+    r"\uD7B0-\uD7FF"   # Hangul Jamo Extended-B
+    r"\uF900-\uFAFF"   # CJK Compatibility Ideographs
+    r"\uFF00-\uFFEF"   # Halfwidth and Fullwidth Forms
     r"]"
 )
 
