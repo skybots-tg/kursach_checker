@@ -1,5 +1,7 @@
 """Reset overrides for no_credits buttons and subscribe.not_subscribed.
 
+Имя ревизии короткое (revision_num в alembic_version — VARCHAR(32)).
+
 В миграции 0017 мы уже создали текст бонуса за подписку и сбросили
 устаревший override для ``check.no_credits``. Теперь подгоняем тексты
 под доработанный UX:
@@ -22,7 +24,7 @@
 которые могут содержать новые плейсхолдеры ({credits}, {N}, {ref_link}),
 чтобы кешированная не персонализированная копия не разошлась всем.
 
-Revision ID: 0018_no_credits_buttons_subscribe_text
+Revision ID: 0018_btns_subs_text
 Revises: 0017_subscribe_bonus
 Create Date: 2026-04-29
 """
@@ -33,7 +35,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = "0018_no_credits_buttons_subscribe_text"
+revision = "0018_btns_subs_text"
 down_revision = "0017_subscribe_bonus"
 branch_labels = None
 depends_on = None
