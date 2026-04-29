@@ -25,14 +25,26 @@ from app.integrations.telegram_constants import (
     SUBSCRIBE_BONUS_PAYLOAD,
     SUBSCRIBE_CHECK_CB,
 )
-from app.integrations.telegram_messages import send_content_messages
+from app.integrations.telegram_messages import (
+    SUBSCRIBE_BTN_PLACEHOLDER,
+    send_content_messages,
+)
 from app.integrations.telegram_notify import notify_referral_bonus
+from app.integrations.telegram_subscribe import (
+    build_subscribe_menu_keyboard,
+    build_subscribe_retry_keyboard,
+    handle_subscribe_check,
+)
 from app.integrations.telegram_users import ensure_user, handle_block_status
-from app.models import ContentMenuItem, CreditsBalance, User
+from app.models import (
+    ContentMenuItem,
+    CreditsBalance,
+    MenuItemMessage,
+    User,
+)
 from app.services import subscribe_bonus
 from app.services.bot_texts import get_text
 from app.services.referrals import parse_ref_payload
-from app.services.subscribe_bonus import SubscribeOutcome
 
 # Реэкспорт для обратной совместимости — часть кода может импортировать
 # константы из этого модуля.
@@ -126,30 +138,6 @@ async def _build_children_rows(
             keyboard_rows.setdefault(m.row, []).append(btn)
 
     return [keyboard_rows[r] for r in sorted(keyboard_rows.keys())]
-
-
-async def _build_subscribe_keyboard() -> InlineKeyboardMarkup | None:
-    """Inline-клавиатура для пункта меню «бонус за подписку».
-
-    Возвращает None, если фича выключена (нет канала в env) — тогда
-    стандартный поток просто не покажет кнопок, но и пункт меню по
-    идее не должен быть активен.
-    """
-    if not subscribe_bonus.is_enabled():
-        return None
-
-    btn_open = await get_text("subscribe.btn_open")
-    btn_check = await get_text("subscribe.btn_check")
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(
-                text=btn_open, url=subscribe_bonus.channel_link(),
-            )],
-            [InlineKeyboardButton(
-                text=btn_check, callback_data=SUBSCRIBE_CHECK_CB,
-            )],
-        ],
-    )
 
 
 def _nav_row(parent_id: int | None, depth: int) -> list[InlineKeyboardButton]:
@@ -417,16 +405,30 @@ async def _navigate_to_item(
         item_title = item.title
         item_payload = item.payload
         children_rows = await _build_children_rows(db, menu_item_id)
+        has_subscribe_btn_marker = await db.scalar(
+            select(MenuItemMessage.id)
+            .where(MenuItemMessage.menu_item_id == menu_item_id)
+            .where(MenuItemMessage.text.like(
+                f"%{SUBSCRIBE_BTN_PLACEHOLDER}%"
+            ))
+            .limit(1)
+        ) is not None
 
     inline_keyboard: list[list[InlineKeyboardButton]] = list(children_rows)
 
     # Пункт «получи +N за подписку на канал» — стандартных дочерних
     # пунктов у него нет, мы подмешиваем кнопки «Перейти в канал» и
-    # «Я подписался — проверить» из спецклавиатуры.
+    # «Проверить подписку» из спецклавиатуры.
     if item_payload == SUBSCRIBE_BONUS_PAYLOAD:
-        subscribe_kb = await _build_subscribe_keyboard()
+        subscribe_kb = await build_subscribe_menu_keyboard()
         if subscribe_kb is not None:
             inline_keyboard.extend(subscribe_kb.inline_keyboard)
+    elif has_subscribe_btn_marker and subscribe_bonus.is_enabled():
+        # Любой другой пункт с маркером {subscribe_btn} в тексте получает
+        # одну кнопку «Проверить подписку» — для CTA в инфо-пунктах
+        # типа «Мои попытки», «Польза для студентов» и т.п.
+        retry_kb = await build_subscribe_retry_keyboard()
+        inline_keyboard.extend(retry_kb.inline_keyboard)
 
     inline_keyboard.append(_nav_row(parent_id, depth))
     keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)

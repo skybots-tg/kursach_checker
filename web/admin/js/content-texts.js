@@ -294,7 +294,9 @@ function messageFormHtml(msg) {
         <div class="form-hint">
           Доступные переменные:
           <code>{ref_link}</code> — персональная реф-ссылка пользователя,
-          <code>{credits}</code> или <code>{N}</code> — количество оставшихся попыток.
+          <code>{credits}</code> или <code>{N}</code> — количество оставшихся попыток,
+          <code>{subscribe_btn}</code> — добавит к пункту меню кнопку «Проверить подписку»
+          (сам маркер из текста удалится).
         </div>
       </div>
       <div class="form-group">

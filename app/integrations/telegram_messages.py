@@ -22,6 +22,10 @@ logger = logging.getLogger(__name__)
 REF_LINK_PLACEHOLDER = "{ref_link}"
 # {credits} — основной вариант, {N} — короткий алиас «количество попыток».
 CREDITS_PLACEHOLDERS: tuple[str, ...] = ("{credits}", "{N}")
+# Маркер «прикрепи кнопку Проверить подписку» к этому пункту меню.
+# В тексте при отправке заменяется на пустую строку, наличие выявляется
+# отдельно и обрабатывается на уровне сборки клавиатуры пункта.
+SUBSCRIBE_BTN_PLACEHOLDER = "{subscribe_btn}"
 
 
 def message_needs_personalization(msg: MenuItemMessage) -> bool:
@@ -29,6 +33,8 @@ def message_needs_personalization(msg: MenuItemMessage) -> bool:
     if not msg.text:
         return False
     if REF_LINK_PLACEHOLDER in msg.text:
+        return True
+    if SUBSCRIBE_BTN_PLACEHOLDER in msg.text:
         return True
     return any(p in msg.text for p in CREDITS_PLACEHOLDERS)
 
@@ -54,6 +60,7 @@ async def personalize_text(text: str, *, tg_user_id: int | None) -> str:
     """
     has_ref = REF_LINK_PLACEHOLDER in text
     has_credits = any(p in text for p in CREDITS_PLACEHOLDERS)
+    has_subscribe_btn = SUBSCRIBE_BTN_PLACEHOLDER in text
 
     if has_ref and tg_user_id:
         text = text.replace(
@@ -67,12 +74,18 @@ async def personalize_text(text: str, *, tg_user_id: int | None) -> str:
         for placeholder in CREDITS_PLACEHOLDERS:
             text = text.replace(placeholder, str(credits_value))
 
-    if has_ref or has_credits:
+    if has_subscribe_btn:
+        # Маркер из текста выкидываем — кнопку добавит сборщик клавиатуры
+        # в _navigate_to_item. Лишние пустые строки админ контролирует сам.
+        text = text.replace(SUBSCRIBE_BTN_PLACEHOLDER, "").rstrip()
+
+    if has_ref or has_credits or has_subscribe_btn:
         # Диагностика: видна в логах бота. Если в логе нет этой строки,
-        # значит выполняется СТАРАЯ версия модуля (без поддержки {credits}).
+        # значит выполняется СТАРАЯ версия модуля.
         logger.info(
-            "personalize_text applied: ref=%s credits=%s tg_user_id=%s",
-            has_ref, has_credits, tg_user_id,
+            "personalize_text applied: ref=%s credits=%s subscribe_btn=%s "
+            "tg_user_id=%s",
+            has_ref, has_credits, has_subscribe_btn, tg_user_id,
         )
 
     return text

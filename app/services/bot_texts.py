@@ -99,10 +99,10 @@ SYSTEM_TEXTS: dict[str, dict[str, Any]] = {
         "variables": ["bonus"],
     },
     "check.no_credits_btn_referral": {
-        "label": "Кнопка «Реферальная программа» (no_credits)",
+        "label": "Кнопка «Пригласить друга» (no_credits)",
         "group": "Проверка документа",
         "description": "Текст кнопки на экране «закончились попытки», ведёт в раздел реф-программы",
-        "default": "👥 Реферальная программа",
+        "default": "👥 Пригласить друга",
         "supports_html": False,
         "variables": [],
     },
@@ -111,6 +111,17 @@ SYSTEM_TEXTS: dict[str, dict[str, Any]] = {
         "group": "Проверка документа",
         "description": "Текст кнопки возврата в главное меню на экране «закончились попытки»",
         "default": "🏠 Вернуться в меню",
+        "supports_html": False,
+        "variables": [],
+    },
+    "check.no_credits_btn_pay": {
+        "label": "Кнопка «Оплатить» (no_credits)",
+        "group": "Проверка документа",
+        "description": (
+            "Текст WebApp-кнопки оплаты на экране «закончились попытки». "
+            "Кнопка появляется только если в .env задан HTTPS app_base_url."
+        ),
+        "default": "💳 Оплатить",
         "supports_html": False,
         "variables": [],
     },

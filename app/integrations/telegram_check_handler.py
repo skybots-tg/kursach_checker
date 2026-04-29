@@ -2,7 +2,12 @@ import logging
 from pathlib import Path
 
 from aiogram import Bot
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from aiogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+    WebAppInfo,
+)
 from sqlalchemy import select
 
 from app.core.config import settings
@@ -125,17 +130,37 @@ async def handle_document(message: Message, bot: Bot) -> None:
     await status_msg.edit_text(await get_text("check.queued"))
 
 
+def _make_pay_webapp_button(label: str) -> InlineKeyboardButton | None:
+    """Кнопка «💳 Оплатить» — открывает Mini App.
+
+    Возвращает None, если ``app_base_url`` не задан или пока на дефолте /
+    без HTTPS (Telegram такие WebApp-кнопки отвергает).
+    """
+    base = (settings.app_base_url or "").strip().rstrip("/")
+    if not base or base == "https://example.com" or not base.startswith("https://"):
+        return None
+    return InlineKeyboardButton(
+        text=label, web_app=WebAppInfo(url=base),
+    )
+
+
 async def _build_no_credits_keyboard(
     db, user_id: int,
 ) -> InlineKeyboardMarkup | None:
     """Inline-клавиатура к сообщению «закончились попытки».
 
-    На ней две кнопки получения бесплатных кредитов:
-    * «+N за подписку на канал» — только если фича включена и бонус ещё не
-      получен (повторно показывать смысла нет);
-    * «+1 за друга» — всегда, реф-программа не имеет лимита.
+    Кнопки в порядке приоритета для пользователя:
+    * «💳 Оплатить» — открывает Mini App с тарифами (если задан base_url);
+    * «🎁 +N за подписку на канал» — только если бонус ещё не выдан;
+    * «👥 Пригласить друга» — всегда, реф-программа без лимита;
+    * «🏠 Вернуться в меню».
     """
     rows: list[list[InlineKeyboardButton]] = []
+
+    pay_label = await get_text("check.no_credits_btn_pay")
+    pay_btn = _make_pay_webapp_button(pay_label)
+    if pay_btn is not None:
+        rows.append([pay_btn])
 
     if subscribe_bonus.is_enabled() and subscribe_bonus.bonus_amount() > 0:
         already = await subscribe_bonus.has_received_subscribe_bonus(
