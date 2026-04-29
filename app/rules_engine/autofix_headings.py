@@ -26,7 +26,17 @@ def _detect_heading_level(paragraph) -> int | None:
 
 
 def _resolve_heading_style(paragraph, level: int):
-    """Get or create the Heading N style in the document."""
+    """Get or create the Heading N style in the document.
+
+    Newly created styles intentionally use ``space_before=0`` /
+    ``space_after=0``: paragraph spacing around chapter headings is
+    governed by the per-paragraph values that ``fix_heading`` /
+    ``promote_to_heading`` set explicitly. Hard-coding 12 pt / 6 pt here
+    used to leak through promoted paragraphs whose direct paragraph
+    properties contained nothing — the inherited style values then
+    rendered as the «extra spacing above and below chapter titles» that
+    reviewers keep flagging.
+    """
     doc = paragraph.part.document
     target_name = f"Heading {level}"
     try:
@@ -38,8 +48,8 @@ def _resolve_heading_style(paragraph, level: int):
     style.quick_style = True
     pf = style.paragraph_format
     pf.keep_with_next = True
-    pf.space_before = Pt(12)
-    pf.space_after = Pt(6)
+    pf.space_before = Pt(0)
+    pf.space_after = Pt(0)
     return style
 
 
@@ -135,6 +145,16 @@ def promote_to_heading(
             run.bold = True
     pf = paragraph.paragraph_format
     pf.first_line_indent = Mm(0)
+
+    target_sb = float(getattr(cfg, "space_before_pt", 0) or 0)
+    target_sa = float(getattr(cfg, "space_after_pt", 0) or 0)
+    pf.space_before = Pt(target_sb)
+    pf.space_after = Pt(target_sa)
+
+    target_ls = float(getattr(cfg, "line_spacing", 1.5) or 1.5)
+    cur_ls = pf.line_spacing
+    if cur_ls is None or abs(float(cur_ls) - target_ls) > 0.05:
+        pf.line_spacing = target_ls
 
     if level == 1 and cfg.heading_level1_center:
         paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
@@ -379,7 +399,22 @@ def _collect_toc_paragraph_elements(doc) -> set:
         content = sdt.find(sdt_content_tag)
         if content is None:
             continue
-        for sub in content.iter(p_tag):
+        # Skip the very first paragraph of the SDT TOC — it's the
+        # «Содержание»/«Оглавление» heading itself. Adding it to
+        # ``toc_elements`` would prevent ``enforce_chapter_page_breaks``
+        # from inserting the page-break before the auto-TOC, which is
+        # exactly the «contents glued to the title page» complaint.
+        sub_paras = list(content.iter(p_tag))
+        first_skipped = False
+        for sub in sub_paras:
+            if not first_skipped:
+                text_norm = "".join(
+                    (t.text or "") for t in sub.iter(qn("w:t"))
+                ).strip().lower().rstrip(":.;")
+                if text_norm in ("содержание", "оглавление"):
+                    first_skipped = True
+                    continue
+                first_skipped = True
             result.add(sub)
     return result
 

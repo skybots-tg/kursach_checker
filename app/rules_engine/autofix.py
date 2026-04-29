@@ -47,6 +47,7 @@ from app.rules_engine.autofix_bibliography import (
     fix_bibliography_order_and_numbering,
 )
 from app.rules_engine.autofix_captions import fix_caption_positions
+from app.rules_engine.autofix_charts import fix_chart_titles_in_zip
 from app.rules_engine.autofix_table_pass import process_table_cells
 from app.rules_engine.autofix_lists import convert_informal_lists
 from app.rules_engine.autofix_toc import insert_toc_field, detect_manual_toc_entry_indices
@@ -464,6 +465,13 @@ def apply_safe_autofixes(
         postprocess_fixed_docx(source, output)
     except Exception:
         logger.warning("Autofix: postprocessing failed for %s, using python-docx output", output)
+
+    if cfg.remove_chart_titles:
+        try:
+            if fix_chart_titles_in_zip(output, details):
+                pass
+        except Exception:
+            logger.exception("Autofix: chart title cleanup failed for %s", output)
 
     if cfg.generate_toc and use_libreoffice_refresh:
         if refresh_fields_via_libreoffice(output, details):

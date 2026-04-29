@@ -38,6 +38,7 @@ class AutoFixConfig:
     fix_bibliography: bool
     fix_caption_positions: bool
     ensure_subheading_spacing: bool
+    remove_chart_titles: bool
     informal_list_markers: list[str]
     informal_list_min_consecutive: int
     section_break_sections: list[str]
@@ -113,6 +114,7 @@ class AutoFixConfig:
             fix_bibliography=_b("fix_bibliography"),
             fix_caption_positions=_b("fix_caption_positions"),
             ensure_subheading_spacing=_b("ensure_subheading_spacing"),
+            remove_chart_titles=_b("remove_chart_titles"),
             informal_list_markers=lfp.get(
                 "informal_list_markers",
                 ["\u00b7", "\u2022", "*", "-", "\u2014", "\u2013"],

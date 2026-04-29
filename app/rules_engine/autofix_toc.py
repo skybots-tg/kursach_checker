@@ -476,6 +476,87 @@ def detect_manual_toc_entry_indices(doc) -> set[int]:
     return set()
 
 
+_TOC_TABLE_MIN_HITS = 3
+
+
+def _table_looks_like_toc(table) -> bool:
+    """Heuristic: does *table* contain a manual TOC?
+
+    A TOC table typically consists of two columns where the left column
+    holds section titles (``Введение``, ``Глава 1.…``, ``1.1.…``,
+    ``Заключение``…) and the right column holds page numbers. We mark
+    the table as a TOC when at least :data:`_TOC_TABLE_MIN_HITS` rows
+    contain a recognisable TOC entry (heading marker, well-known
+    section title or short numeric tail).
+    """
+    rows = list(table.rows)
+    if not rows or len(rows) > 80:
+        return False
+
+    hits = 0
+    for row in rows:
+        cells = list(row.cells)
+        if not cells:
+            continue
+        left_text = (cells[0].text or "").strip()
+        if not left_text:
+            continue
+        if _looks_like_toc_line(left_text):
+            hits += 1
+        if hits >= _TOC_TABLE_MIN_HITS:
+            return True
+    return False
+
+
+def _remove_table_after_heading(doc, heading_para, details: list[str]) -> bool:
+    """If the next sibling element after *heading_para* is a TOC table,
+    detach it and drop any empty paragraphs that sat between the heading
+    and the table.
+
+    Returns True if a TOC table was removed.
+    """
+    body = doc.element.body
+    p_tag = qn("w:p")
+    tbl_tag = qn("w:tbl")
+
+    sibling = heading_para._element.getnext()
+    interim_blanks: list = []
+    while sibling is not None:
+        if sibling.tag == tbl_tag:
+            break
+        if sibling.tag == p_tag:
+            text = "".join(
+                (t.text or "") for t in sibling.iter(qn("w:t"))
+            ).strip()
+            if text:
+                return False
+            interim_blanks.append(sibling)
+            sibling = sibling.getnext()
+            continue
+        return False
+
+    if sibling is None or sibling.tag != tbl_tag:
+        return False
+
+    target_table = None
+    for table in doc.tables:
+        if table._element is sibling:
+            target_table = table
+            break
+    if target_table is None or not _table_looks_like_toc(target_table):
+        return False
+
+    for blank in interim_blanks:
+        if blank.getparent() is not None:
+            blank.getparent().remove(blank)
+
+    sibling.getparent().remove(sibling)
+    details.append(
+        "Оглавление: удалена таблица с ручным оглавлением"
+    )
+    return True
+
+
 def _remove_manual_toc_entries(doc, heading_idx: int, details: list[str]) -> bool:
     """Remove manually typed TOC lines that follow the TOC heading.
 
@@ -537,6 +618,7 @@ def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
         text = (para.text or "").strip()
         if _TOC_HEADING_RE.match(text):
             _remove_manual_toc_entries(doc, idx, details)
+            _remove_table_after_heading(doc, para, details)
             _normalize_existing_toc_heading(para, details)
             return _insert_toc_after(para._element, doc, details)
 
