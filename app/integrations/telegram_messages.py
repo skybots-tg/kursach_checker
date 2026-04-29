@@ -13,26 +13,57 @@ from aiogram.types import FSInputFile, InlineKeyboardMarkup, Message
 from sqlalchemy import select
 
 from app.db.session import SessionLocal
-from app.models import MenuItemMessage
+from app.models import CreditsBalance, MenuItemMessage, User
 from app.services.referrals import build_ref_link
 
 logger = logging.getLogger(__name__)
 
 
 REF_LINK_PLACEHOLDER = "{ref_link}"
+# {credits} — основной вариант, {N} — короткий алиас «количество попыток».
+CREDITS_PLACEHOLDERS: tuple[str, ...] = ("{credits}", "{N}")
 
 
 def message_needs_personalization(msg: MenuItemMessage) -> bool:
     """True, если в тексте сообщения есть подставляемые на лету плейсхолдеры."""
-    return bool(msg.text) and REF_LINK_PLACEHOLDER in msg.text
+    if not msg.text:
+        return False
+    if REF_LINK_PLACEHOLDER in msg.text:
+        return True
+    return any(p in msg.text for p in CREDITS_PLACEHOLDERS)
 
 
-def personalize_text(text: str, *, tg_user_id: int | None) -> str:
-    """Подставить персональные плейсхолдеры в текст сообщения."""
+async def _get_user_credits(tg_user_id: int) -> int:
+    """Прочитать текущий баланс попыток для конкретного Telegram-пользователя."""
+    async with SessionLocal() as db:
+        user = await db.scalar(
+            select(User).where(User.telegram_id == tg_user_id)
+        )
+        if user is None:
+            return 0
+        balance = await db.get(CreditsBalance, user.id)
+        return balance.credits_available if balance else 0
+
+
+async def personalize_text(text: str, *, tg_user_id: int | None) -> str:
+    """Подставить персональные плейсхолдеры в текст сообщения.
+
+    Поддерживаются:
+    * ``{ref_link}`` — личная реферальная ссылка пользователя;
+    * ``{credits}`` и ``{N}`` — текущее количество попыток.
+    """
     if REF_LINK_PLACEHOLDER in text and tg_user_id:
         text = text.replace(
             REF_LINK_PLACEHOLDER, build_ref_link(tg_user_id),
         )
+
+    if any(p in text for p in CREDITS_PLACEHOLDERS):
+        credits_value = (
+            await _get_user_credits(tg_user_id) if tg_user_id else 0
+        )
+        for placeholder in CREDITS_PLACEHOLDERS:
+            text = text.replace(placeholder, str(credits_value))
+
     return text
 
 
@@ -83,7 +114,7 @@ async def _send_new_message(
         mtype = msg.message_type
         text = msg.text or ""
         if text:
-            text = personalize_text(text, tg_user_id=tg_user_id)
+            text = await personalize_text(text, tg_user_id=tg_user_id)
         parse_mode = msg.parse_mode if msg.text else None
         file_input = (
             FSInputFile(msg.file_path)

@@ -22,13 +22,17 @@ from app.integrations.telegram_check_handler import handle_document
 from app.integrations.telegram_constants import (
     CHECK_UPLOAD_NEW_CB,
     START_ITEM_PAYLOAD,
+    SUBSCRIBE_BONUS_PAYLOAD,
+    SUBSCRIBE_CHECK_CB,
 )
 from app.integrations.telegram_messages import send_content_messages
 from app.integrations.telegram_notify import notify_referral_bonus
 from app.integrations.telegram_users import ensure_user, handle_block_status
-from app.models import ContentMenuItem, User
+from app.models import ContentMenuItem, CreditsBalance, User
+from app.services import subscribe_bonus
 from app.services.bot_texts import get_text
 from app.services.referrals import parse_ref_payload
+from app.services.subscribe_bonus import SubscribeOutcome
 
 # Реэкспорт для обратной совместимости — часть кода может импортировать
 # константы из этого модуля.
@@ -122,6 +126,30 @@ async def _build_children_rows(
             keyboard_rows.setdefault(m.row, []).append(btn)
 
     return [keyboard_rows[r] for r in sorted(keyboard_rows.keys())]
+
+
+async def _build_subscribe_keyboard() -> InlineKeyboardMarkup | None:
+    """Inline-клавиатура для пункта меню «бонус за подписку».
+
+    Возвращает None, если фича выключена (нет канала в env) — тогда
+    стандартный поток просто не покажет кнопок, но и пункт меню по
+    идее не должен быть активен.
+    """
+    if not subscribe_bonus.is_enabled():
+        return None
+
+    btn_open = await get_text("subscribe.btn_open")
+    btn_check = await get_text("subscribe.btn_check")
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(
+                text=btn_open, url=subscribe_bonus.channel_link(),
+            )],
+            [InlineKeyboardButton(
+                text=btn_check, callback_data=SUBSCRIBE_CHECK_CB,
+            )],
+        ],
+    )
 
 
 def _nav_row(parent_id: int | None, depth: int) -> list[InlineKeyboardButton]:
@@ -242,6 +270,91 @@ async def _navigate_home(
     _track(chat_id, *sent_ids)
 
 
+async def _handle_subscribe_check(
+    bot: Bot, *, chat_id: int, tg_user_id: int,
+) -> None:
+    """Проверить подписку на канал и при первом успехе начислить бонус.
+
+    Отправляет пользователю отдельное сообщение с результатом
+    (начислено / уже было / нет подписки / ошибка). Старое сообщение
+    с кнопками не трогаем — пусть остаётся для повторной попытки.
+    """
+    if not subscribe_bonus.is_enabled():
+        text = await get_text("subscribe.disabled")
+        sent = await bot.send_message(chat_id, text)
+        _track(chat_id, sent.message_id)
+        return
+
+    outcome = SubscribeOutcome.error
+    new_balance = 0
+
+    async with SessionLocal() as db:
+        user = await db.scalar(
+            select(User).where(User.telegram_id == tg_user_id)
+        )
+        if user is None:
+            text = await get_text("check.need_start")
+            sent = await bot.send_message(chat_id, text)
+            _track(chat_id, sent.message_id)
+            return
+
+        outcome = await subscribe_bonus.try_grant_subscribe_bonus(
+            db, bot, user_id=user.id, telegram_user_id=tg_user_id,
+        )
+
+        if outcome is SubscribeOutcome.granted:
+            balance = await db.get(CreditsBalance, user.id)
+            if balance is not None:
+                new_balance = balance.credits_available
+            await db.commit()
+
+    retry_kb: InlineKeyboardMarkup | None = None
+    parse_mode: str | None = None
+
+    if outcome is SubscribeOutcome.granted:
+        text = await get_text(
+            "subscribe.granted",
+            bonus=subscribe_bonus.bonus_amount(),
+            credits=new_balance,
+        )
+        parse_mode = "HTML"
+    elif outcome is SubscribeOutcome.already_received:
+        text = await get_text("subscribe.already")
+        parse_mode = "HTML"
+    elif outcome is SubscribeOutcome.not_subscribed:
+        text = await get_text(
+            "subscribe.not_subscribed",
+            bonus=subscribe_bonus.bonus_amount(),
+        )
+        retry_kb = await _build_subscribe_retry_keyboard()
+    elif outcome is SubscribeOutcome.disabled:
+        text = await get_text("subscribe.disabled")
+    else:
+        text = await get_text("subscribe.error")
+        retry_kb = await _build_subscribe_retry_keyboard()
+
+    sent = await bot.send_message(
+        chat_id, text, parse_mode=parse_mode, reply_markup=retry_kb,
+    )
+    _track(chat_id, sent.message_id)
+
+
+async def _build_subscribe_retry_keyboard() -> InlineKeyboardMarkup:
+    """Кнопка повторной проверки подписки.
+
+    Используется в ответе на «не вижу подписки» / «не удалось проверить»,
+    чтобы пользователь мог нажать ещё раз без возврата в меню.
+    """
+    btn_check = await get_text("subscribe.btn_check")
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(
+                text=btn_check, callback_data=SUBSCRIBE_CHECK_CB,
+            )],
+        ],
+    )
+
+
 async def _send_upload_prompt(bot: Bot, chat_id: int, tg_user_id: int) -> None:
     """Показать пользователю приглашение загрузить новый файл со счётчиком попыток."""
     await _delete_tracked(bot, chat_id)
@@ -302,9 +415,19 @@ async def _navigate_to_item(
         depth = await _get_item_depth(db, item)
         parent_id = item.parent_id
         item_title = item.title
+        item_payload = item.payload
         children_rows = await _build_children_rows(db, menu_item_id)
 
-    inline_keyboard = list(children_rows)
+    inline_keyboard: list[list[InlineKeyboardButton]] = list(children_rows)
+
+    # Пункт «получи +N за подписку на канал» — стандартных дочерних
+    # пунктов у него нет, мы подмешиваем кнопки «Перейти в канал» и
+    # «Я подписался — проверить» из спецклавиатуры.
+    if item_payload == SUBSCRIBE_BONUS_PAYLOAD:
+        subscribe_kb = await _build_subscribe_keyboard()
+        if subscribe_kb is not None:
+            inline_keyboard.extend(subscribe_kb.inline_keyboard)
+
     inline_keyboard.append(_nav_row(parent_id, depth))
     keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
 
@@ -373,6 +496,19 @@ async def run_bot() -> None:
             return
         await _send_upload_prompt(
             bot, callback.message.chat.id, callback.from_user.id,
+        )
+
+    @dp.callback_query(F.data == SUBSCRIBE_CHECK_CB)
+    async def subscribe_check_callback_handler(
+        callback: CallbackQuery,
+    ) -> None:
+        await callback.answer()
+        if not callback.from_user or not callback.message:
+            return
+        await _handle_subscribe_check(
+            bot,
+            chat_id=callback.message.chat.id,
+            tg_user_id=callback.from_user.id,
         )
 
     @dp.callback_query(F.data.startswith("menu_"))

@@ -2,11 +2,15 @@ import logging
 from pathlib import Path
 
 from aiogram import Bot
-from aiogram.types import Message
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from sqlalchemy import select
 
 from app.core.config import settings
 from app.db.session import SessionLocal
+from app.integrations.telegram_constants import (
+    REFERRAL_PAYLOAD,
+    SUBSCRIBE_BONUS_PAYLOAD,
+)
 from app.models import (
     Check,
     CheckStatus,
@@ -18,6 +22,7 @@ from app.models import (
     TemplateVersion,
     User,
 )
+from app.services import subscribe_bonus
 from app.services.bot_texts import get_text
 from app.storage.files import save_raw_file
 from app.workers.tasks import enqueue_check
@@ -63,8 +68,13 @@ async def handle_document(message: Message, bot: Bot) -> None:
 
         credits = await db.get(CreditsBalance, user.id)
         if not credits or credits.credits_available < 1:
+            kb = await _build_no_credits_keyboard(db, user.id)
+            text = await get_text(
+                "check.no_credits",
+                subscribe_bonus=subscribe_bonus.bonus_amount(),
+            )
             await message.reply(
-                await get_text("check.no_credits"), parse_mode="HTML",
+                text, parse_mode="HTML", reply_markup=kb,
             )
             return
 
@@ -113,6 +123,50 @@ async def handle_document(message: Message, bot: Bot) -> None:
 
     await enqueue_check(check_id)
     await status_msg.edit_text(await get_text("check.queued"))
+
+
+async def _build_no_credits_keyboard(
+    db, user_id: int,
+) -> InlineKeyboardMarkup | None:
+    """Inline-клавиатура к сообщению «закончились попытки».
+
+    На ней две кнопки получения бесплатных кредитов:
+    * «+N за подписку на канал» — только если фича включена и бонус ещё не
+      получен (повторно показывать смысла нет);
+    * «+1 за друга» — всегда, реф-программа не имеет лимита.
+    """
+    rows: list[list[InlineKeyboardButton]] = []
+
+    if subscribe_bonus.is_enabled() and subscribe_bonus.bonus_amount() > 0:
+        already = await subscribe_bonus.has_received_subscribe_bonus(
+            db, user_id,
+        )
+        if not already:
+            label = await get_text(
+                "check.no_credits_btn_subscribe",
+                bonus=subscribe_bonus.bonus_amount(),
+            )
+            rows.append([
+                InlineKeyboardButton(
+                    text=label, callback_data=SUBSCRIBE_BONUS_PAYLOAD,
+                ),
+            ])
+
+    referral_label = await get_text("check.no_credits_btn_referral")
+    rows.append([
+        InlineKeyboardButton(
+            text=referral_label, callback_data=REFERRAL_PAYLOAD,
+        ),
+    ])
+
+    home_label = await get_text("check.no_credits_btn_home")
+    rows.append([
+        InlineKeyboardButton(
+            text=home_label, callback_data="nav_home",
+        ),
+    ])
+
+    return InlineKeyboardMarkup(inline_keyboard=rows) if rows else None
 
 
 async def _get_default_template_version(db) -> TemplateVersion | None:

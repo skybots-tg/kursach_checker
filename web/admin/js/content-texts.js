@@ -291,6 +291,11 @@ function messageFormHtml(msg) {
         </div>
         <textarea class="form-textarea" id="msg-text" rows="5" oninput="updateMsgPreview()">${escHtml(msg?.text || '')}</textarea>
         <div class="form-hint">Поддерживается HTML: &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;a href="..."&gt;</div>
+        <div class="form-hint">
+          Доступные переменные:
+          <code>{ref_link}</code> — персональная реф-ссылка пользователя,
+          <code>{credits}</code> или <code>{N}</code> — количество оставшихся попыток.
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">Предпросмотр</label>

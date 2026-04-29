@@ -1,0 +1,406 @@
+{
+  "summary": {
+    "errors": 4,
+    "warnings": 4,
+    "fixed": 29,
+    "size": 24901
+  },
+  "findings": [
+    {
+      "title": "Определение курса",
+      "category": "context_extraction",
+      "severity": "warning",
+      "expected": "Курс работы определяется из содержимого документа",
+      "found": "Не удалось определить курс автоматически",
+      "location": "титульный лист/документ",
+      "recommendation": "Добавьте явное указание курса на титульном листе",
+      "auto_fixed": false
+    },
+    {
+      "title": "Определение формата работы",
+      "category": "work_formats",
+      "severity": "warning",
+      "expected": "Один из форматов: академический",
+      "found": "Не удалось определить формат по структуре",
+      "location": "структура",
+      "recommendation": "Проверьте названия ключевых разделов или задайте формат вручную",
+      "auto_fixed": false
+    },
+    {
+      "title": "Выравнивание текста",
+      "category": "typography",
+      "severity": "warning",
+      "expected": "По ширине",
+      "found": "По левому краю (унаследовано)",
+      "location": "абзац #2",
+      "recommendation": "Выровняйте основной текст по ширине",
+      "auto_fixed": true
+    },
+    {
+      "title": "Выравнивание текста",
+      "category": "typography",
+      "severity": "warning",
+      "expected": "По ширине",
+      "found": "По левому краю (унаследовано)",
+      "location": "абзац #3",
+      "recommendation": "Выровняйте основной текст по ширине",
+      "auto_fixed": true
+    },
+    {
+      "title": "Выравнивание текста",
+      "category": "typography",
+      "severity": "warning",
+      "expected": "По ширине",
+      "found": "По левому краю (унаследовано)",
+      "location": "абзац #5",
+      "recommendation": "Выровняйте основной текст по ширине",
+      "auto_fixed": true
+    },
+    {
+      "title": "Выравнивание текста",
+      "category": "typography",
+      "severity": "warning",
+      "expected": "По ширине",
+      "found": "По левому краю (унаследовано)",
+      "location": "абзац #6",
+      "recommendation": "Выровняйте основной текст по ширине",
+      "auto_fixed": true
+    },
+    {
+      "title": "Выравнивание текста",
+      "category": "typography",
+      "severity": "warning",
+      "expected": "По ширине",
+      "found": "По левому краю (унаследовано)",
+      "location": "абзац #7",
+      "recommendation": "Выровняйте основной текст по ширине",
+      "auto_fixed": true
+    },
+    {
+      "title": "Выравнивание текста",
+      "category": "typography",
+      "severity": "warning",
+      "expected": "По ширине",
+      "found": "По левому краю (унаследовано)",
+      "location": "абзац #8",
+      "recommendation": "Выровняйте основной текст по ширине",
+      "auto_fixed": true
+    },
+    {
+      "title": "Выравнивание текста",
+      "category": "typography",
+      "severity": "warning",
+      "expected": "По ширине",
+      "found": "По левому краю (унаследовано)",
+      "location": "абзац #9",
+      "recommendation": "Выровняйте основной текст по ширине",
+      "auto_fixed": true
+    },
+    {
+      "title": "Выравнивание текста",
+      "category": "typography",
+      "severity": "warning",
+      "expected": "По ширине",
+      "found": "По левому краю (унаследовано)",
+      "location": "абзац #10",
+      "recommendation": "Выровняйте основной текст по ширине",
+      "auto_fixed": true
+    },
+    {
+      "title": "Выравнивание текста",
+      "category": "typography",
+      "severity": "warning",
+      "expected": "По ширине",
+      "found": "По левому краю (унаследовано)",
+      "location": "абзац #11",
+      "recommendation": "Выровняйте основной текст по ширине",
+      "auto_fixed": true
+    },
+    {
+      "title": "Выравнивание текста",
+      "category": "typography",
+      "severity": "warning",
+      "expected": "По ширине",
+      "found": "По левому краю (унаследовано)",
+      "location": "абзац #12",
+      "recommendation": "Выровняйте основной текст по ширине",
+      "auto_fixed": true
+    },
+    {
+      "title": "Типографика: выравнивание — ещё замечания",
+      "category": "typography",
+      "severity": "advice",
+      "expected": "",
+      "found": "Показаны первые 10 замечаний, проблема массовая",
+      "location": "весь документ",
+      "recommendation": "Выделите весь текст и установите единое форматирование",
+      "auto_fixed": false
+    },
+    {
+      "title": "Раздел «введение»",
+      "category": "structure",
+      "severity": "error",
+      "expected": "Наличие раздела: введение",
+      "found": "Не найден",
+      "location": "структура",
+      "recommendation": "Добавьте обязательный раздел в документ",
+      "auto_fixed": false
+    },
+    {
+      "title": "Раздел «основная часть»",
+      "category": "structure",
+      "severity": "error",
+      "expected": "Наличие раздела: основная часть",
+      "found": "Не найден",
+      "location": "структура",
+      "recommendation": "Добавьте обязательный раздел в документ",
+      "auto_fixed": false
+    },
+    {
+      "title": "Раздел «заключение»",
+      "category": "structure",
+      "severity": "error",
+      "expected": "Наличие раздела: заключение",
+      "found": "Не найден",
+      "location": "структура",
+      "recommendation": "Добавьте обязательный раздел в документ",
+      "auto_fixed": false
+    },
+    {
+      "title": "Раздел «список использованных источников»",
+      "category": "structure",
+      "severity": "error",
+      "expected": "Наличие раздела: список использованных источников, список литературы",
+      "found": "Не найден",
+      "location": "структура",
+      "recommendation": "Добавьте обязательный раздел в документ",
+      "auto_fixed": false
+    },
+    {
+      "title": "Раздел источников",
+      "category": "bibliography",
+      "severity": "warning",
+      "expected": "В документе присутствует раздел со списком источников",
+      "found": "Не найден",
+      "location": "структура",
+      "recommendation": "Добавьте раздел со списком литературы",
+      "auto_fixed": false
+    },
+    {
+      "title": "Нумерация страниц",
+      "category": "page_numbering",
+      "severity": "warning",
+      "expected": "Нумерация страниц присутствует",
+      "found": "Нумерация страниц не обнаружена",
+      "location": "колонтитулы",
+      "recommendation": "Добавьте нумерацию страниц в нижний колонтитул",
+      "auto_fixed": false
+    },
+    {
+      "title": "Оглавление",
+      "category": "toc",
+      "severity": "warning",
+      "expected": "Автоматическое оглавление присутствует",
+      "found": "Оглавление не обнаружено",
+      "location": "структура",
+      "recommendation": "Добавьте автоматическое оглавление (поле TOC) в документ. Убедитесь, что заголовки размечены стилями Word «Заголовок 1/2/3»",
+      "auto_fixed": true
+    },
+    {
+      "title": "Посторонние символы",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Текст содержит только стандартные символы",
+      "found": "Обнаружены символы: U+AE30, U+B2F4, U+B3D9, U+B798, U+BBFC",
+      "location": "абзац #2",
+      "recommendation": "Удалите или замените нестандартные символы",
+      "auto_fixed": true
+    },
+    {
+      "title": "Посторонние символы",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Текст содержит только стандартные символы",
+      "found": "Обнаружены символы: U+AC00, U+AC08, U+ACE0, U+ACE1, U+AD50",
+      "location": "абзац #6",
+      "recommendation": "Удалите или замените нестандартные символы",
+      "auto_fixed": true
+    },
+    {
+      "title": "Посторонние символы",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Текст содержит только стандартные символы",
+      "found": "Обнаружены символы: U+AE30, U+C57C, U+C61B, U+C774",
+      "location": "абзац #7",
+      "recommendation": "Удалите или замените нестандартные символы",
+      "auto_fixed": true
+    },
+    {
+      "title": "Посторонние символы",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Текст содержит только стандартные символы",
+      "found": "Обнаружены символы: U+C124, U+D654",
+      "location": "абзац #9",
+      "recommendation": "Удалите или замените нестандартные символы",
+      "auto_fixed": true
+    },
+    {
+      "title": "Посторонние символы",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Текст содержит только стандартные символы",
+      "found": "Обнаружены символы: U+B2F4, U+BBFC, U+C124, U+C2E0, U+C804",
+      "location": "абзац #11",
+      "recommendation": "Удалите или замените нестандартные символы",
+      "auto_fixed": true
+    },
+    {
+      "title": "Посторонние символы",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Текст содержит только стандартные символы",
+      "found": "Обнаружены символы: U+C124, U+C804",
+      "location": "абзац #12",
+      "recommendation": "Удалите или замените нестандартные символы",
+      "auto_fixed": true
+    },
+    {
+      "title": "Посторонние символы",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Текст содержит только стандартные символы",
+      "found": "Обнаружены символы: U+B2F4, U+BBFC",
+      "location": "абзац #13",
+      "recommendation": "Удалите или замените нестандартные символы",
+      "auto_fixed": true
+    },
+    {
+      "title": "Посторонние символы",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Текст содержит только стандартные символы",
+      "found": "Обнаружены символы: U+B3D9, U+D654",
+      "location": "абзац #15",
+      "recommendation": "Удалите или замените нестандартные символы",
+      "auto_fixed": true
+    },
+    {
+      "title": "Посторонние символы",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Текст содержит только стандартные символы",
+      "found": "Обнаружены символы: U+B3D9, U+B798, U+C804, U+D654",
+      "location": "абзац #16",
+      "recommendation": "Удалите или замените нестандартные символы",
+      "auto_fixed": true
+    },
+    {
+      "title": "Посторонние символы",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Текст содержит только стандартные символы",
+      "found": "Обнаружены символы: U+B3D9, U+D654",
+      "location": "абзац #17",
+      "recommendation": "Удалите или замените нестандартные символы",
+      "auto_fixed": true
+    },
+    {
+      "title": "Посторонние символы — ещё замечания",
+      "category": "text_cleanliness",
+      "severity": "advice",
+      "expected": "",
+      "found": "Показаны первые 10, проблема массовая",
+      "location": "весь документ",
+      "recommendation": "Проверьте весь документ на посторонние символы",
+      "auto_fixed": false
+    },
+    {
+      "title": "Длинное тире (—)",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Среднее тире (–) вместо длинного (—)",
+      "found": "Обнаружено длинное тире (—) — признак ИИ-генерации",
+      "location": "абзац #6",
+      "recommendation": "Замените длинное тире (—) на среднее (–)",
+      "auto_fixed": true
+    },
+    {
+      "title": "Длинное тире (—)",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Среднее тире (–) вместо длинного (—)",
+      "found": "Обнаружено длинное тире (—) — признак ИИ-генерации",
+      "location": "абзац #7",
+      "recommendation": "Замените длинное тире (—) на среднее (–)",
+      "auto_fixed": true
+    },
+    {
+      "title": "Длинное тире (—)",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Среднее тире (–) вместо длинного (—)",
+      "found": "Обнаружено длинное тире (—) — признак ИИ-генерации",
+      "location": "абзац #11",
+      "recommendation": "Замените длинное тире (—) на среднее (–)",
+      "auto_fixed": true
+    },
+    {
+      "title": "Длинное тире (—)",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Среднее тире (–) вместо длинного (—)",
+      "found": "Обнаружено длинное тире (—) — признак ИИ-генерации",
+      "location": "абзац #15",
+      "recommendation": "Замените длинное тире (—) на среднее (–)",
+      "auto_fixed": true
+    },
+    {
+      "title": "Длинное тире (—)",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Среднее тире (–) вместо длинного (—)",
+      "found": "Обнаружено длинное тире (—) — признак ИИ-генерации",
+      "location": "абзац #25",
+      "recommendation": "Замените длинное тире (—) на среднее (–)",
+      "auto_fixed": true
+    },
+    {
+      "title": "Длинное тире (—)",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Среднее тире (–) вместо длинного (—)",
+      "found": "Обнаружено длинное тире (—) — признак ИИ-генерации",
+      "location": "абзац #38",
+      "recommendation": "Замените длинное тире (—) на среднее (–)",
+      "auto_fixed": true
+    },
+    {
+      "title": "Длинное тире (—)",
+      "category": "text_cleanliness",
+      "severity": "warning",
+      "expected": "Среднее тире (–) вместо длинного (—)",
+      "found": "Обнаружено длинное тире (—) — признак ИИ-генерации",
+      "location": "абзац #47",
+      "recommendation": "Замените длинное тире (—) на среднее (–)",
+      "auto_fixed": true
+    },
+    {
+      "title": "Автоисправления",
+      "category": "autofix",
+      "severity": "advice",
+      "expected": "",
+      "found": "",
+      "location": "документ",
+      "recommendation": "Скачайте исправленный DOCX",
+      "auto_fixed": true,
+      "auto_fix_details": "Стили: интервал по умолчанию -> 1.5, после абзаца 0.0 пт; Стили: цвет шрифта -> чёрный; Стили: курсив убран; Нумерация: маркеры -> дефис; Абзац #2: посторонние символы убраны; Абзац #6: посторонние символы убраны; Абзац #7: посторонние символы убраны; Абзац #9: посторонние символы убраны; Абзац #11: посторонние символы убраны; Абзац #12: посторонние символы убраны; Абзац #13: посторонние символы убраны; Абзац #15: посторонние символы убраны; Абзац #16: посторонние символы убраны; Абзац #17: посторонние символы убраны; Абзац #19: посторонние символы убраны; Абзац #20: посторонние символы убраны; Абзац #21: посторонние символы убраны; Абзац #22: посторонние символы убраны; Абзац #23: посторонние символы убраны; Абзац #24: посторонние символы убраны; Абзац #25: посторонние символы убраны; Абзац #26: посторонние символы убраны; Абзац #31: посторонние символы убраны; Абзац #36: посторонние символы убраны; Абзац #41: посторонние символы убраны; Абзац #43: посторонние символы убраны; Абзац #45: посторонние символы убраны; Абзац #48: посторонние символы убраны; Абзац #49: посторонние символы убраны; Абзац #57: посторонние символы убраны"
+    }
+  ],
+  "rules_meta": {
+    "blocks_count": 23
+  },
+  "output_docx_path": "C:\\Users\\Dmitry\\Telegram Bots\\kursach_checker\\tmp_check.fixed.docx",
+  "check_errors": []
+}

@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     telegram_bot_username: str = ""
     telegram_auth_max_age_sec: int = 86400
 
+    # Бонус за подписку на канал (необязательно). Если задан username канала
+    # и бот добавлен туда как администратор, у пользователя появляется
+    # кнопка «Получить +N за подписку», бонус выдаётся один раз.
+    subscribe_bonus_channel_username: str = ""
+    subscribe_bonus_amount: int = 2
+
     prodamus_secret_key: str = ""
     prodamus_payform_url: str = "https://payform.prodamus.ru"
     prodamus_timeout_sec: int = 30
