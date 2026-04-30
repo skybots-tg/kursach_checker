@@ -14,6 +14,7 @@ from app.rules_engine.autofix_headings import (
     ensure_blank_before_subheadings,
     enforce_chapter_page_breaks,
     enforce_heading_bold,
+    enforce_heading_font,
     enforce_subheading_alignment,
     fix_heading as _fix_heading,
     fix_remove_underline,
@@ -21,6 +22,7 @@ from app.rules_engine.autofix_headings import (
 )
 from app.rules_engine.autofix_helpers import (
     clamp_overflow_table_widths,
+    enforce_run_font,
     fix_caption_trailing_dot,
     fix_dashes_in_text,
     fix_font_color_runs,
@@ -392,13 +394,27 @@ def apply_safe_autofixes(
                 if is_field_code_run(run):
                     continue
                 eff_name = effective_font_name(run, paragraph)
-                if cfg.font_name and eff_name and eff_name != cfg.font_name:
-                    run.font.name = cfg.font_name
-                    font_changed = True
                 eff_size = effective_font_size_pt(run, paragraph)
-                if eff_size is not None and abs(eff_size - cfg.font_size_pt) > 0.2:
-                    run.font.size = Pt(cfg.font_size_pt)
-                    font_changed = True
+                # eff_name=None означает, что шрифт задан только через тему
+                # (asciiTheme / docDefaults), что в pandoc-выгрузках почти
+                # всегда Calibri. eff_size=None — размер только из docDefaults
+                # (обычно 12pt). В обоих случаях нужно принудительно проставить
+                # целевой шрифт/размер во все семейства, включая w:eastAsia,
+                # иначе CJK-символы продолжат рендериться Calibri 12pt.
+                need_font = bool(cfg.font_name) and (
+                    not eff_name or eff_name != cfg.font_name
+                )
+                need_size = (
+                    eff_size is None
+                    or abs(eff_size - cfg.font_size_pt) > 0.2
+                )
+                if need_font or need_size:
+                    if enforce_run_font(
+                        run,
+                        cfg.font_name if need_font else "",
+                        cfg.font_size_pt if need_size else None,
+                    ):
+                        font_changed = True
             if font_changed:
                 changed = True
                 para_touched = True
@@ -438,6 +454,7 @@ def apply_safe_autofixes(
     changed |= normalize_source_line_spacing(doc, details)
     changed |= enforce_subheading_alignment(doc, cfg, details)
     changed |= enforce_heading_bold(doc, cfg, details)
+    changed |= enforce_heading_font(doc, cfg, details)
     if cfg.fix_section_breaks and enforce_chapter_page_breaks(doc, details):
         changed = True
     if cfg.ensure_subheading_spacing and ensure_blank_before_subheadings(doc, details):

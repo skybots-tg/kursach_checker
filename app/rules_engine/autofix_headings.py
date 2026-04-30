@@ -9,7 +9,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
-from app.rules_engine.autofix_helpers import is_field_code_run
+from app.rules_engine.autofix_helpers import enforce_run_font, is_field_code_run
 from app.rules_engine.autofix_para_classify import is_heading_para
 from app.rules_engine.style_resolve import detect_toc_paragraph_indices
 
@@ -80,12 +80,7 @@ def fix_heading(paragraph, idx: int, cfg, details: list[str]) -> bool:
     for run in paragraph.runs:
         if is_field_code_run(run):
             continue
-        if cfg.heading_font and run.font.name != cfg.heading_font:
-            run.font.name = cfg.heading_font
-            changed = True
-        size_pt = float(run.font.size.pt) if run.font.size else None
-        if size_pt is None or abs(size_pt - cfg.heading_size_pt) > 0.2:
-            run.font.size = Pt(cfg.heading_size_pt)
+        if enforce_run_font(run, cfg.heading_font, cfg.heading_size_pt):
             changed = True
         if cfg.heading_bold and not run.bold:
             run.bold = True
@@ -138,9 +133,7 @@ def promote_to_heading(
     for run in paragraph.runs:
         if is_field_code_run(run):
             continue
-        if cfg.heading_font:
-            run.font.name = cfg.heading_font
-        run.font.size = Pt(cfg.heading_size_pt)
+        enforce_run_font(run, cfg.heading_font, cfg.heading_size_pt)
         if cfg.heading_bold:
             run.bold = True
     pf = paragraph.paragraph_format
@@ -592,6 +585,48 @@ def enforce_heading_bold(doc, cfg, details: list[str]) -> bool:
     if changed:
         details.append(
             f"Заголовки: {changed} заголовок(ов) переведено в полужирный"
+        )
+    return changed > 0
+
+
+def enforce_heading_font(doc, cfg, details: list[str]) -> bool:
+    """Жёстко проставить шрифт и размер всем runs заголовков.
+
+    Аналог ``enforce_heading_bold``. Работает независимо от safety-флага
+    ``skip_headings``, потому что унаследованные стили заголовков в
+    pandoc-выгрузках обычно используют majorHAnsi (Cambria) и крупные
+    кегли (16/14/12pt с цветом темы), а клиент требует Times New Roman
+    14pt. Заодно гарантирует, что у CJK-символов внутри заголовка
+    проставлен ``w:eastAsia`` — без этого они продолжали бы рендериться
+    Calibri через тему.
+    """
+    if not getattr(cfg, "normalize_font", True):
+        return False
+    target_font = getattr(cfg, "heading_font", "") or ""
+    target_size = float(getattr(cfg, "heading_size_pt", 0) or 0)
+    if not target_font and target_size <= 0:
+        return False
+
+    toc_elems = _collect_toc_paragraph_elements(doc)
+    changed = 0
+    for para in doc.paragraphs:
+        if para._element in toc_elems:
+            continue
+        level = _para_heading_level(para)
+        if level is None:
+            continue
+        touched = False
+        for run in para.runs:
+            if is_field_code_run(run):
+                continue
+            if enforce_run_font(run, target_font, target_size or None):
+                touched = True
+        if touched:
+            changed += 1
+    if changed:
+        details.append(
+            f"Заголовки: шрифт/размер выровнены ({target_font} {target_size:g} пт) "
+            f"в {changed} заголовке(ах)"
         )
     return changed > 0
 

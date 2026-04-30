@@ -139,11 +139,37 @@ def _walk_style_rPr(run, paragraph):
             break
 
 
+def _doc_defaults_rPr(paragraph):
+    """Найти ``w:rPr`` из ``docDefaults`` для документа параграфа."""
+    try:
+        styles_el = paragraph.part.document.styles.element
+    except (AttributeError, TypeError):
+        return None
+    doc_defaults = styles_el.find(qn("w:docDefaults"))
+    if doc_defaults is None:
+        return None
+    rPrDefault = doc_defaults.find(qn("w:rPrDefault"))
+    if rPrDefault is None:
+        return None
+    return rPrDefault.find(qn("w:rPr"))
+
+
 def effective_font_name(run, paragraph) -> str | None:
     if run.font.name is not None:
         return run.font.name
     for rPr in _walk_style_rPr(run, paragraph):
         rFonts = rPr.find(qn("w:rFonts"))
+        if rFonts is not None:
+            for attr in ("w:ascii", "w:hAnsi"):
+                val = rFonts.get(qn(attr))
+                if val:
+                    return val
+    # docDefaults — последний рубеж. Если шрифт задан только через тему
+    # (asciiTheme), вернуть None: вызывающая сторона трактует это как
+    # «шрифт не указан явно» и форсит правильный.
+    default_rPr = _doc_defaults_rPr(paragraph)
+    if default_rPr is not None:
+        rFonts = default_rPr.find(qn("w:rFonts"))
         if rFonts is not None:
             for attr in ("w:ascii", "w:hAnsi"):
                 val = rFonts.get(qn(attr))
@@ -157,6 +183,13 @@ def effective_font_size_pt(run, paragraph) -> float | None:
         return float(run.font.size.pt)
     for rPr in _walk_style_rPr(run, paragraph):
         sz = rPr.find(qn("w:sz"))
+        if sz is not None:
+            val = sz.get(qn("w:val"))
+            if val:
+                return float(val) / 2.0
+    default_rPr = _doc_defaults_rPr(paragraph)
+    if default_rPr is not None:
+        sz = default_rPr.find(qn("w:sz"))
         if sz is not None:
             val = sz.get(qn("w:val"))
             if val:

@@ -55,6 +55,78 @@ def is_field_code_run(run) -> bool:
         or elem.find(qn("w:instrText")) is not None
     )
 
+
+_FONT_FAMILY_ATTRS = ("w:ascii", "w:hAnsi", "w:eastAsia", "w:cs")
+_FONT_THEME_ATTRS = (
+    "w:asciiTheme",
+    "w:hAnsiTheme",
+    "w:eastAsiaTheme",
+    "w:cstheme",
+)
+
+
+def _get_or_create_rPr(run_elem):
+    rPr = run_elem.find(qn("w:rPr"))
+    if rPr is None:
+        rPr = OxmlElement("w:rPr")
+        run_elem.insert(0, rPr)
+    return rPr
+
+
+def enforce_run_font(run, font_name: str, font_size_pt: float | None) -> bool:
+    """Жёстко проставить шрифт и размер на ран.
+
+    python-docx ставит ``run.font.name`` только в ``w:ascii``/``w:hAnsi`` и не
+    трогает ``w:eastAsia``/``w:cs`` и ``*Theme``-атрибуты. В docx, выгруженных
+    через Pandoc, шрифт обычно задан через тему (``asciiTheme="minorHAnsi"`` ≈
+    Calibri), поэтому Word продолжает рендерить текст Calibri даже после
+    стандартной правки. Для CJK-символов это критично: они идут по
+    ``eastAsia``-шрифту, который остаётся темным по умолчанию.
+
+    Эта функция:
+      * прописывает имя шрифта во все четыре семейства (``ascii``/``hAnsi``/
+        ``eastAsia``/``cs``);
+      * удаляет theme-атрибуты, иначе они перебивают явные имена;
+      * проставляет ``w:sz`` и ``w:szCs`` (последний влияет на CJK/complex
+        scripts).
+    """
+    if is_field_code_run(run):
+        return False
+    if not font_name and font_size_pt is None:
+        return False
+
+    changed = False
+    rPr = _get_or_create_rPr(run._element)
+    rFonts = rPr.find(qn("w:rFonts"))
+
+    if font_name:
+        if rFonts is None:
+            rFonts = OxmlElement("w:rFonts")
+            rPr.insert(0, rFonts)
+            changed = True
+        for attr in _FONT_FAMILY_ATTRS:
+            if rFonts.get(qn(attr)) != font_name:
+                rFonts.set(qn(attr), font_name)
+                changed = True
+        for attr in _FONT_THEME_ATTRS:
+            if rFonts.get(qn(attr)) is not None:
+                del rFonts.attrib[qn(attr)]
+                changed = True
+
+    if font_size_pt is not None:
+        target = str(int(round(font_size_pt * 2)))
+        for tag in ("w:sz", "w:szCs"):
+            sz = rPr.find(qn(tag))
+            if sz is None:
+                sz = OxmlElement(tag)
+                rPr.append(sz)
+                sz.set(qn("w:val"), target)
+                changed = True
+            elif sz.get(qn("w:val")) != target:
+                sz.set(qn("w:val"), target)
+                changed = True
+    return changed
+
 def is_manual_list_para(text: str) -> bool:
     stripped = text.lstrip()
     if not stripped:
