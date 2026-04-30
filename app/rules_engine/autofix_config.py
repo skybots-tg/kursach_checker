@@ -55,6 +55,8 @@ class AutoFixConfig:
     heading_bold: bool
     heading_level1_center: bool
     heading_level2plus_center: bool
+    consolidate_appendix: bool
+    appendix_consolidation: str
 
     @classmethod
     def from_rules(cls, rules: dict | None, admin_defaults: dict | None = None) -> "AutoFixConfig":
@@ -138,4 +140,9 @@ class AutoFixConfig:
             heading_level2plus_center=str(
                 hp.get("level2plus_alignment", "CENTER")
             ).upper() == "CENTER",
+            consolidate_appendix=_b("consolidate_appendix"),
+            appendix_consolidation=str(
+                p.get("appendix_consolidation",
+                      ad.get("appendix_consolidation", "plural_only"))
+            ).strip().lower() or "plural_only",
         )

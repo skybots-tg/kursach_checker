@@ -211,6 +211,20 @@ def fix_bibliography_order_and_numbering(
                 entries[-1]["idxs"].append(idx)
                 entries[-1]["text"] = entries[-1]["text"] + " " + text
 
+    # Fallback: when the bibliography is completely un-numbered (typical
+    # student manuscript that just lists references one per paragraph
+    # without «1. 2. 3.» prefixes), the loop above produces zero
+    # entries. Treat every non-trivial paragraph in the bibliography
+    # range as a separate entry so we still sort and number them — this
+    # is exactly the customer complaint «список литературы не по
+    # алфавиту и не под цифрами».
+    if not entries:
+        for idx in range(start, end):
+            text = (paragraphs[idx].text or "").strip()
+            if len(text) < 10:
+                continue
+            entries.append({"idxs": [idx], "text": text})
+
     if len(entries) < 2:
         return False
 
@@ -278,21 +292,38 @@ def fix_bibliography_order_and_numbering(
 
     _, s2, e2 = rng2
     num = 1
+    # Track which paragraph indices are entry "heads" (first paragraph of
+    # an entry that should receive the new number). With our fallback
+    # path most entries won't match _NUMBERED_ENTRY_RE pre-renumbering,
+    # so we treat the **first** non-trivial paragraph after a blank gap
+    # as a head. After at least one numbered entry exists, subsequent
+    # non-numbered short paragraphs are kept as continuation.
+    prev_blank = True
     for idx in range(s2, e2):
         text = (refreshed[idx].text or "").strip()
         if not text:
+            prev_blank = True
             continue
-        if not _NUMBERED_ENTRY_RE.match(text):
+        is_numbered = bool(_NUMBERED_ENTRY_RE.match(text))
+        # Heuristic for un-numbered entries: a head is a paragraph that
+        # either matches _NUMBERED_ENTRY_RE OR is reasonably long
+        # (≥ 25 chars) — short fragments under that threshold are
+        # treated as continuation of the previous entry.
+        is_head = is_numbered or (prev_blank and len(text) >= 25) or len(text) >= 25
+        if not is_head:
+            prev_blank = False
             continue
         clean = _strip_number_prefix(text)
         clean = _NUM_PREFIX_RE.sub("", clean).strip()
         new_text = f"{num}. {clean}"
         _set_paragraph_text(refreshed[idx], new_text)
         num += 1
+        prev_blank = False
 
-    details.append(
-        f"Библиография: источники пронумерованы 1–{num - 1}"
-    )
+    if num > 1:
+        details.append(
+            f"Библиография: источники пронумерованы 1–{num - 1}"
+        )
     return True
 
 

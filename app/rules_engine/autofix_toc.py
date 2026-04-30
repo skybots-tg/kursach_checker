@@ -72,6 +72,44 @@ def _get_heading_level(para) -> int | None:
     return None
 
 
+_APPENDIX_PARENT_RE = re.compile(
+    r"^приложени[еяй]\s*[:.\u2014\u2013-]?\s*$",
+    re.IGNORECASE,
+)
+_APPENDIX_CHILD_RE = re.compile(
+    r"^приложени[еяй]\s+[\dА-ЯЁA-Z][\)\.\s\u2014\u2013-]?",
+    re.IGNORECASE,
+)
+
+
+def _filter_appendix_children_after_parent(
+    headings: list[tuple[str, int]],
+) -> list[tuple[str, int]]:
+    """Drop every «Приложение N» entry that follows a plural «Приложения»
+    parent so the table of contents shows the single canonical
+    «ПРИЛОЖЕНИЯ» line and not a numbered list under it.
+
+    The customer-approved layout collapses the appendix block into one
+    TOC entry. This filter is the last line of defence: it runs even
+    when the body-side ``consolidate_appendix_block`` pass could not
+    demote the children (e.g. they were already real Heading 1
+    paragraphs with custom formatting we did not want to touch).
+    """
+    seen_parent = False
+    out: list[tuple[str, int]] = []
+    for text, level in headings:
+        stripped = text.strip()
+        if _APPENDIX_PARENT_RE.match(stripped):
+            seen_parent = True
+            out.append((text, level))
+            continue
+        if seen_parent and _APPENDIX_CHILD_RE.match(stripped):
+            # Suppressed: collapsed into the «ПРИЛОЖЕНИЯ» entry above.
+            continue
+        out.append((text, level))
+    return out
+
+
 def _collect_headings(doc) -> list[tuple[str, int]]:
     """Return ``[(text, level), ...]`` for headings up to ``_MAX_TOC_LEVEL``."""
     headings: list[tuple[str, int]] = []
@@ -83,7 +121,7 @@ def _collect_headings(doc) -> list[tuple[str, int]]:
         if not text or _TOC_HEADING_RE.match(text):
             continue
         headings.append((text, level))
-    return headings
+    return _filter_appendix_children_after_parent(headings)
 
 
 # ── XML builders ──────────────────────────────────────────────────────
@@ -639,6 +677,135 @@ def _remove_manual_toc_entries(doc, heading_idx: int, details: list[str]) -> boo
     return len(to_remove) > 0
 
 
+_RESIDUAL_TOC_BULLET_RE = re.compile(
+    r"^[\s\xa0]*[\-\u2013\u2014\u2022\u00b7][\s\xa0]+",
+    re.UNICODE,
+)
+_RESIDUAL_TOC_KNOWN_TITLE_RE = re.compile(
+    r"^[\s\xa0]*(?:список\s+(?:использован|используем|литератур|источник|терминов|сокращ)"
+    r"|библиограф|приложени[еяй]|список\s+терминов|список\s+сокращ"
+    r"|термин(?:ы|ов)?|сокращ(?:ения|ений)?|глоссарий|abbreviation|terminolog)",
+    re.IGNORECASE | re.UNICODE,
+)
+# Heuristic: short Title-cased paragraph that ends with «.» — almost
+# certainly a one-word TOC entry leftover («Термины.», «Глоссарий.»,
+# «Список сокращений.»). Body paragraphs are virtually never that short.
+_RESIDUAL_TOC_SHORT_TITLE_RE = re.compile(
+    r"^[\s\xa0]*[А-ЯЁA-Z][А-ЯЁа-яёA-Za-z\s\xa0\-]{1,40}\.?[\s\xa0]*$",
+    re.UNICODE,
+)
+_BODY_CHAPTER_DECOR_RE = re.compile(
+    r"^[\s\xa0]*[\u2580-\u259f]",  # block-element symbols ▌▍▎▏█▓▒░◀◆… that
+    re.UNICODE,                     # students use to mark body chapter starts
+)
+
+
+def _looks_like_residual_toc_line(text: str) -> bool:
+    """More permissive than ``_looks_like_toc_line`` — used for cleaning
+    leftover TOC garbage that appears between the inserted auto-TOC
+    field and the first real body chapter.
+
+    Catches three shapes that ``_scan_manual_toc_block`` is too strict to
+    absorb: bullet-prefixed continuations («– Значение …»),
+    short well-known section titles even without a page number tail
+    («Список терминов и сокращений 26-30», «\xa0Список использованной
+    литературы 31»), and lines that mostly look like a TOC entry tail.
+    """
+    if not text:
+        return True
+    if len(text) > 200:
+        return False
+    if _looks_like_toc_line(text):
+        return True
+    if _RESIDUAL_TOC_BULLET_RE.match(text):
+        # Bullet continuation — only when the rest of the line is short
+        # (TOC tail, not a normal listed paragraph in body text).
+        return len(text) <= 120
+    if _RESIDUAL_TOC_KNOWN_TITLE_RE.match(text):
+        return True
+    if len(text) <= 40 and _RESIDUAL_TOC_SHORT_TITLE_RE.match(text):
+        # Single short Title-cased fragment with optional trailing period —
+        # treat as TOC residue ONLY when followed by no body content
+        # (the caller already enforces this by stopping at the first
+        # real heading / long body paragraph).
+        return True
+    return False
+
+
+def _remove_residual_toc_after_heading(
+    doc, heading_para, details: list[str], max_scan: int = 25,
+) -> int:
+    """Walk forward from the TOC heading and drop any paragraph that
+    still looks like a manual TOC entry (page-number tail, bullet
+    continuation, short known section title) up until the first real
+    body chapter.
+
+    The first paragraph that *clearly* belongs to the body — a real
+    Heading style, a paragraph that starts with a chapter-decoration
+    block character (▌, ◀, …) typical of student manuscripts, or a long
+    body paragraph (> 200 chars without TOC traits) — terminates the
+    scan and stays untouched.
+
+    Returns the number of paragraphs removed.
+    """
+    body = doc.element.body
+    heading_elem = heading_para._element if hasattr(heading_para, "_element") else heading_para
+    if heading_elem.getparent() is not body:
+        return 0
+
+    siblings = list(body)
+    try:
+        start_pos = siblings.index(heading_elem) + 1
+    except ValueError:
+        return 0
+
+    removed = 0
+    scanned = 0
+    pos = start_pos
+    while pos < len(body) and scanned < max_scan:
+        el = body[pos]
+        if el.tag != qn("w:p"):
+            # Hit a table or sectPr — stop, body content begins.
+            break
+        text = "".join((t.text or "") for t in el.iter(qn("w:t"))).strip()
+        # Skip fldChar paragraphs that belong to the just-inserted TOC
+        # field (they may be empty text-wise but carry the field).
+        has_field = any(True for _ in el.iter(qn("w:fldChar")))
+        if has_field:
+            pos += 1
+            scanned += 1
+            continue
+        # A real Word heading or a chapter-decoration body line ends the
+        # cleanup window.
+        pPr = el.find(qn("w:pPr"))
+        sval = ""
+        if pPr is not None:
+            ps = pPr.find(qn("w:pStyle"))
+            if ps is not None:
+                sval = ps.get(qn("w:val")) or ""
+        if sval and sval.startswith("Heading"):
+            break
+        if _BODY_CHAPTER_DECOR_RE.match(text):
+            break
+        if not text:
+            pos += 1
+            scanned += 1
+            continue
+        if _looks_like_residual_toc_line(text):
+            body.remove(el)
+            removed += 1
+            # Don't advance pos — list shifted.
+            continue
+        # Real body paragraph reached.
+        break
+
+    if removed:
+        details.append(
+            f"Оглавление: удалено {removed} остаточных строк ручного содержания"
+        )
+    return removed
+
+
 def _insert_toc_after(anchor, doc, details: list[str]) -> bool:
     """Insert a multi-paragraph TOC field right after *anchor* element."""
     headings = _collect_headings(doc)
@@ -672,7 +839,44 @@ def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
             _remove_manual_toc_entries(doc, idx, details)
             _remove_table_after_heading(doc, para, details)
             _normalize_existing_toc_heading(para, details)
-            return _insert_toc_after(para._element, doc, details)
+            inserted = _insert_toc_after(para._element, doc, details)
+            # Find the LAST paragraph of the inserted TOC field so cleanup
+            # starts AFTER the field. Intermediate TOC entries do not
+            # carry their own ``<w:fldChar>`` markers — only the first
+            # entry has ``begin/separate`` and the last entry has
+            # ``end``. We therefore track the begin/end nesting depth
+            # while walking siblings, advancing through every paragraph
+            # until depth returns to zero (which marks the end of the
+            # TOC field, regardless of how many entry paragraphs sit in
+            # between).
+            anchor_elem = para._element
+            tail = anchor_elem
+            depth = 0
+            saw_begin = False
+            cur = anchor_elem.getnext()
+            while cur is not None and cur.tag == qn("w:p"):
+                fld_types = [fc.get(qn("w:fldCharType")) for fc in cur.iter(qn("w:fldChar"))]
+                for ft in fld_types:
+                    if ft == "begin":
+                        depth += 1
+                        saw_begin = True
+                    elif ft == "end":
+                        depth -= 1
+                tail = cur
+                if saw_begin and depth <= 0:
+                    break
+                if not saw_begin:
+                    # Auto-TOC field MUST start in the very first inserted
+                    # paragraph; if we walked past it without finding a
+                    # ``begin`` marker, something is off — bail out and let
+                    # the cleanup pass start from the heading itself.
+                    if cur.getnext() is None:
+                        tail = anchor_elem
+                        break
+                cur = cur.getnext()
+            from docx.text.paragraph import Paragraph as _P
+            _remove_residual_toc_after_heading(doc, _P(tail, doc), details)
+            return inserted
 
     for para in paragraphs:
         style_name = (getattr(para.style, "name", "") or "").lower()

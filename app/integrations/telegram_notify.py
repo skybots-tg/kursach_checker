@@ -187,10 +187,22 @@ async def notify_referral_bonus(inviter_telegram_id: int) -> None:
         f"зови ещё друзей — за каждого даём +{amount} \U0001F680"
     )
 
+    # Кнопка возврата в меню, чтобы у инвайтера не было ступора
+    # (входящее уведомление приходит вне диалога с ботом).
+    menu_label = await get_text("notify.check_done_btn_menu")
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=menu_label, callback_data="nav_home")],
+        ]
+    )
+
     bot = make_bot()
     try:
         await bot.send_message(
-            chat_id=inviter_telegram_id, text=text, parse_mode="HTML",
+            chat_id=inviter_telegram_id,
+            text=text,
+            parse_mode="HTML",
+            reply_markup=keyboard,
         )
     except Exception:
         logger.exception(

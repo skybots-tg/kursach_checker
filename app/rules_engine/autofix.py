@@ -15,10 +15,12 @@ from app.rules_engine.autofix_headings import (
     enforce_chapter_page_breaks,
     enforce_heading_bold,
     enforce_heading_font,
+    enforce_heading_spacing,
     enforce_subheading_alignment,
     fix_heading as _fix_heading,
     fix_remove_underline,
     promote_to_heading as _promote_to_heading,
+    strip_chapter_decoration_chars,
 )
 from app.rules_engine.autofix_helpers import (
     clamp_overflow_table_widths,
@@ -44,11 +46,16 @@ from app.rules_engine.autofix_helpers import (
     remove_empty_paras_before_page_breaks,
     remove_manual_page_breaks,
 )
+from app.rules_engine.autofix_appendix import consolidate_appendix_block
 from app.rules_engine.autofix_bibliography import (
     enforce_bibliography_entry_formatting,
     fix_bibliography_order_and_numbering,
 )
-from app.rules_engine.autofix_captions import fix_caption_positions
+from app.rules_engine.autofix_captions import (
+    fix_caption_positions,
+    fix_source_caption_lines,
+    tighten_caption_block_layout,
+)
 from app.rules_engine.autofix_charts import fix_chart_titles_in_zip
 from app.rules_engine.autofix_table_pass import process_table_cells
 from app.rules_engine.autofix_lists import convert_informal_lists
@@ -136,6 +143,21 @@ def apply_safe_autofixes(
     # introduction lives in a single ``<w:p>``.
     if split_soft_break_paragraphs(doc, details):
         changed = True
+
+    # Strip decorative block-element symbols (▌▍▎▏█▓▒░◀…) that students
+    # sometimes paste in front of chapter titles. Done BEFORE heading
+    # detection so paragraphs like «▌Введение» are correctly recognised
+    # as «Введение» and promoted to ``Heading 1``.
+    if strip_chapter_decoration_chars(doc, details):
+        changed = True
+
+    # Collapse the appendix block ("Приложения" + "Приложение 1..N") down
+    # to a single TOC entry per the customer-approved layout. Done BEFORE
+    # toc_indices computation so the surrounding passes see the final
+    # body shape (we may insert a synthetic parent paragraph here).
+    if cfg.consolidate_appendix:
+        if consolidate_appendix_block(doc, details, mode=cfg.appendix_consolidation):
+            changed = True
 
     toc_indices: set[int] = set()
     if skip_toc:
@@ -451,10 +473,14 @@ def apply_safe_autofixes(
 
     if getattr(cfg, "fix_caption_positions", True) and fix_caption_positions(doc, details):
         changed = True
+    if getattr(cfg, "fix_caption_positions", True):
+        changed |= tighten_caption_block_layout(doc, details)
+        changed |= fix_source_caption_lines(doc, details)
     changed |= normalize_source_line_spacing(doc, details)
     changed |= enforce_subheading_alignment(doc, cfg, details)
     changed |= enforce_heading_bold(doc, cfg, details)
     changed |= enforce_heading_font(doc, cfg, details)
+    changed |= enforce_heading_spacing(doc, cfg, details)
     if cfg.fix_section_breaks and enforce_chapter_page_breaks(doc, details):
         changed = True
     if cfg.ensure_subheading_spacing and ensure_blank_before_subheadings(doc, details):

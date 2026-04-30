@@ -631,6 +631,151 @@ def enforce_heading_font(doc, cfg, details: list[str]) -> bool:
     return changed > 0
 
 
+def enforce_heading_spacing(doc, cfg, details: list[str]) -> bool:
+    """Hard-set ``space_before`` / ``space_after`` to ``cfg`` values on every
+    ``HeadingN`` paragraph **and** style.
+
+    Why:
+        Pandoc/Word templates routinely ship Heading 1 with
+        ``<w:spacing w:before="480"/>`` (= 24 pt) and Heading 2..9 with
+        ``200`` (= 10 pt). Heading paragraphs in the source document
+        usually have *no* explicit paragraph-format spacing, so the value
+        cascades from the style — and the existing ``fix_heading`` pass
+        skipped the override (``cur_sb is not None`` guard) because the
+        per-paragraph ``space_before`` reads as ``None``. The result: a
+        big visible gap above each chapter title that reviewers keep
+        flagging as «лишний отступ перед заголовком».
+
+    The fix is intentionally split into two passes:
+        1. **Style-level**: walk ``doc.styles``, find every ``HeadingN``,
+           force ``space_before`` / ``space_after`` to the configured
+           values. This is enough on its own for any heading whose
+           paragraph-format does not override the style.
+        2. **Paragraph-level**: walk every heading paragraph and write
+           the values explicitly via ``<w:spacing w:before="0"
+           w:after="0"/>``. Required for headings that DID inherit
+           explicit non-zero spacing somewhere along the chain
+           (manual override, theme, custom linked style).
+
+    Runs unconditionally — independent of ``safety.skip_headings`` —
+    because the operation only adjusts paragraph spacing and never
+    touches font / alignment / bold.
+    """
+    target_sb = float(getattr(cfg, "space_before_pt", 0) or 0)
+    target_sa = float(getattr(cfg, "space_after_pt", 0) or 0)
+
+    styles_changed = 0
+    for style in doc.styles:
+        sid = getattr(style, "style_id", "") or ""
+        if not sid.startswith("Heading"):
+            continue
+        try:
+            spf = style.paragraph_format
+        except AttributeError:
+            continue
+        touched = False
+        cur_sb = spf.space_before
+        if cur_sb is None or abs(cur_sb.pt - target_sb) > 0.2:
+            spf.space_before = Pt(target_sb)
+            touched = True
+        cur_sa = spf.space_after
+        if cur_sa is None or abs(cur_sa.pt - target_sa) > 0.2:
+            spf.space_after = Pt(target_sa)
+            touched = True
+        if touched:
+            styles_changed += 1
+
+    paragraphs_changed = 0
+    toc_elems = _collect_toc_paragraph_elements(doc)
+    for para in doc.paragraphs:
+        if para._element in toc_elems:
+            continue
+        if _para_heading_level(para) is None:
+            continue
+        pf = para.paragraph_format
+        touched = False
+        cur_sb = pf.space_before
+        if cur_sb is None or abs(cur_sb.pt - target_sb) > 0.2:
+            pf.space_before = Pt(target_sb)
+            touched = True
+        cur_sa = pf.space_after
+        if cur_sa is None or abs(cur_sa.pt - target_sa) > 0.2:
+            pf.space_after = Pt(target_sa)
+            touched = True
+        if touched:
+            paragraphs_changed += 1
+
+    if styles_changed:
+        details.append(
+            f"Стили заголовков: интервал до/после обнулён ({styles_changed} шт.)"
+        )
+    if paragraphs_changed:
+        details.append(
+            f"Заголовки: интервал до/после = {target_sb:g}/{target_sa:g} пт "
+            f"({paragraphs_changed} шт.)"
+        )
+    return (styles_changed + paragraphs_changed) > 0
+
+
+_CHAPTER_DECOR_PREFIX_RE = re.compile(
+    r"^[\s\xa0]*[\u2580-\u259f\u25b6\u25c0\u25c6\u25c7\u25cf\u25cb]+[\s\xa0]*",
+    re.UNICODE,
+)
+
+
+def strip_chapter_decoration_chars(doc, details: list[str]) -> bool:
+    """Strip decorative block-element symbols (▌▍▎▏█▓▒░◀▶◆◇●○) from
+    the beginning of paragraphs.
+
+    Some templates / copy-paste sources prepend these symbols to chapter
+    titles (e.g. «▌Введение», «▌Глава 1»). The leftover prefix
+    prevents the heading detection from recognising the paragraph as a
+    real chapter title — without this strip pass headings would stay
+    as plain ``Normal`` paragraphs and the auto-TOC would miss them
+    entirely. We only touch paragraphs whose REMAINING text matches a
+    typical heading shape (chapter keyword, well-known section title,
+    «N.» numeric prefix, …) so generic body bullets stay intact.
+    """
+    from app.rules_engine.heading_detection import detect_heading_candidate
+
+    changed = 0
+    for para in doc.paragraphs:
+        text = para.text or ""
+        m = _CHAPTER_DECOR_PREFIX_RE.match(text)
+        if not m:
+            continue
+        remainder = text[m.end():].strip()
+        if not remainder:
+            continue
+        # Only strip when the cleaned text actually looks like a heading
+        # (the safe-list prevents accidental edits to body bullet lists
+        # that happen to use these block characters).
+        if detect_heading_candidate(remainder) is None:
+            continue
+        # Walk runs and shave off the matching prefix.
+        consumed = 0
+        target = m.end()
+        for r in para._element.iter(qn("w:r")):
+            for t in r.findall(qn("w:t")):
+                if consumed >= target:
+                    break
+                txt = t.text or ""
+                if not txt:
+                    continue
+                take = min(len(txt), target - consumed)
+                t.text = txt[take:]
+                consumed += take
+            if consumed >= target:
+                break
+        changed += 1
+
+    if changed:
+        details.append(
+            f"Заголовки: убраны декоративные символы (▌, ◀, …) перед {changed} заголовком(ами)"
+        )
+    return changed > 0
+
+
 def fix_remove_underline(paragraph, para_label: str, details: list[str]) -> bool:
     p_elem = paragraph._element
     changed = False

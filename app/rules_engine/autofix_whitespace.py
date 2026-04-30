@@ -157,22 +157,54 @@ def _is_removable_empty(para) -> bool:
     return True
 
 
+def _is_heading_para(p) -> bool:
+    """True if paragraph is a Word heading (style name or outlineLvl)."""
+    sname = (getattr(p.style, "name", "") or "").lower()
+    sid = (getattr(p.style, "style_id", "") or "")
+    if "heading" in sname or "заголов" in sname or sid.startswith("Heading"):
+        return True
+    pPr = p._element.find(qn("w:pPr"))
+    if pPr is not None and pPr.find(qn("w:outlineLvl")) is not None:
+        return True
+    return False
+
+
 def collapse_excessive_empty_paras(
     doc, max_consecutive: int, details: list[str],
 ) -> bool:
-    """Remove consecutive empty paragraphs beyond *max_consecutive*."""
+    """Collapse runs of empty paragraphs.
+
+    Policy:
+        * Between two body (non-heading) paragraphs — keep **0** empty
+          paragraphs. Random blank lines that students leave between
+          their introduction sentences are pure noise and the customer
+          flags them as «лишние пробелы».
+        * Before a heading (chapter/subsection) — keep up to
+          ``max_consecutive`` empty paragraphs so the heading visually
+          separates from the preceding text. This also preserves the
+          blanks that :func:`ensure_blank_before_subheadings` inserts.
+        * Trailing blanks at the very end of the document are removed
+          entirely.
+    """
     paragraphs = list(doc.paragraphs)
     body = doc.element.body
     to_remove: list = []
-    consecutive = 0
+    n = len(paragraphs)
 
-    for para in paragraphs:
-        if _is_removable_empty(para):
-            consecutive += 1
-            if consecutive > max_consecutive:
-                to_remove.append(para._element)
-        else:
-            consecutive = 0
+    i = 0
+    while i < n:
+        if not _is_removable_empty(paragraphs[i]):
+            i += 1
+            continue
+        j = i
+        while j < n and _is_removable_empty(paragraphs[j]):
+            j += 1
+        # Blanks span paragraphs[i:j]. Decide how many to keep.
+        next_is_heading = j < n and _is_heading_para(paragraphs[j])
+        allow = max_consecutive if next_is_heading else 0
+        for k in range(i + allow, j):
+            to_remove.append(paragraphs[k]._element)
+        i = j
 
     for elem in to_remove:
         try:
