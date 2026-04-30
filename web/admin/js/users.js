@@ -77,7 +77,7 @@ function usersTable(list) {
                 ${iconSvg('coins', 15)}
               </button>
               <button class="btn btn-icon btn-sm" title="Удалить полностью"
-                onclick="confirmDeleteUser(${u.id}, ${JSON.stringify(u.username || u.first_name || ('#' + u.id))})">
+                onclick="confirmDeleteUser(${u.id})">
                 ${iconSvg('trash', 15)}
               </button>
             </td>
@@ -139,7 +139,7 @@ function renderUserDetail() {
           ${iconSvg('edit', 14)} Редактировать
         </button>
         <button class="btn btn-danger btn-sm"
-          onclick="confirmDeleteUser(${u.id}, ${JSON.stringify(u.username || u.first_name || ('#' + u.id))})">
+          onclick="confirmDeleteUser(${u.id})">
           ${iconSvg('trash', 14)} Удалить
         </button>
       </div>
@@ -318,8 +318,12 @@ function backToUserList() {
 
 /* ---- Delete user ---- */
 
-function confirmDeleteUser(userId, label) {
-  const safeLabel = label && String(label).trim() ? String(label) : ('#' + userId);
+function confirmDeleteUser(userId) {
+  const u = (_usersData || []).find(x => x.id === userId)
+    || (_userDetailData && _userDetailData.user && _userDetailData.user.id === userId
+        ? _userDetailData.user : null);
+  const rawLabel = u ? (u.username || u.first_name) : null;
+  const safeLabel = rawLabel && String(rawLabel).trim() ? String(rawLabel) : ('#' + userId);
   const body = `
     <p>Вы собираетесь <strong>полностью удалить</strong> пользователя
        <strong>${escHtml(safeLabel)}</strong> (ID ${userId}).</p>
