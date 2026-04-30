@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     subscribe_bonus_channel_username: str = ""
     subscribe_bonus_amount: int = 2
 
+    # Приветственный бонус: сколько бесплатных проверок получает новый
+    # пользователь при первом /start. Это значение можно переопределить
+    # из админки (SystemSetting key="welcome_bonus"). 0 — отключено.
+    welcome_bonus_amount: int = 3
+
     prodamus_secret_key: str = ""
     prodamus_payform_url: str = "https://payform.prodamus.ru"
     prodamus_timeout_sec: int = 30

@@ -16,6 +16,7 @@ from app.services.referrals import (
     link_referral,
     try_grant_bonus_for_invited,
 )
+from app.services.welcome_bonus import grant_welcome_bonus
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,8 @@ async def ensure_user(
             db.add(user)
             await db.flush()
             db.add(CreditsBalance(user_id=user.id, credits_available=0))
+            # Приветственный бонус новому пользователю (если включён).
+            await grant_welcome_bonus(db, user_id=user.id)
 
             if ref_inviter_tg_id and ref_inviter_tg_id != tg_user.id:
                 inviter = await db.scalar(

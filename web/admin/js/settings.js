@@ -6,19 +6,46 @@ async function loadSettings() {
   const page = $('page-settings');
   page.innerHTML = loadingHtml();
   try {
-    const cfg = await api('GET', '/admin/settings/doc-converter');
-    renderSettings(cfg);
+    const [docCfg, welcomeCfg] = await Promise.all([
+      api('GET', '/admin/settings/doc-converter'),
+      api('GET', '/admin/settings/welcome-bonus'),
+    ]);
+    renderSettings(docCfg, welcomeCfg);
   } catch (err) {
     page.innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
   }
 }
 
-function renderSettings(cfg) {
+function renderSettings(cfg, welcome) {
   $('page-settings').innerHTML = `
     <div class="page-header">
       <div>
         <h1 class="page-title">Настройки системы</h1>
         <p class="page-subtitle">Системные параметры и интеграции</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header"><h3 class="card-title">Приветственный бонус</h3></div>
+      <p class="card-desc">
+        Сколько бесплатных проверок получает новый пользователь при первом
+        <code>/start</code>. <strong>0</strong> — бонус выключен.
+        Изменения применяются сразу к новым регистрациям.
+      </p>
+      <div id="wb-alert-area"></div>
+
+      <div class="form-group" style="margin-top:12px">
+        <label class="form-label">Количество бесплатных проверок</label>
+        <input class="form-input" type="number" id="wb-amount"
+          value="${welcome?.amount ?? 3}" min="0" max="1000" style="max-width:200px">
+        <div class="form-hint">
+          Сейчас текст бота на экране «закончились попытки» обещает
+          <strong>3 бесплатные проверки</strong> — лучше держать значения согласованными.
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" onclick="saveWelcomeBonus()">Сохранить</button>
       </div>
     </div>
 
@@ -59,6 +86,23 @@ function renderSettings(cfg) {
     </div>`;
 }
 
+async function saveWelcomeBonus() {
+  const area = $('wb-alert-area');
+  const amount = parseInt(getVal('wb-amount'), 10);
+  if (isNaN(amount) || amount < 0) {
+    if (area) area.innerHTML = '<div class="alert error">Введите неотрицательное целое число</div>';
+    return;
+  }
+  try {
+    await api('PUT', '/admin/settings/welcome-bonus', { amount });
+    if (area) area.innerHTML = `<div class="alert success">Сохранено. Новые пользователи будут получать <strong>${amount}</strong> бесплатных проверок.</div>`;
+    toast('Приветственный бонус обновлён', 'success');
+  } catch (err) {
+    if (area) area.innerHTML = `<div class="alert error">Ошибка: ${escHtml(err.message)}</div>`;
+    toast('Ошибка: ' + err.message, 'error');
+  }
+}
+
 async function saveDocConverter() {
   const area = $('dc-alert-area');
   try {
@@ -93,3 +137,4 @@ async function testDocConverter() {
 
 window.saveDocConverter = saveDocConverter;
 window.testDocConverter = testDocConverter;
+window.saveWelcomeBonus = saveWelcomeBonus;

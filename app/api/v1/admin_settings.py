@@ -8,14 +8,17 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.admin_deps import get_current_admin
+from app.core.config import settings
 from app.db.session import get_db
 from app.models import AdminUser, SystemSetting
 from app.schemas.admin_settings import (
     DocConverterSettings,
     DocConverterTestResult,
     SystemSettingsOut,
+    WelcomeBonusSettings,
 )
 from app.services.audit import log_admin_action
+from app.services.welcome_bonus import WELCOME_BONUS_KEY
 
 router = APIRouter()
 
@@ -27,6 +30,13 @@ async def _load_doc_converter(db: AsyncSession) -> DocConverterSettings:
     if row is None:
         return DocConverterSettings()
     return DocConverterSettings.model_validate(row.value)
+
+
+async def _load_welcome_bonus(db: AsyncSession) -> WelcomeBonusSettings:
+    row = await db.get(SystemSetting, WELCOME_BONUS_KEY)
+    if row is None:
+        return WelcomeBonusSettings(amount=settings.welcome_bonus_amount)
+    return WelcomeBonusSettings.model_validate(row.value)
 
 
 async def _save_setting(
@@ -59,7 +69,31 @@ async def get_system_settings(
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     doc = await _load_doc_converter(db)
-    return SystemSettingsOut(doc_converter=doc).model_dump()
+    welcome = await _load_welcome_bonus(db)
+    return SystemSettingsOut(
+        doc_converter=doc,
+        welcome_bonus=welcome,
+    ).model_dump()
+
+
+@router.get("/welcome-bonus", summary="Настройки приветственного бонуса")
+async def get_welcome_bonus(
+    _admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    cfg = await _load_welcome_bonus(db)
+    return cfg.model_dump()
+
+
+@router.put("/welcome-bonus", summary="Обновить приветственный бонус")
+async def update_welcome_bonus(
+    body: WelcomeBonusSettings,
+    admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    payload = body.model_dump()
+    await _save_setting(db, WELCOME_BONUS_KEY, payload, admin)
+    return {"ok": True, "welcome_bonus": payload}
 
 
 @router.get("/doc-converter", summary="Настройки DOC→DOCX конвертера")

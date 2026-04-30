@@ -20,8 +20,23 @@ class DocConverterTestResult(BaseModel):
     converter_version: str | None = None
 
 
+class WelcomeBonusSettings(BaseModel):
+    """Приветственный бонус новым пользователям при первом /start."""
+
+    amount: int = Field(
+        3,
+        ge=0,
+        le=1000,
+        description=(
+            "Сколько бесплатных проверок получает новый пользователь. "
+            "0 — бонус выключен."
+        ),
+    )
+
+
 class SystemSettingsOut(BaseModel):
     doc_converter: DocConverterSettings = Field(default_factory=DocConverterSettings)
+    welcome_bonus: WelcomeBonusSettings = Field(default_factory=WelcomeBonusSettings)
 
 
 class SettingValueOut(BaseModel):

@@ -76,6 +76,10 @@ function usersTable(list) {
               <button class="btn btn-icon btn-sm" title="Кредиты" onclick="showCreditsModal(${u.id}, ${u.credits_available ?? 0})">
                 ${iconSvg('coins', 15)}
               </button>
+              <button class="btn btn-icon btn-sm" title="Удалить полностью"
+                onclick="confirmDeleteUser(${u.id}, ${JSON.stringify(u.username || u.first_name || ('#' + u.id))})">
+                ${iconSvg('trash', 15)}
+              </button>
             </td>
           </tr>`).join('')}
         </tbody>
@@ -133,6 +137,10 @@ function renderUserDetail() {
         </button>
         <button class="btn btn-ghost btn-sm" onclick="showEditUserModal(${u.id})">
           ${iconSvg('edit', 14)} Редактировать
+        </button>
+        <button class="btn btn-danger btn-sm"
+          onclick="confirmDeleteUser(${u.id}, ${JSON.stringify(u.username || u.first_name || ('#' + u.id))})">
+          ${iconSvg('trash', 14)} Удалить
         </button>
       </div>
     </div>
@@ -308,6 +316,48 @@ function backToUserList() {
   loadUsers();
 }
 
+/* ---- Delete user ---- */
+
+function confirmDeleteUser(userId, label) {
+  const safeLabel = label && String(label).trim() ? String(label) : ('#' + userId);
+  const body = `
+    <p>Вы собираетесь <strong>полностью удалить</strong> пользователя
+       <strong>${escHtml(safeLabel)}</strong> (ID ${userId}).</p>
+    <p>Будут удалены: записи о рефералах (где он инвайтер или приглашённый),
+       баланс кредитов и история операций, заказы и платежи Prodamus,
+       все проверки и их логи, файлы и аналитика.</p>
+    <p style="color:var(--danger,#c53030)"><strong>Действие необратимо.</strong>
+       Используйте для удаления тестовых аккаунтов.</p>
+    <div class="form-group" style="margin-top:12px">
+      <label class="form-label">Чтобы подтвердить, введите <code>УДАЛИТЬ</code>:</label>
+      <input class="form-input" id="user-delete-confirm" autocomplete="off" placeholder="УДАЛИТЬ">
+    </div>`;
+  const footer = `
+    <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
+    <button class="btn btn-danger" onclick="deleteUser(${userId})">Удалить навсегда</button>`;
+  openModal('Полное удаление пользователя', body, footer);
+}
+
+async function deleteUser(userId) {
+  const phrase = (getVal('user-delete-confirm') || '').trim();
+  if (phrase !== 'УДАЛИТЬ') {
+    toast('Введите слово УДАЛИТЬ для подтверждения', 'error');
+    return;
+  }
+  try {
+    await api('DELETE', `/admin/users/${userId}`);
+    closeModal();
+    toast('Пользователь удалён', 'success');
+    if (_userDetailData && _userDetailData.user.id === userId) {
+      backToUserList();
+    } else {
+      loadUsers();
+    }
+  } catch (err) {
+    toast('Ошибка: ' + err.message, 'error');
+  }
+}
+
 registerEntityHandler('users', (sub) => viewUserDetail(parseInt(sub)), true);
 
 window.searchUsers = searchUsers;
@@ -319,3 +369,5 @@ window.updateUser = updateUser;
 window.showCreditsModal = showCreditsModal;
 window.setUserCredits = setUserCredits;
 window.backToUserList = backToUserList;
+window.confirmDeleteUser = confirmDeleteUser;
+window.deleteUser = deleteUser;
