@@ -257,6 +257,53 @@ def _build_toc_heading_paragraph(text: str = "Содержание") -> OxmlElem
     return p
 
 
+def _has_visible_content_before(para_elem) -> bool:
+    """True iff there's any non-empty paragraph, table or manual page-break
+    before *para_elem* in the document body.
+
+    Used to decide whether «Содержание» should force a new page: when the
+    document has a title page above the TOC, we want ``pageBreakBefore``
+    on the heading; if «Содержание» is the very first paragraph, adding a
+    break would create a blank first page.
+    """
+    cur = para_elem.getprevious()
+    while cur is not None:
+        tag = cur.tag
+        if tag == qn("w:tbl"):
+            return True
+        if tag == qn("w:p"):
+            text = "".join((t.text or "") for t in cur.iter(qn("w:t")))
+            if text.strip():
+                return True
+            for br in cur.iter(qn("w:br")):
+                if br.get(qn("w:type")) == "page":
+                    return True
+        cur = cur.getprevious()
+    return False
+
+
+def _ensure_page_break_before_toc_heading(para, details: list[str]) -> bool:
+    """Force ``page_break_before`` on «Содержание»/«Оглавление» when there's
+    a title page (or any other content) above it.
+
+    Required because ``normalize_title_page_spacing`` strips manual
+    ``<w:br w:type="page"/>`` between the title page and the TOC heading,
+    and the heading itself is later detached from ``Heading 1`` style by
+    :func:`_normalize_existing_toc_heading` — so neither path leaves the
+    TOC on a fresh page without an explicit pageBreakBefore here.
+    """
+    if not _has_visible_content_before(para._element):
+        return False
+    pf = para.paragraph_format
+    if pf.page_break_before:
+        return False
+    pf.page_break_before = True
+    details.append(
+        "Оглавление: «Содержание» вынесено на новую страницу"
+    )
+    return True
+
+
 def _normalize_existing_toc_heading(para, details: list[str]) -> bool:
     """Re-format an existing «Содержание» paragraph: center + non-bold + no underline.
 
@@ -270,6 +317,8 @@ def _normalize_existing_toc_heading(para, details: list[str]) -> bool:
          ``<w:u w:val="none"/>`` on every run (inserting the element when
          missing) so no inherited property can re-enable bold/underline.
       3. Center alignment and wipe any red-line / left indent.
+      4. Force ``pageBreakBefore`` so the TOC always starts on its own page,
+         even after the title-page page-break stripper runs.
     """
     from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
     from docx.shared import Mm
@@ -305,6 +354,9 @@ def _normalize_existing_toc_heading(para, details: list[str]) -> bool:
             changed = True
 
     if _clear_bold_underline_in_paragraph(para._element):
+        changed = True
+
+    if _ensure_page_break_before_toc_heading(para, details):
         changed = True
 
     if changed:

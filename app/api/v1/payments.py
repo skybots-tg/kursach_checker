@@ -152,4 +152,8 @@ async def prodamus_webhook(
     )
 
     await db.commit()
-    return {"message": "processed", "order_id": order.id, "order_status": order.status.value}
+    return {
+        "message": "processed",
+        "order_id": order.id,
+        "order_status": order.status.value if hasattr(order.status, "value") else order.status,
+    }

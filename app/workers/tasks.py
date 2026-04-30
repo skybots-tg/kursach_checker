@@ -117,7 +117,7 @@ async def process_check_task(ctx: dict, check_id: int) -> dict:
         except Exception:
             logger.exception("Failed to notify user about check %s", check_id)
 
-        return {"check_id": check_id, "status": check.status.value}
+        return {"check_id": check_id, "status": check.status.value if hasattr(check.status, "value") else check.status}
 
 
 async def _run_pipeline(session: AsyncSession, check: Check) -> dict:

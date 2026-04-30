@@ -34,7 +34,7 @@ async def list_orders(
     return [
         {
             "id": o.id,
-            "status": o.status.value,
+            "status": o.status.value if hasattr(o.status, "value") else o.status,
             "amount": float(o.amount),
             "user": {"id": u.id, "telegram_id": u.telegram_id, "username": u.username},
             "product": {"id": p.id, "name": p.name},
@@ -69,7 +69,7 @@ async def get_order_card(
     return {
         "order": {
             "id": order.id,
-            "status": order.status.value,
+            "status": order.status.value if hasattr(order.status, "value") else order.status,
             "amount": float(order.amount),
             "created_at": order.created_at,
             "paid_at": order.paid_at,
