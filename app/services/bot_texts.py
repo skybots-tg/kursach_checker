@@ -42,6 +42,20 @@ SYSTEM_TEXTS: dict[str, dict[str, Any]] = {
         "supports_html": True,
         "variables": [],
     },
+    "bot.kb_anchor": {
+        "label": "Якорь нижнего меню",
+        "group": "Общие",
+        "description": (
+            "Короткое сообщение, которое бот отправляет последним на каждом "
+            "экране, чтобы reply-клавиатура (нижнее меню) всегда оставалась "
+            "видимой. В Telegram reply-клавиатура «живёт» вместе с сообщением, "
+            "к которому прикреплена, поэтому без такого якоря меню пропадает "
+            "при удалении предыдущих сообщений."
+        ),
+        "default": "📋 Меню",
+        "supports_html": True,
+        "variables": [],
+    },
 
     # -- Document handling --
     "check.only_doc_docx": {

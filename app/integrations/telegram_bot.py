@@ -193,6 +193,29 @@ async def build_main_keyboard() -> ReplyKeyboardMarkup:
     )
 
 
+async def _send_kb_anchor(bot: Bot, chat_id: int) -> int | None:
+    """Отправить «якорное» сообщение с reply-клавиатурой главного меню.
+
+    В Telegram reply-клавиатура (нижнее меню) привязана к конкретному
+    сообщению: пока это сообщение существует — клавиатура видна, удалили
+    его — клавиатура исчезает. Чтобы меню «всегда было внизу», после
+    каждой навигации мы шлём короткое сообщение-якорь с пристёгнутой
+    ``ReplyKeyboardMarkup``. Якорь трекается как обычное сообщение и
+    удаляется на следующем шаге — вместо него тут же отправляется новый,
+    так что в чате всегда есть ровно один актуальный якорь внизу.
+    """
+    kb = await build_main_keyboard()
+    text = await get_text("bot.kb_anchor")
+    try:
+        sent = await bot.send_message(
+            chat_id, text, reply_markup=kb, parse_mode="HTML",
+        )
+    except Exception:
+        logger.exception("Failed to send kb anchor to chat %d", chat_id)
+        return None
+    return sent.message_id
+
+
 async def _find_root_item_by_label(text: str) -> ContentMenuItem | None:
     """Match user text against active root menu items (label = icon + title)."""
     items = await _load_root_items()
@@ -270,6 +293,10 @@ async def _send_upload_prompt(bot: Bot, chat_id: int, tg_user_id: int) -> None:
     sent = await bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=kb)
     _track(chat_id, sent.message_id)
 
+    anchor_id = await _send_kb_anchor(bot, chat_id)
+    if anchor_id is not None:
+        _track(chat_id, anchor_id)
+
 
 async def _handle_root_item_tap(
     bot: Bot, chat_id: int, item: ContentMenuItem,
@@ -289,6 +316,9 @@ async def _handle_root_item_tap(
             chat_id, _root_item_label(item), reply_markup=link_kb,
         )
         _track(chat_id, sent.message_id)
+        anchor_id = await _send_kb_anchor(bot, chat_id)
+        if anchor_id is not None:
+            _track(chat_id, anchor_id)
         return
     await _navigate_to_item(bot, chat_id, item.id, tg_user_id=tg_user_id)
 
@@ -342,6 +372,10 @@ async def _navigate_to_item(
             chat_id, f"📋 {item_title}", reply_markup=keyboard,
         )
         sent_ids.append(sent.message_id)
+
+    anchor_id = await _send_kb_anchor(bot, chat_id)
+    if anchor_id is not None:
+        sent_ids.append(anchor_id)
 
     _track(chat_id, *sent_ids)
 
