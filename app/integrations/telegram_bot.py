@@ -86,6 +86,8 @@ def _fallback_reply_keyboard() -> ReplyKeyboardMarkup:
         keyboard=[[KeyboardButton(text="Начать")]],
         resize_keyboard=True,
         is_persistent=True,
+        one_time_keyboard=False,
+        selective=False,
     )
 
 
@@ -190,21 +192,28 @@ async def build_main_keyboard() -> ReplyKeyboardMarkup:
         keyboard=[keyboard_rows[r] for r in sorted(keyboard_rows.keys())],
         resize_keyboard=True,
         is_persistent=True,
+        one_time_keyboard=False,
+        selective=False,
     )
 
 
-async def _send_kb_anchor(bot: Bot, chat_id: int) -> int | None:
+async def _send_kb_anchor(
+    bot: Bot, chat_id: int, *, reply_kb: ReplyKeyboardMarkup | None = None,
+) -> int | None:
     """Отправить «якорное» сообщение с reply-клавиатурой главного меню.
 
     В Telegram reply-клавиатура (нижнее меню) привязана к конкретному
     сообщению: пока это сообщение существует — клавиатура видна, удалили
-    его — клавиатура исчезает. Чтобы меню «всегда было внизу», после
-    каждой навигации мы шлём короткое сообщение-якорь с пристёгнутой
-    ``ReplyKeyboardMarkup``. Якорь трекается как обычное сообщение и
-    удаляется на следующем шаге — вместо него тут же отправляется новый,
-    так что в чате всегда есть ровно один актуальный якорь внизу.
+    его — клавиатура исчезает. Если в текущем экране есть хотя бы одно
+    контентное сообщение без inline, клавиатуру лучше прицеплять к нему.
+    Этот хелпер используется как fallback: когда подходящего «носителя»
+    нет (например, на экране одно сообщение с inline-кнопками), мы шлём
+    короткое сообщение-якорь.
+
+    *reply_kb* можно передать заранее собранную клавиатуру, чтобы
+    избежать повторного запроса в БД.
     """
-    kb = await build_main_keyboard()
+    kb = reply_kb if reply_kb is not None else await build_main_keyboard()
     text = await get_text("bot.kb_anchor")
     try:
         sent = await bot.send_message(
@@ -256,7 +265,7 @@ async def _navigate_home(
 
     start_item_id = await _get_start_item_id()
     if start_item_id is not None:
-        ids = await send_content_messages(
+        ids, _ = await send_content_messages(
             bot, chat_id, start_item_id, reply_markup=None,
             tg_user_id=tg_user_id,
         )
@@ -362,9 +371,10 @@ async def _navigate_to_item(
     inline_keyboard.append(_nav_row(parent_id, depth))
     keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
 
-    sent_ids = await send_content_messages(
+    main_kb = await build_main_keyboard()
+    sent_ids, kb_attached = await send_content_messages(
         bot, chat_id, menu_item_id, reply_markup=keyboard,
-        tg_user_id=tg_user_id,
+        tg_user_id=tg_user_id, reply_keyboard=main_kb,
     )
 
     if not sent_ids:
@@ -373,9 +383,10 @@ async def _navigate_to_item(
         )
         sent_ids.append(sent.message_id)
 
-    anchor_id = await _send_kb_anchor(bot, chat_id)
-    if anchor_id is not None:
-        sent_ids.append(anchor_id)
+    if not kb_attached:
+        anchor_id = await _send_kb_anchor(bot, chat_id, reply_kb=main_kb)
+        if anchor_id is not None:
+            sent_ids.append(anchor_id)
 
     _track(chat_id, *sent_ids)
 

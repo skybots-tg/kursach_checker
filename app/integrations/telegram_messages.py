@@ -9,7 +9,12 @@ import logging
 from pathlib import Path
 
 from aiogram import Bot
-from aiogram.types import FSInputFile, InlineKeyboardMarkup, Message
+from aiogram.types import (
+    FSInputFile,
+    InlineKeyboardMarkup,
+    Message,
+    ReplyKeyboardMarkup,
+)
 from sqlalchemy import select
 
 from app.db.session import SessionLocal
@@ -82,7 +87,7 @@ async def _try_cached_send(
     bot: Bot,
     chat_id: int,
     msg: MenuItemMessage,
-    reply_markup: InlineKeyboardMarkup | None = None,
+    reply_markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | None = None,
 ) -> int | None:
     """Попробовать copy_message из кеша. Возвращает message_id или None."""
     if message_needs_personalization(msg):
@@ -117,7 +122,7 @@ async def _send_new_message(
     bot: Bot,
     chat_id: int,
     msg: MenuItemMessage,
-    reply_markup: InlineKeyboardMarkup | None = None,
+    reply_markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | None = None,
     tg_user_id: int | None = None,
 ) -> Message | None:
     """Отправить сообщение с нуля; результат — Message для кеширования."""
@@ -189,13 +194,26 @@ async def send_content_messages(
     menu_item_id: int,
     reply_markup: InlineKeyboardMarkup | None = None,
     tg_user_id: int | None = None,
-) -> list[int]:
+    reply_keyboard: ReplyKeyboardMarkup | None = None,
+) -> tuple[list[int], bool]:
     """Отправить все сообщения пункта меню.
 
-    *reply_markup* прикрепляется к ПОСЛЕДНЕМУ сообщению.
-    Возвращает список отправленных message_id.
+    Возвращает ``(sent_ids, reply_keyboard_attached)``:
+
+    * ``sent_ids`` — id отправленных сообщений в порядке отправки;
+    * ``reply_keyboard_attached`` — был ли *reply_keyboard* успешно прикреплён
+      к одному из этих сообщений (к первому, у которого нет inline).
+
+    *reply_markup* (inline) всегда прикрепляется к ПОСЛЕДНЕМУ сообщению.
+
+    *reply_keyboard* прикрепляется к ПЕРВОМУ сообщению — но только если
+    в пункте есть как минимум два сообщения (первое заведомо без inline)
+    и оно успешно отправилось. Иначе ``reply_keyboard_attached=False``,
+    и вызывающий сам решает, нужно ли отправить отдельный «якорь» с reply-
+    клавиатурой.
     """
     sent_ids: list[int] = []
+    reply_keyboard_attached = False
 
     async with SessionLocal() as db:
         rows = await db.scalars(
@@ -206,17 +224,33 @@ async def send_content_messages(
         messages = list(rows)
 
         if not messages:
-            return sent_ids
+            return sent_ids, reply_keyboard_attached
+
+        # Reply-клавиатуру можно повесить только на сообщение БЕЗ inline.
+        # У нас inline всегда уходит на последнее, поэтому подходящих
+        # «носителей» хватит, только когда сообщений >= 2.
+        attach_reply_idx = (
+            0 if reply_keyboard is not None and len(messages) >= 2 else -1
+        )
 
         for idx, msg in enumerate(messages):
             is_last = idx == len(messages) - 1
-            markup = reply_markup if is_last else None
+            if is_last:
+                markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | None = (
+                    reply_markup
+                )
+            elif idx == attach_reply_idx:
+                markup = reply_keyboard
+            else:
+                markup = None
 
             cached_mid = await _try_cached_send(
                 bot, chat_id, msg, reply_markup=markup,
             )
             if cached_mid is not None:
                 sent_ids.append(cached_mid)
+                if idx == attach_reply_idx:
+                    reply_keyboard_attached = True
                 continue
 
             sent_msg = await _send_new_message(
@@ -235,7 +269,9 @@ async def send_content_messages(
                     msg.cached_chat_id = sent_msg.chat.id
                     msg.cached_message_id = sent_msg.message_id
                 sent_ids.append(sent_msg.message_id)
+                if idx == attach_reply_idx:
+                    reply_keyboard_attached = True
 
         await db.commit()
 
-    return sent_ids
+    return sent_ids, reply_keyboard_attached
