@@ -52,6 +52,7 @@ from app.rules_engine.autofix_bibliography import (
     fix_bibliography_order_and_numbering,
 )
 from app.rules_engine.autofix_captions import (
+    ensure_blank_after_caption_blocks,
     fix_caption_positions,
     fix_source_caption_lines,
     tighten_caption_block_layout,
@@ -62,7 +63,11 @@ from app.rules_engine.autofix_lists import convert_informal_lists
 from app.rules_engine.autofix_toc import insert_toc_field, detect_manual_toc_entry_indices
 from app.rules_engine.autofix_split_breaks import split_soft_break_paragraphs
 from app.rules_engine.autofix_redundant_breaks import remove_redundant_manual_page_breaks
-from app.rules_engine.autofix_toc_normalize import normalize_toc_heading_formatting
+from app.rules_engine.autofix_toc_normalize import (
+    ensure_page_break_after_toc,
+    lock_toc_fields,
+    normalize_toc_heading_formatting,
+)
 from app.rules_engine.autofix_whitespace import (
     collapse_excessive_empty_paras,
     fix_normalize_left_indent,
@@ -457,6 +462,10 @@ def apply_safe_autofixes(
         changed = True
     if cfg.normalize_toc_heading and normalize_toc_heading_formatting(doc, details, cfg=cfg):
         changed = True
+    if ensure_page_break_after_toc(doc, details):
+        changed = True
+    if lock_toc_fields(doc, details):
+        changed = True
 
     if cfg.fix_bibliography:
         changed |= fix_bibliography_order_and_numbering(doc, details)
@@ -471,11 +480,24 @@ def apply_safe_autofixes(
         ):
             changed = True
 
+    # Heading promotion above may have re-promoted body «Приложение N»
+    # paragraphs to ``Heading 1`` AFTER ``consolidate_appendix_block``
+    # ran. If we leave them as headings Word will pick them up when
+    # the auto-TOC field is refreshed and the TOC will once again
+    # contain «ПРИЛОЖЕНИЕ А», «ПРИЛОЖЕНИЕ Б»… alongside the parent.
+    # Run consolidation a second time to demote anything that slipped
+    # through; this is a no-op when there are no appendix children
+    # left in heading style.
+    if cfg.consolidate_appendix:
+        if consolidate_appendix_block(doc, details, mode=cfg.appendix_consolidation):
+            changed = True
+
     if getattr(cfg, "fix_caption_positions", True) and fix_caption_positions(doc, details):
         changed = True
     if getattr(cfg, "fix_caption_positions", True):
         changed |= tighten_caption_block_layout(doc, details)
         changed |= fix_source_caption_lines(doc, details)
+        changed |= ensure_blank_after_caption_blocks(doc, details)
     changed |= normalize_source_line_spacing(doc, details)
     changed |= enforce_subheading_alignment(doc, cfg, details)
     changed |= enforce_heading_bold(doc, cfg, details)

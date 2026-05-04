@@ -283,6 +283,240 @@ def _normalize_toc_entry(p_elem: OxmlElement, font_name: str | None,
     return changed
 
 
+import re as _re
+
+_INTRO_RE = _re.compile(
+    r"^\s*(?:введение|introduction|вступлени)",
+    _re.IGNORECASE | _re.UNICODE,
+)
+
+
+def lock_toc_fields(doc, details: list[str]) -> bool:
+    """Add ``w:fldLock="true"`` to every PRE-EXISTING TOC field's
+    ``<w:fldChar w:fldCharType="begin"/>`` so Word won't auto-recalculate
+    the TOC on open / on print and overwrite our pre-rendered non-bold
+    entries with bold-from-source-heading runs.
+
+    Auto-inserted TOC fields (the ones we build via
+    :func:`insert_toc_field`) carry ``w:dirty="true"`` on their begin
+    marker — those MUST be refreshed by Word on first open so the
+    placeholder entries get real page numbers. We deliberately skip
+    fields that are already marked dirty.
+
+    The lock attribute is honoured by Word and LibreOffice; users can
+    still refresh the TOC manually via *Update Field*, but the default
+    "auto-update on save / on print" path is disabled, which is enough
+    to preserve our formatting when the customer simply opens the file.
+    """
+    body = doc.element.body
+    fld_tag = qn("w:fldChar")
+    fld_type_attr = qn("w:fldCharType")
+    fld_lock_attr = qn("w:fldLock")
+    fld_dirty_attr = qn("w:dirty")
+    instr_tag = qn("w:instrText")
+
+    locked_count = 0
+    field_stack: list[tuple[str, object]] = []
+    for p_elem in body.iter(qn("w:p")):
+        for elem in p_elem.iter():
+            tag = elem.tag
+            if tag == fld_tag:
+                ftype = elem.get(fld_type_attr)
+                if ftype == "begin":
+                    field_stack.append(("unknown", elem))
+                elif ftype == "separate":
+                    if field_stack and field_stack[-1][0] == "unknown":
+                        kind, fld_begin = field_stack[-1]
+                        field_stack[-1] = ("other", fld_begin)
+                elif ftype == "end" and field_stack:
+                    field_stack.pop()
+            elif tag == instr_tag:
+                text = (elem.text or "").upper()
+                if (
+                    field_stack
+                    and field_stack[-1][0] == "unknown"
+                    and "TOC" in text
+                ):
+                    kind, fld_begin = field_stack[-1]
+                    field_stack[-1] = ("TOC", fld_begin)
+                    dirty_val = (fld_begin.get(fld_dirty_attr) or "").lower()
+                    if dirty_val in {"true", "1", "on"}:
+                        # Auto-inserted TOC \u2014 leave dirty so Word refreshes it
+                        # and fills in real page numbers on open.
+                        continue
+                    if fld_begin.get(fld_lock_attr) != "true":
+                        fld_begin.set(fld_lock_attr, "true")
+                        locked_count += 1
+
+    if locked_count:
+        details.append(
+            f"Оглавление: поля TOC заблокированы от автопересчёта ({locked_count})"
+        )
+        return True
+    return False
+
+
+def ensure_page_break_after_toc(doc, details: list[str]) -> bool:
+    """Force a page break after the TOC when the next body paragraph
+    is not «Введение».
+
+    Customer rule: «После содержания чтобы никакого текста не было
+    Сразу с новой страницы, если нет слова введение». Translates to:
+        * If the document starts the next chapter with «Введение»,
+          leave the layout as-is — that paragraph already carries the
+          chapter-level page-break-before via ``enforce_chapter_page_breaks``.
+        * If there is no «Введение» (e.g. реферат / Plet нева doc),
+          push the next non-empty paragraph onto a fresh page so the
+          TOC sits on its own sheet.
+    """
+    body = doc.element.body
+    p_tag = qn("w:p")
+
+    # Locate the LAST element belonging to the TOC. Two flavours: an SDT
+    # wrapping ``<w:sdtContent>`` (auto-TOC field) or a manual TOC that
+    # starts with a paragraph matching ``_TOC_HEADING_RE`` followed by
+    # entry paragraphs. We anchor on the SDT first because that is what
+    # ``insert_toc_field`` produces.
+    toc_anchor = None
+    for sdt in body.iter(qn("w:sdt")):
+        sdt_pr = sdt.find(qn("w:sdtPr"))
+        is_toc_sdt = False
+        if sdt_pr is not None:
+            for child in sdt_pr.iter():
+                tag_lower = child.tag.lower()
+                if tag_lower.endswith("}docparttypes") or tag_lower.endswith("}docpartlist") or tag_lower.endswith("}docparts"):
+                    txt = (etree_text_of_descendants(child) or "").lower()
+                    if "table of contents" in txt or "toc" in txt:
+                        is_toc_sdt = True
+                        break
+        # Fallback: SDT whose first content paragraph matches «Содержание».
+        if not is_toc_sdt:
+            content = sdt.find(qn("w:sdtContent"))
+            if content is not None:
+                first_p = next((c for c in content.iterchildren() if c.tag == p_tag), None)
+                if first_p is not None:
+                    txt = "".join((t.text or "") for t in first_p.iter(qn("w:t"))).strip()
+                    if _TOC_HEADING_RE.match(txt):
+                        is_toc_sdt = True
+        if is_toc_sdt:
+            toc_anchor = sdt
+            break
+
+    if toc_anchor is None:
+        # Inline TOC field: walk body paragraphs tracking <w:fldChar> begin/
+        # separate/end markers. The TOC field can span MANY paragraphs;
+        # the anchor we want is the paragraph carrying the closing
+        # ``<w:fldChar w:fldCharType="end"/>``.
+        fld_tag = qn("w:fldChar")
+        instr_tag = qn("w:instrText")
+        fld_type_attr = qn("w:fldCharType")
+        field_stack: list[str] = []
+        last_toc_end_para = None
+        for p_elem in body.iterchildren(p_tag):
+            for elem in p_elem.iter():
+                if elem.tag == fld_tag:
+                    ftype = elem.get(fld_type_attr)
+                    if ftype == "begin":
+                        field_stack.append("unknown")
+                    elif ftype == "separate":
+                        if field_stack and field_stack[-1] == "unknown":
+                            field_stack[-1] = "other"
+                    elif ftype == "end" and field_stack:
+                        ended = field_stack.pop()
+                        if ended == "TOC":
+                            last_toc_end_para = p_elem
+                elif elem.tag == instr_tag:
+                    text = elem.text or ""
+                    if (
+                        field_stack
+                        and field_stack[-1] == "unknown"
+                        and "TOC" in text.upper()
+                    ):
+                        field_stack[-1] = "TOC"
+        if last_toc_end_para is not None:
+            toc_anchor = last_toc_end_para
+
+    if toc_anchor is None:
+        # Manual TOC: find «Содержание» / «Оглавление» heading and walk
+        # forward through paragraphs that look like TOC entries.
+        for el in body:
+            if el.tag != p_tag:
+                continue
+            text = "".join((t.text or "") for t in el.iter(qn("w:t"))).strip()
+            if _TOC_HEADING_RE.match(text):
+                tail = el
+                cur = el.getnext()
+                while cur is not None and cur.tag == p_tag:
+                    txt2 = "".join((t.text or "") for t in cur.iter(qn("w:t"))).strip()
+                    if not txt2:
+                        tail = cur
+                        cur = cur.getnext()
+                        continue
+                    # Heuristic: TOC entries are short rows ending with a
+                    # page number tail OR using a TOC-linked paragraph
+                    # style (``TOC1``/``TOC2``/…). Stop at the first
+                    # non-TOC-looking paragraph.
+                    pPr2 = cur.find(qn("w:pPr"))
+                    sty_val = ""
+                    if pPr2 is not None:
+                        ps2 = pPr2.find(qn("w:pStyle"))
+                        if ps2 is not None:
+                            sty_val = (ps2.get(qn("w:val")) or "").lower()
+                    is_toc_style = sty_val.startswith("toc") or sty_val in {
+                        "tableofcontents", "tocheading"
+                    }
+                    import re as _re2
+                    has_page_tail = bool(_re2.search(
+                        r"(?:\.{2,}|\t|\u2026|\s{3,})\s*\d{1,4}\s*$", txt2
+                    ))
+                    if is_toc_style or has_page_tail:
+                        tail = cur
+                        cur = cur.getnext()
+                        continue
+                    break
+                toc_anchor = tail
+                break
+
+    if toc_anchor is None:
+        return False
+
+    nxt = toc_anchor.getnext()
+    while nxt is not None and nxt.tag == p_tag:
+        text = "".join((t.text or "") for t in nxt.iter(qn("w:t"))).strip()
+        if text:
+            break
+        nxt = nxt.getnext()
+
+    if nxt is None or nxt.tag != p_tag:
+        return False
+
+    text = "".join((t.text or "") for t in nxt.iter(qn("w:t"))).strip()
+    if _INTRO_RE.match(text):
+        # Body already starts with «Введение», nothing to do.
+        return False
+
+    # Ensure ``<w:pageBreakBefore/>`` is set on *nxt* so it starts a
+    # fresh page. Add to ``<w:pPr>`` if missing.
+    pPr = nxt.find(qn("w:pPr"))
+    if pPr is None:
+        pPr = OxmlElement("w:pPr")
+        nxt.insert(0, pPr)
+    if pPr.find(qn("w:pageBreakBefore")) is None:
+        pPr.append(OxmlElement("w:pageBreakBefore"))
+        details.append(
+            "Оглавление: после содержания добавлена пустая страница (нет «Введение»)"
+        )
+        return True
+    return False
+
+
+def etree_text_of_descendants(el) -> str:
+    out: list[str] = []
+    for t in el.itertext():
+        out.append(t)
+    return "".join(out)
+
+
 def remove_duplicate_toc_heading_inside_sdt(doc, details: list[str]) -> bool:
     """Remove extra «Содержание»/«Оглавление» line inside TOC SDT when the same
     heading already exists as the preceding body paragraph (common Word

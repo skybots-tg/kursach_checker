@@ -202,10 +202,19 @@ def _build_toc_entry(text: str, level: int) -> OxmlElement:
     return p
 
 
-def _make_fld_run(fld_type: str) -> OxmlElement:
+def _make_fld_run(fld_type: str, *, dirty: bool = False) -> OxmlElement:
     r = OxmlElement("w:r")
     fld = OxmlElement("w:fldChar")
     fld.set(qn("w:fldCharType"), fld_type)
+    if dirty and fld_type == "begin":
+        # ``w:dirty="true"`` tells Word "please refresh this field on
+        # the next open" — used for AUTO-INSERTED TOC fields that
+        # carry placeholder text instead of real page numbers. We do
+        # NOT add this to pre-existing TOC fields (those already have
+        # cached page numbers and we lock them via ``lock_toc_fields``
+        # to prevent Word from copying run-level bold from headings
+        # back into the TOC entries).
+        fld.set(qn("w:dirty"), "true")
     r.append(fld)
     return r
 
@@ -256,7 +265,7 @@ def _build_toc_elements(
     _prepend_runs_after_pPr(
         entries[0],
         [
-            _make_fld_run("begin"),
+            _make_fld_run("begin", dirty=True),
             _make_instr_run(r' TOC \o "1-3" \h \z \u '),
             _make_fld_run("separate"),
         ],
