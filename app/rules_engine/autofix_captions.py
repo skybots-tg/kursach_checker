@@ -118,7 +118,16 @@ def _format_figure_caption(para) -> bool:
 
 
 def _format_table_caption(para) -> bool:
-    """Left-align the table caption and remove red-line indent."""
+    """Apply customer-mandated layout to a table caption row.
+
+    Customer rules (verbatim):
+        * «в одну строчку» — collapse soft breaks, drop leading tabs,
+          single line spacing.
+        * «без выделения» — strip highlight + bold/italic/underline.
+        * «без абзаца» — wipe red-line and left indent.
+        * «одинарный интервал» — line spacing 1.0.
+    """
+    from docx.oxml import OxmlElement
     changed = False
     if para.alignment not in (WD_PARAGRAPH_ALIGNMENT.LEFT, None):
         para.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
@@ -130,7 +139,163 @@ def _format_table_caption(para) -> bool:
     if pf.left_indent is not None and int(pf.left_indent) != 0:
         pf.left_indent = Mm(0)
         changed = True
+
+    p_elem = para._element
+
+    # Collapse soft breaks («Таблица 1\nХарактеристика выборки» split via
+    # Shift+Enter) to a single space so the caption literally fits in
+    # one row of source text. Word-level wrapping still kicks in if the
+    # caption is wider than the page, but the single-line constraint
+    # the customer asked for is about the source markup, not visual
+    # wrap.
+    for br in list(p_elem.iter(qn("w:br"))):
+        if br.get(qn("w:type")) in (None, "textWrapping"):
+            parent = br.getparent()
+            if parent is not None:
+                parent.remove(br)
+                changed = True
+
+    # Drop leading tab characters that students sometimes type before
+    # «Таблица N» to align with body text — they push the caption off
+    # to the right and break the «без абзаца» rule.
+    runs = list(p_elem.iter(qn("w:r")))
+    for r in runs:
+        first_child = next(iter(r), None)
+        if first_child is None:
+            continue
+        if first_child.tag == qn("w:tab"):
+            r.remove(first_child)
+            changed = True
+        t_first = r.find(qn("w:t"))
+        if t_first is not None and (t_first.text or "").startswith("\t"):
+            t_first.text = (t_first.text or "").lstrip("\t ")
+            changed = True
+        break
+
+    # Force ``<w:spacing w:line="240" w:lineRule="auto" w:before="0"
+    # w:after="0"/>`` so the caption renders at single line height.
+    pPr = p_elem.find(qn("w:pPr"))
+    if pPr is None:
+        pPr = OxmlElement("w:pPr")
+        p_elem.insert(0, pPr)
+    spacing = pPr.find(qn("w:spacing"))
+    if spacing is None:
+        spacing = OxmlElement("w:spacing")
+        pPr.append(spacing)
+    if spacing.get(qn("w:line")) != "240":
+        spacing.set(qn("w:line"), "240")
+        changed = True
+    if spacing.get(qn("w:lineRule")) != "auto":
+        spacing.set(qn("w:lineRule"), "auto")
+        changed = True
+    if spacing.get(qn("w:before")) not in (None, "0"):
+        spacing.set(qn("w:before"), "0")
+        changed = True
+    if spacing.get(qn("w:after")) not in (None, "0"):
+        spacing.set(qn("w:after"), "0")
+        changed = True
+
+    # Strip highlight, bold, italic, underline from every run so the
+    # caption renders as plain body text. Default-paragraph rPr too.
+    if _strip_caption_text_decoration(pPr.find(qn("w:rPr"))):
+        changed = True
+    for r in p_elem.iter(qn("w:r")):
+        rPr = r.find(qn("w:rPr"))
+        if rPr is None:
+            continue
+        if _strip_caption_text_decoration(rPr):
+            changed = True
+
     return changed
+
+
+def _strip_caption_text_decoration(rPr) -> bool:
+    """Remove highlight / bold / italic / underline from a ``<w:rPr>``."""
+    if rPr is None:
+        return False
+    changed = False
+    for tag in ("w:highlight", "w:b", "w:bCs", "w:i", "w:iCs", "w:u"):
+        el = rPr.find(qn(tag))
+        if el is not None:
+            rPr.remove(el)
+            changed = True
+    shd = rPr.find(qn("w:shd"))
+    if shd is not None and shd.get(qn("w:fill")) not in (None, "auto"):
+        shd.set(qn("w:fill"), "auto")
+        changed = True
+    return changed
+
+
+def _merge_table_caption_with_description(p_elem, details: list[str]) -> bool:
+    """Merge a bare «Таблица N» paragraph with the descriptive line that
+    immediately follows it.
+
+    Many student documents look like:
+
+        Таблица 1
+        Характеристика выборки исследования
+        <w:tbl>…</w:tbl>
+
+    The caption rule «в одну строчку» requires that we render this as
+    a single paragraph «Таблица 1 – Характеристика выборки
+    исследования». We mutate *p_elem* in place: append « – <description>»
+    and remove the description paragraph from the body.
+
+    Returns True when a merge happened.
+    """
+    text = "".join((t.text or "") for t in p_elem.iter(qn("w:t"))).strip()
+    if not text:
+        return False
+    if not _TABLE_CAPTION_RE.match(text):
+        return False
+    # Already has a description (text after the leading «Таблица N»)?
+    head_match = re.match(r"^\s*таблица\s*[\dА-ЯЁA-Z\.]+", text, re.IGNORECASE | re.UNICODE)
+    if head_match is None:
+        return False
+    tail = text[head_match.end():].strip()
+    if tail:
+        # Already «Таблица N – …», nothing to merge with.
+        return False
+
+    nxt = _next_nonempty_sibling(p_elem)
+    if nxt is None or nxt.tag != qn("w:p"):
+        return False
+    desc_text = "".join((t.text or "") for t in nxt.iter(qn("w:t"))).strip()
+    if not desc_text:
+        return False
+    # Don't pull in another caption / heading / source line.
+    if _TABLE_CAPTION_RE.match(desc_text) or _FIGURE_CAPTION_RE.match(desc_text) or _SOURCE_LINE_RE.match(desc_text):
+        return False
+    nxt_pPr = nxt.find(qn("w:pPr"))
+    if nxt_pPr is not None:
+        ps = nxt_pPr.find(qn("w:pStyle"))
+        if ps is not None and (ps.get(qn("w:val")) or "").startswith("Heading"):
+            return False
+    # Don't merge with a paragraph that contains an image / drawing.
+    if _para_has_image(nxt):
+        return False
+
+    # The next sibling AFTER the description paragraph should be a
+    # ``<w:tbl>`` for the merge to make sense; otherwise we'd be
+    # gluing unrelated body text onto «Таблица N».
+    after_desc = _next_nonempty_sibling(nxt)
+    if after_desc is None or after_desc.tag != qn("w:tbl"):
+        return False
+
+    # Append « – description» to the caption's last text run.
+    t_elements = list(p_elem.iter(qn("w:t")))
+    if not t_elements:
+        return False
+    last_t = t_elements[-1]
+    last_t.text = (last_t.text or "") + " \u2013 " + desc_text
+
+    parent = nxt.getparent()
+    if parent is not None:
+        parent.remove(nxt)
+    details.append(
+        "Подписи: «Таблица N» объединена с описанием в одну строчку"
+    )
+    return True
 
 
 def fix_caption_positions(doc, details: list[str]) -> bool:
@@ -140,6 +305,16 @@ def fix_caption_positions(doc, details: list[str]) -> bool:
     fig_formatted = 0
     tbl_moved = 0
     tbl_formatted = 0
+
+    # Merge bare «Таблица N» rows with the description sitting on the
+    # following paragraph BEFORE the alignment / spacing pass — once
+    # the rows are merged the existing logic handles them correctly.
+    for para in list(doc.paragraphs):
+        p_elem = para._element
+        if p_elem.getparent() is None:
+            continue
+        if _merge_table_caption_with_description(p_elem, details):
+            changed = True
 
     for para in list(doc.paragraphs):
         text = (para.text or "").strip()
@@ -328,6 +503,129 @@ def fix_source_caption_lines(doc, details: list[str]) -> bool:
             f"Подписи: убрана конечная точка в {stripped_dot} строке(ах) «Источник»"
         )
     return changed
+
+
+def ensure_blank_after_caption_blocks(doc, details: list[str]) -> bool:
+    """Insert (or trim) exactly one empty paragraph after every figure/table/
+    «Источник:» block.
+
+    Customer rule: «После таблицы и рисунков или фразы источник: один пробел».
+    The earlier passes ``tighten_caption_block_layout`` and
+    ``fix_source_caption_lines`` zero ``space_after`` on the figure
+    caption / source row, which makes the next body paragraph stick
+    flush to the bottom of the table. We compensate by ensuring a
+    single empty ``<w:p>`` between the block and the next body
+    paragraph.
+
+    A "block end" is detected as one of:
+        * a ``<w:tbl>`` not followed by an «Источник:» row (the table
+          itself is the end);
+        * a ``<w:p>`` whose text matches ``_SOURCE_LINE_RE`` and which
+          immediately follows a table (the source row is the end);
+        * a ``<w:p>`` whose text matches ``_FIGURE_CAPTION_RE`` and
+          which sits below a paragraph with an inline image.
+    """
+    from docx.oxml import OxmlElement
+    body = doc.element.body
+    inserted = 0
+    trimmed = 0
+
+    def _is_text_para(el):
+        if el is None or el.tag != qn("w:p"):
+            return False
+        txt = "".join((t.text or "") for t in el.iter(qn("w:t"))).strip()
+        return bool(txt) or _para_has_image(el)
+
+    def _is_blank_para(el):
+        if el is None or el.tag != qn("w:p"):
+            return False
+        txt = "".join((t.text or "") for t in el.iter(qn("w:t"))).strip()
+        return not txt and not _para_has_image(el)
+
+    def _ends_a_block(el) -> bool:
+        if el.tag == qn("w:tbl"):
+            nxt = _next_nonempty_sibling(el)
+            if nxt is None:
+                return True
+            if nxt.tag == qn("w:p"):
+                txt = "".join((t.text or "") for t in nxt.iter(qn("w:t"))).strip()
+                if _SOURCE_LINE_RE.match(txt):
+                    return False
+            return True
+        if el.tag != qn("w:p"):
+            return False
+        txt = "".join((t.text or "") for t in el.iter(qn("w:t"))).strip()
+        if not txt:
+            return False
+        if _SOURCE_LINE_RE.match(txt):
+            prev = _prev_nonempty_sibling(el)
+            return prev is not None and prev.tag == qn("w:tbl")
+        if _FIGURE_CAPTION_RE.match(txt):
+            prev = _prev_nonempty_sibling(el)
+            return prev is not None and prev.tag == qn("w:p") and _para_has_image(prev)
+        return False
+
+    children = list(body)
+    for el in children:
+        parent = el.getparent()
+        if parent is None:
+            continue
+        if not _ends_a_block(el):
+            continue
+
+        nxt = el.getnext()
+        # Walk past existing empties; if there are 2+ blanks, drop the extras.
+        empties: list = []
+        cursor = nxt
+        while cursor is not None and _is_blank_para(cursor):
+            empties.append(cursor)
+            cursor = cursor.getnext()
+
+        # If next non-blank sibling is something other than body text
+        # (e.g., another caption / table / sectPr / heading), don't add
+        # spacing — the caller's other rules govern that boundary.
+        if cursor is None:
+            for extra in empties[1:]:
+                parent.remove(extra)
+                trimmed += 1
+            continue
+
+        # Heading / page-break-before paragraphs already create the
+        # vertical break we want; no extra blank required.
+        cursor_pPr = cursor.find(qn("w:pPr")) if cursor.tag == qn("w:p") else None
+        starts_section = False
+        if cursor_pPr is not None:
+            if cursor_pPr.find(qn("w:pageBreakBefore")) is not None:
+                starts_section = True
+            ps = cursor_pPr.find(qn("w:pStyle"))
+            if ps is not None and (ps.get(qn("w:val")) or "").startswith("Heading"):
+                starts_section = True
+
+        if starts_section:
+            for extra in empties:
+                parent.remove(extra)
+                trimmed += 1
+            continue
+
+        # Need exactly one blank between block end and *cursor*.
+        if not empties:
+            new_p = OxmlElement("w:p")
+            el.addnext(new_p)
+            inserted += 1
+        elif len(empties) > 1:
+            for extra in empties[1:]:
+                parent.remove(extra)
+                trimmed += 1
+
+    if inserted:
+        details.append(
+            f"Подписи: после таблиц/рисунков/«Источник:» добавлен пустой абзац ({inserted} шт.)"
+        )
+    if trimmed:
+        details.append(
+            f"Подписи: убраны лишние пустые абзацы после таблиц/рисунков ({trimmed} шт.)"
+        )
+    return bool(inserted or trimmed)
 
 
 def tighten_caption_block_layout(doc, details: list[str]) -> bool:

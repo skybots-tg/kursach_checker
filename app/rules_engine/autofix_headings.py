@@ -541,52 +541,282 @@ def enforce_chapter_page_breaks(doc, details: list[str]) -> bool:
     return changed > 0
 
 
-def enforce_heading_bold(doc, cfg, details: list[str]) -> bool:
-    """Ensure every Heading 1/2/3 paragraph has all runs set to bold.
+# Canonical OOXML order of ``CT_RPr`` children (ECMA-376). Word
+# silently ignores properties that appear in the wrong order, so
+# whenever we touch a heading run's ``<w:rPr>`` we re-sort children
+# to match this list.
+_CT_RPR_CANONICAL_ORDER = (
+    "rStyle",
+    "rFonts",
+    "b",
+    "bCs",
+    "i",
+    "iCs",
+    "caps",
+    "smallCaps",
+    "strike",
+    "dstrike",
+    "outline",
+    "shadow",
+    "emboss",
+    "imprint",
+    "noProof",
+    "snapToGrid",
+    "vanish",
+    "webHidden",
+    "color",
+    "spacing",
+    "w",
+    "kern",
+    "position",
+    "sz",
+    "szCs",
+    "highlight",
+    "u",
+    "effect",
+    "bdr",
+    "shd",
+    "fitText",
+    "vertAlign",
+    "rtl",
+    "cs",
+    "em",
+    "lang",
+    "eastAsianLayout",
+    "specVanish",
+    "oMath",
+)
+_CT_RPR_ORDER_INDEX = {name: i for i, name in enumerate(_CT_RPR_CANONICAL_ORDER)}
 
-    Operates at the XML level so that inherited style cascading and mixed
-    explicit run properties no longer leave part of a heading un-bold. Runs
-    independently of the ``skip_headings`` safety flag because the client
-    explicitly asked for bold chapter/subsection headings.
+
+def _normalize_rpr_order(rPr) -> bool:
+    """Re-sort ``<w:rPr>`` children into canonical OOXML order.
+
+    Returns ``True`` when at least one element was re-positioned.
+    """
+    children = list(rPr)
+    if not children:
+        return False
+    children_with_keys = []
+    seen_unknown = False
+    for child in children:
+        local = child.tag.split("}")[-1]
+        if local in _CT_RPR_ORDER_INDEX:
+            children_with_keys.append((_CT_RPR_ORDER_INDEX[local], child))
+        else:
+            seen_unknown = True
+            children_with_keys.append((len(_CT_RPR_ORDER_INDEX), child))
+    sorted_pairs = sorted(
+        enumerate(children_with_keys), key=lambda p: (p[1][0], p[0])
+    )
+    new_order = [pair[1][1] for pair in sorted_pairs]
+    if [c for c in children] == new_order and not seen_unknown:
+        return False
+    if [c for c in children] == new_order:
+        return False
+    for child in children:
+        rPr.remove(child)
+    for child in new_order:
+        rPr.append(child)
+    return True
+
+
+def _ensure_heading_styles_bold(doc) -> tuple[int, dict[int, str]]:
+    """Add ``<w:b/>``/``<w:bCs/>`` to ``Heading 1/2/3`` (and "Заголовок 1/2/3")
+    style ``<w:rPr>``s so headings keep displaying bold even after we
+    strip run-level ``<w:b/>`` from heading paragraphs (which is needed
+    so Word's TOC refresh doesn't carry that bold into TOC entries).
+
+    Returns a tuple ``(style_changed, level_to_styleId)`` where
+    ``level_to_styleId`` maps each detected heading level (1..3) to the
+    *real* ``w:styleId`` of the style that carries that level. The
+    map is needed because document templates routinely ship a style
+    named "heading 1" whose ``styleId`` is something opaque like
+    ``"1"`` or ``"Заголовок1"`` — setting ``<w:pStyle w:val="Heading1"/>``
+    would point at a non-existent style and Word would silently render
+    the paragraph in the default font.
+    """
+    from docx.oxml import OxmlElement
+    styles_root = doc.styles.element
+    canonical_names = {f"heading {i}": i for i in range(1, 4)}
+    canonical_names.update({f"заголовок {i}": i for i in range(1, 4)})
+    canonical_ids = {f"Heading{i}": i for i in range(1, 4)}
+
+    def _force_bold_rpr(style_el) -> bool:
+        """Ensure ``<w:b/>``/``<w:bCs/>`` are present (and non-zero) inside
+        the style's ``<w:rPr>``."""
+        rPr = style_el.find(qn("w:rPr"))
+        if rPr is None:
+            rPr = OxmlElement("w:rPr")
+            pPr = style_el.find(qn("w:pPr"))
+            if pPr is not None:
+                pPr.addnext(rPr)
+            else:
+                style_el.append(rPr)
+        local = False
+        for tag in ("w:b", "w:bCs"):
+            el = rPr.find(qn(tag))
+            if el is None:
+                el = OxmlElement(tag)
+                rPr.append(el)
+                local = True
+            elif el.get(qn("w:val")) in ("0", "false"):
+                el.set(qn("w:val"), "1")
+                local = True
+        return local
+
+    by_id: dict[str, "OxmlElement"] = {}
+    for st in styles_root.iter(qn("w:style")):
+        sid = st.get(qn("w:styleId"))
+        if sid:
+            by_id[sid] = st
+
+    level_to_styleid: dict[int, str] = {}
+    style_changed = 0
+    for st in styles_root.iter(qn("w:style")):
+        sid = st.get(qn("w:styleId")) or ""
+        sname_el = st.find(qn("w:name"))
+        sname_val = (sname_el.get(qn("w:val")) if sname_el is not None else "") or ""
+        sname_lower = sname_val.lower()
+        level = canonical_ids.get(sid) or canonical_names.get(sname_lower)
+        if level is None:
+            continue
+        # Prefer the first style we see for each level so deterministic
+        # behaviour when the document has duplicates.
+        level_to_styleid.setdefault(level, sid)
+        if _force_bold_rpr(st):
+            style_changed += 1
+        # Word's "linked" character style (``<w:link w:val="…"/>``) is
+        # automatically mirrored from the paragraph style's run
+        # properties. Some renderers (notably the one Word uses when
+        # exporting to PDF) prefer the linked character style's rPr
+        # over the paragraph style's rPr for runs, which makes our
+        # paragraph-style ``<w:b/>`` invisible. Update the linked
+        # character style as well so the bold survives the round-trip.
+        link_el = st.find(qn("w:link"))
+        if link_el is not None:
+            link_target = link_el.get(qn("w:val")) or ""
+            link_st = by_id.get(link_target)
+            if link_st is not None and _force_bold_rpr(link_st):
+                style_changed += 1
+    return style_changed, level_to_styleid
+
+
+def enforce_heading_bold(doc, cfg, details: list[str]) -> bool:
+    """Ensure every Heading 1/2/3 paragraph DISPLAYS bold while keeping
+    auto-TOC entries non-bold.
+
+    Strategy:
+        * Add ``<w:b/>``/``<w:bCs/>`` to the Heading 1/2/3 (Заголовок 1/2/3)
+          style ``<w:rPr>`` so the bold flag travels via style inheritance.
+        * Strip run-level ``<w:b/>``/``<w:bCs/>`` from every heading run
+          and from the paragraph's default ``<w:rPr>``. Run-level bold
+          is what Word's TOC field-refresh copies into the regenerated
+          TOC entries; once it's gone the TOC1/TOC2/TOC3 styles' explicit
+          ``<w:b w:val="0"/>`` takes effect and the TOC renders non-bold,
+          which is what the customer asked for.
+
+    The previous behaviour (force run-level ``<w:b w:val="1"/>``) made
+    the body look correct but caused «Содержание» entries to render
+    bold after Word silently refreshed the TOC field on PDF export.
     """
     if not getattr(cfg, "heading_bold", True):
         return False
 
     from docx.oxml import OxmlElement
+    style_changed, level_to_styleid = _ensure_heading_styles_bold(doc)
 
     toc_elems = _collect_toc_paragraph_elements(doc)
-    changed = 0
+    paras_changed = 0
+    pstyles_changed = 0
+    bold_runs_added = 0
+    canonical_names_lower = (
+        {f"heading {i}" for i in range(1, 4)}
+        | {f"заголовок {i}" for i in range(1, 4)}
+    )
+    canonical_ids_set = {f"Heading{i}" for i in range(1, 4)}
+    canonical_target_ids = set(level_to_styleid.values())
     for para in doc.paragraphs:
         if para._element in toc_elems:
             continue
         level = _para_heading_level(para)
         if level is None or level > 3:
             continue
-        touched = False
-        for r_elem in para._element.iter(qn("w:r")):
-            rPr = r_elem.find(qn("w:rPr"))
-            if rPr is None:
-                rPr = OxmlElement("w:rPr")
-                r_elem.insert(0, rPr)
-            for tag in ("w:b", "w:bCs"):
-                el = rPr.find(qn(tag))
-                if el is None:
-                    el = OxmlElement(tag)
-                    rPr.append(el)
-                val = el.get(qn("w:val"))
-                if val in ("0", "false"):
-                    el.set(qn("w:val"), "1")
-                    touched = True
-                elif val is None:
-                    touched = True
-        if touched:
-            changed += 1
-
-    if changed:
-        details.append(
-            f"Заголовки: {changed} заголовок(ов) переведено в полужирный"
+        sid = (getattr(para.style, "style_id", "") or "")
+        sname = (getattr(para.style, "name", "") or "").lower()
+        # "Canonical" means the paragraph is on a style that we
+        # marked bold via ``_ensure_heading_styles_bold``: the
+        # official ``HeadingN`` styleIds, anything whose name matches
+        # ``heading N`` / ``заголовок N``, or any styleId we already
+        # noted as the level's primary style.
+        is_canonical = (
+            sid in canonical_ids_set
+            or sname in canonical_names_lower
+            or sid in canonical_target_ids
         )
-    return changed > 0
+        touched = False
+        if is_canonical:
+            # Body heading is on a canonical style (e.g. avto's
+            # ``Heading1`` / voina's ``Heading 1``). The style's
+            # ``<w:b/>`` (added by ``_ensure_heading_styles_bold``)
+            # makes the paragraph render bold via inheritance —
+            # strip explicit run-level ``<w:b/>`` so Word's TOC
+            # refresh doesn't carry that bold into regenerated
+            # entries.
+            pPr = para._element.find(qn("w:pPr"))
+            if pPr is not None:
+                rPr_def = pPr.find(qn("w:rPr"))
+                if rPr_def is not None:
+                    for tag in ("w:b", "w:bCs"):
+                        el = rPr_def.find(qn(tag))
+                        if el is not None:
+                            rPr_def.remove(el)
+                            touched = True
+            for r_elem in para._element.iter(qn("w:r")):
+                rPr = r_elem.find(qn("w:rPr"))
+                if rPr is None:
+                    continue
+                for tag in ("w:b", "w:bCs"):
+                    el = rPr.find(qn(tag))
+                    if el is not None:
+                        rPr.remove(el)
+                        touched = True
+        else:
+            # Non-canonical heading paragraph (custom style like
+            # ref6's ``af0`` / "основной" + explicit ``<w:outlineLvl/>``).
+            # The original document encodes bold at the run level
+            # — leave the paragraph alone here. Switching ``pStyle``
+            # to a different style ID empirically breaks bold
+            # rendering in some Word templates because ``<w:rFonts>``
+            # / ``<w:sz>`` overrides we add later trigger Word to
+            # use the linked character style's rPr instead of the
+            # paragraph style's rPr, and the linked char style is
+            # rebuilt without bold. The ``run.bold = True`` guard
+            # below makes sure heading runs that lost their bold to
+            # a sibling autofix still display bold.
+            for run in para.runs:
+                if is_field_code_run(run):
+                    continue
+                if not (run.text or "").strip():
+                    continue
+                if run.bold is True:
+                    continue
+                run.bold = True
+                bold_runs_added += 1
+                touched = True
+
+        if touched:
+            paras_changed += 1
+
+    if style_changed or paras_changed or pstyles_changed or bold_runs_added:
+        details.append(
+            f"Заголовки: жирность нормализована "
+            f"(стилей: {style_changed}, абзацев: {paras_changed}, "
+            f"переведено на «Heading N»: {pstyles_changed}, "
+            f"добавлено run-level bold: {bold_runs_added}) — "
+            f"оглавление при этом остаётся не жирным"
+        )
+    return bool(style_changed or paras_changed or pstyles_changed or bold_runs_added)
 
 
 def enforce_heading_font(doc, cfg, details: list[str]) -> bool:

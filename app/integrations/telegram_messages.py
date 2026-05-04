@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import html
 import logging
 from pathlib import Path
 
@@ -50,20 +51,25 @@ async def _get_user_credits(tg_user_id: int) -> int:
         return balance.credits_available if balance else 0
 
 
-async def personalize_text(text: str, *, tg_user_id: int | None) -> str:
+async def personalize_text(
+    text: str, *, tg_user_id: int | None, parse_mode: str | None = None,
+) -> str:
     """Подставить персональные плейсхолдеры в текст сообщения.
 
     Поддерживаются:
-    * ``{ref_link}`` — личная реферальная ссылка пользователя;
+    * ``{ref_link}`` — личная реферальная ссылка пользователя.
+      При HTML-разметке оборачивается в ``<code>...</code>``, чтобы
+      пользователь мог скопировать ссылку одним тапом.
     * ``{credits}`` и ``{N}`` — текущее количество попыток.
     """
     has_ref = REF_LINK_PLACEHOLDER in text
     has_credits = any(p in text for p in CREDITS_PLACEHOLDERS)
 
     if has_ref and tg_user_id:
-        text = text.replace(
-            REF_LINK_PLACEHOLDER, build_ref_link(tg_user_id),
-        )
+        link = build_ref_link(tg_user_id)
+        if (parse_mode or "").upper() == "HTML":
+            link = f"<code>{html.escape(link, quote=False)}</code>"
+        text = text.replace(REF_LINK_PLACEHOLDER, link)
 
     if has_credits:
         credits_value = (
@@ -129,9 +135,11 @@ async def _send_new_message(
     try:
         mtype = msg.message_type
         text = msg.text or ""
-        if text:
-            text = await personalize_text(text, tg_user_id=tg_user_id)
         parse_mode = msg.parse_mode if msg.text else None
+        if text:
+            text = await personalize_text(
+                text, tg_user_id=tg_user_id, parse_mode=parse_mode,
+            )
         file_input = (
             FSInputFile(msg.file_path)
             if msg.file_path and Path(msg.file_path).exists()

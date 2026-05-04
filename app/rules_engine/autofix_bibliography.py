@@ -72,6 +72,69 @@ _NUMBERED_ENTRY_RE = re.compile(r"^\s*(?:\[\d{1,3}\][\.)\s]?|\d{1,3}[\.)])\s+\S"
 _LEADING_NONWORD_RE = re.compile(r"^[\s\W_]+", re.UNICODE)
 _HEADING_STYLE_IDS = frozenset({f"Heading{i}" for i in range(1, 10)})
 
+# Recognise common bibliography subsection titles ("Нормативно-правовые
+# акты", "Судебная практика", "Научная литература", "Учебная литература",
+# "Иные источники", "Электронные ресурсы", …). The whole paragraph must
+# match — these are short label rows, not actual reference entries. Used
+# to keep the multi-section structure intact instead of flattening
+# everything alphabetically (which would, for example, push «Конституция»
+# into the middle of «Учебная литература»).
+_SUBSECTION_TITLE_RE = re.compile(
+    r"^\s*(?:"
+    r"нормативн[оы]\s*[\-–—]?\s*правов(?:ые|ой|о)\s+акт\w*"
+    r"|нормативн[оы]\s+(?:и\s+иные\s+)?(?:правовые\s+)?акт\w*"
+    r"|нпа"
+    r"|официальн\w+\s+документ\w*"
+    r"|международн\w+\s+(?:акт\w*|договор\w*)"
+    r"|законы(?:\s+и\s+подзаконные\s+акты)?"
+    r"|подзаконные\s+акты"
+    r"|конституц\w+(?:\s+и\s+(?:федеральн\w+\s+)?закон\w*)?"
+    r"|(?:материал\w+\s+)?судебн(?:ая|ой)\s+практик\w*"
+    r"|акт\w*\s+(?:высш\w+\s+)?судебн\w+\s+орган\w*"
+    r"|прав\w+\s+позиц\w+\s+(?:судов|судебн\w+)"
+    r"|научн(?:ая|ые|о[\s\-]?метод\w*)\s+(?:литератур\w*|публикац\w+|источник\w+|труд\w+|стат\w+|исследован\w+)"
+    r"|научно[\s\-]?учебн\w+\s+литератур\w*"
+    r"|учебн(?:ая|ые|о[\s\-]?метод\w*)\s+литератур\w*"
+    r"|(?:учебная\s+)?литератур\w+(?:\s+и\s+учебн\w+\s+пособ\w+)?"
+    r"|учебники?(?:\s+и\s+учебные\s+пособ\w+)?"
+    r"|учебн\w+\s+пособ\w+"
+    r"|специальн(?:ая|ые)\s+литератур\w*"
+    r"|монограф\w+(?:\s+и\s+стат\w+)?"
+    r"|периодическ\w+(?:\s+(?:издани\w+|печат\w+))?"
+    r"|стат\w+\s+в\s+период\w+\s+издан\w+"
+    r"|диссертац\w+(?:\s+и\s+автореферат\w+)?"
+    r"|автореферат\w+"
+    r"|иные?\s+(?:источник\w+|документ\w+|материал\w+|публикац\w+)"
+    r"|прочие?\s+(?:источник\w+|документ\w+|материал\w+)"
+    r"|дополнительн\w+\s+(?:источник\w+|литератур\w+)"
+    r"|электронн(?:ые|ый|ой)\s+(?:ресурс\w*|источник\w*)"
+    r"|интернет[\s\-]ресурс\w*"
+    r"|интернет[\s\-]источник\w*"
+    r"|сайт\w+\s+в\s+интернет\w*"
+    r"|справочно\W*правов\w+\s+систем\w+"
+    r"|references"
+    r"|primary\s+sources"
+    r"|secondary\s+sources"
+    r")\s*[:.;]?\s*$",
+    re.IGNORECASE | re.UNICODE,
+)
+
+
+def _is_subsection_heading(text: str) -> bool:
+    """Return True if *text* is a bibliography subsection title.
+
+    The check is text-only (we cannot rely on bold any more — earlier
+    autofix passes strip bold from body paragraphs before this function
+    runs). Works on the trimmed paragraph text.
+    """
+    if not text:
+        return False
+    if len(text) > 80:
+        return False
+    if _NUMBERED_ENTRY_RE.match(text):
+        return False
+    return bool(_SUBSECTION_TITLE_RE.match(text.strip()))
+
 _RU_ALPHABET = (
     "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 )
@@ -182,10 +245,109 @@ def _set_paragraph_text(paragraph, new_text: str) -> None:
         run.text = ""
 
 
+def _collect_subsection_indices(
+    paragraphs, start: int, end: int,
+) -> list[int]:
+    """Return paragraph indices (in the bibliography range) whose text
+    looks like a subsection title («Нормативно-правовые акты», …).
+    """
+    out: list[int] = []
+    for idx in range(start, end):
+        text = (paragraphs[idx].text or "").strip()
+        if _is_subsection_heading(text):
+            out.append(idx)
+    return out
+
+
+def _enforce_subsection_bold(paragraph) -> None:
+    """Re-stamp bold on a subsection heading paragraph.
+
+    Earlier autofix passes strip bold from body-text paragraphs, so by
+    the time we get here the «Нормативно-правовые акты» row is plain
+    text. Customer expects subsection labels to stay bold.
+    """
+    pPr = paragraph._element.find(qn("w:pPr"))
+    if pPr is not None:
+        rPr_def = pPr.find(qn("w:rPr"))
+        if rPr_def is None:
+            rPr_def = OxmlElement("w:rPr")
+            pPr.append(rPr_def)
+        if rPr_def.find(qn("w:b")) is None:
+            rPr_def.append(OxmlElement("w:b"))
+        if rPr_def.find(qn("w:bCs")) is None:
+            rPr_def.append(OxmlElement("w:bCs"))
+
+    for r_el in paragraph._element.iter(qn("w:r")):
+        rPr = r_el.find(qn("w:rPr"))
+        if rPr is None:
+            rPr = OxmlElement("w:rPr")
+            r_el.insert(0, rPr)
+        if rPr.find(qn("w:b")) is None:
+            rPr.append(OxmlElement("w:b"))
+        if rPr.find(qn("w:bCs")) is None:
+            rPr.append(OxmlElement("w:bCs"))
+
+
+def _build_grouped_entries(
+    paragraphs, start: int, end: int, subsection_indices: list[int],
+) -> list[dict]:
+    """Group bibliography paragraphs into per-subsection entry groups.
+
+    Returns ``[{"subsection_idx": int|None, "entries": [entry, …]}]``
+    where each *entry* is ``{"idxs": [...], "text": "..."}``. Subsection
+    titles are used only as group dividers — they are NOT added to
+    entry indices, so they can later be re-formatted independently
+    (kept bold, no numbering).
+    """
+    sub_set = set(subsection_indices)
+    groups: list[dict] = [{"subsection_idx": None, "entries": []}]
+    current = groups[0]
+
+    for idx in range(start, end):
+        text = (paragraphs[idx].text or "").strip()
+        if not text:
+            continue
+        if idx in sub_set:
+            current = {"subsection_idx": idx, "entries": []}
+            groups.append(current)
+            continue
+        if _NUMBERED_ENTRY_RE.match(text):
+            current["entries"].append({"idxs": [idx], "text": text})
+        else:
+            if len(text) < 5:
+                continue
+            if current["entries"]:
+                current["entries"][-1]["idxs"].append(idx)
+                current["entries"][-1]["text"] = (
+                    current["entries"][-1]["text"] + " " + text
+                )
+            else:
+                current["entries"].append({"idxs": [idx], "text": text})
+
+    # Drop the leading "no subsection" group if it contains no entries
+    if not groups[0]["entries"] and len(groups) > 1:
+        groups.pop(0)
+
+    return groups
+
+
 def fix_bibliography_order_and_numbering(
     doc, details: list[str],
 ) -> bool:
-    """Sort bibliography entries alphabetically and number them 1. 2. 3."""
+    """Sort/renumber bibliography entries.
+
+    Two operating modes:
+
+    * **No subsections detected** — flatten the list, sort
+      alphabetically and renumber 1.…N. (Original behaviour.)
+    * **Subsections detected** (НПА / Судебная практика / Научная
+      литература / Учебная литература / Иные источники, …) — group
+      entries by subsection, **preserve the order students wrote
+      inside each section** (NPA hierarchy beats alphabetical order:
+      Конституция must stay on top), and renumber continuously
+      across the whole bibliography. Subsection labels stay where
+      they are and have their bold re-applied.
+    """
     rng = _find_bibliography_range(doc)
     if rng is None:
         return False
@@ -193,11 +355,22 @@ def fix_bibliography_order_and_numbering(
     heading_idx, start, end = rng
     paragraphs = doc.paragraphs
 
-    # Group contiguous paragraphs into "entries". Each entry begins with a
-    # numbered paragraph (e.g. "1. Иванов..."); subsequent non-numbered
-    # paragraphs are treated as continuation of the previous entry and are
-    # moved together with it during sorting.
-    entries: list[dict] = []  # each: {"idxs": [...], "text": "..."}
+    subsection_indices = _collect_subsection_indices(paragraphs, start, end)
+
+    if subsection_indices:
+        return _fix_with_subsections(
+            doc, details, heading_idx, start, end, subsection_indices,
+        )
+
+    return _fix_flat_alphabetical(doc, details, heading_idx, start, end)
+
+
+def _fix_flat_alphabetical(
+    doc, details: list[str], heading_idx: int, start: int, end: int,
+) -> bool:
+    paragraphs = doc.paragraphs
+
+    entries: list[dict] = []
     for idx in range(start, end):
         text = (paragraphs[idx].text or "").strip()
         if not text:
@@ -215,9 +388,7 @@ def fix_bibliography_order_and_numbering(
     # student manuscript that just lists references one per paragraph
     # without «1. 2. 3.» prefixes), the loop above produces zero
     # entries. Treat every non-trivial paragraph in the bibliography
-    # range as a separate entry so we still sort and number them — this
-    # is exactly the customer complaint «список литературы не по
-    # алфавиту и не под цифрами».
+    # range as a separate entry so we still sort and number them.
     if not entries:
         for idx in range(start, end):
             text = (paragraphs[idx].text or "").strip()
@@ -292,12 +463,6 @@ def fix_bibliography_order_and_numbering(
 
     _, s2, e2 = rng2
     num = 1
-    # Track which paragraph indices are entry "heads" (first paragraph of
-    # an entry that should receive the new number). With our fallback
-    # path most entries won't match _NUMBERED_ENTRY_RE pre-renumbering,
-    # so we treat the **first** non-trivial paragraph after a blank gap
-    # as a head. After at least one numbered entry exists, subsequent
-    # non-numbered short paragraphs are kept as continuation.
     prev_blank = True
     for idx in range(s2, e2):
         text = (refreshed[idx].text or "").strip()
@@ -305,10 +470,6 @@ def fix_bibliography_order_and_numbering(
             prev_blank = True
             continue
         is_numbered = bool(_NUMBERED_ENTRY_RE.match(text))
-        # Heuristic for un-numbered entries: a head is a paragraph that
-        # either matches _NUMBERED_ENTRY_RE OR is reasonably long
-        # (≥ 25 chars) — short fragments under that threshold are
-        # treated as continuation of the previous entry.
         is_head = is_numbered or (prev_blank and len(text) >= 25) or len(text) >= 25
         if not is_head:
             prev_blank = False
@@ -324,6 +485,50 @@ def fix_bibliography_order_and_numbering(
         details.append(
             f"Библиография: источники пронумерованы 1–{num - 1}"
         )
+    return True
+
+
+def _fix_with_subsections(
+    doc, details: list[str], heading_idx: int, start: int, end: int,
+    subsection_indices: list[int],
+) -> bool:
+    """Renumber bibliography entries while keeping subsection structure.
+
+    Order inside each subsection is intentionally preserved — students
+    write NPA in legal-force hierarchy («Конституция» → ГК → ЗК → ЖК →
+    федеральные законы), and alphabetical sorting would break that.
+    """
+    paragraphs = doc.paragraphs
+    groups = _build_grouped_entries(paragraphs, start, end, subsection_indices)
+
+    total_entries = sum(len(g["entries"]) for g in groups)
+    if total_entries < 2:
+        return False
+
+    # Renumber in place: per-subsection order stays the same, numbers
+    # run continuously across the whole bibliography.
+    num = 1
+    for group in groups:
+        for entry in group["entries"]:
+            head_idx = entry["idxs"][0]
+            head_para = paragraphs[head_idx]
+            text = (head_para.text or "").strip()
+            clean = _strip_number_prefix(text)
+            clean = _NUM_PREFIX_RE.sub("", clean).strip()
+            new_text = f"{num}. {clean}"
+            if new_text != text:
+                _set_paragraph_text(head_para, new_text)
+            num += 1
+
+    # Re-stamp bold on subsection rows so they visually stand out
+    # again after general bold-stripping passes ran.
+    for sub_idx in subsection_indices:
+        _enforce_subsection_bold(paragraphs[sub_idx])
+
+    details.append(
+        f"Библиография: разделы сохранены ({len(subsection_indices)} шт.), "
+        f"источники пронумерованы сквозной нумерацией 1–{num - 1}"
+    )
     return True
 
 
@@ -359,6 +564,11 @@ def enforce_bibliography_entry_formatting(
         if not text:
             continue
         if _is_heading_para(para):
+            continue
+        # Subsection rows («Нормативно-правовые акты», «Судебная
+        # практика», …) must keep their bold and stay un-indented;
+        # they are dividers, not regular reference entries.
+        if _is_subsection_heading(text):
             continue
         if _apply_entry_formatting(
             para, line_spacing, first_line_indent_mm, space_after_pt,

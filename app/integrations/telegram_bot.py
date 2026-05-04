@@ -302,9 +302,10 @@ async def _send_upload_prompt(bot: Bot, chat_id: int, tg_user_id: int) -> None:
     sent = await bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=kb)
     _track(chat_id, sent.message_id)
 
-    anchor_id = await _send_kb_anchor(bot, chat_id)
-    if anchor_id is not None:
-        _track(chat_id, anchor_id)
+    # Якорь reply-клавиатуры временно отключён.
+    # anchor_id = await _send_kb_anchor(bot, chat_id)
+    # if anchor_id is not None:
+    #     _track(chat_id, anchor_id)
 
 
 async def _handle_root_item_tap(
@@ -325,9 +326,10 @@ async def _handle_root_item_tap(
             chat_id, _root_item_label(item), reply_markup=link_kb,
         )
         _track(chat_id, sent.message_id)
-        anchor_id = await _send_kb_anchor(bot, chat_id)
-        if anchor_id is not None:
-            _track(chat_id, anchor_id)
+        # Якорь reply-клавиатуры временно отключён.
+        # anchor_id = await _send_kb_anchor(bot, chat_id)
+        # if anchor_id is not None:
+        #     _track(chat_id, anchor_id)
         return
     await _navigate_to_item(bot, chat_id, item.id, tg_user_id=tg_user_id)
 
@@ -372,7 +374,7 @@ async def _navigate_to_item(
     keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
 
     main_kb = await build_main_keyboard()
-    sent_ids, kb_attached = await send_content_messages(
+    sent_ids, _kb_attached = await send_content_messages(
         bot, chat_id, menu_item_id, reply_markup=keyboard,
         tg_user_id=tg_user_id, reply_keyboard=main_kb,
     )
@@ -383,10 +385,13 @@ async def _navigate_to_item(
         )
         sent_ids.append(sent.message_id)
 
-    if not kb_attached:
-        anchor_id = await _send_kb_anchor(bot, chat_id, reply_kb=main_kb)
-        if anchor_id is not None:
-            sent_ids.append(anchor_id)
+    # Якорь reply-клавиатуры временно отключён. Если main_kb не была
+    # прицеплена ни к одному из контентных сообщений (одиночное сообщение
+    # с inline), reply-меню пропадёт до следующего /start.
+    # if not _kb_attached:
+    #     anchor_id = await _send_kb_anchor(bot, chat_id, reply_kb=main_kb)
+    #     if anchor_id is not None:
+    #         sent_ids.append(anchor_id)
 
     _track(chat_id, *sent_ids)
 
