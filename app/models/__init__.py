@@ -22,6 +22,7 @@ from app.models.entities import (
     CreditsTransactionType,
     DemoSample,
     File,
+    FollowUpMessage,
     Gost,
     MenuItemMessage,
     Order,
@@ -35,6 +36,7 @@ from app.models.entities import (
     TemplateVersion,
     University,
     User,
+    UserFollowUp,
 )
 
 __all__ = [
@@ -72,5 +74,7 @@ __all__ = [
     "UserStatus",
     "DailyAnalytics",
     "EventCategory",
+    "FollowUpMessage",
+    "UserFollowUp",
 ]
 

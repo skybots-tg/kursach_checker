@@ -314,6 +314,36 @@ class Broadcast(Base):
     sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
+class FollowUpMessage(Base):
+    __tablename__ = "followup_messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    step: Mapped[int] = mapped_column(Integer, unique=True)  # 1, 2, 3
+    delay_minutes: Mapped[int] = mapped_column(Integer, default=15)
+    text: Mapped[str] = mapped_column(Text, default="")
+    parse_mode: Mapped[str] = mapped_column(String(16), default="HTML")
+    button_text: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    button_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    photo_paths: Mapped[list] = mapped_column(JSON, default=list)
+    is_album: Mapped[bool] = mapped_column(Boolean, default=False)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class UserFollowUp(Base):
+    __tablename__ = "user_followups"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
+    current_step: Mapped[int] = mapped_column(Integer, default=0)
+    next_send_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    is_converted: Mapped[bool] = mapped_column(Boolean, default=False)
+    cycle_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class BroadcastMessage(Base):
     __tablename__ = "broadcast_messages"
 
