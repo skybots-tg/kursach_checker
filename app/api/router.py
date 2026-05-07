@@ -9,6 +9,7 @@ from app.api.v1 import (
     admin_content,
     admin_content_messages,
     admin_demo,
+    admin_followups,
     admin_orders,
     admin_products,
     admin_referrals,
@@ -54,3 +55,4 @@ api_router.include_router(admin_autofix.router, prefix="/admin/autofix", tags=["
 api_router.include_router(admin_settings.router, prefix="/admin/settings", tags=["admin-settings"])
 api_router.include_router(admin_analytics.router, prefix="/admin/analytics", tags=["admin-analytics"])
 api_router.include_router(admin_referrals.router, prefix="/admin/referrals", tags=["admin-referrals"])
+api_router.include_router(admin_followups.router, prefix="/admin/content", tags=["admin-followups"])

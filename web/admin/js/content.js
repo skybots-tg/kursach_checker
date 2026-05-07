@@ -7,12 +7,13 @@ let _contentTab = 'menu';
 async function loadContent() {
   const { sub } = parseHash();
 
-  if (sub && ['menu', 'texts', 'system'].includes(sub)) _contentTab = sub;
+  if (sub && ['menu', 'texts', 'system', 'followups'].includes(sub)) _contentTab = sub;
   const page = $('page-content');
   page.innerHTML = loadingHtml();
   try {
     if (_contentTab === 'texts') await loadContentTexts();
     else if (_contentTab === 'system') await loadSystemTexts();
+    else if (_contentTab === 'followups') await loadFollowups();
     else await loadContentMenu();
   } catch (err) {
     page.innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
@@ -32,6 +33,7 @@ function renderContentPage(bodyHtml, actionBtn) {
       <button class="tab-btn ${_contentTab === 'menu' ? 'active' : ''}" onclick="switchContentTab('menu')">Меню</button>
       <button class="tab-btn ${_contentTab === 'texts' ? 'active' : ''}" onclick="switchContentTab('texts')">Тексты</button>
       <button class="tab-btn ${_contentTab === 'system' ? 'active' : ''}" onclick="switchContentTab('system')">Системные тексты</button>
+      <button class="tab-btn ${_contentTab === 'followups' ? 'active' : ''}" onclick="switchContentTab('followups')">Дожимы</button>
     </div>
     ${bodyHtml}`;
 }

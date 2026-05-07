@@ -29,6 +29,7 @@ from app.models import (
 )
 from app.services import subscribe_bonus
 from app.services.bot_texts import get_text
+from app.services.followups import mark_converted
 from app.storage.files import save_raw_file
 from app.workers.tasks import enqueue_check
 
@@ -128,6 +129,12 @@ async def handle_document(message: Message, bot: Bot) -> None:
 
     await enqueue_check(check_id)
     await status_msg.edit_text(await get_text("check.queued"))
+
+    # Пользователь загрузил документ — конверсия, останавливаем дожимы.
+    try:
+        await mark_converted(user.id)
+    except Exception:
+        logger.exception("Failed to mark follow-up conversion for user_id=%s", user.id)
 
 
 def _make_pay_webapp_button(label: str) -> InlineKeyboardButton | None:

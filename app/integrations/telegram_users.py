@@ -16,6 +16,7 @@ from app.services.referrals import (
     link_referral,
     try_grant_bonus_for_invited,
 )
+from app.services.followups import start_followup_chain
 from app.services.welcome_bonus import grant_welcome_bonus
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ async def ensure_user(
     (чтобы вызывающая сторона могла отправить уведомление); иначе ``None``.
     """
     inviter_tg_id_to_notify: int | None = None
+    new_user_id: int | None = None
     async with SessionLocal() as db:
         user = await db.scalar(
             select(User).where(User.telegram_id == tg_user.id)
@@ -50,6 +52,7 @@ async def ensure_user(
             db.add(CreditsBalance(user_id=user.id, credits_available=0))
             # Приветственный бонус новому пользователю (если включён).
             await grant_welcome_bonus(db, user_id=user.id)
+            new_user_id = user.id
 
             if ref_inviter_tg_id and ref_inviter_tg_id != tg_user.id:
                 inviter = await db.scalar(
@@ -72,6 +75,12 @@ async def ensure_user(
             user.username = tg_user.username
             user.last_login_at = datetime.utcnow()
         await db.commit()
+    # Запустить цепочку дожимов вне транзакции (своя сессия внутри).
+    if new_user_id is not None:
+        try:
+            await start_followup_chain(new_user_id)
+        except Exception:
+            logger.exception("Failed to start follow-up chain for user_id=%s", new_user_id)
     return inviter_tg_id_to_notify
 
 

@@ -3,16 +3,18 @@ import traceback
 from datetime import datetime
 from pathlib import Path
 
-from arq import create_pool
+from arq import create_pool, cron
 from arq.connections import RedisSettings
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.db.session import SessionLocal
+from app.integrations.telegram_bot_factory import make_bot
 from app.integrations.telegram_notify import notify_check_error, notify_check_ready
 from app.models import Check, CheckStatus, CheckWorkerLog, File, SystemSetting, TemplateVersion, User
 from app.services.check_pipeline import run_check_pipeline
 from app.services.credits import spend_credits
+from app.services.followups import process_pending_followups
 from app.storage.files import fixed_output_download_name, save_json_report
 
 logger = logging.getLogger(__name__)
@@ -179,11 +181,28 @@ async def _run_pipeline(session: AsyncSession, check: Check) -> dict:
     }
 
 
+async def run_followups_cron(ctx: dict) -> dict:
+    """Periodic task: send pending follow-up messages."""
+    if not settings.telegram_bot_token:
+        return {"sent": 0, "reason": "no_bot_token"}
+    bot = make_bot()
+    try:
+        sent = await process_pending_followups(bot)
+    finally:
+        await bot.session.close()
+    if sent:
+        logger.info("Follow-ups cron: sent %d messages", sent)
+    return {"sent": sent}
+
+
 _redis_settings = RedisSettings.from_dsn(settings.redis_url)
 
 
 class WorkerSettings:
     functions = [process_check_task]
+    cron_jobs = [
+        cron(run_followups_cron, minute=None, timeout=120),
+    ]
     redis_settings = _redis_settings
     max_tries = 1
     job_timeout = 300
