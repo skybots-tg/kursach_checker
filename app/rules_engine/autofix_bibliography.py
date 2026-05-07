@@ -469,15 +469,19 @@ def _fix_flat_alphabetical(
         if not text:
             prev_blank = True
             continue
+        if _is_subsection_heading(text):
+            prev_blank = True
+            continue
         is_numbered = bool(_NUMBERED_ENTRY_RE.match(text))
-        is_head = is_numbered or (prev_blank and len(text) >= 25) or len(text) >= 25
+        is_head = is_numbered or (prev_blank and len(text) >= 25)
         if not is_head:
             prev_blank = False
             continue
         clean = _strip_number_prefix(text)
         clean = _NUM_PREFIX_RE.sub("", clean).strip()
         new_text = f"{num}. {clean}"
-        _set_paragraph_text(refreshed[idx], new_text)
+        if new_text != text:
+            _set_paragraph_text(refreshed[idx], new_text)
         num += 1
         prev_blank = False
 

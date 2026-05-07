@@ -74,7 +74,6 @@ from app.rules_engine.autofix_whitespace import (
     fix_strip_leading_whitespace,
     normalize_doc_defaults_spacing,
     normalize_source_line_spacing,
-    normalize_title_page_spacing,
 )
 from app.rules_engine.checks_content import ALLOWED_CHARS_RE as _ALLOWED_CHARS_RE
 from app.rules_engine.autofix_para_classify import (
@@ -209,7 +208,17 @@ def apply_safe_autofixes(
         else:
             logger.info("Autofix: margin normalization skipped — tables would overflow")
 
+    body_start = 0
+    for i, p in enumerate(doc.paragraphs):
+        if is_heading_para(p):
+            body_start = i
+            break
+
     for idx, paragraph in enumerate(doc.paragraphs):
+        # Skip title page paragraphs — client requirement:
+        # «в титульнике ничего не менялось от исходного файла»
+        if idx < body_start:
+            continue
         text = (paragraph.text or "").strip()
         if not text:
             continue
@@ -246,16 +255,6 @@ def apply_safe_autofixes(
                         changed = True
                     if fix_page_break_before(paragraph, para_label, details):
                         changed = True
-
-    body_start = 0
-    for i, p in enumerate(doc.paragraphs):
-        if is_heading_para(p):
-            body_start = i
-            break
-
-    if body_start > 0 and cfg.normalize_spacing_before_after:
-        if normalize_title_page_spacing(doc, body_start, details):
-            changed = True
 
     para_count = 0
     for idx, paragraph in enumerate(doc.paragraphs):
@@ -382,7 +381,7 @@ def apply_safe_autofixes(
 
         if cfg.normalize_line_spacing:
             eff_ls = effective_line_spacing(paragraph)
-            if eff_ls is not None and abs(eff_ls - cfg.line_spacing) > 0.05:
+            if eff_ls is None or abs(eff_ls - cfg.line_spacing) > 0.05:
                 pf.line_spacing = cfg.line_spacing
                 changed = True
                 para_touched = True
@@ -497,7 +496,6 @@ def apply_safe_autofixes(
     if getattr(cfg, "fix_caption_positions", True):
         changed |= tighten_caption_block_layout(doc, details)
         changed |= fix_source_caption_lines(doc, details)
-        changed |= ensure_blank_after_caption_blocks(doc, details)
     changed |= normalize_source_line_spacing(doc, details)
     changed |= enforce_subheading_alignment(doc, cfg, details)
     changed |= enforce_heading_bold(doc, cfg, details)
@@ -509,6 +507,11 @@ def apply_safe_autofixes(
         changed = True
     if cfg.collapse_empty_paras and collapse_excessive_empty_paras(doc, cfg.max_consecutive_empty_paras, details):
         changed = True
+    # Insert blank paragraphs after table/figure/source blocks AFTER the
+    # collapse pass so they are not removed.  Client requirement:
+    # «после таблиц и рисунков отступы».
+    if getattr(cfg, "fix_caption_positions", True):
+        changed |= ensure_blank_after_caption_blocks(doc, details)
 
     if changed:
         if remove_redundant_manual_page_breaks(doc, details):

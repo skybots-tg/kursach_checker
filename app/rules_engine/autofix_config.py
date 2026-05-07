@@ -55,6 +55,8 @@ class AutoFixConfig:
     heading_bold: bool
     heading_level1_center: bool
     heading_level2plus_center: bool
+    table_font_name: str
+    table_font_size_pt: float
     consolidate_appendix: bool
     appendix_consolidation: str
 
@@ -140,9 +142,15 @@ class AutoFixConfig:
             heading_level2plus_center=str(
                 hp.get("level2plus_alignment", "CENTER")
             ).upper() == "CENTER",
+            table_font_name=str(
+                p.get("table_font_name", ad.get("table_font_name", body.get("font", "Times New Roman")))
+            ),
+            table_font_size_pt=float(
+                p.get("table_font_size_pt", ad.get("table_font_size_pt", 12))
+            ),
             consolidate_appendix=_b("consolidate_appendix"),
             appendix_consolidation=str(
                 p.get("appendix_consolidation",
-                      ad.get("appendix_consolidation", "plural_only"))
-            ).strip().lower() or "plural_only",
+                      ad.get("appendix_consolidation", "singular_numbered"))
+            ).strip().lower() or "singular_numbered",
         )

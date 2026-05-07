@@ -912,6 +912,9 @@ def enforce_heading_spacing(doc, cfg, details: list[str]) -> bool:
         if cur_sa is None or abs(cur_sa.pt - target_sa) > 0.2:
             spf.space_after = Pt(target_sa)
             touched = True
+        if not spf.keep_with_next:
+            spf.keep_with_next = True
+            touched = True
         if touched:
             styles_changed += 1
 
@@ -931,6 +934,9 @@ def enforce_heading_spacing(doc, cfg, details: list[str]) -> bool:
         cur_sa = pf.space_after
         if cur_sa is None or abs(cur_sa.pt - target_sa) > 0.2:
             pf.space_after = Pt(target_sa)
+            touched = True
+        if not pf.keep_with_next:
+            pf.keep_with_next = True
             touched = True
         if touched:
             paragraphs_changed += 1

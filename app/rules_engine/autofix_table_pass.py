@@ -6,6 +6,7 @@ colour, italic, captions, list markers, dashes, and markdown artifacts.
 from __future__ import annotations
 
 from app.rules_engine.autofix_helpers import (
+    enforce_run_font,
     fix_caption_trailing_dot,
     fix_dashes_in_text,
     fix_font_color_runs,
@@ -14,6 +15,7 @@ from app.rules_engine.autofix_helpers import (
     fix_remove_italic,
     fix_strip_markdown_artifacts,
     fix_table_cell_spacing,
+    is_field_code_run,
     is_manual_list_para,
     iter_table_cell_paragraphs,
 )
@@ -43,6 +45,20 @@ def process_table_cells(
             if fix_table_cell_spacing(
                 t_para, cfg.table_line_spacing, t_label, details,
             ):
+                changed = True
+                t_touched = True
+        if cfg.normalize_font and cfg.table_font_size_pt > 0:
+            font_changed = False
+            for run in t_para.runs:
+                if is_field_code_run(run):
+                    continue
+                if enforce_run_font(
+                    run,
+                    cfg.table_font_name or "",
+                    cfg.table_font_size_pt,
+                ):
+                    font_changed = True
+            if font_changed:
                 changed = True
                 t_touched = True
         if not t_text:
