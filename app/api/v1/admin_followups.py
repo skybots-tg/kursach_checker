@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.admin_deps import get_current_admin
 from app.db.session import get_db
-from app.models import AdminUser, FollowUpMessage, UserFollowUp
+from app.models import AdminUser, Check, FollowUpMessage, User, UserFollowUp
 
 router = APIRouter()
 
@@ -117,3 +117,54 @@ async def update_followup(
     await db.commit()
     await db.refresh(msg)
     return FollowUpMessageOut.model_validate(msg, from_attributes=True)
+
+
+@router.get("/followups/eligible-count", summary="Кол-во старых юзеров без цепочки")
+async def eligible_existing_users_count(
+    _admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    already_in = select(UserFollowUp.user_id).scalar_subquery()
+    has_checks = select(Check.user_id).distinct().scalar_subquery()
+    count = await db.scalar(
+        select(func.count(User.id)).where(
+            User.id.notin_(already_in),
+            User.id.notin_(has_checks),
+        )
+    ) or 0
+    return {"eligible": count}
+
+
+@router.post("/followups/enroll-existing", summary="Запустить дожимы для старых юзеров")
+async def enroll_existing_users(
+    _admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    already_in = select(UserFollowUp.user_id).scalar_subquery()
+    has_checks = select(Check.user_id).distinct().scalar_subquery()
+    users = await db.scalars(
+        select(User.id).where(
+            User.id.notin_(already_in),
+            User.id.notin_(has_checks),
+        )
+    )
+    user_ids = list(users)
+    if not user_ids:
+        return {"enrolled": 0}
+
+    msg1 = await db.scalar(
+        select(FollowUpMessage).where(
+            FollowUpMessage.step == 1, FollowUpMessage.active.is_(True),
+        )
+    )
+    delay = msg1.delay_minutes if msg1 else 15
+    now = datetime.utcnow()
+
+    for uid in user_ids:
+        db.add(UserFollowUp(
+            user_id=uid,
+            current_step=0,
+            next_send_at=now + timedelta(minutes=delay),
+        ))
+    await db.commit()
+    return {"enrolled": len(user_ids)}

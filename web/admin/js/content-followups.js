@@ -2,14 +2,17 @@
 
 let _followupMessages = [];
 let _followupStats = {};
+let _followupEligible = 0;
 
 async function loadFollowups() {
-  const [messages, stats] = await Promise.all([
+  const [messages, stats, eligible] = await Promise.all([
     api('GET', '/admin/content/followups'),
     api('GET', '/admin/content/followups/stats'),
+    api('GET', '/admin/content/followups/eligible-count'),
   ]);
   _followupMessages = messages;
   _followupStats = stats;
+  _followupEligible = eligible.eligible || 0;
   renderContentPage(renderFollowupsTab(), '');
 }
 
@@ -35,6 +38,15 @@ function renderFollowupStats() {
       <div class="stat-value">${s.converted || 0}</div>
       <div class="stat-label">Конвертированы</div>
     </div>
+  </div>
+  <div class="card" style="margin-bottom:24px; padding:16px; display:flex; align-items:center; justify-content:space-between">
+    <div>
+      <b>Старые юзеры без цепочки</b>
+      <span class="text-muted" style="margin-left:8px">${_followupEligible} чел. (без загрузок и без дожимов)</span>
+    </div>
+    <button class="btn btn-sm ${_followupEligible ? 'btn-primary' : 'btn-ghost'}" onclick="enrollExistingUsers()" ${_followupEligible ? '' : 'disabled'}>
+      Запустить дожимы
+    </button>
   </div>`;
 }
 
@@ -151,6 +163,27 @@ async function saveFollowup(step) {
   }
 }
 
+async function enrollExistingUsers() {
+  const body = `<p>Будет запущена цепочка дожимов для <b>${_followupEligible}</b> старых юзеров, которые ещё не загружали документы и не состоят в цепочке.</p><p>Они начнут получать сообщения с шага 1.</p>`;
+  const footer = `
+    <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
+    <button class="btn btn-primary" onclick="confirmEnrollExisting()">Запустить</button>`;
+  openModal('Запустить дожимы для старых юзеров', body, footer);
+}
+
+async function confirmEnrollExisting() {
+  try {
+    const res = await api('POST', '/admin/content/followups/enroll-existing');
+    closeModal();
+    showToast(`Дожимы запущены для ${res.enrolled} юзеров`);
+    await loadFollowups();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
 window.loadFollowups = loadFollowups;
 window.editFollowup = editFollowup;
 window.saveFollowup = saveFollowup;
+window.enrollExistingUsers = enrollExistingUsers;
+window.confirmEnrollExisting = confirmEnrollExisting;

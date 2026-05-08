@@ -210,28 +210,18 @@ async def _send_followup_message(bot: Bot, chat_id: int, msg: FollowUpMessage) -
                 reply_markup=keyboard,
             )
     elif existing_photos:
-        # Одно фото + текст (caption).
-        # Telegram caption limit = 1024, если текст длиннее — шлём фото без caption + текст отдельно.
-        if msg.text and len(msg.text) <= 1024:
-            await bot.send_photo(
+        # Фото отдельно, затем текст + кнопка отдельным сообщением.
+        await bot.send_photo(
+            chat_id=chat_id,
+            photo=FSInputFile(str(existing_photos[0])),
+        )
+        if msg.text:
+            await bot.send_message(
                 chat_id=chat_id,
-                photo=FSInputFile(str(existing_photos[0])),
-                caption=msg.text,
+                text=msg.text,
                 parse_mode=msg.parse_mode or "HTML",
                 reply_markup=keyboard,
             )
-        else:
-            await bot.send_photo(
-                chat_id=chat_id,
-                photo=FSInputFile(str(existing_photos[0])),
-            )
-            if msg.text:
-                await bot.send_message(
-                    chat_id=chat_id,
-                    text=msg.text,
-                    parse_mode=msg.parse_mode or "HTML",
-                    reply_markup=keyboard,
-                )
     else:
         # Только текст.
         if msg.text:
