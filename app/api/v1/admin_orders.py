@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import exists, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.admin_deps import get_current_admin
@@ -17,32 +19,70 @@ class OrderStatusIn(BaseModel):
 @router.get("")
 async def list_orders(
     status: str | None = None,
+    period: str | None = None,
+    source: str | None = None,
     current_admin: AdminUser = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
-) -> list[dict]:
+) -> dict:
     _ = current_admin
+
+    prodamus_exists = exists(
+        select(PaymentProdamus.id).where(PaymentProdamus.order_id == Order.id)
+    ).correlate(Order)
+
     stmt = (
-        select(Order, User, Product)
+        select(Order, User, Product, prodamus_exists.label("has_prodamus"))
         .join(User, User.id == Order.user_id)
         .join(Product, Product.id == Order.product_id)
         .order_by(Order.id.desc())
     )
+
     if status:
         stmt = stmt.where(Order.status == status)
 
-    rows = await db.execute(stmt)
-    return [
-        {
+    if period == "day":
+        since = datetime.utcnow() - timedelta(days=1)
+        stmt = stmt.where(Order.created_at >= since)
+    elif period == "week":
+        since = datetime.utcnow() - timedelta(weeks=1)
+        stmt = stmt.where(Order.created_at >= since)
+    elif period == "month":
+        since = datetime.utcnow() - timedelta(days=30)
+        stmt = stmt.where(Order.created_at >= since)
+
+    if source == "prodamus":
+        stmt = stmt.where(prodamus_exists)
+    elif source == "other":
+        stmt = stmt.where(~prodamus_exists)
+
+    rows = (await db.execute(stmt)).all()
+
+    items = []
+    total_sum = 0.0
+    paid_sum = 0.0
+    for o, u, p, has_prod in rows:
+        amt = float(o.amount)
+        total_sum += amt
+        st = o.status.value if hasattr(o.status, "value") else o.status
+        if st == "paid":
+            paid_sum += amt
+        items.append({
             "id": o.id,
-            "status": o.status.value if hasattr(o.status, "value") else o.status,
-            "amount": float(o.amount),
+            "status": st,
+            "amount": amt,
+            "has_prodamus": has_prod,
             "user": {"id": u.id, "telegram_id": u.telegram_id, "username": u.username},
             "product": {"id": p.id, "name": p.name},
             "created_at": o.created_at,
             "paid_at": o.paid_at,
-        }
-        for o, u, p in rows
-    ]
+        })
+
+    return {
+        "items": items,
+        "total_sum": round(total_sum, 2),
+        "paid_sum": round(paid_sum, 2),
+        "count": len(items),
+    }
 
 
 @router.get("/{order_id}")

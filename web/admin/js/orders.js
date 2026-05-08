@@ -4,12 +4,16 @@ registerPage('orders', loadOrders);
 
 let _ordersData = [];
 let _ordersPage = 1;
+let _ordersMeta = { total_sum: 0, paid_sum: 0, count: 0 };
 
 async function loadOrders() {
   const page = $('page-orders');
   page.innerHTML = loadingHtml();
   try {
-    _ordersData = await api('GET', '/admin/orders');
+    const params = _buildOrdersQuery();
+    const resp = await api('GET', '/admin/orders' + params);
+    _ordersData = resp.items || [];
+    _ordersMeta = { total_sum: resp.total_sum || 0, paid_sum: resp.paid_sum || 0, count: resp.count || 0 };
     _ordersPage = 1;
     renderOrders();
   } catch (err) {
@@ -17,28 +21,76 @@ async function loadOrders() {
   }
 }
 
+function _buildOrdersQuery() {
+  const status = getVal('orders-filter');
+  const period = getVal('orders-period');
+  const source = getVal('orders-source');
+  const parts = [];
+  if (status) parts.push('status=' + status);
+  if (period) parts.push('period=' + period);
+  if (source) parts.push('source=' + source);
+  return parts.length ? '?' + parts.join('&') : '';
+}
+
 function renderOrders() {
+  const m = _ordersMeta;
   $('page-orders').innerHTML = `
     <div class="page-header">
       <div>
         <h1 class="page-title">Заказы и платежи</h1>
-        <p class="page-subtitle">Все заказы пользователей (${_ordersData.length})</p>
+        <p class="page-subtitle">Найдено: ${m.count}</p>
       </div>
     </div>
-    <div class="toolbar">
-      <select class="filter-select" id="orders-filter" onchange="filterOrders()">
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
+      <div class="card stat-card">
+        <div class="stat-icon blue">${iconSvg('coins', 20)}</div>
+        <div class="stat-val">${m.count}</div>
+        <div class="stat-label">Всего заказов</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon yellow">${iconSvg('coins', 20)}</div>
+        <div class="stat-val">${fmtMoney(m.total_sum)}</div>
+        <div class="stat-label">Общая сумма</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon green">${iconSvg('coins', 20)}</div>
+        <div class="stat-val">${fmtMoney(m.paid_sum)}</div>
+        <div class="stat-label">Оплачено</div>
+      </div>
+    </div>
+    <div class="toolbar" style="flex-wrap:wrap">
+      <select class="filter-select" id="orders-filter" onchange="applyOrdersFilters()">
         <option value="">Все статусы</option>
         <option value="created">Создан</option>
         <option value="paid">Оплачен</option>
         <option value="failed">Ошибка</option>
         <option value="cancelled">Отменён</option>
       </select>
-      <button class="btn btn-secondary btn-sm" onclick="loadOrders()">
+      <select class="filter-select" id="orders-period" onchange="applyOrdersFilters()">
+        <option value="">Всё время</option>
+        <option value="day">За день</option>
+        <option value="week">За неделю</option>
+        <option value="month">За месяц</option>
+      </select>
+      <select class="filter-select" id="orders-source" onchange="applyOrdersFilters()">
+        <option value="">Все источники</option>
+        <option value="prodamus">Продамус</option>
+        <option value="other">Прочие</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="resetOrdersFilters()">
+        ${iconSvg('x', 14)} Сбросить
+      </button>
+      <button class="btn btn-secondary btn-sm" onclick="applyOrdersFilters()">
         ${iconSvg('refresh', 14)} Обновить
       </button>
     </div>
     <div id="orders-table-area"></div>`;
+  _restoreOrdersFilters();
   renderOrdersTable();
+}
+
+function fmtMoney(v) {
+  return Number(v || 0).toLocaleString('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ₽';
 }
 
 function renderOrdersTable() {
@@ -59,7 +111,7 @@ function ordersTable(list) {
       <table class="data-table">
         <thead><tr>
           <th>ID</th><th>Пользователь</th><th>Продукт</th>
-          <th>Сумма</th><th>Статус</th><th>Дата</th>
+          <th>Сумма</th><th>Источник</th><th>Статус</th><th>Дата</th>
           <th style="text-align:right">Действия</th>
         </tr></thead>
         <tbody>
@@ -71,7 +123,10 @@ function ordersTable(list) {
             <td data-label="Продукт">${o.product
               ? entityTag('product', o.product.id, o.product.name)
               : '—'}</td>
-            <td data-label="Сумма"><strong>${o.amount ?? '—'}</strong></td>
+            <td data-label="Сумма"><strong>${fmtMoney(o.amount)}</strong></td>
+            <td data-label="Источник">${o.has_prodamus
+              ? '<span class="badge badge-primary">Продамус</span>'
+              : '<span class="badge badge-gray">Прочее</span>'}</td>
             <td data-label="Статус">${statusBadge(o.status)}</td>
             <td data-label="Дата" style="white-space:nowrap">${formatDate(o.created_at)}</td>
             <td data-label="" class="actions-cell">
@@ -86,18 +141,38 @@ function ordersTable(list) {
   </div>`;
 }
 
-async function filterOrders() {
-  const status = getVal('orders-filter');
+let _ordersFilterCache = { status: '', period: '', source: '' };
+
+async function applyOrdersFilters() {
+  _ordersFilterCache = {
+    status: getVal('orders-filter') || '',
+    period: getVal('orders-period') || '',
+    source: getVal('orders-source') || '',
+  };
   try {
-    const url = status ? `/admin/orders?status=${status}` : '/admin/orders';
-    _ordersData = await api('GET', url);
+    const params = _buildOrdersQuery();
+    const resp = await api('GET', '/admin/orders' + params);
+    _ordersData = resp.items || [];
+    _ordersMeta = { total_sum: resp.total_sum || 0, paid_sum: resp.paid_sum || 0, count: resp.count || 0 };
     _ordersPage = 1;
     renderOrders();
-    if (status) setVal('orders-filter', status);
   } catch (err) {
     toast('Ошибка фильтрации: ' + err.message, 'error');
   }
 }
+
+function resetOrdersFilters() {
+  _ordersFilterCache = { status: '', period: '', source: '' };
+  loadOrders();
+}
+
+function _restoreOrdersFilters() {
+  setVal('orders-filter', _ordersFilterCache.status);
+  setVal('orders-period', _ordersFilterCache.period);
+  setVal('orders-source', _ordersFilterCache.source);
+}
+
+async function filterOrders() { applyOrdersFilters(); }
 
 async function viewOrder(id) {
   history.replaceState(null, '', '#orders/' + id);
@@ -172,5 +247,7 @@ registerEntityHandler('orders', (sub) => viewOrder(parseInt(sub)));
 
 window.ordersGoPage = ordersGoPage;
 window.filterOrders = filterOrders;
+window.applyOrdersFilters = applyOrdersFilters;
+window.resetOrdersFilters = resetOrdersFilters;
 window.viewOrder = viewOrder;
 window.updateOrderStatus = updateOrderStatus;
