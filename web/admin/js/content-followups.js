@@ -75,6 +75,7 @@ function renderFollowupCards() {
           ${activeBadge}
           ${albumBadge}
           ${photoCount ? '<span class="badge">' + photoCount + ' фото</span>' : ''}
+          <button class="btn btn-sm btn-ghost" onclick="openTestSend(${msg.step})">Тест</button>
           <button class="btn btn-sm btn-primary" onclick="editFollowup(${msg.step})">Редактировать</button>
         </div>
       </div>
@@ -182,8 +183,69 @@ async function confirmEnrollExisting() {
   }
 }
 
+/* --- Test-send: search user & send a specific follow-up --- */
+
+let _testSendStep = null;
+let _testSendTimer = null;
+
+function openTestSend(step) {
+  _testSendStep = step;
+  const stepLabels = {1: 'Сообщение 1', 2: 'Сообщение 2', 3: 'Сообщение 3'};
+  const body = `
+    <div class="form-group">
+      <label class="form-label">Поиск пользователя (имя или @username)</label>
+      <input class="form-input" id="fu-test-search" placeholder="Введите имя или username..." oninput="onTestSendSearch()">
+    </div>
+    <div id="fu-test-results" style="max-height:250px; overflow:auto"></div>
+    <div id="fu-test-selected" style="margin-top:12px"></div>`;
+  const footer = `
+    <button class="btn btn-ghost" onclick="closeModal()">Закрыть</button>`;
+  openModal('Тестовая отправка — ' + (stepLabels[step] || 'Шаг ' + step), body, footer);
+}
+
+function onTestSendSearch() {
+  clearTimeout(_testSendTimer);
+  _testSendTimer = setTimeout(async () => {
+    const q = document.getElementById('fu-test-search').value.trim();
+    const container = document.getElementById('fu-test-results');
+    if (q.length < 2) { container.innerHTML = '<span class="text-muted" style="font-size:13px">Введите минимум 2 символа</span>'; return; }
+    try {
+      const users = await api('GET', '/admin/users?q=' + encodeURIComponent(q));
+      if (!users.length) { container.innerHTML = '<span class="text-muted" style="font-size:13px">Ничего не найдено</span>'; return; }
+      container.innerHTML = users.slice(0, 20).map(u => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border, #eee)">
+          <div>
+            <b>${escHtml(u.first_name || '')}</b>
+            ${u.username ? '<span class="text-muted">@' + escHtml(u.username) + '</span>' : ''}
+            <span class="text-muted" style="font-size:12px">ID: ${u.id}, TG: ${u.telegram_id || '—'}</span>
+          </div>
+          <button class="btn btn-sm btn-primary" onclick="execTestSend(${u.id}, this)">Отправить</button>
+        </div>`).join('');
+    } catch (err) { container.innerHTML = '<span class="text-muted">' + escHtml(err.message) + '</span>'; }
+  }, 350);
+}
+
+async function execTestSend(userId, btn) {
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    await api('POST', '/admin/content/followups/test-send', { user_id: userId, step: _testSendStep });
+    btn.textContent = '✓';
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-ghost');
+    showToast('Отправлено');
+  } catch (err) {
+    btn.textContent = 'Ошибка';
+    showToast(err.message, 'error');
+    setTimeout(() => { btn.textContent = 'Отправить'; btn.disabled = false; }, 2000);
+  }
+}
+
 window.loadFollowups = loadFollowups;
 window.editFollowup = editFollowup;
 window.saveFollowup = saveFollowup;
 window.enrollExistingUsers = enrollExistingUsers;
 window.confirmEnrollExisting = confirmEnrollExisting;
+window.openTestSend = openTestSend;
+window.onTestSendSearch = onTestSendSearch;
+window.execTestSend = execTestSend;

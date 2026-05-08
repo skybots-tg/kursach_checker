@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +13,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.admin_deps import get_current_admin
 from app.db.session import get_db
 from app.models import AdminUser, Check, FollowUpMessage, User, UserFollowUp
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -168,3 +171,42 @@ async def enroll_existing_users(
         ))
     await db.commit()
     return {"enrolled": len(user_ids)}
+
+
+class TestSendIn(BaseModel):
+    user_id: int
+    step: int
+
+
+@router.post("/followups/test-send", summary="Тестовая отправка дожима пользователю")
+async def test_send_followup(
+    body: TestSendIn,
+    _admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    user = await db.scalar(select(User).where(User.id == body.user_id))
+    if not user or not user.telegram_id:
+        raise HTTPException(404, "Пользователь не найден или нет telegram_id")
+
+    msg = await db.scalar(
+        select(FollowUpMessage).where(FollowUpMessage.step == body.step)
+    )
+    if not msg:
+        raise HTTPException(404, f"Follow-up шаг {body.step} не найден")
+
+    from app.integrations.telegram_bot_factory import make_bot
+    from app.services.followups import _send_followup_message
+
+    bot = make_bot()
+    try:
+        await _send_followup_message(bot, user.telegram_id, msg)
+    except Exception as e:
+        raise HTTPException(500, f"Ошибка отправки: {e}")
+    finally:
+        await bot.session.close()
+
+    logger.info(
+        "Test follow-up step %d sent to user_id=%d (tg=%d) by admin",
+        body.step, user.id, user.telegram_id,
+    )
+    return {"ok": True, "sent_to": user.telegram_id, "step": body.step}
