@@ -47,6 +47,94 @@ def _has_auto_toc(doc) -> bool:
     return False
 
 
+def _strip_existing_auto_toc(doc, details: list[str]) -> bool:
+    """Remove ALL existing auto-TOC structures (SDT wrappers, inline TOC
+    field markers, and fldSimple TOC elements) so a fresh static TOC can
+    be inserted.
+
+    Returns True if anything was removed.
+    """
+    body = doc.element.body
+    changed = False
+
+    # 1. Remove TOC SDTs (entire wrapper + content)
+    for sdt in list(body.iter(qn("w:sdt"))):
+        if _is_toc_sdt(sdt):
+            parent = sdt.getparent()
+            if parent is not None:
+                parent.remove(sdt)
+                changed = True
+                details.append(
+                    "Оглавление: удалён автоматический блок TOC (SDT)"
+                )
+
+    # 2. Remove inline TOC field markers (begin/instrText/separate/end)
+    # Walk paragraphs, track field nesting, remove TOC-field runs.
+    fld_tag = qn("w:fldChar")
+    fld_type_attr = qn("w:fldCharType")
+    instr_tag = qn("w:instrText")
+    p_tag = qn("w:p")
+
+    toc_paras_to_remove: list = []
+    in_toc_field = False
+    depth = 0
+
+    for p_elem in list(body.iterchildren(p_tag)):
+        has_toc_content = False
+        for elem in list(p_elem.iter()):
+            if elem.tag == fld_tag:
+                ftype = elem.get(fld_type_attr)
+                if ftype == "begin":
+                    depth += 1
+                elif ftype == "end":
+                    if in_toc_field and depth > 0:
+                        depth -= 1
+                        if depth == 0:
+                            in_toc_field = False
+                            has_toc_content = True
+                    elif depth > 0:
+                        depth -= 1
+            elif elem.tag == instr_tag:
+                text = (elem.text or "").upper()
+                if "TOC" in text and depth > 0:
+                    in_toc_field = True
+
+        if in_toc_field or has_toc_content:
+            # Paragraph is inside or at the end of a TOC field
+            pPr = p_elem.find(qn("w:pPr"))
+            sval = ""
+            if pPr is not None:
+                ps = pPr.find(qn("w:pStyle"))
+                if ps is not None:
+                    sval = (ps.get(qn("w:val")) or "").lower()
+            # Only remove paragraphs styled as TOC entries, not the heading
+            text = "".join((t.text or "") for t in p_elem.iter(qn("w:t"))).strip()
+            if not _TOC_HEADING_RE.match(text):
+                toc_paras_to_remove.append(p_elem)
+
+    for p_elem in toc_paras_to_remove:
+        if p_elem.getparent() is not None:
+            p_elem.getparent().remove(p_elem)
+            changed = True
+
+    if toc_paras_to_remove:
+        details.append(
+            f"Оглавление: удалено {len(toc_paras_to_remove)} параграфов "
+            f"встроенного авто-TOC"
+        )
+
+    # 3. Remove fldSimple TOC elements
+    for fld in list(body.iter(qn("w:fldSimple"))):
+        instr = fld.get(qn("w:instr")) or ""
+        if "TOC" in instr.upper():
+            parent = fld.getparent()
+            if parent is not None:
+                parent.remove(fld)
+                changed = True
+
+    return changed
+
+
 # ── heading extraction ────────────────────────────────────────────────
 
 def _get_heading_level(para) -> int | None:
@@ -180,7 +268,10 @@ def _clear_bold_underline_in_paragraph(p_elem: OxmlElement) -> bool:
 
 
 def _build_toc_entry(text: str, level: int) -> OxmlElement:
-    """Build a cached TOC entry paragraph with TOCx style, non-bold, no indent."""
+    """Build a static TOC entry paragraph with TOCx style, tab leader dots.
+
+    No field markers -- Word will not auto-refresh these paragraphs.
+    """
     p = OxmlElement("w:p")
     pPr = OxmlElement("w:pPr")
     pStyle = OxmlElement("w:pStyle")
@@ -190,8 +281,20 @@ def _build_toc_entry(text: str, level: int) -> OxmlElement:
     ind.set(qn("w:left"), "0")
     ind.set(qn("w:firstLine"), "0")
     pPr.append(ind)
+
+    # Right-aligned tab stop at ~16 cm with dot leader
+    tabs = OxmlElement("w:tabs")
+    tab = OxmlElement("w:tab")
+    tab.set(qn("w:val"), "right")
+    tab.set(qn("w:leader"), "dot")
+    tab.set(qn("w:pos"), "9072")  # ~16 cm in twips
+    tabs.append(tab)
+    pPr.append(tabs)
+
     _append_no_bold_rpr(pPr)
     p.append(pPr)
+
+    # Text run
     r = OxmlElement("w:r")
     _append_no_bold_rpr(r)
     t = OxmlElement("w:t")
@@ -199,6 +302,13 @@ def _build_toc_entry(text: str, level: int) -> OxmlElement:
     t.text = text
     r.append(t)
     p.append(r)
+
+    # Tab character run (produces dot leader)
+    r_tab = OxmlElement("w:r")
+    tab_char = OxmlElement("w:tab")
+    r_tab.append(tab_char)
+    p.append(r_tab)
+
     return p
 
 
@@ -239,15 +349,10 @@ def _prepend_runs_after_pPr(p_elem: OxmlElement, runs: list[OxmlElement]) -> Non
 def _build_toc_elements(
     headings: list[tuple[str, int]],
 ) -> list[OxmlElement]:
-    """Return TOC paragraphs with field markers folded into the entries.
+    """Return static TOC paragraphs (no field markers).
 
-    Word allows the begin / separate / end markers of a TOC field to live
-    inside the same paragraphs as the TOC entries. We deliberately do NOT
-    emit standalone empty paragraphs for the markers because such "ghost"
-    paragraphs are not removable by the empty-paragraph cleanup (they
-    contain ``<w:fldChar>``, not ``<w:t>``) and frequently get pushed
-    onto a page of their own when the TOC fills the first page,
-    producing a blank page right after the table of contents.
+    Each entry is a plain paragraph with TOCx style and a dot-leader tab.
+    Word will NOT auto-refresh these -- the TOC is fully manual/static.
     """
     entries = [_build_toc_entry(text, level) for text, level in headings]
 
@@ -259,20 +364,6 @@ def _build_toc_elements(
         r_fb.append(t_fb)
         fallback.append(r_fb)
         entries = [fallback]
-
-    # Field begin / instr / separate go BEFORE the first entry's text run,
-    # but after its <w:pPr>, so the entry text still renders correctly.
-    _prepend_runs_after_pPr(
-        entries[0],
-        [
-            _make_fld_run("begin", dirty=True),
-            _make_instr_run(r' TOC \o "1-3" \h \z \u '),
-            _make_fld_run("separate"),
-        ],
-    )
-
-    # Field end goes at the very end of the last entry.
-    entries[-1].append(_make_fld_run("end"))
 
     return entries
 
@@ -441,7 +532,7 @@ def _looks_like_toc_line(text: str) -> bool:
          («Введение», «Заключение», «Список литературы», …).
     """
     stripped = text.strip()
-    if not stripped or len(stripped) > 200:
+    if not stripped or len(stripped) > 300:
         return False
 
     if TOC_LINE_TAIL_RE.search(stripped):
@@ -529,9 +620,9 @@ def _scan_manual_toc_block(
             indices.append(offset)
             elements.append(para._element)
             continue
-        if _is_strong_toc_break(para):
-            break
         if not _looks_like_toc_line(text):
+            if _is_strong_toc_break(para):
+                break
             break
         norm = _normalize_for_dup(text)
         if norm and norm in seen_norm:
@@ -773,6 +864,15 @@ def _remove_residual_toc_after_heading(
     pos = start_pos
     while pos < len(body) and scanned < max_scan:
         el = body[pos]
+        if el.tag == qn("w:sdt"):
+            if _is_toc_sdt(el):
+                body.remove(el)
+                removed += 1
+                details.append(
+                    "Оглавление: удалён устаревший блок содержания (SDT без поля TOC)"
+                )
+                continue
+            break
         if el.tag != qn("w:p"):
             # Hit a table or sectPr — stop, body content begins.
             break
@@ -816,7 +916,10 @@ def _remove_residual_toc_after_heading(
 
 
 def _insert_toc_after(anchor, doc, details: list[str]) -> bool:
-    """Insert a multi-paragraph TOC field right after *anchor* element."""
+    """Insert static TOC paragraphs right after *anchor* element.
+
+    Returns the last inserted element (for residual cleanup positioning).
+    """
     headings = _collect_headings(doc)
     entries = _build_toc_elements(headings)
 
@@ -828,16 +931,82 @@ def _insert_toc_after(anchor, doc, details: list[str]) -> bool:
     n_entries = len(headings)
     if n_entries:
         details.append(
-            f"Оглавление: вставлено поле TOC ({n_entries} записей из заголовков)"
+            f"Оглавление: вставлено статическое содержание ({n_entries} записей)"
         )
     else:
-        details.append("Оглавление: вставлено поле TOC (обновите в Word: Ctrl+A → F9)")
-    return True
+        details.append("Оглавление: вставлено пустое содержание (заголовки не найдены)")
+    return last
+
+
+def _is_toc_sdt(sdt_elem) -> bool:
+    """Return True when *sdt_elem* looks like a (possibly static) TOC SDT.
+
+    Checks two signals:
+      1. ``sdtPr`` contains a ``docPartGallery`` with
+         ``"Table of Contents"``.
+      2. More than half of its content paragraphs carry a ``TOCx`` style.
+    """
+    sdt_pr = sdt_elem.find(qn("w:sdtPr"))
+    if sdt_pr is not None:
+        for child in sdt_pr.iter():
+            tag_local = child.tag.split("}")[-1].lower() if isinstance(child.tag, str) else ""
+            if "gallery" in tag_local or "docpart" in tag_local:
+                val = (child.get(qn("w:val")) or "").lower()
+                if "table of contents" in val or val == "toc":
+                    return True
+    content = sdt_elem.find(qn("w:sdtContent"))
+    if content is not None:
+        paras = [c for c in content.iterchildren() if c.tag == qn("w:p")]
+        toc_styled = 0
+        for p in paras:
+            pPr = p.find(qn("w:pPr"))
+            if pPr is not None:
+                ps = pPr.find(qn("w:pStyle"))
+                if ps is not None:
+                    sval = (ps.get(qn("w:val")) or "").lower()
+                    if sval.startswith("toc") or sval in (
+                        "tableofcontents", "tocheading",
+                    ):
+                        toc_styled += 1
+        if paras and toc_styled / len(paras) > 0.5:
+            return True
+    return False
+
+
+def _remove_stale_toc_sdt(body, heading_elem, details: list[str]) -> bool:
+    """Remove a static/unlinked TOC SDT sitting right after *heading_elem*.
+
+    When a student "unlinks" a Word auto-TOC the ``<w:fldChar>`` markers
+    disappear but the ``<w:sdt>`` wrapper with its TOC-styled paragraphs
+    remains.  ``_has_auto_toc`` misses these, so ``insert_toc_field``
+    would generate a brand-new TOC field while the stale SDT block stays
+    in the document — producing a visible duplicate.
+    """
+    sdt_tag = qn("w:sdt")
+    p_tag = qn("w:p")
+    nxt = heading_elem.getnext()
+    while nxt is not None:
+        if nxt.tag == sdt_tag:
+            if _is_toc_sdt(nxt):
+                body.remove(nxt)
+                details.append(
+                    "Оглавление: удалён устаревший блок содержания (SDT без поля TOC)"
+                )
+                return True
+            break
+        if nxt.tag == p_tag:
+            text = "".join((t.text or "") for t in nxt.iter(qn("w:t"))).strip()
+            if text:
+                break
+            nxt = nxt.getnext()
+            continue
+        break
+    return False
 
 
 def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
     if _has_auto_toc(doc):
-        return False
+        _strip_existing_auto_toc(doc, details)
 
     body = doc.element.body
     paragraphs = doc.paragraphs
@@ -845,47 +1014,16 @@ def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
     for idx, para in enumerate(paragraphs):
         text = (para.text or "").strip()
         if _TOC_HEADING_RE.match(text):
+            _remove_stale_toc_sdt(body, para._element, details)
             _remove_manual_toc_entries(doc, idx, details)
             _remove_table_after_heading(doc, para, details)
             _normalize_existing_toc_heading(para, details)
-            inserted = _insert_toc_after(para._element, doc, details)
-            # Find the LAST paragraph of the inserted TOC field so cleanup
-            # starts AFTER the field. Intermediate TOC entries do not
-            # carry their own ``<w:fldChar>`` markers — only the first
-            # entry has ``begin/separate`` and the last entry has
-            # ``end``. We therefore track the begin/end nesting depth
-            # while walking siblings, advancing through every paragraph
-            # until depth returns to zero (which marks the end of the
-            # TOC field, regardless of how many entry paragraphs sit in
-            # between).
-            anchor_elem = para._element
-            tail = anchor_elem
-            depth = 0
-            saw_begin = False
-            cur = anchor_elem.getnext()
-            while cur is not None and cur.tag == qn("w:p"):
-                fld_types = [fc.get(qn("w:fldCharType")) for fc in cur.iter(qn("w:fldChar"))]
-                for ft in fld_types:
-                    if ft == "begin":
-                        depth += 1
-                        saw_begin = True
-                    elif ft == "end":
-                        depth -= 1
-                tail = cur
-                if saw_begin and depth <= 0:
-                    break
-                if not saw_begin:
-                    # Auto-TOC field MUST start in the very first inserted
-                    # paragraph; if we walked past it without finding a
-                    # ``begin`` marker, something is off — bail out and let
-                    # the cleanup pass start from the heading itself.
-                    if cur.getnext() is None:
-                        tail = anchor_elem
-                        break
-                cur = cur.getnext()
+            last_inserted = _insert_toc_after(para._element, doc, details)
             from docx.text.paragraph import Paragraph as _P
-            _remove_residual_toc_after_heading(doc, _P(tail, doc), details)
-            return inserted
+            _remove_residual_toc_after_heading(
+                doc, _P(last_inserted, doc), details,
+            )
+            return True
 
     for para in paragraphs:
         style_name = (getattr(para.style, "name", "") or "").lower()
@@ -893,13 +1031,15 @@ def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
             heading_p = _build_toc_heading_paragraph("Содержание")
             para._element.addprevious(heading_p)
             details.append("Оглавление: создан заголовок «Содержание» (по центру)")
-            return _insert_toc_after(heading_p, doc, details)
+            _insert_toc_after(heading_p, doc, details)
+            return True
 
     if len(body) > 0:
         heading_p = _build_toc_heading_paragraph("Содержание")
         body.insert(0, heading_p)
         details.append("Оглавление: создан заголовок «Содержание» (по центру)")
-        return _insert_toc_after(heading_p, doc, details)
+        _insert_toc_after(heading_p, doc, details)
+        return True
 
     return False
 

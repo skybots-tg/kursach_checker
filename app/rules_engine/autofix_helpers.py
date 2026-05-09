@@ -478,14 +478,11 @@ def postprocess_fixed_docx(original: Path, output: Path) -> None:
             if any(info.filename.startswith(p) for p in _BINARY_PREFIXES) and not info.filename.endswith("/"):
                 orig_bins[info.filename] = (info, orig_zf.read(info.filename))
 
-    has_toc = _zip_has_toc(output)
-
-    if not orig_bins and not has_toc:
+    if not orig_bins:
         _validate_docx_zip(output)
         return
 
     temp_path = output.with_name(output.stem + ".tmp.docx")
-    settings_injected = False
     with zipfile.ZipFile(str(output), "r") as out_zf:
         with zipfile.ZipFile(str(temp_path), "w", zipfile.ZIP_DEFLATED) as new_zf:
             for item in out_zf.infolist():
@@ -494,25 +491,11 @@ def postprocess_fixed_docx(original: Path, output: Path) -> None:
                     restored = _clone_zipinfo(orig_info)
                     restored.compress_type = zipfile.ZIP_STORED
                     new_zf.writestr(restored, orig_data)
-                elif has_toc and item.filename == "word/settings.xml":
-                    data = _inject_update_fields(out_zf.read(item.filename))
-                    new_zf.writestr(item, data)
-                    settings_injected = True
                 else:
                     new_zf.writestr(item, out_zf.read(item.filename))
 
-    if has_toc and not settings_injected:
-        logger.debug("Autofix: word/settings.xml not found, cannot inject updateFields")
-
     _validate_docx_zip(temp_path)
     temp_path.replace(output)
-
-def _zip_has_toc(path: Path) -> bool:
-    with zipfile.ZipFile(str(path), "r") as zf:
-        if "word/document.xml" not in zf.namelist():
-            return False
-        data = zf.read("word/document.xml")
-        return b"TOC " in data or b"Table of Contents" in data
 
 def _clone_zipinfo(src: zipfile.ZipInfo) -> zipfile.ZipInfo:
     zi = zipfile.ZipInfo(src.filename)
@@ -521,14 +504,6 @@ def _clone_zipinfo(src: zipfile.ZipInfo) -> zipfile.ZipInfo:
     zi.flag_bits = src.flag_bits & 0x800
     return zi
 
-def _inject_update_fields(settings_bytes: bytes) -> bytes:
-    root = etree.fromstring(settings_bytes)
-    tag = f"{{{_W_NS}}}updateFields"
-    el = root.find(tag)
-    if el is None:
-        el = etree.SubElement(root, tag)
-    el.set(f"{{{_W_NS}}}val", "true")
-    return etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
 
 def _validate_docx_zip(path: Path) -> None:
     with zipfile.ZipFile(str(path), "r") as zf:
