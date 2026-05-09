@@ -43,5 +43,7 @@ storage/demo/
 alembic/versions/*.pyc
 
 .test_files/
+test_docs/
 tmp_*/
 tmp_*.py
+tmp_*.txt
