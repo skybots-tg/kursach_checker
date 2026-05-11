@@ -67,8 +67,8 @@ _BIBLIOGRAPHY_PATTERN = re.compile(
     re.IGNORECASE | re.UNICODE,
 )
 
-_NUM_PREFIX_RE = re.compile(r"^\s*(?:\[\d{1,3}\][\.)\s]?|\d{1,3}[\.)])\s*")
-_NUMBERED_ENTRY_RE = re.compile(r"^\s*(?:\[\d{1,3}\][\.)\s]?|\d{1,3}[\.)])\s+\S")
+_NUM_PREFIX_RE = re.compile(r"^\s*(?:\[\d{1,3}\][\.)\s\t]?|\d{1,3}[\.)\u2013\u2014])\s*")
+_NUMBERED_ENTRY_RE = re.compile(r"^\s*(?:\[\d{1,3}\][\.)\s\t]?|\d{1,3}[\.)\u2013\u2014])\s+\S")
 _LEADING_NONWORD_RE = re.compile(r"^[\s\W_]+", re.UNICODE)
 _HEADING_STYLE_IDS = frozenset({f"Heading{i}" for i in range(1, 10)})
 
@@ -209,6 +209,30 @@ def _strip_number_prefix(text: str) -> str:
             break
         result = stripped
     return result.strip()
+
+
+_NPA_PATTERNS = re.compile(
+    r"(?:"
+    r"конституци[яи]"
+    r"|федеральн\w+\s+конституционн\w+\s+закон"
+    r"|федеральн\w+\s+закон"
+    r"|закон\s+(?:рф|российской)"
+    r"|указ\s+президент"
+    r"|постановлени\w+\s+(?:правительств|конституционн)"
+    r"|распоряжени\w+\s+(?:правительств|президент)"
+    r"|приказ\s+(?:мин|росстат|фас|фнс)"
+    r"|кодекс"
+    r"|№\s*\d+[\-\u2013\u2014]?(?:фз|фкз)"
+    r"|гост\s+р?\s*\d"
+    r")",
+    re.IGNORECASE | re.UNICODE,
+)
+
+
+def _is_npa_entry(text: str) -> bool:
+    """Check if a bibliography entry looks like an NPA (normative legal act)."""
+    clean = _strip_number_prefix(text)
+    return bool(_NPA_PATTERNS.search(clean[:120]))
 
 
 def _sort_key(text: str) -> tuple:
@@ -355,6 +379,8 @@ def fix_bibliography_order_and_numbering(
     heading_idx, start, end = rng
     paragraphs = doc.paragraphs
 
+    _ensure_bibliography_page_break(paragraphs[heading_idx], details)
+
     subsection_indices = _collect_subsection_indices(paragraphs, start, end)
 
     if subsection_indices:
@@ -363,6 +389,20 @@ def fix_bibliography_order_and_numbering(
         )
 
     return _fix_flat_alphabetical(doc, details, heading_idx, start, end)
+
+
+def _ensure_bibliography_page_break(heading_para, details: list[str]) -> bool:
+    """Force ``page_break_before`` on the bibliography heading so it
+    always starts on a fresh page."""
+    pf = heading_para.paragraph_format
+    if pf.page_break_before:
+        return False
+    for br in heading_para._element.iter(qn("w:br")):
+        if br.get(qn("w:type")) == "page":
+            return False
+    pf.page_break_before = True
+    details.append("Библиография: заголовок вынесен на новую страницу")
+    return True
 
 
 def _fix_flat_alphabetical(
@@ -399,21 +439,29 @@ def _fix_flat_alphabetical(
     if len(entries) < 2:
         return False
 
-    sorted_entries = sorted(entries, key=lambda e: _sort_key(e["text"]))
+    npa_entries = [e for e in entries if _is_npa_entry(_strip_number_prefix(e["text"]))]
+    lit_entries = [e for e in entries if not _is_npa_entry(_strip_number_prefix(e["text"]))]
 
-    already_sorted = all(
-        _sort_key(entries[i]["text"]) <= _sort_key(entries[i + 1]["text"])
-        for i in range(len(entries) - 1)
-    )
+    sorted_lit = sorted(lit_entries, key=lambda e: _sort_key(e["text"]))
+
+    if npa_entries:
+        sorted_entries = npa_entries + sorted_lit
+    else:
+        sorted_entries = sorted_lit
+
+    already_ordered = all(
+        id(sorted_entries[i]) == id(entries[i])
+        for i in range(len(entries))
+    ) if len(sorted_entries) == len(entries) else False
 
     already_numbered = all(
         re.match(r"^\s*\d{1,3}[\.)]\s", e["text"]) for e in entries
     )
 
-    if already_sorted and already_numbered:
+    if already_ordered and already_numbered:
         return False
 
-    if not already_sorted:
+    if not already_ordered:
         heading_elem = paragraphs[heading_idx]._element
         parent = heading_elem.getparent()
         if parent is None:
@@ -452,8 +500,14 @@ def _fix_flat_alphabetical(
                 parent.insert(cursor, elem)
                 cursor += 1
 
+        detail_parts = []
+        if npa_entries:
+            detail_parts.append(f"НПА: {len(npa_entries)} шт. (порядок сохранён)")
+        detail_parts.append(
+            f"литература: {len(sorted_lit)} шт. (отсортировано)"
+        )
         details.append(
-            f"Библиография: источники отсортированы по алфавиту ({len(entries)} шт.)"
+            f"Библиография: {', '.join(detail_parts)}"
         )
 
     refreshed = doc.paragraphs
@@ -462,32 +516,45 @@ def _fix_flat_alphabetical(
         return True
 
     _, s2, e2 = rng2
-    num = 1
-    prev_blank = True
+
+    re_entries: list[dict] = []
     for idx in range(s2, e2):
         text = (refreshed[idx].text or "").strip()
         if not text:
-            prev_blank = True
             continue
         if _is_subsection_heading(text):
-            prev_blank = True
             continue
-        is_numbered = bool(_NUMBERED_ENTRY_RE.match(text))
-        is_head = is_numbered or (prev_blank and len(text) >= 25)
-        if not is_head:
-            prev_blank = False
-            continue
+        if _NUMBERED_ENTRY_RE.match(text):
+            re_entries.append({"head": idx, "text": text})
+        else:
+            if len(text) < 5:
+                continue
+            if re_entries:
+                re_entries[-1]["text"] += " " + text
+            else:
+                re_entries.append({"head": idx, "text": text})
+
+    if len(re_entries) < 2:
+        re_entries = []
+        for idx in range(s2, e2):
+            text = (refreshed[idx].text or "").strip()
+            if len(text) < 10:
+                continue
+            if _is_subsection_heading(text):
+                continue
+            re_entries.append({"head": idx, "text": text})
+
+    for num, entry in enumerate(re_entries, 1):
+        idx = entry["head"]
+        text = (refreshed[idx].text or "").strip()
         clean = _strip_number_prefix(text)
-        clean = _NUM_PREFIX_RE.sub("", clean).strip()
         new_text = f"{num}. {clean}"
         if new_text != text:
             _set_paragraph_text(refreshed[idx], new_text)
-        num += 1
-        prev_blank = False
 
-    if num > 1:
+    if re_entries:
         details.append(
-            f"Библиография: источники пронумерованы 1–{num - 1}"
+            f"Библиография: источники пронумерованы 1–{len(re_entries)}"
         )
     return True
 

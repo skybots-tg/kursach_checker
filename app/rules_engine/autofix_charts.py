@@ -33,12 +33,26 @@ _NS = {
 _CHART_PATH_RE = re.compile(r"^word/charts/chart\d+\.xml$", re.IGNORECASE)
 
 
+_PLACEHOLDER_TITLES = frozenset({
+    "название диаграммы",
+    "chart title",
+    "title",
+    "заголовок диаграммы",
+})
+
+
 def _title_has_text(title_el) -> bool:
-    """Return True if the chart title carries any non-empty ``<a:t>`` text."""
+    """Return True if the chart title carries meaningful (non-placeholder)
+    ``<a:t>`` text. Default Word placeholders like "Название диаграммы"
+    are treated as empty."""
+    fragments: list[str] = []
     for t_el in title_el.iter(f"{{{_NS['a']}}}t"):
         if (t_el.text or "").strip():
-            return True
-    return False
+            fragments.append((t_el.text or "").strip())
+    if not fragments:
+        return False
+    combined = " ".join(fragments).lower()
+    return combined not in _PLACEHOLDER_TITLES
 
 
 def _suppress_chart_title(xml_bytes: bytes) -> tuple[bytes, bool]:

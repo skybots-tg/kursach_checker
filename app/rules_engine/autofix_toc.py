@@ -282,6 +282,13 @@ def _build_toc_entry(text: str, level: int) -> OxmlElement:
     ind.set(qn("w:firstLine"), "0")
     pPr.append(ind)
 
+    spacing = OxmlElement("w:spacing")
+    spacing.set(qn("w:line"), "240")
+    spacing.set(qn("w:lineRule"), "auto")
+    spacing.set(qn("w:before"), "0")
+    spacing.set(qn("w:after"), "0")
+    pPr.append(spacing)
+
     # Right-aligned tab stop at ~16 cm with dot leader
     tabs = OxmlElement("w:tabs")
     tab = OxmlElement("w:tab")

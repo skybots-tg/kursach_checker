@@ -53,6 +53,7 @@ from app.rules_engine.autofix_bibliography import (
 )
 from app.rules_engine.autofix_captions import (
     ensure_blank_after_caption_blocks,
+    ensure_blank_before_table_blocks,
     fix_caption_positions,
     fix_source_caption_lines,
     tighten_caption_block_layout,
@@ -515,6 +516,7 @@ def apply_safe_autofixes(
     # collapse pass so they are not removed.  Client requirement:
     # «после таблиц и рисунков отступы».
     if getattr(cfg, "fix_caption_positions", True):
+        changed |= ensure_blank_before_table_blocks(doc, details)
         changed |= ensure_blank_after_caption_blocks(doc, details)
 
     if changed:

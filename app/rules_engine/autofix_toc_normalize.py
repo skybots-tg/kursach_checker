@@ -148,7 +148,7 @@ def _ensure_toc_styles_font(
         styles_root = styles_part.element
 
     size_half = str(int(round(font_size_pt * 2)))
-    line_240 = str(int(round((line_spacing or 1.0) * 240)))
+    line_240 = "240"  # TOC styles always use single (1.0) line spacing
     changed = False
 
     for level in (1, 2, 3):
@@ -272,14 +272,16 @@ def _normalize_toc_entry(p_elem: OxmlElement, font_name: str | None,
                          font_size_pt: float | None, line_spacing: float | None) -> bool:
     """Apply the full «plain body text» normalization to a single TOC entry
     paragraph: clear bold/underline, set body font/size, set line spacing.
+
+    TOC entries always use single (1.0) line spacing regardless of the
+    document body spacing — this keeps the table of contents compact.
     """
     changed = _clear_bold_underline_in_paragraph(p_elem)
     if font_name and font_size_pt:
         if _normalize_toc_entry_run_font(p_elem, font_name, font_size_pt):
             changed = True
-    if line_spacing:
-        if _normalize_toc_entry_paragraph_format(p_elem, line_spacing):
-            changed = True
+    if _normalize_toc_entry_paragraph_format(p_elem, 1.0):
+        changed = True
     return changed
 
 

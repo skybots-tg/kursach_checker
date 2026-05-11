@@ -101,6 +101,22 @@ def _next_nonempty_sibling(elem):
     return None
 
 
+def _ensure_keep_with_next(p_elem) -> bool:
+    """Set ``keep_with_next`` on a ``<w:p>`` element so Word won't split it
+    from the next paragraph across a page break."""
+    from docx.oxml import OxmlElement
+    pPr = p_elem.find(qn("w:pPr"))
+    if pPr is None:
+        pPr = OxmlElement("w:pPr")
+        p_elem.insert(0, pPr)
+    kwn = pPr.find(qn("w:keepNext"))
+    if kwn is not None:
+        return False
+    kwn = OxmlElement("w:keepNext")
+    pPr.append(kwn)
+    return True
+
+
 def _format_figure_caption(para) -> bool:
     """Center the caption paragraph and wipe red-line / left indents."""
     changed = False
@@ -325,17 +341,17 @@ def fix_caption_positions(doc, details: list[str]) -> bool:
             continue
 
         if _FIGURE_CAPTION_RE.match(text):
-            # Figure caption: should be right below an image paragraph.
             prev = _prev_nonempty_sibling(p_elem)
             if prev is not None and prev.tag == qn("w:p") and _para_has_image(prev):
                 if _format_figure_caption(para):
                     changed = True
                     fig_formatted += 1
+                if _ensure_keep_with_next(prev):
+                    changed = True
                 continue
 
             nxt = _next_nonempty_sibling(p_elem)
             if nxt is not None and nxt.tag == qn("w:p") and _para_has_image(nxt):
-                # Caption is above the image; move it below.
                 parent = p_elem.getparent()
                 if parent is not None:
                     parent.remove(p_elem)
@@ -344,10 +360,10 @@ def fix_caption_positions(doc, details: list[str]) -> bool:
                     fig_moved += 1
                 if _format_figure_caption(para):
                     changed = True
+                if _ensure_keep_with_next(nxt):
+                    changed = True
                 continue
 
-            # No adjacent image — just align the caption (the image may sit
-            # further away, but GOST layout still wants a centered caption).
             if _format_figure_caption(para):
                 changed = True
                 fig_formatted += 1
@@ -628,6 +644,80 @@ def ensure_blank_after_caption_blocks(doc, details: list[str]) -> bool:
     return bool(inserted or trimmed)
 
 
+def ensure_blank_before_table_blocks(doc, details: list[str]) -> bool:
+    """Insert exactly one empty paragraph before every table caption or bare
+    table that follows body text.
+
+    Customer rule: spacing before tables should match spacing after tables.
+    ``ensure_blank_after_caption_blocks`` already adds a blank after; this
+    function mirrors that logic for the *top* edge.
+
+    A "block start" is:
+      * ``<w:p>`` whose text matches ``_TABLE_CAPTION_RE``
+        ("Таблица N — ..."),
+      * ``<w:tbl>`` not preceded by a caption paragraph.
+    """
+    from docx.oxml import OxmlElement
+    body = doc.element.body
+    inserted = 0
+
+    def _is_blank_para(el):
+        if el is None or el.tag != qn("w:p"):
+            return False
+        txt = "".join((t.text or "") for t in el.iter(qn("w:t"))).strip()
+        return not txt and not _para_has_image(el)
+
+    children = list(body)
+    for el in children:
+        if el.getparent() is None:
+            continue
+        tag = el.tag
+
+        is_table_caption = False
+        is_bare_table = False
+
+        if tag == qn("w:p"):
+            txt = "".join((t.text or "") for t in el.iter(qn("w:t"))).strip()
+            if txt and _TABLE_CAPTION_RE.match(txt):
+                is_table_caption = True
+        elif tag == qn("w:tbl"):
+            prev_ne = _prev_nonempty_sibling(el)
+            if prev_ne is not None and prev_ne.tag == qn("w:p"):
+                prev_txt = "".join(
+                    (t.text or "") for t in prev_ne.iter(qn("w:t"))
+                ).strip()
+                if not _TABLE_CAPTION_RE.match(prev_txt):
+                    is_bare_table = True
+            elif prev_ne is None or prev_ne.tag != qn("w:p"):
+                is_bare_table = True
+
+        if not is_table_caption and not is_bare_table:
+            continue
+
+        prev = el.getprevious()
+        if prev is not None and _is_blank_para(prev):
+            continue
+
+        if prev is None:
+            continue
+
+        pPr = prev.find(qn("w:pPr")) if prev.tag == qn("w:p") else None
+        if pPr is not None:
+            ps = pPr.find(qn("w:pStyle"))
+            if ps is not None and (ps.get(qn("w:val")) or "").startswith("Heading"):
+                continue
+
+        new_p = OxmlElement("w:p")
+        el.addprevious(new_p)
+        inserted += 1
+
+    if inserted:
+        details.append(
+            f"Подписи: перед таблицами добавлен пустой абзац ({inserted} шт.)"
+        )
+    return inserted > 0
+
+
 def tighten_caption_block_layout(doc, details: list[str]) -> bool:
     """Compress the vertical space around figures, captions and tables.
 
@@ -661,10 +751,6 @@ def tighten_caption_block_layout(doc, details: list[str]) -> bool:
             continue
         touched = _zero_paragraph_spacing(p_elem)
         if is_figure:
-            # Force single line spacing on the figure-bearing paragraph
-            # so the inline drawing renders without the 1.3 multiplier
-            # padding, which used to add a visible gap above the
-            # caption.
             pPr = p_elem.find(qn("w:pPr"))
             if pPr is None:
                 pPr = OxmlElement("w:pPr")
@@ -676,6 +762,9 @@ def tighten_caption_block_layout(doc, details: list[str]) -> bool:
             if spacing.get(qn("w:line")) != "240":
                 spacing.set(qn("w:line"), "240")
                 spacing.set(qn("w:lineRule"), "auto")
+                touched = True
+            if not para.paragraph_format.keep_with_next:
+                para.paragraph_format.keep_with_next = True
                 touched = True
         if touched:
             changed = True

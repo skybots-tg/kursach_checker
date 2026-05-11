@@ -953,6 +953,20 @@ def remove_empty_paras_before_page_breaks(doc, details: list[str]) -> bool:
 def fix_section_margins(
     section, margins_mm: dict, sec_idx: int, details: list[str],
 ) -> bool:
+    from docx.enum.section import WD_ORIENT
+
+    is_landscape = (
+        getattr(section, "orientation", None) == WD_ORIENT.LANDSCAPE
+        or (section.page_width is not None
+            and section.page_height is not None
+            and int(section.page_width) > int(section.page_height))
+    )
+    if is_landscape:
+        details.append(
+            f"\u0421\u0435\u043a\u0446\u0438\u044f #{sec_idx + 1}: альбомная ориентация — поля не изменены"
+        )
+        return False
+
     changed = False
     for key in ("left", "right", "top", "bottom"):
         target_mm = margins_mm.get(key)
@@ -965,5 +979,5 @@ def fix_section_margins(
             setattr(section, attr, target)
             changed = True
     if changed:
-        details.append(f"\u0421\u0435\u043a\u0446\u0438\u044f #{sec_idx + 1}: \u043f\u043e\u043b\u044f \u0438\u0441\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u044b")
+        details.append(f"\u0421\u0435\u043a\u0446\u0438\u044f #{sec_idx + 1}: поля исправлены")
     return changed
