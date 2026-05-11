@@ -269,7 +269,12 @@ def _sort_key(text: str) -> tuple:
 
 
 def _set_paragraph_text(paragraph, new_text: str) -> None:
-    """Replace paragraph text while preserving formatting of the first run."""
+    """Replace paragraph text while preserving formatting of the first run.
+
+    Also clears text inside ``<w:hyperlink>`` children — ``paragraph.runs``
+    does NOT include those, so without this step URLs appear twice (once
+    from the run text we write here, once from the orphaned hyperlink run).
+    """
     runs = paragraph.runs
     if not runs:
         return
@@ -277,6 +282,11 @@ def _set_paragraph_text(paragraph, new_text: str) -> None:
     runs[0].text = new_text
     for run in runs[1:]:
         run.text = ""
+
+    for hl in paragraph._element.findall(qn("w:hyperlink")):
+        for r_el in hl.findall(qn("w:r")):
+            for t_el in r_el.findall(qn("w:t")):
+                t_el.text = ""
 
 
 def _collect_subsection_indices(
@@ -561,6 +571,7 @@ def _fix_flat_alphabetical(
         new_text = f"{num}. {clean}"
         if new_text != text:
             _set_paragraph_text(refreshed[idx], new_text)
+        _strip_numPr(refreshed[idx])
 
     if re_entries:
         details.append(
@@ -586,8 +597,6 @@ def _fix_with_subsections(
     if total_entries < 2:
         return False
 
-    # Renumber in place: per-subsection order stays the same, numbers
-    # run continuously across the whole bibliography.
     num = 1
     for group in groups:
         for entry in group["entries"]:
@@ -599,6 +608,7 @@ def _fix_with_subsections(
             new_text = f"{num}. {clean}"
             if new_text != text:
                 _set_paragraph_text(head_para, new_text)
+            _strip_numPr(head_para)
             num += 1
 
     # Re-stamp bold on subsection rows so they visually stand out
@@ -665,6 +675,23 @@ def enforce_bibliography_entry_formatting(
     return touched > 0
 
 
+def _strip_numPr(para) -> bool:
+    """Remove Word-level numbering properties from a paragraph.
+
+    When we write "N. " into the text ourselves, any residual ``<w:numPr>``
+    causes Word to render a SECOND numbering prefix (the one from the
+    abstract numbering definition), producing "12.  12. Author…".
+    """
+    pPr = para._element.find(qn("w:pPr"))
+    if pPr is None:
+        return False
+    numPr = pPr.find(qn("w:numPr"))
+    if numPr is None:
+        return False
+    pPr.remove(numPr)
+    return True
+
+
 def _apply_entry_formatting(
     para,
     line_spacing: float,
@@ -675,6 +702,9 @@ def _apply_entry_formatting(
 ) -> bool:
     pf = para.paragraph_format
     changed = False
+
+    if _strip_numPr(para):
+        changed = True
 
     if para.alignment != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
         para.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
