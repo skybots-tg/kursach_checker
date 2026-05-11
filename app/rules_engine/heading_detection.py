@@ -13,7 +13,7 @@ CHAPTER_RE = re.compile(
     r"^[^\w]*(?:(?:глава|chapter|раздел)\s+\d|\d+\s+глава)",
     re.IGNORECASE,
 )
-TOC_LINE_TAIL_RE = re.compile(r"\s{2,}\d[\d\-–—]+")
+TOC_LINE_TAIL_RE = re.compile(r"\s{2,}\d[\d\-–—]*")
 
 # ── Known structural section names ──────────────────────────────────
 

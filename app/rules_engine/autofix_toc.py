@@ -560,6 +560,8 @@ def _looks_like_toc_line(text: str) -> bool:
         return True
     if re.search(r"\.{2,}\s*\d+\s*$", stripped):
         return True
+    if re.search(r"(?:\.\s){3,}\d*\s*$", stripped):
+        return True
     if re.search(r"\t+\d+\s*$", stripped):
         return True
     if _TOC_ENTRY_START_RE.match(stripped):
@@ -600,6 +602,7 @@ def _normalize_for_dup(text: str) -> str:
     manual TOC block ends and the body starts repeating its own titles."""
     base = re.sub(r"\s+", " ", text).strip().lower()
     base = re.sub(r"[\.\u2026]+\s*\d+\s*$", "", base)  # «… 12»
+    base = re.sub(r"(?:\.\s){3,}\d*\s*$", "", base)   # «. . . 12»
     base = re.sub(r"\s{2,}\d+\s*$", "", base)         # «  12»
     base = re.sub(r"\t+\d+\s*$", "", base)
     base = base.rstrip(":.;\u2014\u2013- ")
