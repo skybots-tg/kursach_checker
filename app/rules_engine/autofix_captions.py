@@ -117,8 +117,25 @@ def _ensure_keep_with_next(p_elem) -> bool:
     return True
 
 
+def _ensure_keep_lines(p_elem) -> bool:
+    """Set ``keep_lines`` on a ``<w:p>`` so Word won't split it across pages."""
+    from docx.oxml import OxmlElement
+    pPr = p_elem.find(qn("w:pPr"))
+    if pPr is None:
+        pPr = OxmlElement("w:pPr")
+        p_elem.insert(0, pPr)
+    kl = pPr.find(qn("w:keepLines"))
+    if kl is not None:
+        return False
+    kl = OxmlElement("w:keepLines")
+    pPr.append(kl)
+    return True
+
+
 def _format_figure_caption(para) -> bool:
-    """Center the caption paragraph and wipe red-line / left indents."""
+    """Center the caption paragraph, wipe red-line / left indents, and prevent
+    the caption from being separated from the preceding image across a page
+    break (``keepLines``)."""
     changed = False
     if para.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
         para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
@@ -129,6 +146,8 @@ def _format_figure_caption(para) -> bool:
         changed = True
     if pf.left_indent is not None and int(pf.left_indent) != 0:
         pf.left_indent = Mm(0)
+        changed = True
+    if _ensure_keep_lines(para._element):
         changed = True
     return changed
 
@@ -702,7 +721,7 @@ def ensure_blank_before_table_blocks(doc, details: list[str]) -> bool:
             continue
 
         pPr = prev.find(qn("w:pPr")) if prev.tag == qn("w:p") else None
-        if pPr is not None:
+        if pPr is not None and is_table_caption:
             ps = pPr.find(qn("w:pStyle"))
             if ps is not None and (ps.get(qn("w:val")) or "").startswith("Heading"):
                 continue

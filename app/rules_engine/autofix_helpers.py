@@ -908,6 +908,8 @@ def _is_removable_empty_para(para) -> bool:
     for child in para._element:
         tag = child.tag
         if tag == qn("w:pPr"):
+            if child.find(qn("w:sectPr")) is not None:
+                return False
             continue
         if tag in (qn("w:bookmarkStart"), qn("w:bookmarkEnd")):
             continue

@@ -114,6 +114,9 @@ def _strip_existing_auto_toc(doc, details: list[str]) -> bool:
 
     for p_elem in toc_paras_to_remove:
         if p_elem.getparent() is not None:
+            p_pPr = p_elem.find(qn("w:pPr"))
+            if p_pPr is not None and p_pPr.find(qn("w:sectPr")) is not None:
+                continue
             p_elem.getparent().remove(p_elem)
             changed = True
 
@@ -198,8 +201,17 @@ def _filter_appendix_children_after_parent(
     return out
 
 
+_MAX_TOC_HEADING_LEN = 200
+
+
 def _collect_headings(doc) -> list[tuple[str, int]]:
-    """Return ``[(text, level), ...]`` for headings up to ``_MAX_TOC_LEVEL``."""
+    """Return ``[(text, level), ...]`` for headings up to ``_MAX_TOC_LEVEL``.
+
+    Paragraphs whose text exceeds ``_MAX_TOC_HEADING_LEN`` characters are
+    skipped — they are body text with a mistakenly assigned heading /
+    outline level (common pattern: «Актуальность работы. При поступлении
+    в школу…» formatted as a TOC-linked heading in the source document).
+    """
     headings: list[tuple[str, int]] = []
     for para in doc.paragraphs:
         level = _get_heading_level(para)
@@ -207,6 +219,8 @@ def _collect_headings(doc) -> list[tuple[str, int]]:
             continue
         text = (para.text or "").strip()
         if not text or _TOC_HEADING_RE.match(text):
+            continue
+        if len(text) > _MAX_TOC_HEADING_LEN:
             continue
         headings.append((text, level))
     return _filter_appendix_children_after_parent(headings)
@@ -745,6 +759,9 @@ def _remove_table_after_heading(doc, heading_para, details: list[str]) -> bool:
 
     for blank in interim_blanks:
         if blank.getparent() is not None:
+            bk_pPr = blank.find(qn("w:pPr"))
+            if bk_pPr is not None and bk_pPr.find(qn("w:sectPr")) is not None:
+                continue
             blank.getparent().remove(blank)
 
     sibling.getparent().remove(sibling)
@@ -777,6 +794,9 @@ def _remove_manual_toc_entries(doc, heading_idx: int, details: list[str]) -> boo
 
     for elem in to_remove:
         if elem.getparent() is not None:
+            el_pPr = elem.find(qn("w:pPr"))
+            if el_pPr is not None and el_pPr.find(qn("w:sectPr")) is not None:
+                continue
             elem.getparent().remove(elem)
 
     if to_remove:
@@ -908,6 +928,9 @@ def _remove_residual_toc_after_heading(
             scanned += 1
             continue
         if _looks_like_residual_toc_line(text):
+            el_pPr = el.find(qn("w:pPr"))
+            if el_pPr is not None and el_pPr.find(qn("w:sectPr")) is not None:
+                break
             body.remove(el)
             removed += 1
             # Don't advance pos — list shifted.

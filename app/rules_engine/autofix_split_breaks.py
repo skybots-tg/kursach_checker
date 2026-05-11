@@ -179,6 +179,16 @@ def split_soft_break_paragraphs(doc, details: list[str]) -> bool:
             anchor.addnext(new_p)
             anchor = new_p
             new_paragraphs.append(new_p)
+        old_pPr = p_elem.find(qn("w:pPr"))
+        if old_pPr is not None:
+            sect = old_pPr.find(qn("w:sectPr"))
+            if sect is not None and new_paragraphs:
+                last_pPr = new_paragraphs[-1].find(qn("w:pPr"))
+                if last_pPr is None:
+                    from docx.oxml import OxmlElement
+                    last_pPr = OxmlElement("w:pPr")
+                    new_paragraphs[-1].insert(0, last_pPr)
+                last_pPr.append(sect)
         parent.remove(p_elem)
         changed_paragraphs += 1
 

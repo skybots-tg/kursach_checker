@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -215,6 +216,21 @@ def apply_safe_autofixes(
         if is_heading_para(p):
             body_start = i
             break
+    if body_start == 0:
+        _vved_re = re.compile(
+            r"^\s*(?:введение|вступление|аннотация|реферат|abstract"
+            r"|содержание|оглавление)\s*$",
+            re.IGNORECASE,
+        )
+        for i, p in enumerate(doc.paragraphs):
+            text_low = (p.text or "").strip()
+            if _vved_re.match(text_low):
+                body_start = i
+                break
+            pf = p.paragraph_format
+            if pf.page_break_before and i > 3:
+                body_start = i
+                break
 
     for idx, paragraph in enumerate(doc.paragraphs):
         # Skip title page paragraphs — client requirement:
@@ -263,6 +279,9 @@ def apply_safe_autofixes(
         if para_count >= max_paragraphs:
             break
 
+        if idx < body_start:
+            continue
+
         text = (paragraph.text or "").strip()
         if not text:
             continue
@@ -296,6 +315,27 @@ def apply_safe_autofixes(
             continue
 
         is_heading = is_heading_para(paragraph)
+
+        if is_heading and len(text) > 200:
+            try:
+                normal_style = doc.styles["Normal"]
+                paragraph.style = normal_style
+            except KeyError:
+                pass
+            pPr = paragraph._element.find(
+                "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}pPr"
+            )
+            if pPr is not None:
+                ol = pPr.find(
+                    "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}outlineLvl"
+                )
+                if ol is not None:
+                    pPr.remove(ol)
+            is_heading = False
+            changed = True
+            para_touched = True
+            details.append(f"{para_label}: длинный параграф понижен из заголовка в обычный текст")
+
         candidate_level = detect_heading_candidate(text) if not is_heading else None
         if not is_heading and candidate_level is None and toc_heading_levels:
             candidate_level = detect_heading_via_toc(text, toc_heading_levels)

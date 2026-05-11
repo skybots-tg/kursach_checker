@@ -516,6 +516,9 @@ def consolidate_appendix_block(
                 idx = list(body).index(el)
                 if _is_inside_range(idx, toc_range):
                     continue
+                el_pPr = el.find(qn("w:pPr"))
+                if el_pPr is not None and el_pPr.find(qn("w:sectPr")) is not None:
+                    continue
                 body.remove(el)
                 removed += 1
         if removed:
