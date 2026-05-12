@@ -100,11 +100,12 @@ async function viewUserDetail(id) {
   const page = $('page-users');
   page.innerHTML = loadingHtml();
   try {
-    const [user, allOrders, allChecks] = await Promise.all([
+    const [user, ordersResp, allChecks] = await Promise.all([
       api('GET', `/admin/users/${id}`),
       api('GET', '/admin/orders'),
       api('GET', '/admin/checks'),
     ]);
+    const allOrders = ordersResp.items || ordersResp;
     const orders = allOrders.filter(o => (o.user_id ?? o.user?.id) === id);
     const checks = allChecks.filter(c => (c.user_id ?? c.user?.id) === id);
     _userDetailData = { user, orders, checks };
@@ -222,13 +223,14 @@ function userChecksList(checks) {
     <div class="table-wrap">
       <table class="data-table">
         <thead><tr>
-          <th>ID</th><th>ГОСТ</th><th>Статус</th>
+          <th>ID</th><th>Файл</th><th>ГОСТ</th><th>Статус</th>
           <th>Загружено</th><th>Завершено</th>
           <th style="text-align:right">Действия</th>
         </tr></thead>
         <tbody>
           ${checks.map(c => `<tr>
             <td data-label="ID">${c.id}</td>
+            <td data-label="Файл" title="${escHtml(c.filename || '')}" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(c.filename || '—')}</td>
             <td data-label="ГОСТ">${c.gost ? entityTag('gost', c.gost.id, c.gost.name) : '—'}</td>
             <td data-label="Статус">${statusBadge(c.status)}</td>
             <td data-label="Загружено" style="white-space:nowrap">${formatDate(c.created_at)}</td>

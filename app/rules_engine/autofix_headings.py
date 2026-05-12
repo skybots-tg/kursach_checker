@@ -48,6 +48,7 @@ def _resolve_heading_style(paragraph, level: int):
     style.quick_style = True
     pf = style.paragraph_format
     pf.keep_with_next = True
+    pf.keep_together = True
     pf.space_before = Pt(0)
     pf.space_after = Pt(0)
     return style
@@ -915,6 +916,9 @@ def enforce_heading_spacing(doc, cfg, details: list[str]) -> bool:
         if not spf.keep_with_next:
             spf.keep_with_next = True
             touched = True
+        if not spf.keep_together:
+            spf.keep_together = True
+            touched = True
         if touched:
             styles_changed += 1
 
@@ -937,6 +941,9 @@ def enforce_heading_spacing(doc, cfg, details: list[str]) -> bool:
             touched = True
         if not pf.keep_with_next:
             pf.keep_with_next = True
+            touched = True
+        if not pf.keep_together:
+            pf.keep_together = True
             touched = True
         if touched:
             paragraphs_changed += 1

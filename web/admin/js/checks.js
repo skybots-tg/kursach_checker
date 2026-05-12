@@ -88,7 +88,7 @@ function checksTable(list) {
     <div class="table-wrap">
       <table class="data-table">
         <thead><tr>
-          <th>ID</th><th>Пользователь</th><th>ГОСТ</th>
+          <th>ID</th><th>Пользователь</th><th>Файл</th><th>ГОСТ</th>
           <th>Статус</th><th>Создано</th><th>Завершено</th>
           <th style="text-align:right">Действия</th>
         </tr></thead>
@@ -98,6 +98,7 @@ function checksTable(list) {
             <td data-label="Пользователь">${c.user
               ? entityTag('user', c.user_id || c.user.id, c.user.username ? '@' + c.user.username : c.user.first_name || 'user')
               : '—'}</td>
+            <td data-label="Файл" title="${escHtml(c.filename || '')}" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(c.filename || '—')}</td>
             <td data-label="ГОСТ">${c.gost
               ? entityTag('gost', c.gost.id, c.gost.name)
               : '—'}</td>

@@ -47,3 +47,12 @@ test_docs/
 tmp_*/
 tmp_*.py
 tmp_*.txt
+
+# Local debug/test scripts
+_test_output/
+_debug_*.py
+_run_*.py
+_take_*.py
+_word_com_checker.py
+
+.cursor/*

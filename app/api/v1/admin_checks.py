@@ -21,10 +21,11 @@ async def list_checks(
 ) -> list[dict]:
     _ = current_admin
     stmt = (
-        select(Check, User, TemplateVersion, Gost)
+        select(Check, User, TemplateVersion, Gost, File)
         .join(User, User.id == Check.user_id)
         .join(TemplateVersion, TemplateVersion.id == Check.template_version_id)
         .outerjoin(Gost, Gost.id == Check.gost_id)
+        .outerjoin(File, File.id == Check.input_file_id)
         .order_by(Check.id.desc())
     )
     if status:
@@ -39,10 +40,11 @@ async def list_checks(
             "user_id": u.id,
             "template_version_id": tv.id,
             "gost": {"id": g.id, "name": g.name} if g else None,
+            "filename": f.original_name if f else None,
             "created_at": c.created_at,
             "finished_at": c.finished_at,
         }
-        for c, u, tv, g in rows
+        for c, u, tv, g, f in rows
     ]
 
 
