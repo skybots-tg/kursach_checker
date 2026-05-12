@@ -57,17 +57,25 @@ function usersTable(list) {
     <div class="table-wrap">
       <table class="data-table">
         <thead><tr>
-          <th>ID</th><th>Telegram ID</th><th>Имя</th>
-          <th>Username</th><th>Кредиты</th><th>Регистрация</th>
+          <th>ID</th><th>Имя</th><th>Username</th>
+          <th style="text-align:center">Кредиты</th>
+          <th style="text-align:center">Проверки</th>
+          <th style="text-align:center">Платежи</th>
+          <th>Регистрация</th>
           <th style="text-align:right">Действия</th>
         </tr></thead>
         <tbody>
-          ${list.map(u => `<tr>
+          ${list.map(u => {
+            const paidInfo = (u.paid_count || 0)
+              ? `${u.paid_count} / ${u.paid_total ?? 0}\u2009₽`
+              : '—';
+            return `<tr>
             <td data-label="ID">${u.id}</td>
-            <td data-label="Telegram ID"><code>${u.telegram_id}</code></td>
             <td data-label="Имя">${escHtml(u.first_name || '—')}</td>
             <td data-label="Username">${u.username ? `@${escHtml(u.username)}` : '—'}</td>
-            <td data-label="Кредиты"><span class="badge badge-primary">${u.credits_available ?? 0}</span></td>
+            <td data-label="Кредиты" style="text-align:center"><span class="badge badge-primary">${u.credits_available ?? 0}</span></td>
+            <td data-label="Проверки" style="text-align:center"><span class="badge badge-info">${u.checks_count ?? 0}</span></td>
+            <td data-label="Платежи" style="text-align:center;white-space:nowrap">${paidInfo}</td>
             <td data-label="Регистрация" style="white-space:nowrap">${formatDate(u.created_at)}</td>
             <td data-label="" class="actions-cell">
               <button class="btn btn-icon btn-sm" title="Подробнее" onclick="viewUserDetail(${u.id})">
@@ -81,7 +89,7 @@ function usersTable(list) {
                 ${iconSvg('trash', 15)}
               </button>
             </td>
-          </tr>`).join('')}
+          </tr>`;}).join('')}
         </tbody>
       </table>
     </div>

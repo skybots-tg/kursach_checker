@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.admin_deps import get_current_admin
@@ -42,15 +42,51 @@ async def list_users(
     db: AsyncSession = Depends(get_db),
 ) -> list[dict]:
     _ = current_admin
-    stmt = select(User).order_by(User.id.desc())
+
+    checks_count_sq = (
+        select(func.count(Check.id))
+        .where(Check.user_id == User.id)
+        .correlate(User)
+        .scalar_subquery()
+        .label("checks_count")
+    )
+    paid_count_sq = (
+        select(func.count(Order.id))
+        .where(Order.user_id == User.id, Order.status == "paid")
+        .correlate(User)
+        .scalar_subquery()
+        .label("paid_count")
+    )
+    paid_total_sq = (
+        select(func.coalesce(func.sum(Order.amount), 0))
+        .where(Order.user_id == User.id, Order.status == "paid")
+        .correlate(User)
+        .scalar_subquery()
+        .label("paid_total")
+    )
+
+    stmt = (
+        select(User, checks_count_sq, paid_count_sq, paid_total_sq)
+        .order_by(User.id.desc())
+    )
     if q:
         like = f"%{q}%"
         stmt = stmt.where((User.username.ilike(like)) | (User.first_name.ilike(like)))
 
-    users = await db.scalars(stmt)
+    rows = await db.execute(stmt)
+    user_ids = []
+    user_map: dict[int, tuple] = {}
+    for u, c_cnt, p_cnt, p_total in rows:
+        user_ids.append(u.id)
+        user_map[u.id] = (u, c_cnt, p_cnt, p_total)
+
+    credits_stmt = select(CreditsBalance).where(CreditsBalance.user_id.in_(user_ids))
+    credits_rows = {c.user_id: c for c in await db.scalars(credits_stmt)}
+
     result = []
-    for u in users:
-        credits = await db.get(CreditsBalance, u.id)
+    for uid in user_ids:
+        u, c_cnt, p_cnt, p_total = user_map[uid]
+        credits = credits_rows.get(uid)
         result.append(
             {
                 "id": u.id,
@@ -58,6 +94,9 @@ async def list_users(
                 "first_name": u.first_name,
                 "username": u.username,
                 "credits_available": credits.credits_available if credits else 0,
+                "checks_count": c_cnt,
+                "paid_count": p_cnt,
+                "paid_total": p_total,
                 "created_at": u.created_at,
             }
         )
