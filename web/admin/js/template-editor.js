@@ -181,7 +181,7 @@ let _editVersionNum = 0;
 
 async function openTemplateEditor(id) {
   const hash = '#templates/' + id;
-  if (location.hash !== hash) history.replaceState(null, '', hash);
+  if (location.hash !== hash) history.pushState(null, '', hash);
   const page = $('page-templates');
   page.innerHTML = loadingHtml();
   try {
@@ -475,8 +475,7 @@ async function saveTemplateChanges() {
       },
     });
     toast('Шаблон сохранён (новая версия создана)', 'success');
-    history.replaceState(null, '', '#templates');
-    loadTemplates();
+    navigateTo('templates', null, 'replace');
   } catch (err) {
     toast('Ошибка: ' + err.message, 'error');
   }
@@ -485,8 +484,7 @@ async function saveTemplateChanges() {
 function backToTemplateList() {
   _editTplId = null;
   _editBlocks = [];
-  history.replaceState(null, '', '#templates');
-  loadTemplates();
+  navigateTo('templates', null, 'replace');
 }
 
 /* ---- Exports ---- */

@@ -40,7 +40,7 @@ function renderContentPage(bodyHtml, actionBtn) {
 
 function switchContentTab(tab) {
   _contentTab = tab;
-  history.replaceState(null, '', '#content/' + tab);
+  history.pushState(null, '', '#content/' + tab);
   loadContent();
 }
 

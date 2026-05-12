@@ -175,7 +175,8 @@ function _restoreOrdersFilters() {
 async function filterOrders() { applyOrdersFilters(); }
 
 async function viewOrder(id) {
-  history.replaceState(null, '', '#orders/' + id);
+  const hash = '#orders/' + id;
+  if (location.hash !== hash) history.pushState(null, '', hash);
   try {
     const data = await api('GET', `/admin/orders/${id}`);
     const o = data.order || {};

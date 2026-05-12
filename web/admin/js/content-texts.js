@@ -439,7 +439,7 @@ async function editStartWelcomeText() {
     return;
   }
   _contentTab = 'system';
-  history.replaceState(null, '', '#content/system');
+  history.pushState(null, '', '#content/system');
   try {
     await loadSystemTexts();
   } catch (err) {

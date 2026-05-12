@@ -175,7 +175,8 @@ function buildFindingsSection(findings) {
 }
 
 async function viewCheck(id) {
-  history.replaceState(null, '', '#checks/' + id);
+  const hash = '#checks/' + id;
+  if (location.hash !== hash) history.pushState(null, '', hash);
   try {
     const data = await api('GET', `/admin/checks/${id}`);
     const c = data.check || {};

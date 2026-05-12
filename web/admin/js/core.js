@@ -67,9 +67,9 @@ function registerEntityHandler(pageId, handler, skipLoader) {
 
 window._modalEntityHash = false;
 
-async function navigateTo(pageId, sub) {
-  window._modalEntityHash = false;
-  closeModal();
+async function navigateTo(pageId, sub, historyAction) {
+  if (!historyAction) historyAction = 'push';
+  closeModal(true);
 
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
@@ -85,7 +85,10 @@ async function navigateTo(pageId, sub) {
 
   const hasSub = sub != null && sub !== '';
   const hash = hasSub ? '#' + pageId + '/' + sub : '#' + pageId;
-  if (location.hash !== hash) history.replaceState(null, '', hash);
+  if (location.hash !== hash) {
+    if (historyAction === 'push') history.pushState(null, '', hash);
+    else if (historyAction === 'replace') history.replaceState(null, '', hash);
+  }
 
   const handler = hasSub ? entityHandlers[pageId] : null;
   if (handler && handler.skipPageLoader) {
@@ -161,12 +164,12 @@ function openModal(title, bodyHtml, footerHtml) {
   document.body.appendChild(overlay);
 }
 
-function closeModal() {
+function closeModal(skipHistory) {
+  const hadModalHash = window._modalEntityHash;
+  window._modalEntityHash = false;
   document.getElementById('active-modal')?.remove();
-  if (window._modalEntityHash) {
-    window._modalEntityHash = false;
-    const { page } = parseHash();
-    history.replaceState(null, '', '#' + page);
+  if (!skipHistory && hadModalHash) {
+    history.back();
   }
 }
 
@@ -380,7 +383,6 @@ function entityTag(type, id, label) {
 function goToEntity(type, id) {
   const map = { user:'users', university:'universities', gost:'gosts', order:'orders', check:'checks', product:'products', template:'templates' };
   if (!map[type]) return;
-  closeModal();
   navigateTo(map[type], id ? String(id) : undefined);
 }
 
@@ -389,14 +391,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!getToken()) showLoginModal();
   else {
     const { page, sub } = parseHash();
-    navigateTo(page, sub);
+    navigateTo(page, sub, 'replace');
   }
 });
 
-window.addEventListener('hashchange', () => {
+window.addEventListener('popstate', () => {
   if (getToken()) {
     const { page, sub } = parseHash();
-    navigateTo(page, sub);
+    navigateTo(page, sub, 'none');
   }
 });
 

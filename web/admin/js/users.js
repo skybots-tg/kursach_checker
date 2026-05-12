@@ -96,7 +96,7 @@ function searchUsers() {
 
 async function viewUserDetail(id) {
   const hash = '#users/' + id;
-  if (location.hash !== hash) history.replaceState(null, '', hash);
+  if (location.hash !== hash) history.pushState(null, '', hash);
   const page = $('page-users');
   page.innerHTML = loadingHtml();
   try {
@@ -314,8 +314,7 @@ async function setUserCredits(userId) {
 
 function backToUserList() {
   _userDetailData = null;
-  history.replaceState(null, '', '#users');
-  loadUsers();
+  navigateTo('users', null, 'replace');
 }
 
 /* ---- Delete user ---- */
