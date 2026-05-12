@@ -135,6 +135,7 @@ def _load_report_summary(report_file: File) -> dict | None:
             "warnings": summary.get("warnings", 0),
             "fixed": summary.get("fixed", 0),
             "findings_count": len(findings),
+            "findings": findings,
             "check_errors": check_errors,
         }
     except Exception:

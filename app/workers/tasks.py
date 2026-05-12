@@ -44,7 +44,7 @@ async def process_check_task(ctx: dict, check_id: int) -> dict:
             return {"error": "check_not_found", "check_id": check_id}
 
         check.status = CheckStatus.running
-        _add_log(session, check.id, "info", "Check started")
+        _add_log(session, check.id, "info", "Проверка запущена")
         await session.commit()
 
         try:
@@ -53,36 +53,36 @@ async def process_check_task(ctx: dict, check_id: int) -> dict:
             check.status = CheckStatus.done if ok else CheckStatus.error
 
             if ok:
-                _add_log(session, check.id, "info", "Check completed successfully")
+                _add_log(session, check.id, "info", "Проверка завершена успешно")
                 check_errors = result.get("check_errors", [])
                 if not check_errors:
                     await spend_credits(
                         session,
                         user_id=check.user_id,
                         amount=1,
-                        description=f"Check #{check.id}",
+                        description=f"Проверка #{check.id}",
                         reference_type="check",
                         reference_id=check.id,
                     )
                 else:
                     _add_log(
                         session, check.id, "warning",
-                        f"Credits not charged: {len(check_errors)} internal check error(s)",
+                        f"Кредит не списан: {len(check_errors)} внутр. ошибок при проверке",
                     )
                 for notice in result.get("pipeline_notices", []):
-                    _add_log(session, check.id, "info", f"Pipeline: {notice}")
+                    _add_log(session, check.id, "info", notice)
                 for ce in check_errors:
-                    _add_log(session, check.id, "warning", f"Check issue: {ce}")
+                    _add_log(session, check.id, "warning", f"Проблема проверки: {ce}")
             else:
-                error_msg = result.get("error") or "Unknown pipeline error"
-                _add_log(session, check.id, "error", f"Check failed: {error_msg}")
+                error_msg = result.get("error") or "Неизвестная ошибка пайплайна"
+                _add_log(session, check.id, "error", f"Проверка не удалась: {error_msg}")
 
         except Exception:
             tb = traceback.format_exc()
             logger.exception("Unhandled error in check %s", check_id)
             result = {"ok": False}
             check.status = CheckStatus.error
-            _add_log(session, check.id, "error", f"Unhandled exception:\n{tb}")
+            _add_log(session, check.id, "error", f"Необработанное исключение:\n{tb}")
 
         check.finished_at = datetime.utcnow()
         await session.commit()

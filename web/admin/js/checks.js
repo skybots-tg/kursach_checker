@@ -134,6 +134,46 @@ async function filterChecks() {
   }
 }
 
+function buildFindingsSection(findings) {
+  const severityLabel = s => ({error: 'Ошибка', warning: 'Предупр.', advice: 'Совет'}[s] || s);
+  const severityColor = s => ({error: 'var(--danger)', warning: 'var(--warn)', advice: '#6b7280'}[s] || '#6b7280');
+  const severityBg = s => ({error: '#fef2f2', warning: '#fffbeb', advice: '#f8fafc'}[s] || '#f8fafc');
+
+  const errors = findings.filter(f => f.severity === 'error');
+  const warnings = findings.filter(f => f.severity === 'warning');
+  const advice = findings.filter(f => f.severity !== 'error' && f.severity !== 'warning');
+  const sorted = [...errors, ...warnings, ...advice];
+
+  const rows = sorted.map(f => {
+    const fixed = f.auto_fixed
+      ? `<span style="color:var(--success);font-size:11px;margin-left:6px">[исправлено]</span>`
+      : '';
+    return `<div style="padding:10px 12px;border-bottom:1px solid #e2e8f0;background:${severityBg(f.severity)}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="font-size:11px;font-weight:600;color:${severityColor(f.severity)};text-transform:uppercase">${severityLabel(f.severity)}</span>
+        <span style="font-size:13px;font-weight:600">${escHtml(f.title)}</span>
+        ${fixed}
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:2px">
+        <span style="color:var(--text-muted)">Где:</span> ${escHtml(f.location || '—')}
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary)">
+        <span style="color:var(--text-muted)">Ожидается:</span> ${escHtml(f.expected || '—')}
+        · <span style="color:var(--text-muted)">Найдено:</span> ${escHtml(f.found || '—')}
+      </div>
+      ${f.recommendation ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:2px"><span style="color:var(--text-muted)">Рекомендация:</span> ${escHtml(f.recommendation)}</div>` : ''}
+      ${f.auto_fix_details ? `<div style="font-size:11px;color:var(--success);margin-top:2px">↳ ${escHtml(f.auto_fix_details)}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  return `<div>
+    <div class="form-label" style="margin-bottom:8px">Замечания (${findings.length})</div>
+    <div style="max-height:400px;overflow-y:auto;border-radius:8px;border:1px solid #e2e8f0">
+      ${rows}
+    </div>
+  </div>`;
+}
+
 async function viewCheck(id) {
   history.replaceState(null, '', '#checks/' + id);
   try {
@@ -176,6 +216,8 @@ async function viewCheck(id) {
           </div>` : ''}
       </div>` : '';
 
+    const findingsSection = rs && rs.findings && rs.findings.length ? buildFindingsSection(rs.findings) : '';
+
     const errorLogs = logs.filter(l => l.level === 'error');
     const warnLogs = logs.filter(l => l.level === 'warning');
     const infoLogs = logs.filter(l => l.level === 'info');
@@ -199,6 +241,7 @@ async function viewCheck(id) {
           <div>${c.gost ? entityTag('gost', c.gost.id || c.gost_id, c.gost.name) : entityTag('gost', c.gost_id, '#' + c.gost_id)}</div>
         </div>` : ''}
         ${reportSection}
+        ${findingsSection}
         <div>
           <div class="form-label" style="margin-bottom:6px">Файлы</div>
           ${fileRow('Исходный', files.input)}
