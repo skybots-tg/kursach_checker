@@ -10,6 +10,7 @@ from app.models.entities import (
     AuditLog,
     BotContent,
     Broadcast,
+    BroadcastFile,
     BroadcastMessage,
     BroadcastStatus,
     Check,
@@ -42,6 +43,7 @@ from app.models.entities import (
 __all__ = [
     "User",
     "Broadcast",
+    "BroadcastFile",
     "BroadcastMessage",
     "BroadcastStatus",
     "Product",

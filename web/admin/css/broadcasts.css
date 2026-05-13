@@ -1,5 +1,5 @@
 /* ============================================================
-   Broadcasts — list, editor (text + media), floating toolbar
+   Broadcasts — list, editor, files, buttons, toolbar, schedule
    ============================================================ */
 
 /* ---- List View ---- */
@@ -15,7 +15,7 @@
 }
 .bc-list-item-meta {
   display: flex; align-items: center; gap: 10px;
-  font-size: 12px; color: var(--text-muted);
+  font-size: 12px; color: var(--text-muted); flex-wrap: wrap;
 }
 .bc-list-item-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
@@ -99,29 +99,55 @@
   background: #f1f5f9; padding: 2px 6px; border-radius: 4px;
   font-family: 'Courier New', monospace; font-size: 13px;
 }
+.bc-text-block pre {
+  background: #f1f5f9; padding: 8px 12px; border-radius: 6px;
+  font-family: 'Courier New', monospace; font-size: 13px;
+  white-space: pre-wrap; margin: 4px 0;
+}
+.bc-text-block tg-spoiler {
+  background: #64748b; color: #64748b; border-radius: 2px;
+  padding: 0 2px; cursor: pointer; transition: color 0.2s;
+}
+.bc-text-block tg-spoiler:hover { color: white; }
+.bc-text-block blockquote {
+  border-left: 3px solid var(--accent); padding-left: 10px;
+  margin: 4px 0; color: var(--text-muted); font-style: italic;
+}
 .bc-text-block a { color: var(--accent); text-decoration: underline; }
 
-/* ---- Media Type Selector ---- */
-.bc-media-type-row {
-  margin-bottom: 12px;
+/* ---- Files Grid ---- */
+.bc-files-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px; margin-bottom: 12px;
 }
-.bc-media-select {
-  width: 100%; max-width: 280px;
-  padding: 8px 12px; font-size: 14px;
-  border: 1px solid var(--border); border-radius: 8px;
-  background: var(--bg-input); color: var(--text);
-  outline: none; cursor: pointer;
-  transition: border-color 0.15s;
-  font-family: inherit;
+.bc-file-card {
+  position: relative; border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; background: var(--bg-input); transition: border-color 0.15s;
 }
-.bc-media-select:focus { border-color: var(--border-focus); }
-
-.bc-media-type-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 12px; background: var(--bg-input);
-  border: 1px solid var(--border); border-radius: 6px;
-  font-size: 13px; font-weight: 500; color: var(--text);
+.bc-file-card:hover { border-color: var(--accent-muted); }
+.bc-file-thumb {
+  width: 100%; height: 90px; background-size: cover; background-position: center;
+  background-color: #f1f5f9;
 }
+.bc-file-thumb-icon {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.bc-file-card-name {
+  padding: 6px 8px; font-size: 11px; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.bc-file-card-del {
+  position: absolute; top: 4px; right: 4px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(0,0,0,0.55); color: white; border: none;
+  font-size: 14px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.15s;
+  line-height: 1;
+}
+.bc-file-card:hover .bc-file-card-del { opacity: 1; }
+.bc-file-card-del:hover { background: var(--danger); }
 
 .bc-no-media-hint {
   font-size: 13px; color: var(--text-muted);
@@ -140,20 +166,50 @@
   border-color: var(--accent); background: var(--accent-soft); color: var(--accent);
 }
 .bc-upload-zone span { font-size: 13px; font-weight: 500; }
+.bc-upload-hint { font-size: 12px; opacity: 0.6; }
 
-/* ---- File Info ---- */
-.bc-file-info {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 14px; background: var(--bg-input);
-  border: 1px solid var(--border); border-radius: 8px;
+/* ---- Inline Buttons ---- */
+.bc-buttons-preview { margin-bottom: 8px; }
+
+.bc-btn-row {
+  display: flex; gap: 6px; margin-bottom: 6px;
 }
-.bc-file-icon { font-size: 18px; flex-shrink: 0; }
-.bc-file-name {
-  flex: 1; font-size: 13px; font-weight: 500; color: var(--text);
+
+.bc-inline-btn {
+  flex: 1; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  padding: 8px 12px; min-height: 36px;
+  background: var(--accent-soft); color: var(--accent);
+  border: 1px solid var(--accent-muted); border-radius: 8px;
+  font-size: 13px; font-weight: 500; gap: 6px;
+  transition: background 0.15s;
+}
+.bc-inline-btn:hover { background: var(--accent); color: white; }
+
+.bc-inline-btn-text {
+  flex: 1; text-align: center; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.bc-no-file {
-  padding: 12px; font-size: 13px; color: var(--text-muted); font-style: italic;
+
+.bc-inline-btn-edit,
+.bc-inline-btn-del {
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; cursor: pointer; background: rgba(0,0,0,0.08);
+  border: none; color: inherit; opacity: 0; transition: opacity 0.15s;
+  flex-shrink: 0; line-height: 1;
+}
+.bc-inline-btn:hover .bc-inline-btn-edit,
+.bc-inline-btn:hover .bc-inline-btn-del { opacity: 1; }
+.bc-inline-btn-del:hover { background: var(--danger); color: white; }
+
+.bc-btn-add-row { margin-top: 4px; }
+
+.bc-btn-form { display: flex; flex-direction: column; gap: 12px; }
+.bc-btn-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 500; color: var(--text-muted); }
+.bc-btn-samerow-label {
+  flex-direction: row !important; align-items: center; gap: 8px !important;
+  font-weight: 400 !important; cursor: pointer;
 }
 
 /* ---- Floating Toolbar ---- */
@@ -171,6 +227,25 @@
 .tb-btn:hover { background: #334155; color: white; }
 .tb-btn-code { font-size: 11px; font-weight: 600; letter-spacing: -0.5px; }
 .tb-sep { width: 1px; background: #334155; margin: 4px 2px; }
+
+/* ---- Media Type Selector (legacy, audience) ---- */
+.bc-media-select {
+  width: 100%; max-width: 280px;
+  padding: 8px 12px; font-size: 14px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg-input); color: var(--text);
+  outline: none; cursor: pointer;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+.bc-media-select:focus { border-color: var(--border-focus); }
+
+.bc-media-type-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; background: var(--bg-input);
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 13px; font-weight: 500; color: var(--text);
+}
 
 /* ---- Audience Counter ---- */
 .bc-audience-counter {
@@ -200,6 +275,32 @@
   background: var(--bg-input); outline: none;
 }
 .bc-date-row input[type="date"]:focus { border-color: var(--border-focus); }
+
+/* ---- Schedule Badge ---- */
+.bc-sched-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 4px; font-size: 12px;
+  background: #fef3c7; color: #92400e; font-weight: 500;
+  margin-left: 8px;
+}
+
+.bc-schedule-form { display: flex; flex-direction: column; gap: 14px; }
+.bc-schedule-form label {
+  display: flex; flex-direction: column; gap: 4px;
+  font-size: 13px; font-weight: 500; color: var(--text-muted);
+}
+.bc-schedule-form .form-input {
+  padding: 8px 12px; font-size: 14px;
+}
+
+.btn-danger-ghost {
+  color: var(--danger) !important;
+  border-color: var(--danger) !important;
+}
+.btn-danger-ghost:hover {
+  background: var(--danger) !important;
+  color: white !important;
+}
 
 /* ---- Test Send Modal ---- */
 .bc-test-results {
@@ -239,4 +340,5 @@
   .bc-stats-row { flex-direction: column; gap: 8px; }
   .bc-title-input { font-size: 16px; }
   .bc-media-select { max-width: 100%; }
+  .bc-files-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
 }

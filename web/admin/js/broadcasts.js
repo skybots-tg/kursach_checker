@@ -41,18 +41,25 @@ async function loadBroadcastsList() {
     const paged = paginate(list, _bcPage);
     let html = '<div class="bc-list">';
     for (const b of paged.items) {
+      const schedInfo = b.status === 'scheduled' && b.scheduled_at
+        ? `<span class="bc-sched-badge">${bcFormatSchedule(b.scheduled_at, b.admin_timezone)}</span>`
+        : '';
       html += `
         <div class="card bc-list-item" onclick="navigateToBroadcast(${b.id})">
           <div class="bc-list-item-info">
             <div class="bc-list-item-title">${escHtml(b.title)}</div>
             <div class="bc-list-item-meta">
               ${statusBadge(b.status)}
+              ${schedInfo}
               <span>${formatDate(b.created_at)}</span>
               ${b.status === 'sent' ? `<span>✓ ${b.sent_count} / ${b.total_users}</span>` : ''}
             </div>
           </div>
           <div class="bc-list-item-actions" onclick="event.stopPropagation()">
-            ${b.status === 'draft' ? `
+            ${b.status === 'scheduled' ? `
+              <button class="btn-icon btn-sm" onclick="bcCancelScheduleFromList(${b.id})" title="Отменить расписание">${iconSvg('x', 16)}</button>
+            ` : ''}
+            ${b.status === 'draft' || b.status === 'scheduled' ? `
               <button class="btn-icon btn-sm" onclick="deleteBroadcast(${b.id})" title="Удалить">${iconSvg('trash', 16)}</button>
             ` : ''}
           </div>
@@ -89,24 +96,29 @@ async function deleteBroadcast(id) {
   } catch (err) { toast(err.message, 'error'); }
 }
 
+async function bcCancelScheduleFromList(bid) {
+  if (!confirm('Отменить запланированную отправку?')) return;
+  try {
+    await api('POST', `/admin/broadcasts/${bid}/cancel-schedule`);
+    toast('Расписание отменено', 'success');
+    loadBroadcastsList();
+  } catch (err) { toast(err.message, 'error'); }
+}
+
 function confirmSendBroadcast(broadcastId) {
   const msg = window._currentBcMessage;
-  if (!msg) { toast('Сообщение не создано', 'error'); return; }
+  const files = window._bcFiles || [];
+  if (!msg && !files.length) { toast('Добавьте текст или файлы', 'error'); return; }
 
-  if (msg.message_type === 'text' && !msg.text) {
-    toast('Введите текст сообщения', 'error');
-    return;
-  }
-  if (msg.message_type !== 'text' && !msg.file_name) {
-    toast('Прикрепите файл или выберите тип «Без медиа»', 'error');
+  if (msg?.message_type === 'text' && !msg.text && !files.length) {
+    toast('Введите текст сообщения или прикрепите файлы', 'error');
     return;
   }
 
-  const typeLabels = { text: 'Текст', photo: 'Фото', video: 'Видео', document: 'Документ', audio: 'Аудио', animation: 'GIF' };
-  const label = typeLabels[msg.message_type] || msg.message_type;
-  const summary = msg.message_type === 'text'
-    ? 'Текстовое сообщение'
-    : `${label}${msg.text ? ' с подписью' : ''}`;
+  const filesInfo = files.length ? `${files.length} файл(ов)` : '';
+  const textInfo = msg?.text ? 'текст' : '';
+  const btnInfo = msg?.buttons_json?.length ? `, ${msg.buttons_json.length} кнопок(ки)` : '';
+  const summary = [textInfo, filesInfo].filter(Boolean).join(' + ') + btnInfo;
 
   const segLabels = { all: 'Все пользователи', paid: 'Оплачивали', viewers: 'Только смотрели',
     unpaid_invoice: 'Создали счёт, но не оплатили', recent: 'Зарегистрировались недавно' };
@@ -117,7 +129,7 @@ function confirmSendBroadcast(broadcastId) {
 
   openModal('Отправить рассылку', `
     <p style="margin-bottom:12px">Рассылка будет отправлена выбранному сегменту.<br>
-    <span style="color:var(--text-muted)">Тип: ${summary}</span><br>
+    <span style="color:var(--text-muted)">Содержимое: ${summary}</span><br>
     <span style="color:var(--text-muted)">Аудитория: ${segName}</span><br>
     <span style="color:var(--text-muted)">Получатели: ${audienceInfo}</span></p>
     <p style="color:var(--danger);font-weight:500">Это действие нельзя отменить.</p>
@@ -144,3 +156,4 @@ window.createBroadcast = createBroadcast;
 window.deleteBroadcast = deleteBroadcast;
 window.confirmSendBroadcast = confirmSendBroadcast;
 window.doSendBroadcast = doSendBroadcast;
+window.bcCancelScheduleFromList = bcCancelScheduleFromList;

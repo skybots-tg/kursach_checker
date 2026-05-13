@@ -195,6 +195,83 @@ async def run_followups_cron(ctx: dict) -> dict:
     return {"sent": sent}
 
 
+async def send_scheduled_broadcasts_cron(ctx: dict) -> dict:
+    """Check for scheduled broadcasts that are due and send them."""
+    from sqlalchemy import select as sa_select
+
+    from app.models import Broadcast, BroadcastFile, BroadcastMessage, BroadcastStatus
+    from app.services.broadcast_segments import get_segment_user_ids
+
+    now = datetime.utcnow()
+    sent_count = 0
+
+    async with SessionLocal() as db:
+        rows = await db.scalars(
+            sa_select(Broadcast).where(
+                Broadcast.status == BroadcastStatus.scheduled,
+                Broadcast.scheduled_at.isnot(None),
+                Broadcast.scheduled_at <= now,
+            )
+        )
+        due = list(rows)
+
+        for b in due:
+            try:
+                segment = b.target_segment or {"type": "all"}
+                user_pairs = await get_segment_user_ids(db, segment)
+                if not user_pairs:
+                    b.status = BroadcastStatus.failed
+                    await db.commit()
+                    continue
+
+                telegram_ids = [tg_id for _, tg_id in user_pairs]
+                msgs = await db.scalars(
+                    sa_select(BroadcastMessage)
+                    .where(BroadcastMessage.broadcast_id == b.id)
+                    .order_by(BroadcastMessage.position.asc())
+                )
+                messages_data = []
+                for m in msgs:
+                    messages_data.append({
+                        "id": m.id, "broadcast_id": m.broadcast_id,
+                        "position": m.position, "message_type": m.message_type,
+                        "text": m.text, "parse_mode": m.parse_mode,
+                        "file_path": m.file_path, "file_name": m.file_name,
+                        "mime_type": m.mime_type, "buttons_json": m.buttons_json,
+                    })
+                file_rows = await db.scalars(
+                    sa_select(BroadcastFile)
+                    .where(BroadcastFile.broadcast_id == b.id)
+                    .order_by(BroadcastFile.position.asc())
+                )
+                files_data = []
+                for f in file_rows:
+                    files_data.append({
+                        "id": f.id, "broadcast_id": f.broadcast_id,
+                        "position": f.position, "file_path": f.file_path,
+                        "file_name": f.file_name, "mime_type": f.mime_type,
+                        "media_type": f.media_type,
+                    })
+
+                b.status = BroadcastStatus.sending
+                b.total_users = len(telegram_ids)
+                b.sent_count = 0
+                b.failed_count = 0
+                await db.commit()
+
+                from app.integrations.telegram_broadcast import run_broadcast
+                await run_broadcast(b.id, messages_data, files_data, telegram_ids)
+                sent_count += 1
+            except Exception:
+                logger.exception("Failed to send scheduled broadcast %d", b.id)
+                b.status = BroadcastStatus.failed
+                await db.commit()
+
+    if sent_count:
+        logger.info("Scheduled broadcasts cron: sent %d broadcasts", sent_count)
+    return {"sent": sent_count}
+
+
 _redis_settings = RedisSettings.from_dsn(settings.redis_url)
 
 
@@ -202,6 +279,7 @@ class WorkerSettings:
     functions = [process_check_task]
     cron_jobs = [
         cron(run_followups_cron, minute=None, timeout=120),
+        cron(send_scheduled_broadcasts_cron, minute=None, timeout=300),
     ]
     redis_settings = _redis_settings
     max_tries = 1

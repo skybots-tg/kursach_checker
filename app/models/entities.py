@@ -294,6 +294,7 @@ class SystemSetting(Base):
 
 class BroadcastStatus(str, enum.Enum):
     draft = "draft"
+    scheduled = "scheduled"
     sending = "sending"
     sent = "sent"
     failed = "failed"
@@ -312,6 +313,8 @@ class Broadcast(Base):
     created_by_admin_id: Mapped[int | None] = mapped_column(ForeignKey("admin_users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    scheduled_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    admin_timezone: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
 
 class FollowUpMessage(Base):
@@ -356,5 +359,19 @@ class BroadcastMessage(Base):
     file_path: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     file_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     mime_type: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    buttons_json: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class BroadcastFile(Base):
+    __tablename__ = "broadcast_files"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    broadcast_id: Mapped[int] = mapped_column(ForeignKey("broadcasts.id", ondelete="CASCADE"), index=True)
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    file_path: Mapped[str] = mapped_column(String(1024))
+    file_name: Mapped[str] = mapped_column(String(255))
+    mime_type: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    media_type: Mapped[str] = mapped_column(String(32), default="document")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 

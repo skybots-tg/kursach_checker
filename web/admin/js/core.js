@@ -247,10 +247,12 @@ const ACTION_LABELS = {
   'content.message.update': 'Обновление сообщения',
   'content.message.delete': 'Удаление сообщения',
   'content.message.reorder':'Изменение порядка сообщений',
-  'broadcast.create':       'Создание рассылки',
-  'broadcast.update':       'Обновление рассылки',
-  'broadcast.delete':       'Удаление рассылки',
-  'broadcast.send':         'Отправка рассылки',
+  'broadcast.create':          'Создание рассылки',
+  'broadcast.update':          'Обновление рассылки',
+  'broadcast.delete':          'Удаление рассылки',
+  'broadcast.send':            'Отправка рассылки',
+  'broadcast.schedule':        'Планирование рассылки',
+  'broadcast.cancel_schedule': 'Отмена планирования рассылки',
   'template.create':        'Создание шаблона',
   'template.version.create':'Новая версия шаблона',
   'template.update':        'Обновление шаблона',
@@ -293,6 +295,7 @@ function statusBadge(status) {
     queued: ['В очереди', 'info'], running: ['Выполняется', 'warn'],
     done: ['Готово', 'success'], error: ['Ошибка', 'danger'],
     draft: ['Черновик', 'gray'], published: ['Опубликован', 'success'],
+    scheduled: ['Запланировано', 'info'],
     sending: ['Отправка', 'warn'], sent: ['Отправлено', 'success'],
   };
   const [label, cls] = map[status] || [status, 'gray'];
@@ -331,6 +334,7 @@ const ICONS = {
   chevronRight: '<polyline points="9 18 15 12 9 6"/>',
   fileCheck: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/>',
   send: '<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
 };
 
 function iconSvg(name, size = 18) {

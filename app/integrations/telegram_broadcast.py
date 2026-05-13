@@ -4,50 +4,128 @@ from datetime import datetime
 from pathlib import Path
 
 from aiogram import Bot
-from aiogram.types import FSInputFile
+from aiogram.types import (
+    FSInputFile,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    InputMediaAnimation,
+    InputMediaAudio,
+    InputMediaDocument,
+    InputMediaPhoto,
+    InputMediaVideo,
+)
 from sqlalchemy import select
 
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.integrations.telegram_bot_factory import make_bot
-from app.models import Broadcast, BroadcastStatus, User
+from app.models import Broadcast, BroadcastStatus
 
 logger = logging.getLogger(__name__)
 
 
-async def _send_one_msg(bot: Bot, chat_id: int, msg: dict) -> bool:
-    try:
-        mtype = msg.get("message_type", "text")
-        text = msg.get("text") or ""
-        pm = msg.get("parse_mode") if text else None
-        fp = msg.get("file_path")
-        f_in = FSInputFile(fp) if fp and Path(fp).exists() else None
+def _build_keyboard(buttons_json: list | None) -> InlineKeyboardMarkup | None:
+    if not buttons_json:
+        return None
+    rows: list[list[InlineKeyboardButton]] = []
+    current_row: list[InlineKeyboardButton] = []
+    for btn in buttons_json:
+        text = btn.get("text", "")
+        url = btn.get("url", "")
+        if not text or not url:
+            continue
+        ib = InlineKeyboardButton(text=text, url=url)
+        if btn.get("same_row") and current_row:
+            current_row.append(ib)
+        else:
+            if current_row:
+                rows.append(current_row)
+            current_row = [ib]
+    if current_row:
+        rows.append(current_row)
+    return InlineKeyboardMarkup(inline_keyboard=rows) if rows else None
 
-        if mtype == "text":
-            if text:
-                await bot.send_message(chat_id, text, parse_mode=pm)
-                return True
-        elif mtype == "photo" and f_in:
-            await bot.send_photo(chat_id, f_in, caption=text or None, parse_mode=pm)
+
+def _make_input_media(media_type: str, file_input: FSInputFile, caption: str | None = None, parse_mode: str | None = None):
+    kwargs: dict = {"media": file_input}
+    if caption:
+        kwargs["caption"] = caption
+        if parse_mode:
+            kwargs["parse_mode"] = parse_mode
+    if media_type == "photo":
+        return InputMediaPhoto(**kwargs)
+    if media_type == "video":
+        return InputMediaVideo(**kwargs)
+    if media_type == "animation":
+        return InputMediaAnimation(**kwargs)
+    if media_type == "audio":
+        return InputMediaAudio(**kwargs)
+    return InputMediaDocument(**kwargs)
+
+
+async def _send_to_user(
+    bot: Bot,
+    chat_id: int,
+    messages: list[dict],
+    files: list[dict],
+) -> bool:
+    """Send a complete broadcast to one user. Returns True on success."""
+    try:
+        keyboard = None
+        text = ""
+        parse_mode = None
+        if messages:
+            msg = messages[0]
+            text = msg.get("text") or ""
+            parse_mode = msg.get("parse_mode") if text else None
+            keyboard = _build_keyboard(msg.get("buttons_json"))
+
+        valid_files = [
+            f for f in files
+            if f.get("file_path") and Path(f["file_path"]).exists()
+        ]
+
+        if len(valid_files) >= 2:
+            media_items = []
+            for i, f in enumerate(valid_files):
+                fi = FSInputFile(f["file_path"])
+                cap = text if i == 0 else None
+                pm = parse_mode if i == 0 else None
+                media_items.append(
+                    _make_input_media(f.get("media_type", "document"), fi, cap, pm)
+                )
+            await bot.send_media_group(chat_id, media=media_items)
+            if keyboard:
+                btn_text = "\u200B"
+                await bot.send_message(chat_id, btn_text, reply_markup=keyboard)
             return True
-        elif mtype == "video" and f_in:
-            await bot.send_video(chat_id, f_in, caption=text or None, parse_mode=pm)
+
+        if len(valid_files) == 1:
+            f = valid_files[0]
+            fi = FSInputFile(f["file_path"])
+            mt = f.get("media_type", "document")
+            cap = text or None
+            pm = parse_mode if cap else None
+            if mt == "photo":
+                await bot.send_photo(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=keyboard)
+            elif mt == "video":
+                await bot.send_video(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=keyboard)
+            elif mt == "animation":
+                await bot.send_animation(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=keyboard)
+            elif mt == "audio":
+                await bot.send_audio(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=keyboard)
+            elif mt == "video_note":
+                await bot.send_video_note(chat_id, fi)
+                if text:
+                    await bot.send_message(chat_id, text, parse_mode=parse_mode, reply_markup=keyboard)
+            else:
+                await bot.send_document(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=keyboard)
             return True
-        elif mtype == "document" and f_in:
-            await bot.send_document(chat_id, f_in, caption=text or None, parse_mode=pm)
+
+        if text:
+            await bot.send_message(chat_id, text, parse_mode=parse_mode, reply_markup=keyboard)
             return True
-        elif mtype == "audio" and f_in:
-            await bot.send_audio(chat_id, f_in, caption=text or None, parse_mode=pm)
-            return True
-        elif mtype == "animation" and f_in:
-            await bot.send_animation(chat_id, f_in, caption=text or None, parse_mode=pm)
-            return True
-        elif mtype == "video_note" and f_in:
-            await bot.send_video_note(chat_id, f_in)
-            return True
-        elif text:
-            await bot.send_message(chat_id, text, parse_mode=pm)
-            return True
+
         return False
     except Exception:
         logger.debug("Broadcast msg failed for chat %d", chat_id)
@@ -66,9 +144,9 @@ async def _update_progress(broadcast_id: int, sent: int, failed: int) -> None:
 async def run_broadcast(
     broadcast_id: int,
     messages: list[dict],
+    files: list[dict],
     telegram_ids: list[int] | None = None,
 ) -> None:
-    """Send broadcast to users. If telegram_ids given, send only to them."""
     if not settings.telegram_bot_token:
         return
     bot = make_bot()
@@ -76,6 +154,7 @@ async def run_broadcast(
         if telegram_ids is not None:
             tg_ids = telegram_ids
         else:
+            from app.models import User
             async with SessionLocal() as db:
                 users = list(await db.scalars(select(User)))
             tg_ids = [u.telegram_id for u in users]
@@ -83,11 +162,7 @@ async def run_broadcast(
         sent = 0
         failed = 0
         for tg_id in tg_ids:
-            ok = True
-            for msg in messages:
-                if not await _send_one_msg(bot, tg_id, msg):
-                    ok = False
-                    break
+            ok = await _send_to_user(bot, tg_id, messages, files)
             if ok:
                 sent += 1
             else:
@@ -116,9 +191,10 @@ async def run_broadcast(
 
 
 async def test_send_broadcast(
-    messages: list[dict], telegram_ids: list[int],
+    messages: list[dict],
+    files: list[dict],
+    telegram_ids: list[int],
 ) -> dict:
-    """Send test broadcast to specific users. Does not update any broadcast status."""
     if not settings.telegram_bot_token:
         return {"sent": 0, "failed": 0}
     bot = make_bot()
@@ -126,11 +202,7 @@ async def test_send_broadcast(
         sent = 0
         failed = 0
         for tg_id in telegram_ids:
-            ok = True
-            for msg in messages:
-                if not await _send_one_msg(bot, tg_id, msg):
-                    ok = False
-                    break
+            ok = await _send_to_user(bot, tg_id, messages, files)
             sent += 1 if ok else 0
             failed += 0 if ok else 1
             await asyncio.sleep(0.05)
