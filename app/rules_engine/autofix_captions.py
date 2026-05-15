@@ -395,6 +395,8 @@ def fix_caption_positions(doc, details: list[str]) -> bool:
                 if _format_table_caption(para):
                     changed = True
                     tbl_formatted += 1
+                if _ensure_keep_with_next(p_elem):
+                    changed = True
                 continue
 
             prev = _prev_nonempty_sibling(p_elem)
@@ -406,6 +408,8 @@ def fix_caption_positions(doc, details: list[str]) -> bool:
                     changed = True
                     tbl_moved += 1
                 if _format_table_caption(para):
+                    changed = True
+                if _ensure_keep_with_next(p_elem):
                     changed = True
                 continue
 
@@ -625,18 +629,15 @@ def ensure_blank_after_caption_blocks(doc, details: list[str]) -> bool:
                 trimmed += 1
             continue
 
-        # Heading / page-break-before paragraphs already create the
-        # vertical break we want; no extra blank required.
+        # Page-break-before paragraphs already create a visual gap;
+        # headings after tables still need a blank separator line.
         cursor_pPr = cursor.find(qn("w:pPr")) if cursor.tag == qn("w:p") else None
-        starts_section = False
+        has_page_break = False
         if cursor_pPr is not None:
             if cursor_pPr.find(qn("w:pageBreakBefore")) is not None:
-                starts_section = True
-            ps = cursor_pPr.find(qn("w:pStyle"))
-            if ps is not None and (ps.get(qn("w:val")) or "").startswith("Heading"):
-                starts_section = True
+                has_page_break = True
 
-        if starts_section:
+        if has_page_break:
             for extra in empties:
                 parent.remove(extra)
                 trimmed += 1

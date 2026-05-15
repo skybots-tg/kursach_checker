@@ -14,6 +14,7 @@ from docx.text.paragraph import Paragraph
 from app.rules_engine.autofix_toc import (
     _TOC_HEADING_RE,
     _clear_bold_underline_in_paragraph,
+    _has_auto_toc,
     _normalize_existing_toc_heading,
 )
 from app.rules_engine.style_resolve import detect_toc_paragraph_indices
@@ -269,14 +270,22 @@ def _apply_toc_style_props(style_el, font_name: str, size_half: str, line_240: s
 
 
 def _normalize_toc_entry(p_elem: OxmlElement, font_name: str | None,
-                         font_size_pt: float | None, line_spacing: float | None) -> bool:
+                         font_size_pt: float | None, line_spacing: float | None,
+                         *, preserve_bold: bool = False) -> bool:
     """Apply the full «plain body text» normalization to a single TOC entry
     paragraph: clear bold/underline, set body font/size, set line spacing.
 
     TOC entries always use single (1.0) line spacing regardless of the
     document body spacing — this keeps the table of contents compact.
+
+    When *preserve_bold* is True, bold/underline removal is skipped — used
+    for entries inside auto-TOC fields where removing bold causes Word to
+    consider the TOC invalid and duplicate it.
     """
-    changed = _clear_bold_underline_in_paragraph(p_elem)
+    changed = False
+    if not preserve_bold:
+        if _clear_bold_underline_in_paragraph(p_elem):
+            changed = True
     if font_name and font_size_pt:
         if _normalize_toc_entry_run_font(p_elem, font_name, font_size_pt):
             changed = True
@@ -460,9 +469,14 @@ def normalize_toc_heading_formatting(doc, details: list[str], *, cfg=None) -> bo
     by Word) — those paragraphs are invisible to ``doc.paragraphs`` and
     were the reason TOC entries kept appearing in the heading/theme font
     after autofix.
+
+    When the document contains an auto-TOC field, bold removal is skipped
+    on SDT entries to prevent Word from considering the TOC invalid and
+    duplicating it on next open.
     """
     changed = remove_duplicate_toc_heading_inside_sdt(doc, details)
     processed_elems: set = set()
+    has_auto = _has_auto_toc(doc)
 
     font_name = getattr(cfg, "font_name", None) if cfg is not None else None
     font_size_pt = getattr(cfg, "font_size_pt", None) if cfg is not None else None
@@ -502,8 +516,9 @@ def normalize_toc_heading_formatting(doc, details: list[str], *, cfg=None) -> bo
         if is_first and _TOC_HEADING_RE.match(text):
             if elem is not heading_elem:
                 heading_elem = elem
-                if _normalize_existing_toc_heading(sdt_para, details):
-                    changed = True
+                if not has_auto:
+                    if _normalize_existing_toc_heading(sdt_para, details):
+                        changed = True
                 if font_name and font_size_pt:
                     if _normalize_toc_entry_run_font(heading_elem, font_name, font_size_pt):
                         changed = True
@@ -511,7 +526,8 @@ def normalize_toc_heading_formatting(doc, details: list[str], *, cfg=None) -> bo
                     if _normalize_toc_entry_paragraph_format(heading_elem, line_spacing):
                         changed = True
             continue
-        if _normalize_toc_entry(elem, font_name, font_size_pt, line_spacing):
+        if _normalize_toc_entry(elem, font_name, font_size_pt, line_spacing,
+                                preserve_bold=has_auto):
             sdt_entries_changed += 1
             changed = True
 

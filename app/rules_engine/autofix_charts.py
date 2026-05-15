@@ -60,10 +60,10 @@ def _suppress_chart_title(xml_bytes: bytes) -> tuple[bytes, bool]:
 
     Strategy:
       * If ``<c:title>`` is missing → leave file untouched.
-      * If ``<c:title>`` carries explicit text → leave it alone (this is
-        an author-written caption, not an auto-generated one).
-      * Otherwise force ``<c:autoTitleDeleted val="1"/>`` so Word stops
-        synthesising a title from the first series name.
+      * If ``<c:title>`` carries explicit meaningful text → leave it alone.
+      * Otherwise remove ``<c:title>`` entirely and set
+        ``<c:autoTitleDeleted val="1"/>`` so Word neither shows
+        the placeholder text nor auto-generates a title from the series.
     """
     try:
         root = etree.fromstring(xml_bytes)
@@ -76,35 +76,23 @@ def _suppress_chart_title(xml_bytes: bytes) -> tuple[bytes, bool]:
     if chart_el is None:
         return xml_bytes, False
 
-    title_el = chart_el.find(f"{{{_NS['c']}}}title")
+    title_tag = f"{{{_NS['c']}}}title"
+    title_el = chart_el.find(title_tag)
     if title_el is None:
         return xml_bytes, False
     if _title_has_text(title_el):
         return xml_bytes, False
 
+    chart_el.remove(title_el)
+
     auto_tag = f"{{{_NS['c']}}}autoTitleDeleted"
     auto_el = chart_el.find(auto_tag)
-    # The ``val`` attribute on ``<c:autoTitleDeleted>`` lives in the
-    # *no-namespace* slot — it must be written exactly as ``val="1"``,
-    # not ``c:val="1"``. Using ``{namespace}val`` would emit a second,
-    # namespaced attribute and Word would still see the original
-    # ``val="0"``, leaving the auto-title visible.
     if auto_el is None:
         auto_el = etree.SubElement(chart_el, auto_tag)
-        # ``autoTitleDeleted`` must come right after ``title`` in the
-        # chart sequence (CT_Chart). lxml's SubElement appends at the
-        # end, so move it explicitly to keep the schema order.
-        title_idx = list(chart_el).index(title_el)
         chart_el.remove(auto_el)
-        chart_el.insert(title_idx + 1, auto_el)
-        auto_el.set("val", "1")
-        return etree.tostring(
-            root, xml_declaration=True, encoding="UTF-8", standalone=True,
-        ), True
-
-    if auto_el.get("val") == "1":
-        return xml_bytes, False
+        chart_el.insert(0, auto_el)
     auto_el.set("val", "1")
+
     return etree.tostring(
         root, xml_declaration=True, encoding="UTF-8", standalone=True,
     ), True

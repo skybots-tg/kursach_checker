@@ -42,6 +42,7 @@ from app.rules_engine.autofix_helpers import (
     fix_section_margins,
     is_field_code_run,
     is_manual_list_para,
+    normalize_table_borders_black,
     postprocess_fixed_docx,
     preflight_margins_safe,
     remove_empty_paras_before_page_breaks,
@@ -212,21 +213,37 @@ def apply_safe_autofixes(
             logger.info("Autofix: margin normalization skipped — tables would overflow")
 
     body_start = 0
+    _toc_re = re.compile(
+        r"^\s*(?:содержание|оглавление)\s*$", re.IGNORECASE,
+    )
+    _body_anchor_re = re.compile(
+        r"^\s*(?:введение|вступление|аннотация|реферат|abstract"
+        r"|содержание|оглавление)\s*$",
+        re.IGNORECASE,
+    )
+    # Priority 1: find "Содержание"/"Оглавление" — the true body start.
+    # Any pages between title and TOC (задание, рецензия) are skipped.
     for i, p in enumerate(doc.paragraphs):
-        if is_heading_para(p):
+        text_low = (p.text or "").strip()
+        if _toc_re.match(text_low):
             body_start = i
             break
+    # Priority 2: if no TOC heading, find first body-anchor keyword
     if body_start == 0:
-        _vved_re = re.compile(
-            r"^\s*(?:введение|вступление|аннотация|реферат|abstract"
-            r"|содержание|оглавление)\s*$",
-            re.IGNORECASE,
-        )
         for i, p in enumerate(doc.paragraphs):
             text_low = (p.text or "").strip()
-            if _vved_re.match(text_low):
+            if _body_anchor_re.match(text_low):
                 body_start = i
                 break
+    # Priority 3: first Heading-styled paragraph
+    if body_start == 0:
+        for i, p in enumerate(doc.paragraphs):
+            if is_heading_para(p):
+                body_start = i
+                break
+    # Priority 4: page break after first few paragraphs
+    if body_start == 0:
+        for i, p in enumerate(doc.paragraphs):
             pf = p.paragraph_format
             if pf.page_break_before and i > 3:
                 body_start = i
@@ -401,7 +418,8 @@ def apply_safe_autofixes(
                 para_touched = True
 
         if not is_center_like and is_word_list and cfg.normalize_list_indent:
-            if fix_list_indent(paragraph, para_label, details):
+            if fix_list_indent(paragraph, para_label, details,
+                               first_line_indent_mm=cfg.first_line_indent_mm):
                 changed = True
                 para_touched = True
 
@@ -495,6 +513,9 @@ def apply_safe_autofixes(
         doc, cfg, max_paragraphs, para_count, details,
     )
     changed |= table_changed
+
+    if not skip_tables_safety and normalize_table_borders_black(doc, details):
+        changed = True
 
     if cfg.normalize_table_width and not skip_tables_safety and clamp_overflow_table_widths(doc, details):
         changed = True

@@ -1037,9 +1037,25 @@ def _remove_stale_toc_sdt(body, heading_elem, details: list[str]) -> bool:
     return False
 
 
+_INTRO_ANCHOR_RE = re.compile(
+    r"^\s*(?:введение|introduction|вступлени)",
+    re.IGNORECASE | re.UNICODE,
+)
+
+
+def _find_intro_paragraph(doc):
+    """Return the first body paragraph whose text looks like «ВВЕДЕНИЕ»."""
+    for para in doc.paragraphs:
+        text = (para.text or "").strip()
+        if text and _INTRO_ANCHOR_RE.match(text) and len(text) <= 60:
+            return para
+    return None
+
+
 def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
     if _has_auto_toc(doc):
-        _strip_existing_auto_toc(doc, details)
+        details.append("Оглавление: сохранено существующее автооглавление (поле TOC)")
+        return False
 
     body = doc.element.body
     paragraphs = doc.paragraphs
@@ -1050,6 +1066,17 @@ def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
             _remove_stale_toc_sdt(body, para._element, details)
             _remove_manual_toc_entries(doc, idx, details)
             _remove_table_after_heading(doc, para, details)
+
+            intro = _find_intro_paragraph(doc)
+            if intro is not None and _element_precedes(intro._element, para._element, body):
+                parent = para._element.getparent()
+                if parent is not None:
+                    parent.remove(para._element)
+                    intro._element.addprevious(para._element)
+                    details.append(
+                        "Оглавление: «Содержание» перемещено перед «Введение»"
+                    )
+
             _normalize_existing_toc_heading(para, details)
             last_inserted = _insert_toc_after(para._element, doc, details)
             from docx.text.paragraph import Paragraph as _P
@@ -1057,6 +1084,14 @@ def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
                 doc, _P(last_inserted, doc), details,
             )
             return True
+
+    intro = _find_intro_paragraph(doc)
+    if intro is not None:
+        heading_p = _build_toc_heading_paragraph("Содержание")
+        intro._element.addprevious(heading_p)
+        details.append("Оглавление: создан заголовок «Содержание» (по центру, перед «Введение»)")
+        _insert_toc_after(heading_p, doc, details)
+        return True
 
     for para in paragraphs:
         style_name = (getattr(para.style, "name", "") or "").lower()
@@ -1074,5 +1109,15 @@ def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
         _insert_toc_after(heading_p, doc, details)
         return True
 
+    return False
+
+
+def _element_precedes(a, b, body) -> bool:
+    """Return True if element *a* comes before *b* in *body*."""
+    for child in body:
+        if child is a:
+            return True
+        if child is b:
+            return False
     return False
 

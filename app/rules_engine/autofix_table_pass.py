@@ -83,7 +83,7 @@ def process_table_cells(
                 changed = True
                 t_touched = True
         if t_is_list and cfg.normalize_list_indent:
-            if fix_list_indent(t_para, t_label, details):
+            if fix_list_indent(t_para, t_label, details, first_line_indent_mm=0):
                 changed = True
                 t_touched = True
         if cfg.normalize_dashes:

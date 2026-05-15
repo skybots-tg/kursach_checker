@@ -221,11 +221,17 @@ def fix_remove_italic(paragraph, para_label: str, details: list[str]) -> bool:
         details.append(f"{para_label}: \u043a\u0443\u0440\u0441\u0438\u0432 \u0443\u0431\u0440\u0430\u043d")
     return changed
 
-def fix_list_indent(paragraph, para_label: str, details: list[str]) -> bool:
+def fix_list_indent(paragraph, para_label: str, details: list[str],
+                    first_line_indent_mm: float = 12.5) -> bool:
+    """Normalize list paragraph indents: set first_line_indent to the body
+    value (default 12.5mm) and zero out left_indent / hanging so the marker
+    sits at the red-line indent position — consistent with body text.
+    """
     pf = paragraph.paragraph_format
     changed = False
-    if abs(effective_first_line_indent_mm(paragraph)) > 0.5:
-        pf.first_line_indent = Mm(0)
+    eff_fli = effective_first_line_indent_mm(paragraph)
+    if abs(eff_fli - first_line_indent_mm) > 0.5:
+        pf.first_line_indent = Mm(first_line_indent_mm)
         changed = True
     if pf.left_indent is not None and int(pf.left_indent) > int(Mm(0.5)):
         pf.left_indent = Mm(0)
@@ -248,7 +254,7 @@ def fix_list_indent(paragraph, para_label: str, details: list[str]) -> bool:
                 except (ValueError, TypeError):
                     pass
     if changed:
-        details.append(f"{para_label}: \u043e\u0442\u0441\u0442\u0443\u043f \u0441\u043f\u0438\u0441\u043a\u0430 \u043e\u0431\u043d\u0443\u043b\u0451\u043d")
+        details.append(f"{para_label}: отступ списка = {first_line_indent_mm} мм")
     return changed
 
 _ALL_MARKER_CHARS = _BULLET_CHARS | frozenset((_EN_DASH, _EM_DASH, "*"))
@@ -758,6 +764,81 @@ def iter_table_cell_paragraphs(doc: Document):
         if eid not in seen:
             seen.add(eid)
             yield p
+
+
+def normalize_table_borders_black(doc, details: list[str]) -> bool:
+    """Force all table borders (table-level and cell-level) to be solid black.
+
+    Iterates every <w:tbl> in the document and rewrites border elements
+    under <w:tblBorders> and <w:tcBorders> to use color="000000",
+    val="single", sz="4" (0.5pt).  Skips borders that are already black
+    or explicitly set to "none"/"nil" (invisible borders are preserved).
+    """
+    _BORDER_SIDES = ("top", "bottom", "left", "right", "insideH", "insideV",
+                     "start", "end", "tl2br", "tr2bl")
+    changed = False
+    tables_fixed = 0
+
+    for table in doc.tables:
+        tbl_el = table._tbl
+        tbl_changed = False
+
+        # --- table-level borders ---
+        tblPr = tbl_el.find(qn("w:tblPr"))
+        if tblPr is not None:
+            tblBorders = tblPr.find(qn("w:tblBorders"))
+            if tblBorders is not None:
+                for side in _BORDER_SIDES:
+                    el = tblBorders.find(qn(f"w:{side}"))
+                    if el is None:
+                        continue
+                    val = el.get(qn("w:val"))
+                    if val in ("none", "nil"):
+                        continue
+                    color = (el.get(qn("w:color")) or "").lower()
+                    if color != "000000":
+                        el.set(qn("w:color"), "000000")
+                        tbl_changed = True
+                    if el.get(qn("w:themeColor")) is not None:
+                        del el.attrib[qn("w:themeColor")]
+                        tbl_changed = True
+                    if el.get(qn("w:themeTint")) is not None:
+                        del el.attrib[qn("w:themeTint")]
+                        tbl_changed = True
+
+        # --- cell-level borders ---
+        for tc in tbl_el.iter(qn("w:tc")):
+            tcPr = tc.find(qn("w:tcPr"))
+            if tcPr is None:
+                continue
+            tcBorders = tcPr.find(qn("w:tcBorders"))
+            if tcBorders is None:
+                continue
+            for side in _BORDER_SIDES:
+                el = tcBorders.find(qn(f"w:{side}"))
+                if el is None:
+                    continue
+                val = el.get(qn("w:val"))
+                if val in ("none", "nil"):
+                    continue
+                color = (el.get(qn("w:color")) or "").lower()
+                if color != "000000":
+                    el.set(qn("w:color"), "000000")
+                    tbl_changed = True
+                if el.get(qn("w:themeColor")) is not None:
+                    del el.attrib[qn("w:themeColor")]
+                    tbl_changed = True
+                if el.get(qn("w:themeTint")) is not None:
+                    del el.attrib[qn("w:themeTint")]
+                    tbl_changed = True
+
+        if tbl_changed:
+            changed = True
+            tables_fixed += 1
+
+    if tables_fixed:
+        details.append(f"Таблицы: границы приведены к чёрному цвету ({tables_fixed} шт.)")
+    return changed
 
 
 def fix_table_cell_spacing(

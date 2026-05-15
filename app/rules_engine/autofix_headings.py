@@ -95,6 +95,13 @@ def fix_heading(paragraph, idx: int, cfg, details: list[str]) -> bool:
         changed = True
 
     pf = paragraph.paragraph_format
+    if pf.first_line_indent is not None and int(pf.first_line_indent) != 0:
+        pf.first_line_indent = Mm(0)
+        changed = True
+    if pf.left_indent is not None and int(pf.left_indent) != 0:
+        pf.left_indent = Mm(0)
+        changed = True
+
     target_ls = getattr(cfg, "line_spacing", 1.5)
     cur_ls = pf.line_spacing
     if cur_ls is None or abs(float(cur_ls) - target_ls) > 0.05:
