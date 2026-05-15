@@ -1121,3 +1121,174 @@ def _element_precedes(a, b, body) -> bool:
             return False
     return False
 
+
+# ---------------------------------------------------------------------------
+# Repair broken _Toc bookmarks in auto-TOC
+# ---------------------------------------------------------------------------
+
+_DIGITS_TRAIL_RE = re.compile(r"\d+$")
+
+
+def _normalize_toc_text(text: str) -> str:
+    """Strip page numbers, whitespace, dots — for fuzzy matching."""
+    text = _DIGITS_TRAIL_RE.sub("", text)
+    text = text.replace("\t", " ").replace(".", " ").strip()
+    return re.sub(r"\s+", " ", text).lower()
+
+
+def _collect_toc_refs(body) -> dict[str, str]:
+    """Return {bookmark_name: toc_entry_text} from auto-TOC cached content."""
+    refs: dict[str, str] = {}
+    p_tag = qn("w:p")
+    t_tag = qn("w:t")
+    hl_tag = qn("w:hyperlink")
+    anchor_attr = qn("w:anchor")
+    instr_tag = qn("w:instrText")
+
+    for sdt in body.iter(qn("w:sdt")):
+        sdtContent = sdt.find(qn("w:sdtContent"))
+        if sdtContent is None:
+            continue
+        for p in sdtContent.iter(p_tag):
+            text = "".join((t.text or "") for t in p.iter(t_tag)).strip()
+            if not text:
+                continue
+            for hl in p.iter(hl_tag):
+                anchor = hl.get(anchor_attr, "")
+                if anchor.startswith("_Toc"):
+                    refs[anchor] = text
+            for instr in p.iter(instr_tag):
+                if instr.text and "PAGEREF" in instr.text:
+                    parts = instr.text.strip().split()
+                    for part in parts:
+                        if part.startswith("_Toc"):
+                            refs.setdefault(part, text)
+
+    # Also check inline TOC fields (not inside SDT)
+    in_toc = False
+    depth = 0
+    fld_tag = qn("w:fldChar")
+    fld_type = qn("w:fldCharType")
+    for p in body.iterchildren(p_tag):
+        for elem in p.iter():
+            if elem.tag == fld_tag:
+                ft = elem.get(fld_type)
+                if ft == "begin":
+                    depth += 1
+                elif ft == "end":
+                    if in_toc and depth > 0:
+                        depth -= 1
+                        if depth == 0:
+                            in_toc = False
+                    elif depth > 0:
+                        depth -= 1
+            elif elem.tag == instr_tag:
+                if "TOC" in (elem.text or "").upper() and depth > 0:
+                    in_toc = True
+        if in_toc or depth > 0:
+            text = "".join((t.text or "") for t in p.iter(t_tag)).strip()
+            if text:
+                for hl in p.iter(hl_tag):
+                    anchor = hl.get(anchor_attr, "")
+                    if anchor.startswith("_Toc"):
+                        refs[anchor] = text
+                for instr in p.iter(instr_tag):
+                    if instr.text and "PAGEREF" in instr.text:
+                        for part in instr.text.strip().split():
+                            if part.startswith("_Toc"):
+                                refs.setdefault(part, text)
+
+    return refs
+
+
+def _collect_existing_bookmarks(body) -> set[str]:
+    """Return set of all bookmark names present in the document."""
+    bm_tag = qn("w:bookmarkStart")
+    name_attr = qn("w:name")
+    return {b.get(name_attr, "") for b in body.iter(bm_tag)}
+
+
+def _get_max_bookmark_id(body) -> int:
+    """Return the max w:id among all bookmarkStart elements."""
+    bm_tag = qn("w:bookmarkStart")
+    id_attr = qn("w:id")
+    max_id = 0
+    for b in body.iter(bm_tag):
+        try:
+            max_id = max(max_id, int(b.get(id_attr, "0")))
+        except ValueError:
+            pass
+    return max_id
+
+
+def _add_bookmark_to_paragraph(p_elem, bm_name: str, bm_id: int):
+    """Insert bookmarkStart/bookmarkEnd pair at the beginning of paragraph."""
+    ns_name = qn("w:name")
+    ns_id = qn("w:id")
+
+    bm_start = OxmlElement("w:bookmarkStart")
+    bm_start.set(ns_id, str(bm_id))
+    bm_start.set(ns_name, bm_name)
+
+    bm_end = OxmlElement("w:bookmarkEnd")
+    bm_end.set(ns_id, str(bm_id))
+
+    pPr = p_elem.find(qn("w:pPr"))
+    if pPr is not None:
+        pPr.addnext(bm_start)
+        bm_start.addnext(bm_end)
+    else:
+        p_elem.insert(0, bm_end)
+        p_elem.insert(0, bm_start)
+
+
+def repair_auto_toc_bookmarks(doc, details: list[str]) -> bool:
+    """Find _Toc bookmark refs in auto-TOC that are missing from the document
+    body, match them to heading paragraphs by text, and insert the bookmarks.
+
+    This prevents "Error! Bookmark not defined." when Word opens the file.
+    """
+    if not _has_auto_toc(doc):
+        return False
+
+    body = doc.element.body
+    toc_refs = _collect_toc_refs(body)
+    if not toc_refs:
+        return False
+
+    existing = _collect_existing_bookmarks(body)
+    missing = {name: text for name, text in toc_refs.items()
+               if name not in existing}
+    if not missing:
+        return False
+
+    heading_map: dict[str, object] = {}
+    for para in doc.paragraphs:
+        style = getattr(para.style, "name", "") or ""
+        if not ("heading" in style.lower() or "заголов" in style.lower()
+                or style in ("1", "2", "3")):
+            continue
+        text = (para.text or "").strip()
+        if text:
+            key = _normalize_toc_text(text)
+            heading_map[key] = para
+
+    next_id = _get_max_bookmark_id(body) + 1
+    repaired = 0
+    for bm_name, toc_text in missing.items():
+        key = _normalize_toc_text(toc_text)
+        if key in heading_map:
+            _add_bookmark_to_paragraph(
+                heading_map[key]._element, bm_name, next_id,
+            )
+            next_id += 1
+            repaired += 1
+            logger.debug("TOC bookmark %s -> heading %r", bm_name, key)
+
+    if repaired:
+        details.append(
+            f"Оглавление: восстановлено {repaired} закладок(ки) "
+            f"для auto-TOC (предотвращён «Error! Bookmark not defined.»)"
+        )
+    return repaired > 0
+

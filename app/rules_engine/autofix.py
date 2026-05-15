@@ -63,7 +63,7 @@ from app.rules_engine.autofix_captions import (
 from app.rules_engine.autofix_charts import fix_chart_titles_in_zip
 from app.rules_engine.autofix_table_pass import process_table_cells
 from app.rules_engine.autofix_lists import convert_informal_lists
-from app.rules_engine.autofix_toc import insert_toc_field, detect_manual_toc_entry_indices
+from app.rules_engine.autofix_toc import insert_toc_field, repair_auto_toc_bookmarks, detect_manual_toc_entry_indices
 from app.rules_engine.autofix_split_breaks import split_soft_break_paragraphs
 from app.rules_engine.autofix_redundant_breaks import remove_redundant_manual_page_breaks
 from app.rules_engine.autofix_toc_normalize import (
@@ -579,6 +579,9 @@ def apply_safe_autofixes(
     if getattr(cfg, "fix_caption_positions", True):
         changed |= ensure_blank_before_table_blocks(doc, details)
         changed |= ensure_blank_after_caption_blocks(doc, details)
+
+    if repair_auto_toc_bookmarks(doc, details):
+        changed = True
 
     if changed:
         if remove_redundant_manual_page_breaks(doc, details):
