@@ -544,7 +544,7 @@ def fix_source_caption_lines(doc, details: list[str]) -> bool:
     return changed
 
 
-def ensure_blank_after_caption_blocks(doc, details: list[str]) -> bool:
+def ensure_blank_after_caption_blocks(doc, details: list[str], *, body_start: int = 0) -> bool:
     """Insert (or trim) exactly one empty paragraph after every figure/table/
     «Источник:» block.
 
@@ -568,6 +568,12 @@ def ensure_blank_after_caption_blocks(doc, details: list[str]) -> bool:
     body = doc.element.body
     inserted = 0
     trimmed = 0
+
+    body_start_elem = None
+    if body_start > 0:
+        paras = doc.paragraphs
+        if body_start < len(paras):
+            body_start_elem = paras[body_start]._element
 
     def _is_text_para(el):
         if el is None or el.tag != qn("w:p"):
@@ -605,7 +611,13 @@ def ensure_blank_after_caption_blocks(doc, details: list[str]) -> bool:
         return False
 
     children = list(body)
+    reached_body = body_start_elem is None
     for el in children:
+        if not reached_body:
+            if el is body_start_elem:
+                reached_body = True
+            else:
+                continue
         parent = el.getparent()
         if parent is None:
             continue
@@ -664,7 +676,7 @@ def ensure_blank_after_caption_blocks(doc, details: list[str]) -> bool:
     return bool(inserted or trimmed)
 
 
-def ensure_blank_before_table_blocks(doc, details: list[str]) -> bool:
+def ensure_blank_before_table_blocks(doc, details: list[str], *, body_start: int = 0) -> bool:
     """Insert exactly one empty paragraph before every table caption or bare
     table that follows body text.
 
@@ -681,6 +693,12 @@ def ensure_blank_before_table_blocks(doc, details: list[str]) -> bool:
     body = doc.element.body
     inserted = 0
 
+    body_start_elem = None
+    if body_start > 0:
+        paras = doc.paragraphs
+        if body_start < len(paras):
+            body_start_elem = paras[body_start]._element
+
     def _is_blank_para(el):
         if el is None or el.tag != qn("w:p"):
             return False
@@ -688,7 +706,13 @@ def ensure_blank_before_table_blocks(doc, details: list[str]) -> bool:
         return not txt and not _para_has_image(el)
 
     children = list(body)
+    reached_body = body_start_elem is None
     for el in children:
+        if not reached_body:
+            if el is body_start_elem:
+                reached_body = True
+            else:
+                continue
         if el.getparent() is None:
             continue
         tag = el.tag

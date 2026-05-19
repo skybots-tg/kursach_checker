@@ -203,15 +203,6 @@ def apply_safe_autofixes(
         ):
             changed = True
 
-    if cfg.normalize_margins and not skip_margins_safety:
-        if preflight_margins_safe(doc, cfg.margins_mm):
-            for sec_idx, section in enumerate(doc.sections):
-                if fix_section_margins(section, cfg.margins_mm, sec_idx, details):
-                    changed = True
-                    change_count += 1
-        else:
-            logger.info("Autofix: margin normalization skipped — tables would overflow")
-
     body_start = 0
     _toc_re = re.compile(
         r"^\s*(?:содержание|оглавление)\s*$", re.IGNORECASE,
@@ -248,6 +239,20 @@ def apply_safe_autofixes(
             if pf.page_break_before and i > 3:
                 body_start = i
                 break
+
+    if cfg.normalize_margins and not skip_margins_safety:
+        if preflight_margins_safe(doc, cfg.margins_mm):
+            for sec_idx, section in enumerate(doc.sections):
+                if sec_idx == 0 and body_start > 0:
+                    details.append(
+                        f"\u0421\u0435\u043a\u0446\u0438\u044f #{sec_idx + 1}: титульный лист — поля не изменены"
+                    )
+                    continue
+                if fix_section_margins(section, cfg.margins_mm, sec_idx, details):
+                    changed = True
+                    change_count += 1
+        else:
+            logger.info("Autofix: margin normalization skipped — tables would overflow")
 
     for idx, paragraph in enumerate(doc.paragraphs):
         # Skip title page paragraphs — client requirement:
@@ -577,8 +582,8 @@ def apply_safe_autofixes(
     # collapse pass so they are not removed.  Client requirement:
     # «после таблиц и рисунков отступы».
     if getattr(cfg, "fix_caption_positions", True):
-        changed |= ensure_blank_before_table_blocks(doc, details)
-        changed |= ensure_blank_after_caption_blocks(doc, details)
+        changed |= ensure_blank_before_table_blocks(doc, details, body_start=body_start)
+        changed |= ensure_blank_after_caption_blocks(doc, details, body_start=body_start)
 
     if repair_auto_toc_bookmarks(doc, details):
         changed = True

@@ -198,6 +198,28 @@ def _ensure_toc_styles_font(
     return changed
 
 
+_TOC_TAB_POS = "9072"
+
+
+def _ensure_dot_leader_tab(pPr) -> bool:
+    """Ensure *pPr* has a right-aligned tab stop with dot leader at ~16 cm."""
+    tabs = pPr.find(qn("w:tabs"))
+    if tabs is not None:
+        for tab in tabs.findall(qn("w:tab")):
+            if (tab.get(qn("w:val")) == "right"
+                    and tab.get(qn("w:leader")) == "dot"):
+                return False
+    if tabs is None:
+        tabs = OxmlElement("w:tabs")
+        pPr.append(tabs)
+    tab = OxmlElement("w:tab")
+    tab.set(qn("w:val"), "right")
+    tab.set(qn("w:leader"), "dot")
+    tab.set(qn("w:pos"), _TOC_TAB_POS)
+    tabs.append(tab)
+    return True
+
+
 def _apply_toc_style_props(style_el, font_name: str, size_half: str, line_240: str) -> bool:
     """Force pPr/rPr inside *style_el* to point to TNR / 14 pt / 1.0
     spacing without theme attributes. Returns True on changes."""
@@ -223,6 +245,8 @@ def _apply_toc_style_props(style_el, font_name: str, size_half: str, line_240: s
         changed = True
     if spacing.get(qn("w:after")) not in (None, "0"):
         spacing.set(qn("w:after"), "0")
+        changed = True
+    if _ensure_dot_leader_tab(pPr):
         changed = True
 
     rPr = style_el.find(qn("w:rPr"))
@@ -273,7 +297,8 @@ def _normalize_toc_entry(p_elem: OxmlElement, font_name: str | None,
                          font_size_pt: float | None, line_spacing: float | None,
                          *, preserve_bold: bool = False) -> bool:
     """Apply the full «plain body text» normalization to a single TOC entry
-    paragraph: clear bold/underline, set body font/size, set line spacing.
+    paragraph: clear bold/underline, set body font/size, set line spacing,
+    and ensure a right-aligned tab stop with dot leader.
 
     TOC entries always use single (1.0) line spacing regardless of the
     document body spacing — this keeps the table of contents compact.
@@ -290,6 +315,13 @@ def _normalize_toc_entry(p_elem: OxmlElement, font_name: str | None,
         if _normalize_toc_entry_run_font(p_elem, font_name, font_size_pt):
             changed = True
     if _normalize_toc_entry_paragraph_format(p_elem, 1.0):
+        changed = True
+    pPr = p_elem.find(qn("w:pPr"))
+    if pPr is None:
+        pPr = OxmlElement("w:pPr")
+        p_elem.insert(0, pPr)
+        changed = True
+    if _ensure_dot_leader_tab(pPr):
         changed = True
     return changed
 

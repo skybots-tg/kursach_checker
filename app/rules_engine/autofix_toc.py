@@ -546,7 +546,7 @@ def _looks_like_toc_line(text: str) -> bool:
 
     Accepts three families of lines:
       1) entries with an explicit page number tail (``\\s{2,}\\d`` / dots+num /
-         tab+num);
+         tab+num / ellipsis+num);
       2) entries that start with a recognizable heading marker — chapter
          keyword, section number «1.2», roman numeral chapter, «Приложение»;
       3) short lines matching a well-known section title
@@ -558,7 +558,7 @@ def _looks_like_toc_line(text: str) -> bool:
 
     if TOC_LINE_TAIL_RE.search(stripped):
         return True
-    if re.search(r"\.{2,}\s*\d+\s*$", stripped):
+    if re.search(r"[.\u2026]{2,}\s*\d+\s*$", stripped):
         return True
     if re.search(r"(?:\.\s){3,}\d*\s*$", stripped):
         return True
@@ -567,11 +567,12 @@ def _looks_like_toc_line(text: str) -> bool:
     if _TOC_ENTRY_START_RE.match(stripped):
         return True
 
-    low = stripped.lower().rstrip(":.;")
+    # Strip trailing dot-leaders / ellipsis + optional page number for
+    # known-title matching so «ВВЕДЕНИЕ…………3» resolves to «введение».
+    cleaned = re.sub(r"[.\u2026\s\t\d\-–—]+$", "", stripped).strip()
+    low = cleaned.lower().rstrip(":.;")
     if low in KNOWN_SECTION_TITLES:
         return True
-    # Known section title followed by a short inline suffix, e.g.
-    # «Список использованных источников информации».
     for title in KNOWN_SECTION_TITLES:
         if low.startswith(title + " ") and len(low) <= len(title) + 40:
             return True
@@ -601,11 +602,11 @@ def _normalize_for_dup(text: str) -> str:
     ``"Введение  3"``) compare equal. Used to detect the moment when the
     manual TOC block ends and the body starts repeating its own titles."""
     base = re.sub(r"\s+", " ", text).strip().lower()
-    base = re.sub(r"[\.\u2026]+\s*\d+\s*$", "", base)  # «… 12»
+    base = re.sub(r"[.\u2026]+\s*\d+\s*$", "", base)  # «… 12» or «....12»
     base = re.sub(r"(?:\.\s){3,}\d*\s*$", "", base)   # «. . . 12»
     base = re.sub(r"\s{2,}\d+\s*$", "", base)         # «  12»
     base = re.sub(r"\t+\d+\s*$", "", base)
-    base = base.rstrip(":.;\u2014\u2013- ")
+    base = base.rstrip(":.;\u2014\u2013\u2026.- ")
     return base
 
 
@@ -922,8 +923,20 @@ def _remove_residual_toc_after_heading(
             ps = pPr.find(qn("w:pStyle"))
             if ps is not None:
                 sval = ps.get(qn("w:val")) or ""
-        if sval and sval.startswith("Heading"):
-            break
+        if sval:
+            sval_low = sval.lower()
+            if (sval_low.startswith("heading")
+                    or "заголов" in sval_low
+                    or sval_low.startswith("heading")):
+                break
+        if pPr is not None:
+            ol = pPr.find(qn("w:outlineLvl"))
+            if ol is not None:
+                try:
+                    if int(ol.get(qn("w:val"), "9")) < 9:
+                        break
+                except (TypeError, ValueError):
+                    pass
         if _BODY_CHAPTER_DECOR_RE.match(text):
             break
         if not text:
