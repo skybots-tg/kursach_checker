@@ -173,6 +173,7 @@ def _is_heading_para(p) -> bool:
 
 def collapse_excessive_empty_paras(
     doc, max_consecutive: int, details: list[str],
+    *, body_start: int = 0,
 ) -> bool:
     """Collapse runs of empty paragraphs.
 
@@ -187,13 +188,15 @@ def collapse_excessive_empty_paras(
           blanks that :func:`ensure_blank_before_subheadings` inserts.
         * Trailing blanks at the very end of the document are removed
           entirely.
+        * Paragraphs before ``body_start`` (title page / задание /
+          рецензия) are never touched.
     """
     paragraphs = list(doc.paragraphs)
     body = doc.element.body
     to_remove: list = []
     n = len(paragraphs)
 
-    i = 0
+    i = body_start
     while i < n:
         if not _is_removable_empty(paragraphs[i]):
             i += 1

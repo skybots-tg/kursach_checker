@@ -208,7 +208,9 @@ def _build_empty_paragraph() -> "OxmlElement":
     return OxmlElement("w:p")
 
 
-def enforce_subheading_alignment(doc, cfg, details: list[str]) -> bool:
+def enforce_subheading_alignment(
+    doc, cfg, details: list[str], *, body_start: int = 0,
+) -> bool:
     """Force every heading to a specific alignment.
 
     * level 1 (chapters / ВВЕДЕНИЕ / ЗАКЛЮЧЕНИЕ / СПИСОК ЛИТЕРАТУРЫ) →
@@ -228,7 +230,9 @@ def enforce_subheading_alignment(doc, cfg, details: list[str]) -> bool:
     toc_elems = _collect_toc_paragraph_elements(doc)
     chapters_changed = 0
     subs_changed = 0
-    for para in doc.paragraphs:
+    for idx, para in enumerate(doc.paragraphs):
+        if idx < body_start:
+            continue
         if para._element in toc_elems:
             continue
         level = _para_heading_level(para)
@@ -267,7 +271,9 @@ def enforce_subheading_alignment(doc, cfg, details: list[str]) -> bool:
     return (chapters_changed + subs_changed) > 0
 
 
-def ensure_blank_before_subheadings(doc, details: list[str]) -> bool:
+def ensure_blank_before_subheadings(
+    doc, details: list[str], *, body_start: int = 0,
+) -> bool:
     """Ensure exactly one empty paragraph precedes every level-2+ heading
     within a chapter.
 
@@ -284,7 +290,9 @@ def ensure_blank_before_subheadings(doc, details: list[str]) -> bool:
     changed = False
     inserted = 0
 
-    for para in paragraphs:
+    for idx, para in enumerate(paragraphs):
+        if idx < body_start:
+            continue
         if para._element in toc_elems:
             continue
         level = _para_heading_level(para)
@@ -710,7 +718,9 @@ def _ensure_heading_styles_bold(doc) -> tuple[int, dict[int, str]]:
     return style_changed, level_to_styleid
 
 
-def enforce_heading_bold(doc, cfg, details: list[str]) -> bool:
+def enforce_heading_bold(
+    doc, cfg, details: list[str], *, body_start: int = 0,
+) -> bool:
     """Ensure every Heading 1/2/3 paragraph DISPLAYS bold while keeping
     auto-TOC entries non-bold.
 
@@ -744,7 +754,9 @@ def enforce_heading_bold(doc, cfg, details: list[str]) -> bool:
     )
     canonical_ids_set = {f"Heading{i}" for i in range(1, 4)}
     canonical_target_ids = set(level_to_styleid.values())
-    for para in doc.paragraphs:
+    for idx, para in enumerate(doc.paragraphs):
+        if idx < body_start:
+            continue
         if para._element in toc_elems:
             continue
         level = _para_heading_level(para)
@@ -827,7 +839,9 @@ def enforce_heading_bold(doc, cfg, details: list[str]) -> bool:
     return bool(style_changed or paras_changed or pstyles_changed or bold_runs_added)
 
 
-def enforce_heading_font(doc, cfg, details: list[str]) -> bool:
+def enforce_heading_font(
+    doc, cfg, details: list[str], *, body_start: int = 0,
+) -> bool:
     """Жёстко проставить шрифт и размер всем runs заголовков.
 
     Аналог ``enforce_heading_bold``. Работает независимо от safety-флага
@@ -847,7 +861,9 @@ def enforce_heading_font(doc, cfg, details: list[str]) -> bool:
 
     toc_elems = _collect_toc_paragraph_elements(doc)
     changed = 0
-    for para in doc.paragraphs:
+    for idx, para in enumerate(doc.paragraphs):
+        if idx < body_start:
+            continue
         if para._element in toc_elems:
             continue
         level = _para_heading_level(para)
@@ -869,7 +885,9 @@ def enforce_heading_font(doc, cfg, details: list[str]) -> bool:
     return changed > 0
 
 
-def enforce_heading_spacing(doc, cfg, details: list[str]) -> bool:
+def enforce_heading_spacing(
+    doc, cfg, details: list[str], *, body_start: int = 0,
+) -> bool:
     """Hard-set ``space_before`` / ``space_after`` to ``cfg`` values on every
     ``HeadingN`` paragraph **and** style.
 
@@ -931,7 +949,9 @@ def enforce_heading_spacing(doc, cfg, details: list[str]) -> bool:
 
     paragraphs_changed = 0
     toc_elems = _collect_toc_paragraph_elements(doc)
-    for para in doc.paragraphs:
+    for idx, para in enumerate(doc.paragraphs):
+        if idx < body_start:
+            continue
         if para._element in toc_elems:
             continue
         if _para_heading_level(para) is None:

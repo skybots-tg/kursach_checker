@@ -563,15 +563,15 @@ def apply_safe_autofixes(
         changed |= tighten_caption_block_layout(doc, details)
         changed |= fix_source_caption_lines(doc, details)
     changed |= normalize_source_line_spacing(doc, details)
-    changed |= enforce_subheading_alignment(doc, cfg, details)
-    changed |= enforce_heading_bold(doc, cfg, details)
-    changed |= enforce_heading_font(doc, cfg, details)
-    changed |= enforce_heading_spacing(doc, cfg, details)
+    changed |= enforce_subheading_alignment(doc, cfg, details, body_start=body_start)
+    changed |= enforce_heading_bold(doc, cfg, details, body_start=body_start)
+    changed |= enforce_heading_font(doc, cfg, details, body_start=body_start)
+    changed |= enforce_heading_spacing(doc, cfg, details, body_start=body_start)
     if cfg.fix_section_breaks and enforce_chapter_page_breaks(doc, details):
         changed = True
-    if cfg.ensure_subheading_spacing and ensure_blank_before_subheadings(doc, details):
+    if cfg.ensure_subheading_spacing and ensure_blank_before_subheadings(doc, details, body_start=body_start):
         changed = True
-    if cfg.collapse_empty_paras and collapse_excessive_empty_paras(doc, cfg.max_consecutive_empty_paras, details):
+    if cfg.collapse_empty_paras and collapse_excessive_empty_paras(doc, cfg.max_consecutive_empty_paras, details, body_start=body_start):
         changed = True
     # Insert blank paragraphs after table/figure/source blocks AFTER the
     # collapse pass so they are not removed.  Client requirement:
@@ -584,9 +584,9 @@ def apply_safe_autofixes(
         changed = True
 
     if changed:
-        if remove_redundant_manual_page_breaks(doc, details):
+        if remove_redundant_manual_page_breaks(doc, details, body_start=body_start):
             pass
-        if remove_empty_paras_before_page_breaks(doc, details):
+        if remove_empty_paras_before_page_breaks(doc, details, body_start=body_start):
             pass
 
     if not changed:

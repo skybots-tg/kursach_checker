@@ -68,15 +68,23 @@ def _has_page_break_before(p_elem) -> bool:
     return val not in ("0", "false")
 
 
-def remove_redundant_manual_page_breaks(doc, details: list[str]) -> bool:
+def remove_redundant_manual_page_breaks(
+    doc, details: list[str], *, body_start: int = 0,
+) -> bool:
     """Drop empty manual-page-break paragraphs adjacent to a heading whose
     paragraph format already specifies ``pageBreakBefore``.
 
     Operates on every body-level ``<w:p>`` so it reaches paragraphs that
     ``doc.paragraphs`` would skip (e.g. inside content controls).
+    Paragraphs before ``body_start`` (title page) are never removed.
     """
     body = doc.element.body
     p_elements = list(body.iter(_P_TAG))
+
+    title_elems: set[int] = set()
+    if body_start > 0:
+        for p in doc.paragraphs[:body_start]:
+            title_elems.add(id(p._element))
 
     removed = 0
     seen: set[int] = set()
@@ -86,11 +94,11 @@ def remove_redundant_manual_page_breaks(doc, details: list[str]) -> bool:
             continue
         # Look at the paragraph BEFORE the heading.
         prev = p_elements[idx - 1] if idx > 0 else None
-        if prev is not None and id(prev) not in seen and _is_manual_page_break_only_paragraph(prev):
+        if prev is not None and id(prev) not in seen and id(prev) not in title_elems and _is_manual_page_break_only_paragraph(prev):
             seen.add(id(prev))
         # Look at the paragraph AFTER the heading.
         nxt = p_elements[idx + 1] if idx + 1 < len(p_elements) else None
-        if nxt is not None and id(nxt) not in seen and _is_manual_page_break_only_paragraph(nxt):
+        if nxt is not None and id(nxt) not in seen and id(nxt) not in title_elems and _is_manual_page_break_only_paragraph(nxt):
             seen.add(id(nxt))
 
     for p_elem in p_elements:

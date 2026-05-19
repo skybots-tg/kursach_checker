@@ -1005,7 +1005,9 @@ def _is_removable_empty_para(para) -> bool:
             return False
     return True
 
-def remove_empty_paras_before_page_breaks(doc, details: list[str]) -> bool:
+def remove_empty_paras_before_page_breaks(
+    doc, details: list[str], *, body_start: int = 0,
+) -> bool:
     paragraphs = list(doc.paragraphs)
     body = doc.element.body
     to_remove = []
@@ -1017,6 +1019,8 @@ def remove_empty_paras_before_page_breaks(doc, details: list[str]) -> bool:
             continue
         j = i - 1
         while j >= 0:
+            if j < body_start:
+                break
             prev = paragraphs[j]
             if not _is_removable_empty_para(prev):
                 break
