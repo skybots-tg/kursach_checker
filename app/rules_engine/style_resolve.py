@@ -32,9 +32,25 @@ _JC_MAP = {
 }
 
 
-def effective_alignment(paragraph) -> WD_PARAGRAPH_ALIGNMENT | None:
-    if paragraph.alignment is not None:
+def safe_alignment(paragraph) -> WD_PARAGRAPH_ALIGNMENT | None:
+    """Read paragraph.alignment safely, mapping 'start'→LEFT, 'end'→RIGHT."""
+    try:
         return paragraph.alignment
+    except (ValueError, KeyError):
+        pPr_el = paragraph._element.find(qn("w:pPr"))
+        if pPr_el is not None:
+            jc = pPr_el.find(qn("w:jc"))
+            if jc is not None:
+                val = jc.get(qn("w:val"))
+                if val in _JC_MAP:
+                    return _JC_MAP[val]
+        return None
+
+
+def effective_alignment(paragraph) -> WD_PARAGRAPH_ALIGNMENT | None:
+    align = safe_alignment(paragraph)
+    if align is not None:
+        return align
     for pPr in walk_style_pPr(paragraph):
         jc = pPr.find(qn("w:jc"))
         if jc is not None:

@@ -47,6 +47,7 @@ from app.rules_engine.autofix_helpers import (
     preflight_margins_safe,
     remove_empty_paras_before_page_breaks,
     remove_manual_page_breaks,
+    strip_char_indents,
 )
 from app.rules_engine.autofix_appendix import consolidate_appendix_block
 from app.rules_engine.autofix_bibliography import (
@@ -406,6 +407,8 @@ def apply_safe_autofixes(
                 para_count += 1
             continue
 
+        strip_char_indents(paragraph)
+
         eff_align = effective_alignment(paragraph)
         is_center_like = eff_align in (
             WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -456,6 +459,7 @@ def apply_safe_autofixes(
             eff_indent = effective_first_line_indent_mm(paragraph)
             if abs(eff_indent - cfg.first_line_indent_mm) > 0.5:
                 pf.first_line_indent = Mm(cfg.first_line_indent_mm)
+                strip_char_indents(paragraph)
                 changed = True
                 para_touched = True
                 details.append(f"{para_label}: абзацный отступ {cfg.first_line_indent_mm} мм")

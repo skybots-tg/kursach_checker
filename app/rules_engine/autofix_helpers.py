@@ -17,6 +17,32 @@ from app.rules_engine.style_resolve import effective_first_line_indent_mm
 logger = logging.getLogger(__name__)
 
 _W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+
+_CHAR_INDENT_ATTRS = [
+    qn("w:firstLineChars"),
+    qn("w:hangingChars"),
+    qn("w:leftChars"),
+    qn("w:rightChars"),
+    qn("w:startChars"),
+    qn("w:endChars"),
+]
+
+
+def strip_char_indents(paragraph) -> None:
+    """Remove character-based indent attrs (firstLineChars etc.) from w:ind.
+
+    Word prioritises *Chars over absolute twip values; leaving them
+    makes python-docx's ``first_line_indent`` setter ineffective.
+    """
+    pPr = paragraph._element.find(qn("w:pPr"))
+    if pPr is None:
+        return
+    ind = pPr.find(qn("w:ind"))
+    if ind is None:
+        return
+    for attr in _CHAR_INDENT_ATTRS:
+        if attr in ind.attrib:
+            del ind.attrib[attr]
 _BINARY_PREFIXES = ("word/media/", "word/embeddings/")
 
 _BULLET_CHARS = frozenset("\u2022\u25cf\u25cb\u25e6\u2023\u2043\u25aa\u25ab\u00b7")

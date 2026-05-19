@@ -10,6 +10,8 @@ from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 from docx.text.run import Run
 
+from app.rules_engine.style_resolve import safe_alignment
+
 
 def _force_run_underline_none(r_el) -> bool:
     """Stamp ``<w:u w:val="none"/>`` on the run's ``<w:rPr>``.
@@ -706,7 +708,7 @@ def _apply_entry_formatting(
     if _strip_numPr(para):
         changed = True
 
-    if para.alignment != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
+    if safe_alignment(para) != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
         para.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
         changed = True
     if pf.first_line_indent is None or abs(float(pf.first_line_indent.mm) - first_line_indent_mm) > 0.5:

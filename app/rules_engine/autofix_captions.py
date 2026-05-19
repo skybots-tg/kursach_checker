@@ -19,6 +19,8 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.shared import Mm
 
+from app.rules_engine.style_resolve import safe_alignment
+
 logger = logging.getLogger(__name__)
 
 _FIGURE_CAPTION_RE = re.compile(
@@ -137,7 +139,7 @@ def _format_figure_caption(para) -> bool:
     the caption from being separated from the preceding image across a page
     break (``keepLines``)."""
     changed = False
-    if para.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+    if safe_alignment(para) != WD_PARAGRAPH_ALIGNMENT.CENTER:
         para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         changed = True
     pf = para.paragraph_format
@@ -164,7 +166,7 @@ def _format_table_caption(para) -> bool:
     """
     from docx.oxml import OxmlElement
     changed = False
-    if para.alignment not in (WD_PARAGRAPH_ALIGNMENT.LEFT, None):
+    if safe_alignment(para) not in (WD_PARAGRAPH_ALIGNMENT.LEFT, None):
         para.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
         changed = True
     pf = para.paragraph_format
@@ -514,7 +516,7 @@ def fix_source_caption_lines(doc, details: list[str]) -> bool:
         if prev is None or prev.tag != qn("w:tbl"):
             continue
 
-        if para.alignment != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
+        if safe_alignment(para) != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
             para.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
             fixed_align += 1
             changed = True

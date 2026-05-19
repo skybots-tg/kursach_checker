@@ -11,7 +11,7 @@ from docx.shared import Mm, Pt
 
 from app.rules_engine.autofix_helpers import enforce_run_font, is_field_code_run
 from app.rules_engine.autofix_para_classify import is_heading_para
-from app.rules_engine.style_resolve import detect_toc_paragraph_indices
+from app.rules_engine.style_resolve import detect_toc_paragraph_indices, safe_alignment
 
 logger = logging.getLogger(__name__)
 
@@ -56,20 +56,20 @@ def _resolve_heading_style(paragraph, level: int):
 
 def _fix_alignment(paragraph, level: int | None, cfg, details: list[str], idx: int) -> bool:
     if level == 1 and cfg.heading_level1_center:
-        if paragraph.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+        if safe_alignment(paragraph) != WD_PARAGRAPH_ALIGNMENT.CENTER:
             paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             details.append(f"Заголовок #{idx + 1}: выравнивание по центру")
             return True
     elif level is not None and level >= 2:
         if cfg.heading_level2plus_center:
-            if paragraph.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+            if safe_alignment(paragraph) != WD_PARAGRAPH_ALIGNMENT.CENTER:
                 paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
                 paragraph.paragraph_format.first_line_indent = Mm(0)
                 details.append(
                     f"Заголовок #{idx + 1}: подзаголовок по центру"
                 )
                 return True
-        elif paragraph.alignment == WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
+        elif safe_alignment(paragraph) == WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
             paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
             details.append(f"Заголовок #{idx + 1}: выравнивание по левому краю")
             return True
@@ -244,7 +244,7 @@ def enforce_subheading_alignment(
             continue
 
         touched = False
-        if para.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+        if safe_alignment(para) != WD_PARAGRAPH_ALIGNMENT.CENTER:
             para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             touched = True
         pf = para.paragraph_format

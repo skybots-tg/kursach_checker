@@ -14,6 +14,7 @@ from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
 from app.rules_engine.autofix_title_layout import distribute_title_page_vertical_blocks
+from app.rules_engine.style_resolve import safe_alignment
 
 logger = logging.getLogger(__name__)
 
@@ -350,7 +351,7 @@ def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -
         if cur.replace("\xa0", " ").strip() != want:
             _replace_paragraph_plain_text(p, want)
             changed = True
-        if p.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+        if safe_alignment(p) != WD_PARAGRAPH_ALIGNMENT.CENTER:
             p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             changed = True
         if changed:
@@ -363,7 +364,7 @@ def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -
         yp = paras[footer_idx]
         if _strip_leading_soft_vertical_runs_from_paragraph(yp._element):
             changed = True
-        if yp.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+        if safe_alignment(yp) != WD_PARAGRAPH_ALIGNMENT.CENTER:
             yp.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             changed = True
         city_idx = footer_idx - 1
@@ -377,7 +378,7 @@ def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -
                 if new_city and _collapse_title_text_for_match(cp.text or "") != new_city:
                     _replace_paragraph_plain_text(cp, new_city)
                     changed = True
-                if cp.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+                if safe_alignment(cp) != WD_PARAGRAPH_ALIGNMENT.CENTER:
                     cp.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
                     changed = True
         if changed:
@@ -397,13 +398,13 @@ def normalize_title_page_city_footer(doc, body_start: int, details: list[str]) -
         if new_city and collapsed != new_city:
             _replace_paragraph_plain_text(p, new_city)
             changed = True
-        if p.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+        if safe_alignment(p) != WD_PARAGRAPH_ALIGNMENT.CENTER:
             p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             changed = True
         if i + 1 < body_start:
             p2 = paras[i + 1]
             if _YEAR_ONLY_RE.match((p2.text or "").strip()):
-                if p2.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+                if safe_alignment(p2) != WD_PARAGRAPH_ALIGNMENT.CENTER:
                     p2.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
                     changed = True
         break

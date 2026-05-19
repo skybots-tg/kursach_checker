@@ -17,7 +17,7 @@ from app.rules_engine.heading_detection import (
     KNOWN_SECTION_TITLES,
     detect_heading_candidate,
 )
-from app.rules_engine.style_resolve import detect_toc_paragraph_indices
+from app.rules_engine.style_resolve import detect_toc_paragraph_indices, safe_alignment
 
 logger = logging.getLogger(__name__)
 
@@ -494,7 +494,7 @@ def _normalize_existing_toc_heading(para, details: list[str]) -> bool:
     except KeyError:
         pass
 
-    if para.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+    if safe_alignment(para) != WD_PARAGRAPH_ALIGNMENT.CENTER:
         para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         changed = True
 
