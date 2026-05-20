@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import date, datetime, time
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -38,6 +40,8 @@ class CreditsUpdateIn(BaseModel):
 @router.get("")
 async def list_users(
     q: str | None = None,
+    date_from: date | None = Query(None, description="Начало периода (YYYY-MM-DD)"),
+    date_to: date | None = Query(None, description="Конец периода (YYYY-MM-DD)"),
     current_admin: AdminUser = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> list[dict]:
@@ -72,6 +76,10 @@ async def list_users(
     if q:
         like = f"%{q}%"
         stmt = stmt.where((User.username.ilike(like)) | (User.first_name.ilike(like)))
+    if date_from:
+        stmt = stmt.where(User.created_at >= datetime.combine(date_from, time.min))
+    if date_to:
+        stmt = stmt.where(User.created_at <= datetime.combine(date_to, time.max))
 
     rows = await db.execute(stmt)
     user_ids = []

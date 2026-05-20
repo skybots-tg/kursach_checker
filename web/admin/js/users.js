@@ -6,12 +6,19 @@ let _usersData = [];
 let _usersPage = 1;
 let _userDetailData = null;
 let _userDetailTab = 'orders';
+let _usersDateFrom = '';
+let _usersDateTo = '';
 
 async function loadUsers(query) {
   const page = $('page-users');
   page.innerHTML = loadingHtml();
   try {
-    const url = query ? `/admin/users?q=${encodeURIComponent(query)}` : '/admin/users';
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (_usersDateFrom) params.set('date_from', _usersDateFrom);
+    if (_usersDateTo) params.set('date_to', _usersDateTo);
+    const qs = params.toString();
+    const url = '/admin/users' + (qs ? '?' + qs : '');
     _usersData = await api('GET', url);
     _usersPage = 1;
     renderUsers(query);
@@ -21,20 +28,42 @@ async function loadUsers(query) {
 }
 
 function renderUsers(query) {
+  const hasDateFilter = _usersDateFrom || _usersDateTo;
+  const periodLabel = hasDateFilter
+    ? `За период: <strong>${_usersDateFrom || '…'} — ${_usersDateTo || '…'}</strong>`
+    : 'Все зарегистрированные пользователи';
+
   $('page-users').innerHTML = `
     <div class="page-header">
       <div>
         <h1 class="page-title">Пользователи</h1>
-        <p class="page-subtitle">Все зарегистрированные пользователи (${_usersData.length})</p>
+        <p class="page-subtitle">${periodLabel} (${_usersData.length})</p>
       </div>
     </div>
-    <div class="toolbar">
+    <div class="toolbar" style="flex-wrap:wrap;gap:8px">
       <input class="search-input" id="users-search" placeholder="Поиск по имени или username…"
         value="${query ? escHtml(query) : ''}"
         onkeydown="if(event.key==='Enter')searchUsers()">
       <button class="btn btn-secondary btn-sm" onclick="searchUsers()">
         ${iconSvg('search', 14)} Найти
       </button>
+    </div>
+    <div class="card" style="margin-bottom:16px;padding:12px 16px">
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px">
+        <span style="font-weight:500;font-size:13px">${iconSvg('calendar', 14)} Период регистрации:</span>
+        <input type="date" class="form-input" id="users-date-from" value="${_usersDateFrom}"
+          style="width:150px;padding:4px 8px;font-size:13px">
+        <span style="font-size:13px">—</span>
+        <input type="date" class="form-input" id="users-date-to" value="${_usersDateTo}"
+          style="width:150px;padding:4px 8px;font-size:13px">
+        <button class="btn btn-primary btn-sm" onclick="applyUsersDateFilter()">Применить</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetUsersDateFilter()">Сбросить</button>
+        <span style="border-left:1px solid var(--border);height:20px;margin:0 4px"></span>
+        <button class="btn btn-ghost btn-sm" onclick="usersQuickDate('today')">Сегодня</button>
+        <button class="btn btn-ghost btn-sm" onclick="usersQuickDate('7d')">7 дней</button>
+        <button class="btn btn-ghost btn-sm" onclick="usersQuickDate('30d')">30 дней</button>
+        <button class="btn btn-ghost btn-sm" onclick="usersQuickDate('90d')">90 дней</button>
+      </div>
     </div>
     <div id="users-table-area"></div>`;
   renderUsersTable();
@@ -94,6 +123,33 @@ function usersTable(list) {
       </table>
     </div>
   </div>`;
+}
+
+function applyUsersDateFilter() {
+  _usersDateFrom = getVal('users-date-from') || '';
+  _usersDateTo = getVal('users-date-to') || '';
+  loadUsers(getVal('users-search').trim() || undefined);
+}
+
+function resetUsersDateFilter() {
+  _usersDateFrom = '';
+  _usersDateTo = '';
+  loadUsers(getVal('users-search').trim() || undefined);
+}
+
+function usersQuickDate(preset) {
+  const today = new Date();
+  const fmt = d => d.toISOString().slice(0, 10);
+  _usersDateTo = fmt(today);
+  if (preset === 'today') {
+    _usersDateFrom = fmt(today);
+  } else {
+    const days = parseInt(preset);
+    const from = new Date(today);
+    from.setDate(from.getDate() - days + 1);
+    _usersDateFrom = fmt(from);
+  }
+  loadUsers(getVal('users-search').trim() || undefined);
 }
 
 function searchUsers() {
@@ -374,6 +430,9 @@ async function deleteUser(userId) {
 registerEntityHandler('users', (sub) => viewUserDetail(parseInt(sub)), true);
 
 window.searchUsers = searchUsers;
+window.applyUsersDateFilter = applyUsersDateFilter;
+window.resetUsersDateFilter = resetUsersDateFilter;
+window.usersQuickDate = usersQuickDate;
 window.usersGoPage = usersGoPage;
 window.viewUserDetail = viewUserDetail;
 window.switchUserTab = switchUserTab;
