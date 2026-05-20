@@ -56,12 +56,18 @@ class AnalyticsMiddleware(BaseMiddleware):
 
         if msg.text and msg.text.startswith("/"):
             event_type = "command"
-            category = EventCategory.lifecycle if msg.text == "/start" else EventCategory.action
+            category = EventCategory.lifecycle if msg.text.startswith("/start") else EventCategory.action
             event_data = {"command": msg.text.split()[0]}
 
-            if msg.text == "/start":
+            if msg.text.startswith("/start"):
                 event_type = "bot_start"
                 event_data["source"] = "command"
+                parts = msg.text.split(maxsplit=1)
+                if len(parts) > 1:
+                    start_arg = parts[1].strip()
+                    from app.services.referrals import REF_PAYLOAD_PREFIX
+                    if start_arg and not start_arg.startswith(REF_PAYLOAD_PREFIX):
+                        event_data["utm_source"] = start_arg[:128]
         else:
             event_type = "message_sent"
             category = EventCategory.message

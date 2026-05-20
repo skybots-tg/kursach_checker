@@ -23,7 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 async def ensure_user(
-    tg_user: TgUser, *, ref_inviter_tg_id: int | None = None,
+    tg_user: TgUser,
+    *,
+    ref_inviter_tg_id: int | None = None,
+    utm_source: str | None = None,
 ) -> int | None:
     """Создать/обновить запись пользователя.
 
@@ -45,6 +48,7 @@ async def ensure_user(
                 telegram_id=tg_user.id,
                 first_name=tg_user.first_name,
                 username=tg_user.username,
+                utm_source=utm_source,
                 last_login_at=datetime.utcnow(),
             )
             db.add(user)

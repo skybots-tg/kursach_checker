@@ -415,15 +415,21 @@ async def run_bot() -> None:
         message: Message, command: CommandObject,
     ) -> None:
         ref_inviter_tg_id: int | None = None
-        inviter_id = parse_ref_payload(command.args)
+        utm_source: str | None = None
+        start_arg = (command.args or "").strip()
+
+        inviter_id = parse_ref_payload(start_arg)
         if inviter_id:
             ref_inviter_tg_id = inviter_id
+        elif start_arg:
+            utm_source = start_arg[:128]
 
         inviter_to_notify: int | None = None
         if message.from_user:
             inviter_to_notify = await ensure_user(
                 message.from_user,
                 ref_inviter_tg_id=ref_inviter_tg_id,
+                utm_source=utm_source,
             )
 
         tg_user_id = message.from_user.id if message.from_user else None
