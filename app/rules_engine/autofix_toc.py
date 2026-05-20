@@ -649,6 +649,14 @@ def _scan_manual_toc_block(
             if _is_strong_toc_break(para):
                 break
             break
+        # A standalone known section title without a page-number tail that
+        # appears as the very first "entry" is almost certainly the body
+        # heading (e.g. "ВВЕДЕНИЕ" right after "Содержание"), not a TOC line.
+        _low_scan = re.sub(r"[\s\xa0]+", " ", text).strip().lower().rstrip(":.;")
+        if (_low_scan in KNOWN_SECTION_TITLES
+                and not TOC_LINE_TAIL_RE.search(text)
+                and entries_seen == 0):
+            break
         norm = _normalize_for_dup(text)
         if norm and norm in seen_norm:
             # Same title appeared earlier in the TOC list → this is the
