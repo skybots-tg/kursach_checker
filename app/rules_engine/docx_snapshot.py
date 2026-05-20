@@ -117,6 +117,26 @@ def _mm_from_emu(value: int | None) -> float | None:
     return round(value / 36000, 2)
 
 
+def _safe_margin(section, attr: str) -> int | None:
+    """Read a section margin safely, handling float twip values in XML."""
+    try:
+        return getattr(section, attr)
+    except (ValueError, TypeError):
+        from docx.oxml.ns import qn
+        from docx.shared import Twips
+        pgMar = section._sectPr.find(qn("w:pgMar"))
+        if pgMar is None:
+            return None
+        xml_attr = attr.replace("_margin", "")
+        raw = pgMar.get(qn("w:" + xml_attr))
+        if raw is None:
+            return None
+        try:
+            return Twips(int(round(float(raw))))
+        except (ValueError, TypeError):
+            return None
+
+
 def _safe_doc_attr_length(obj: object, attr_name: str) -> int:
     value = getattr(obj, attr_name, None)
     if value is None:
@@ -158,10 +178,10 @@ def _section_margins(doc: Document) -> list[SectionMargins]:
     for section in doc.sections:
         result.append(
             SectionMargins(
-                left_mm=_mm_from_emu(section.left_margin),
-                right_mm=_mm_from_emu(section.right_margin),
-                top_mm=_mm_from_emu(section.top_margin),
-                bottom_mm=_mm_from_emu(section.bottom_margin),
+                left_mm=_mm_from_emu(_safe_margin(section, "left_margin")),
+                right_mm=_mm_from_emu(_safe_margin(section, "right_margin")),
+                top_mm=_mm_from_emu(_safe_margin(section, "top_margin")),
+                bottom_mm=_mm_from_emu(_safe_margin(section, "bottom_margin")),
             )
         )
     return result

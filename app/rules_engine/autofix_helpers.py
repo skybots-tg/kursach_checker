@@ -556,7 +556,7 @@ def preflight_margins_safe(doc: Document, target_margins_mm: dict) -> bool:
     mn = None
     for sec in doc.sections:
         try: pw = sec.page_width.twips
-        except (AttributeError, TypeError): continue
+        except (AttributeError, TypeError, ValueError): continue
         content = pw - lt - rt
         if mn is None or content < mn:
             mn = content
@@ -1068,12 +1068,15 @@ def fix_section_margins(
 ) -> bool:
     from docx.enum.section import WD_ORIENT
 
-    is_landscape = (
-        getattr(section, "orientation", None) == WD_ORIENT.LANDSCAPE
-        or (section.page_width is not None
-            and section.page_height is not None
-            and int(section.page_width) > int(section.page_height))
-    )
+    try:
+        is_landscape = (
+            getattr(section, "orientation", None) == WD_ORIENT.LANDSCAPE
+            or (section.page_width is not None
+                and section.page_height is not None
+                and int(section.page_width) > int(section.page_height))
+        )
+    except (ValueError, TypeError):
+        is_landscape = False
     if is_landscape:
         details.append(
             f"\u0421\u0435\u043a\u0446\u0438\u044f #{sec_idx + 1}: альбомная ориентация — поля не изменены"
@@ -1086,7 +1089,10 @@ def fix_section_margins(
         if target_mm is None:
             continue
         attr = f"{key}_margin"
-        current = getattr(section, attr, None)
+        try:
+            current = getattr(section, attr, None)
+        except (ValueError, TypeError):
+            current = None
         target = Mm(target_mm)
         if current is None or abs(int(current) - int(target)) > int(Mm(0.5)):
             setattr(section, attr, target)
