@@ -6,6 +6,9 @@ let _utmStats = null;
 let _utmDaily = [];
 let _utmDays = 30;
 let _utmTab = 'overview';
+let _utmDateFrom = '';
+let _utmDateTo = '';
+let _utmCustomRange = false;
 
 async function loadUtm() {
   const page = $('page-utm');
@@ -18,9 +21,16 @@ async function loadUtm() {
 }
 
 async function refreshUtm() {
+  let qs = '';
+  if (_utmCustomRange && _utmDateFrom) {
+    qs = `date_from=${_utmDateFrom}`;
+    if (_utmDateTo) qs += `&date_to=${_utmDateTo}`;
+  } else {
+    qs = _utmDays > 0 ? `days=${_utmDays}` : 'days=9999';
+  }
   const [stats, daily] = await Promise.all([
-    api('GET', `/admin/utm/stats?days=${_utmDays}`),
-    api('GET', `/admin/utm/daily?days=${_utmDays}`),
+    api('GET', `/admin/utm/stats?${qs}`),
+    api('GET', `/admin/utm/daily?${qs}`),
   ]);
   _utmStats = stats;
   _utmDaily = daily;
@@ -42,14 +52,21 @@ function renderUtm() {
       </button>
     </div>
 
-    <div class="toolbar" style="margin-bottom:16px">
+    <div class="toolbar" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
       <select class="filter-select" onchange="utmChangeDays(this.value)">
-        <option value="7"${_utmDays === 7 ? ' selected' : ''}>7 дней</option>
-        <option value="14"${_utmDays === 14 ? ' selected' : ''}>14 дней</option>
-        <option value="30"${_utmDays === 30 ? ' selected' : ''}>30 дней</option>
-        <option value="90"${_utmDays === 90 ? ' selected' : ''}>90 дней</option>
-        <option value="365"${_utmDays === 365 ? ' selected' : ''}>Год</option>
+        <option value="7"${_utmDays === 7 && !_utmCustomRange ? ' selected' : ''}>7 дней</option>
+        <option value="14"${_utmDays === 14 && !_utmCustomRange ? ' selected' : ''}>14 дней</option>
+        <option value="30"${_utmDays === 30 && !_utmCustomRange ? ' selected' : ''}>30 дней</option>
+        <option value="90"${_utmDays === 90 && !_utmCustomRange ? ' selected' : ''}>90 дней</option>
+        <option value="365"${_utmDays === 365 && !_utmCustomRange ? ' selected' : ''}>Год</option>
+        <option value="0"${_utmDays === 0 && !_utmCustomRange ? ' selected' : ''}>За всё время</option>
+        <option value="custom"${_utmCustomRange ? ' selected' : ''}>Свой диапазон</option>
       </select>
+      ${_utmCustomRange ? `
+        <input type="date" class="form-input" style="width:auto;padding:4px 8px;font-size:13px" value="${_utmDateFrom}" onchange="utmSetCustomFrom(this.value)">
+        <span style="color:var(--text-muted)">—</span>
+        <input type="date" class="form-input" style="width:auto;padding:4px 8px;font-size:13px" value="${_utmDateTo}" onchange="utmSetCustomTo(this.value)">
+      ` : ''}
       <button class="btn btn-secondary btn-sm" onclick="refreshUtm()">
         ${iconSvg('refresh', 14)} Обновить
       </button>
@@ -263,11 +280,33 @@ async function utmCopyLink(tag) {
   } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
 }
 
+let _utmUsersSource = '';
+let _utmUsersDateFrom = '';
+let _utmUsersDateTo = '';
+
 async function utmViewUsers(source) {
+  _utmUsersSource = source;
+  _utmUsersDateFrom = '';
+  _utmUsersDateTo = '';
+  await _utmRenderUsersModal();
+}
+
+async function _utmRenderUsersModal() {
+  const source = _utmUsersSource;
   try {
-    const data = await api('GET', `/admin/utm/users?source=${encodeURIComponent(source)}&limit=100`);
+    let qs = `source=${encodeURIComponent(source)}&limit=100`;
+    if (_utmUsersDateFrom) qs += `&date_from=${_utmUsersDateFrom}`;
+    if (_utmUsersDateTo) qs += `&date_to=${_utmUsersDateTo}`;
+    const data = await api('GET', `/admin/utm/users?${qs}`);
     const items = data.items || [];
-    const body = items.length
+    const filterHtml = `<div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+      <label style="font-size:12px;color:var(--text-muted)">С:</label>
+      <input type="date" class="form-input" style="width:auto;padding:4px 8px;font-size:13px" value="${_utmUsersDateFrom}" onchange="utmUsersFilterFrom(this.value)">
+      <label style="font-size:12px;color:var(--text-muted)">По:</label>
+      <input type="date" class="form-input" style="width:auto;padding:4px 8px;font-size:13px" value="${_utmUsersDateTo}" onchange="utmUsersFilterTo(this.value)">
+      ${(_utmUsersDateFrom || _utmUsersDateTo) ? `<button class="btn btn-ghost btn-sm" onclick="utmUsersFilterReset()" style="font-size:12px">Сбросить</button>` : ''}
+    </div>`;
+    const tableHtml = items.length
       ? `<div style="max-height:50vh;overflow-y:auto"><table class="data-table">
           <thead><tr><th>ID</th><th>Telegram</th><th>Имя</th><th>Username</th><th>Дата</th></tr></thead>
           <tbody>${items.map(u => `<tr>
@@ -280,12 +319,42 @@ async function utmViewUsers(source) {
         </table></div>
         <p style="margin-top:8px;font-size:12px;color:var(--text-muted)">Всего: ${data.total}</p>`
       : emptyHtml('Нет пользователей', 'По этой метке пока никто не пришёл');
-    openModal(`Пользователи — ${source}`, body, `<button class="btn btn-ghost" onclick="closeModal()">Закрыть</button>`);
+    openModal(`Пользователи — ${source}`, filterHtml + tableHtml, `<button class="btn btn-ghost" onclick="closeModal()">Закрыть</button>`);
   } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
 }
 
+function utmUsersFilterFrom(val) {
+  _utmUsersDateFrom = val;
+  _utmRenderUsersModal();
+}
+function utmUsersFilterTo(val) {
+  _utmUsersDateTo = val;
+  _utmRenderUsersModal();
+}
+function utmUsersFilterReset() {
+  _utmUsersDateFrom = '';
+  _utmUsersDateTo = '';
+  _utmRenderUsersModal();
+}
+
 function utmChangeDays(val) {
+  if (val === 'custom') {
+    _utmCustomRange = true;
+    renderUtm();
+    return;
+  }
+  _utmCustomRange = false;
   _utmDays = parseInt(val, 10) || 30;
+  refreshUtm().catch(e => toast('Ошибка: ' + e.message, 'error'));
+}
+
+function utmSetCustomFrom(val) {
+  _utmDateFrom = val;
+  refreshUtm().catch(e => toast('Ошибка: ' + e.message, 'error'));
+}
+
+function utmSetCustomTo(val) {
+  _utmDateTo = val;
   refreshUtm().catch(e => toast('Ошибка: ' + e.message, 'error'));
 }
 
@@ -300,3 +369,8 @@ window.utmCopyGenerated = utmCopyGenerated;
 window.utmCopyLink = utmCopyLink;
 window.utmViewUsers = utmViewUsers;
 window.utmChangeDays = utmChangeDays;
+window.utmSetCustomFrom = utmSetCustomFrom;
+window.utmSetCustomTo = utmSetCustomTo;
+window.utmUsersFilterFrom = utmUsersFilterFrom;
+window.utmUsersFilterTo = utmUsersFilterTo;
+window.utmUsersFilterReset = utmUsersFilterReset;

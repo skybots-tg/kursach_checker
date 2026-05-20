@@ -17,36 +17,63 @@ from app.models.analytics import UserEvent
 router = APIRouter()
 
 
+def _parse_date_range(
+    days: int | None, date_from: str | None, date_to: str | None,
+) -> tuple[datetime | None, datetime | None]:
+    """Resolve query params into (since, until) datetime bounds."""
+    since = None
+    until = None
+    if date_from:
+        try:
+            since = datetime.fromisoformat(date_from)
+        except ValueError:
+            pass
+    if date_to:
+        try:
+            until = datetime.fromisoformat(date_to + "T23:59:59") if "T" not in date_to else datetime.fromisoformat(date_to)
+        except ValueError:
+            pass
+    if since is None and days and days < 9999:
+        since = datetime.utcnow() - timedelta(days=days)
+    return since, until
+
+
 @router.get("/stats")
 async def utm_stats(
-    days: int = Query(30, ge=1, le=365),
+    days: int = Query(30, ge=1, le=9999),
+    date_from: str | None = Query(None),
+    date_to: str | None = Query(None),
     current_admin: AdminUser = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Aggregate UTM stats: users per tag, daily breakdown."""
     _ = current_admin
-    since = datetime.utcnow() - timedelta(days=days)
+    since, until = _parse_date_range(days, date_from, date_to)
 
-    by_source = (
-        await db.execute(
-            select(
-                User.utm_source,
-                func.count(User.id).label("total_users"),
-                func.min(User.created_at).label("first_seen"),
-                func.max(User.created_at).label("last_seen"),
-            )
-            .where(User.utm_source.isnot(None), User.created_at >= since)
-            .group_by(User.utm_source)
-            .order_by(func.count(User.id).desc())
+    q = (
+        select(
+            User.utm_source,
+            func.count(User.id).label("total_users"),
+            func.min(User.created_at).label("first_seen"),
+            func.max(User.created_at).label("last_seen"),
         )
-    ).all()
+        .where(User.utm_source.isnot(None))
+    )
+    if since:
+        q = q.where(User.created_at >= since)
+    if until:
+        q = q.where(User.created_at <= until)
+    by_source = (await db.execute(
+        q.group_by(User.utm_source).order_by(func.count(User.id).desc())
+    )).all()
 
     total_utm = sum(r.total_users for r in by_source)
-    total_organic = await db.scalar(
-        select(func.count(User.id)).where(
-            User.utm_source.is_(None), User.created_at >= since,
-        )
-    ) or 0
+    oq = select(func.count(User.id)).where(User.utm_source.is_(None))
+    if since:
+        oq = oq.where(User.created_at >= since)
+    if until:
+        oq = oq.where(User.created_at <= until)
+    total_organic = await db.scalar(oq) or 0
 
     sources = [
         {
@@ -67,27 +94,29 @@ async def utm_stats(
 
 @router.get("/daily")
 async def utm_daily(
-    days: int = Query(30, ge=1, le=365),
+    days: int = Query(30, ge=1, le=9999),
+    date_from: str | None = Query(None),
+    date_to: str | None = Query(None),
     current_admin: AdminUser = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> list[dict]:
     """Daily new users grouped by UTM source (for chart)."""
     _ = current_admin
-    since = datetime.utcnow() - timedelta(days=days)
+    since, until = _parse_date_range(days, date_from, date_to)
     date_col = cast(User.created_at, Date)
 
-    rows = (
-        await db.execute(
-            select(
-                date_col.label("day"),
-                func.coalesce(User.utm_source, "__organic__").label("source"),
-                func.count(User.id).label("count"),
-            )
-            .where(User.created_at >= since)
-            .group_by(date_col, "source")
-            .order_by(date_col)
+    q = (
+        select(
+            date_col.label("day"),
+            func.coalesce(User.utm_source, "__organic__").label("source"),
+            func.count(User.id).label("count"),
         )
-    ).all()
+    )
+    if since:
+        q = q.where(User.created_at >= since)
+    if until:
+        q = q.where(User.created_at <= until)
+    rows = (await db.execute(q.group_by(date_col, "source").order_by(date_col))).all()
 
     return [
         {"date": str(r.day), "source": r.source, "count": r.count}
@@ -100,12 +129,28 @@ async def utm_users(
     source: str = Query(...),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
+    date_from: str | None = Query(None),
+    date_to: str | None = Query(None),
     current_admin: AdminUser = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """List users that came from a specific UTM source."""
     _ = current_admin
     base = select(User).where(User.utm_source == source)
+
+    if date_from:
+        try:
+            dt_from = datetime.fromisoformat(date_from)
+            base = base.where(User.created_at >= dt_from)
+        except ValueError:
+            pass
+    if date_to:
+        try:
+            dt_to = datetime.fromisoformat(date_to + "T23:59:59") if "T" not in date_to else datetime.fromisoformat(date_to)
+            base = base.where(User.created_at <= dt_to)
+        except ValueError:
+            pass
+
     total = await db.scalar(
         select(func.count()).select_from(base.subquery())
     ) or 0

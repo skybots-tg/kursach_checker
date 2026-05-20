@@ -943,6 +943,11 @@ def _remove_residual_toc_after_heading(
             pos += 1
             scanned += 1
             continue
+        # A standalone known section title without a page-number tail
+        # is the actual body heading (e.g. "ВВЕДЕНИЕ"), not residual TOC.
+        _low_t = re.sub(r"[\s\xa0]+", " ", text).strip().lower().rstrip(":.;")
+        if _low_t in KNOWN_SECTION_TITLES and not TOC_LINE_TAIL_RE.search(text):
+            break
         if _looks_like_residual_toc_line(text):
             el_pPr = el.find(qn("w:pPr"))
             if el_pPr is not None and el_pPr.find(qn("w:sectPr")) is not None:
