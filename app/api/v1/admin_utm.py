@@ -131,7 +131,7 @@ async def utm_users(
     }
 
 
-@router.post("/generate")
+@router.get("/generate")
 async def utm_generate_link(
     tag: str = Query(..., min_length=1, max_length=128),
     current_admin: AdminUser = Depends(get_current_admin),
