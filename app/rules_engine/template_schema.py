@@ -21,7 +21,7 @@ DEFAULT_TEMPLATE_BLOCKS: list[RuleBlock] = [
         severity="error",
         params={
             "allowed_extensions": ["doc", "docx"],
-            "max_size_mb": 20,
+            "max_size_mb": 50,
             "doc_policy": "convert",
         },
     ),

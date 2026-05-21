@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     init_db_on_startup: bool = False
 
     allowed_origins: str = ""
-    max_upload_mb: int = 20
+    max_upload_mb: int = 50
 
     doc_to_docx_converter: str = ""
 
