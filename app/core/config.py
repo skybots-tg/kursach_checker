@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     telegram_bot_username: str = ""
     telegram_auth_max_age_sec: int = 86400
 
+    # Local Bot API Server (нужен для скачивания файлов >20 МБ)
+    telegram_api_id: int = 0
+    telegram_api_hash: str = ""
+    telegram_local_server_url: str = ""
+
     # Бонус за подписку на канал (необязательно). Если задан username канала
     # и бот добавлен туда как администратор, у пользователя появляется
     # кнопка «Получить +N за подписку», бонус выдаётся один раз.
