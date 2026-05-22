@@ -94,7 +94,7 @@ _ROMAN_CHAPTER_RE = re.compile(
 )
 # Appendix like "Приложение А. ..." or "Приложение А ..." (без точки)
 _APPENDIX_RE = re.compile(
-    r"^приложени[еяй]\s+[\dА-ЯЁA-Z]",
+    r"^приложени[еяй][\s\u00a0\u202f]*[\dА-ЯЁA-Z]",
     re.IGNORECASE,
 )
 

@@ -77,6 +77,11 @@ _NUMBERED_ENTRY_RE = re.compile(r"^\s*(?:\[\d{1,3}\][\.)\s\t]?|\d{1,3}[\.)\u2013
 _LEADING_NONWORD_RE = re.compile(r"^[\s\W_]+", re.UNICODE)
 _HEADING_STYLE_IDS = frozenset({f"Heading{i}" for i in range(1, 10)})
 
+_BIB_END_SECTION_RE = re.compile(
+    r"^(?:приложени[еяй]|заключени[ея]|выводы)\b",
+    re.IGNORECASE | re.UNICODE,
+)
+
 # Recognise common bibliography subsection titles ("Нормативно-правовые
 # акты", "Судебная практика", "Научная литература", "Учебная литература",
 # "Иные источники", "Электронные ресурсы", …). The whole paragraph must
@@ -194,6 +199,10 @@ def _find_bibliography_range(doc) -> tuple[int, int, int] | None:
             end = idx
             break
         if text == text.upper() and len(text) > 3 and not re.match(r"^\s*[\[\d]", text):
+            end = idx
+            break
+        low = re.sub(r"[\s\xa0\u202f]+", " ", text).strip().lower()
+        if _BIB_END_SECTION_RE.match(low):
             end = idx
             break
 

@@ -35,6 +35,7 @@ from app.rules_engine.autofix_helpers import (
     fix_markers_text,
     fix_numbering_bullets,
     fix_page_break_before,
+    remove_orphan_page_number,
     fix_remove_highlight,
     fix_remove_italic,
     fix_remove_strange_chars,
@@ -273,6 +274,9 @@ def apply_safe_autofixes(
         if cfg.strip_leading_whitespace and idx not in toc_indices:
             if fix_strip_leading_whitespace(paragraph, para_label, details):
                 changed = True
+        if idx not in toc_indices and remove_orphan_page_number(paragraph, para_label, details):
+            changed = True
+            continue
         if (
             cfg.fix_section_breaks
             and idx > 0
@@ -280,7 +284,10 @@ def apply_safe_autofixes(
             and idx not in toc_indices
         ):
             if not _TOC_LINE_TAIL_RE.search(text):
-                needs_break = any(s in text.lower() for s in cfg.section_break_sections)
+                _low = re.sub(r"[\s\xa0]+", " ", text).strip().lower().rstrip(":.;")
+                needs_break = _low in cfg.section_break_sections or any(
+                    _low.startswith(s) for s in cfg.section_break_sections
+                )
                 if not needs_break:
                     needs_break = bool(_CHAPTER_RE.match(text))
                 if needs_break:

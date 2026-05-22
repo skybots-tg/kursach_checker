@@ -62,7 +62,7 @@ _PARENT_RE = re.compile(
 )
 # Numbered/lettered child form: «Приложение 1», «Приложение А», …
 _CHILD_RE = re.compile(
-    r"^приложени[еяй]\s+[\dА-ЯЁA-Z][\)\.\s\u2014\u2013-]?",
+    r"^приложени[еяй][\s\u00a0\u202f]*[\dА-ЯЁA-Z][\)\.\s\u2014\u2013-]?",
     re.IGNORECASE,
 )
 _PARENT_TEXT = "ПРИЛОЖЕНИЯ"

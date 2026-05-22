@@ -1009,6 +1009,34 @@ def fix_page_break_before(paragraph, para_label: str, details: list[str]) -> boo
     details.append(f"{para_label}: \u0440\u0430\u0437\u0440\u044b\u0432 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u044b \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d")
     return True
 
+def remove_orphan_page_number(paragraph, para_label: str, details: list[str]) -> bool:
+    """Remove a standalone centered digit paragraph (orphaned page number).
+
+    These appear in student documents when manual page numbers are left
+    behind after copy-pasting or reformatting. Only removes when the text
+    is purely numeric (1-3 digits) and the paragraph is centered.
+    """
+    text = (paragraph.text or "").strip()
+    if not text or len(text) > 3 or not text.isdigit():
+        return False
+    from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+    pf = paragraph.paragraph_format
+    if pf.alignment not in (WD_PARAGRAPH_ALIGNMENT.CENTER, 1):
+        pPr = paragraph._element.find(qn("w:pPr"))
+        if pPr is not None:
+            jc = pPr.find(qn("w:jc"))
+            if jc is None or jc.get(qn("w:val")) != "center":
+                return False
+        else:
+            return False
+    parent = paragraph._element.getparent()
+    if parent is None:
+        return False
+    parent.remove(paragraph._element)
+    details.append(f"{para_label}: удалён осиротевший номер страницы «{text}»")
+    return True
+
+
 def _is_removable_empty_para(para) -> bool:
     if (para.text or "").strip():
         return False

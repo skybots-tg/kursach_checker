@@ -353,6 +353,12 @@ _CHAPTER_PAGE_BREAK_RE = re.compile(
 )
 
 
+_SUBSECTION_NUMBER_RE = re.compile(
+    r"^\s*\d+\.\d+",
+    re.UNICODE,
+)
+
+
 def _collect_toc_paragraph_elements(doc) -> set:
     """Return every ``<w:p>`` element that lives inside a TOC field.
 
@@ -539,8 +545,13 @@ def enforce_chapter_page_breaks(doc, details: list[str]) -> bool:
 
         level = _para_heading_level(para)
         matches_chapter = bool(_CHAPTER_PAGE_BREAK_RE.match(text))
-        if level != 1 and not matches_chapter:
-            continue
+        if not matches_chapter:
+            if level != 1:
+                continue
+            if _SUBSECTION_NUMBER_RE.match(text):
+                continue
+            if not (text == text.upper() and len(text) > 3):
+                continue
         if len(text) > 200:
             continue
 
