@@ -28,6 +28,7 @@ from app.rules_engine.autofix_helpers import (
     enforce_run_font,
     fix_caption_trailing_dot,
     fix_dashes_in_text,
+    fix_floating_images_wrapping,
     fix_font_color_runs,
     fix_font_color_styles,
     fix_italic_styles,
@@ -35,6 +36,7 @@ from app.rules_engine.autofix_helpers import (
     fix_markers_text,
     fix_numbering_bullets,
     fix_page_break_before,
+    force_all_tables_full_width,
     remove_orphan_page_number,
     fix_remove_highlight,
     fix_remove_italic,
@@ -534,6 +536,12 @@ def apply_safe_autofixes(
         changed = True
 
     if cfg.normalize_table_width and not skip_tables_safety and clamp_overflow_table_widths(doc, details):
+        changed = True
+
+    if cfg.normalize_table_width and force_all_tables_full_width(doc, details):
+        changed = True
+
+    if fix_floating_images_wrapping(doc, details):
         changed = True
 
     if cfg.generate_toc and insert_toc_field(doc, toc_indices, details):

@@ -1128,3 +1128,99 @@ def fix_section_margins(
     if changed:
         details.append(f"\u0421\u0435\u043a\u0446\u0438\u044f #{sec_idx + 1}: поля исправлены")
     return changed
+
+
+# ---------------------------------------------------------------------------
+# Force all tables to 100% text width
+# ---------------------------------------------------------------------------
+
+def force_all_tables_full_width(doc: Document, details: list[str]) -> bool:
+    """Set every table in the document to 100 % preferred width.
+
+    Students frequently paste tables from Excel or other tools at a fixed
+    pixel width that is much narrower than the text area. This makes the
+    tables appear as tiny blocks in the middle of the page. Forcing 100 %
+    width ensures they span the full content area.
+
+    Also scales ``<w:tblGrid>`` columns proportionally when their total
+    exceeds the content width so Word renders the grid correctly.
+    """
+    limit = min_content_width_twips(doc)
+    changed_any = False
+    seen: set[int] = set()
+    for table in doc.tables:
+        el = table._tbl
+        tid = id(el)
+        if tid in seen:
+            continue
+        seen.add(tid)
+        tp = el.tblPr if hasattr(el, "tblPr") else el.find(qn("w:tblPr"))
+        if tp is None:
+            tp = OxmlElement("w:tblPr")
+            el.insert(0, tp)
+
+        tw = tp.find(qn("w:tblW"))
+        already_full = (
+            tw is not None
+            and tw.get(qn("w:type")) == "pct"
+            and tw.get(qn("w:w")) == "5000"
+        )
+        if already_full:
+            continue
+
+        set_table_width_pct100(el)
+        changed_any = True
+
+        grid_total = _sum_grid_cols(el)
+        if grid_total > limit:
+            _scale_tbl_grid(el, limit)
+
+    if changed_any:
+        details.append("Таблицы: все таблицы растянуты на 100 % ширины текста")
+    return changed_any
+
+
+# ---------------------------------------------------------------------------
+# Fix floating images (wrapNone → wrapTopAndBottom)
+# ---------------------------------------------------------------------------
+
+_WP_NS = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
+_WP14_NS = "http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing"
+
+
+def fix_floating_images_wrapping(doc: Document, details: list[str]) -> bool:
+    """Convert ``wrapNone`` floating images to ``wrapTopAndBottom``.
+
+    Images placed with ``wrapNone`` (no text wrapping) overlap body text
+    because Word renders them on top of/behind text with no displacement.
+    ``wrapTopAndBottom`` pushes text above and below the image, which is
+    the expected behaviour for figures in academic documents.
+
+    The replacement element is inserted at the same position in the
+    ``<wp:anchor>`` child list to preserve the schema-mandated order
+    (wrapping must precede ``<wp:docPr>``).
+    """
+    body = doc.element.body
+    anchor_tag = f"{{{_WP_NS}}}anchor"
+    wrap_none_tag = f"{{{_WP_NS}}}wrapNone"
+    wrap_ttb_tag = f"{{{_WP_NS}}}wrapTopAndBottom"
+
+    fixed = 0
+    for anchor in body.iter(anchor_tag):
+        wrap_none = anchor.find(wrap_none_tag)
+        if wrap_none is None:
+            continue
+        pos = list(anchor).index(wrap_none)
+        anchor.remove(wrap_none)
+        wrap_ttb = etree.Element(wrap_ttb_tag)
+        wrap_ttb.set("distT", "0")
+        wrap_ttb.set("distB", "0")
+        anchor.insert(pos, wrap_ttb)
+        fixed += 1
+
+    if fixed:
+        details.append(
+            f"Рисунки: {fixed} плавающих изображений переведены "
+            f"в режим «сверху и снизу» (убрано наложение на текст)"
+        )
+    return fixed > 0

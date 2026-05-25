@@ -1078,8 +1078,87 @@ def _find_intro_paragraph(doc):
     return None
 
 
+def _remove_manual_entries_after_auto_toc(doc, details: list[str]) -> bool:
+    """Remove manual TOC entries that sit as regular ``<w:p>`` right after
+    an auto-TOC ``<w:sdt>`` block.
+
+    Common scenario: the document has a properly formed auto-TOC inside
+    an SDT AND a second copy of all entries as plain body paragraphs
+    right below the SDT — producing two visually identical tables of
+    contents glued together.
+    """
+    body = doc.element.body
+    p_tag = qn("w:p")
+    sdt_tag = qn("w:sdt")
+
+    toc_sdt = None
+    for el in body:
+        if el.tag == sdt_tag and _is_toc_sdt(el):
+            toc_sdt = el
+            break
+    if toc_sdt is None:
+        return False
+
+    to_remove: list = []
+    cur = toc_sdt.getnext()
+    blanks: list = []
+    while cur is not None:
+        if cur.tag != p_tag:
+            break
+        text = "".join((t.text or "") for t in cur.iter(qn("w:t"))).strip()
+        if not text:
+            blanks.append(cur)
+            cur = cur.getnext()
+            continue
+        pPr = cur.find(qn("w:pPr"))
+        sval = ""
+        if pPr is not None:
+            ps = pPr.find(qn("w:pStyle"))
+            if ps is not None:
+                sval = (ps.get(qn("w:val")) or "").lower()
+        if sval.startswith("heading") or "заголов" in sval:
+            break
+        if pPr is not None and pPr.find(qn("w:outlineLvl")) is not None:
+            try:
+                if int(pPr.find(qn("w:outlineLvl")).get(qn("w:val"), "9")) < 9:
+                    break
+            except (TypeError, ValueError):
+                pass
+        if pPr is not None and pPr.find(qn("w:pageBreakBefore")) is not None:
+            break
+        if _looks_like_toc_line(text):
+            to_remove.extend(blanks)
+            blanks.clear()
+            to_remove.append(cur)
+            cur = cur.getnext()
+            continue
+        low = re.sub(r"[\s\xa0]+", " ", text).strip().lower().rstrip(":.;")
+        if low in KNOWN_SECTION_TITLES and len(text) < 100:
+            to_remove.extend(blanks)
+            blanks.clear()
+            to_remove.append(cur)
+            cur = cur.getnext()
+            continue
+        break
+
+    for el in to_remove:
+        el_pPr = el.find(qn("w:pPr"))
+        if el_pPr is not None and el_pPr.find(qn("w:sectPr")) is not None:
+            continue
+        if el.getparent() is not None:
+            el.getparent().remove(el)
+
+    if to_remove:
+        details.append(
+            f"Оглавление: удалено {len(to_remove)} дублирующих записей "
+            f"после авто-TOC SDT"
+        )
+    return len(to_remove) > 0
+
+
 def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
     if _has_auto_toc(doc):
+        _remove_manual_entries_after_auto_toc(doc, details)
         details.append("Оглавление: сохранено существующее автооглавление (поле TOC)")
         return False
 
