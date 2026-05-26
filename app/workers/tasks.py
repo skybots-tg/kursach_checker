@@ -195,15 +195,22 @@ async def run_followups_cron(ctx: dict) -> dict:
     return {"sent": sent}
 
 
+async def process_broadcast_task(ctx: dict, broadcast_id: int, messages: list[dict], files: list[dict], telegram_ids: list[int]) -> dict:
+    """Arq job: actually send a broadcast (long-running, separate from cron)."""
+    from app.integrations.telegram_broadcast import run_broadcast
+    await run_broadcast(broadcast_id, messages, files, telegram_ids)
+    return {"broadcast_id": broadcast_id}
+
+
 async def send_scheduled_broadcasts_cron(ctx: dict) -> dict:
-    """Check for scheduled broadcasts that are due and send them."""
+    """Check for scheduled broadcasts that are due and enqueue sending jobs."""
     from sqlalchemy import select as sa_select
 
     from app.models import Broadcast, BroadcastFile, BroadcastMessage, BroadcastStatus
     from app.services.broadcast_segments import get_segment_user_ids
 
     now = datetime.utcnow()
-    sent_count = 0
+    enqueued = 0
 
     async with SessionLocal() as db:
         rows = await db.scalars(
@@ -259,31 +266,37 @@ async def send_scheduled_broadcasts_cron(ctx: dict) -> dict:
                 b.failed_count = 0
                 await db.commit()
 
-                from app.integrations.telegram_broadcast import run_broadcast
-                await run_broadcast(b.id, messages_data, files_data, telegram_ids)
-                sent_count += 1
+                redis = await create_pool(_redis_settings)
+                try:
+                    await redis.enqueue_job(
+                        "process_broadcast_task",
+                        b.id, messages_data, files_data, telegram_ids,
+                    )
+                finally:
+                    await redis.close()
+                enqueued += 1
             except Exception:
-                logger.exception("Failed to send scheduled broadcast %d", b.id)
+                logger.exception("Failed to enqueue scheduled broadcast %d", b.id)
                 b.status = BroadcastStatus.failed
                 await db.commit()
 
-    if sent_count:
-        logger.info("Scheduled broadcasts cron: sent %d broadcasts", sent_count)
-    return {"sent": sent_count}
+    if enqueued:
+        logger.info("Scheduled broadcasts cron: enqueued %d broadcasts", enqueued)
+    return {"enqueued": enqueued}
 
 
 _redis_settings = RedisSettings.from_dsn(settings.redis_url)
 
 
 class WorkerSettings:
-    functions = [process_check_task]
+    functions = [process_check_task, process_broadcast_task]
     cron_jobs = [
         cron(run_followups_cron, minute=None, timeout=120),
-        cron(send_scheduled_broadcasts_cron, minute=None, timeout=300),
+        cron(send_scheduled_broadcasts_cron, minute=None, timeout=60),
     ]
     redis_settings = _redis_settings
     max_tries = 1
-    job_timeout = 300
+    job_timeout = 1800
 
 
 async def enqueue_check(check_id: int) -> None:
