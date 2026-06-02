@@ -55,4 +55,13 @@ _run_*.py
 _take_*.py
 _word_com_checker.py
 
-.cursor/*
+.cursor/
+
+# Repo-root Word/debug session artifacts (one-off scripts, screenshots, repro docs)
+/_*.py
+/_*.ps1
+/_*.png
+/_*.txt
+/_*.docx
+/_customer_word_check/
+/_test_chat_export/
