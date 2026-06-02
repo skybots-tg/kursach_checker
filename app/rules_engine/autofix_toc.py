@@ -650,13 +650,34 @@ def _scan_manual_toc_block(
                 break
             break
         # A standalone known section title without a page-number tail that
-        # appears as the very first "entry" is almost certainly the body
-        # heading (e.g. "ВВЕДЕНИЕ" right after "Содержание"), not a TOC line.
+        # appears as the very first "entry" is *usually* the body heading
+        # (e.g. "ВВЕДЕНИЕ" glued right after "Содержание" with no real TOC
+        # list), not a TOC line. But some students type a genuine manual
+        # TOC whose entries simply lack page numbers — its first line is
+        # «Введение» too. Distinguish the two by peeking at the next
+        # non-blank paragraph: if it also looks like a TOC entry (and is
+        # not itself a real, heading-styled body title), this is a real
+        # TOC and we keep scanning; otherwise treat «Введение» as the body
+        # heading and stop.
         _low_scan = re.sub(r"[\s\xa0]+", " ", text).strip().lower().rstrip(":.;")
         if (_low_scan in KNOWN_SECTION_TITLES
                 and not TOC_LINE_TAIL_RE.search(text)
                 and entries_seen == 0):
-            break
+            look = offset + 1
+            next_is_toc_list = False
+            while look < len(paragraphs):
+                nxt_para = paragraphs[look]
+                nxt_text = (nxt_para.text or "").strip()
+                if not nxt_text:
+                    look += 1
+                    continue
+                next_is_toc_list = (
+                    _looks_like_toc_line(nxt_text)
+                    and not _is_strong_toc_break(nxt_para)
+                )
+                break
+            if not next_is_toc_list:
+                break
         norm = _normalize_for_dup(text)
         if norm and norm in seen_norm:
             # Same title appeared earlier in the TOC list → this is the
