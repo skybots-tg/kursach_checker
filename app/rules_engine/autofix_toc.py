@@ -599,13 +599,22 @@ def _is_strong_toc_break(para) -> bool:
 def _normalize_for_dup(text: str) -> str:
     """Collapse whitespace + lowercase + strip trailing punctuation/numbers
     so that ``"Введение"`` and the body heading ``"ВВЕДЕНИЕ"`` (or
-    ``"Введение  3"``) compare equal. Used to detect the moment when the
-    manual TOC block ends and the body starts repeating its own titles."""
-    base = re.sub(r"\s+", " ", text).strip().lower()
-    base = re.sub(r"[.\u2026]+\s*\d+\s*$", "", base)  # «… 12» or «....12»
-    base = re.sub(r"(?:\.\s){3,}\d*\s*$", "", base)   # «. . . 12»
-    base = re.sub(r"\s{2,}\d+\s*$", "", base)         # «  12»
-    base = re.sub(r"\t+\d+\s*$", "", base)
+    ``"Введение\\t3"`` / ``"Введение  3"``) compare equal. Used to detect the
+    moment when the manual TOC block ends and the body starts repeating its
+    own titles.
+
+    The page-number tail must be stripped BEFORE collapsing internal
+    whitespace — otherwise ``"Введение\\t3"`` would first become
+    ``"введение 3"`` (tab → single space) and neither the ``\\t+\\d+`` nor the
+    ``\\s{2,}\\d+`` tail pattern would match, leaving ``"введение 3"`` which
+    never equals the body heading ``"введение"``. That mismatch made the
+    manual-TOC scanner swallow the real body «Введение» heading and delete it.
+    """
+    base = text.strip().lower()
+    base = re.sub(r"[.\u2026]+\s*\d+\s*$", "", base)   # «… 12» or «....12»
+    base = re.sub(r"(?:\.\s){3,}\d*\s*$", "", base)    # «. . . 12»
+    base = re.sub(r"[\t\u00a0 ]+\d+\s*$", "", base)    # «\t12» / «  12» / nbsp+num
+    base = re.sub(r"\s+", " ", base).strip()
     base = base.rstrip(":.;\u2014\u2013\u2026.- ")
     return base
 
@@ -1177,7 +1186,9 @@ def _remove_manual_entries_after_auto_toc(doc, details: list[str]) -> bool:
     return len(to_remove) > 0
 
 
-def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
+def insert_toc_field(
+    doc, toc_indices: set[int], details: list[str], body_start: int = 0,
+) -> bool:
     if _has_auto_toc(doc):
         _remove_manual_entries_after_auto_toc(doc, details)
         details.append("Оглавление: сохранено существующее автооглавление (поле TOC)")
@@ -1227,6 +1238,25 @@ def insert_toc_field(doc, toc_indices: set[int], details: list[str]) -> bool:
             details.append("Оглавление: создан заголовок «Содержание» (по центру)")
             _insert_toc_after(heading_p, doc, details)
             return True
+
+    # Last resort: no «Содержание»/«Введение» anchor and no heading-styled
+    # paragraph. Only create a TOC when the document actually has headings
+    # to list — otherwise we'd produce an empty «Содержание / Обновите
+    # оглавление» placeholder. Insert it AFTER the title page (before the
+    # first body paragraph), never at body position 0, so the title page
+    # is not pushed below the table of contents.
+    if not _collect_headings(doc):
+        return False
+
+    anchor_elem = None
+    if 0 < body_start < len(paragraphs):
+        anchor_elem = paragraphs[body_start]._element
+    if anchor_elem is not None:
+        heading_p = _build_toc_heading_paragraph("Содержание")
+        anchor_elem.addprevious(heading_p)
+        details.append("Оглавление: создан заголовок «Содержание» (по центру, после титульного листа)")
+        _insert_toc_after(heading_p, doc, details)
+        return True
 
     if len(body) > 0:
         heading_p = _build_toc_heading_paragraph("Содержание")

@@ -544,7 +544,7 @@ def apply_safe_autofixes(
     if fix_floating_images_wrapping(doc, details):
         changed = True
 
-    if cfg.generate_toc and insert_toc_field(doc, toc_indices, details):
+    if cfg.generate_toc and insert_toc_field(doc, toc_indices, details, body_start=body_start):
         changed = True
     if cfg.normalize_toc_heading and normalize_toc_heading_formatting(doc, details, cfg=cfg):
         changed = True
