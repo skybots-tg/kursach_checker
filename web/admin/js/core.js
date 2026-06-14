@@ -45,7 +45,13 @@ function registerPage(id, loader) {
 }
 
 function parseHash() {
-  const raw = location.hash.replace('#', '');
+  let raw = location.hash.replace('#', '');
+  let query = '';
+  const qIdx = raw.indexOf('?');
+  if (qIdx !== -1) {
+    query = raw.substring(qIdx + 1);
+    raw = raw.substring(0, qIdx);
+  }
   const slashIdx = raw.indexOf('/');
   let page, sub;
   if (slashIdx !== -1) {
@@ -56,7 +62,18 @@ function parseHash() {
     sub = null;
   }
   if (!page || !document.getElementById('page-' + page)) page = 'dashboard';
-  return { page, sub };
+  const args = {};
+  if (query) {
+    for (const part of query.split('&')) {
+      if (!part) continue;
+      const eq = part.indexOf('=');
+      const k = eq === -1 ? part : part.substring(0, eq);
+      const v = eq === -1 ? '' : part.substring(eq + 1);
+      try { args[decodeURIComponent(k)] = decodeURIComponent(v); }
+      catch (e) { args[k] = v; }
+    }
+  }
+  return { page, sub, args };
 }
 
 const entityHandlers = {};
@@ -84,7 +101,16 @@ async function navigateTo(pageId, sub, historyAction) {
   if (topTitle && link) topTitle.textContent = link.dataset.label || link.textContent.trim();
 
   const hasSub = sub != null && sub !== '';
-  const hash = hasSub ? '#' + pageId + '/' + sub : '#' + pageId;
+  let hash;
+  if (hasSub) {
+    hash = '#' + pageId + '/' + sub;
+  } else {
+    // Preserve a query string (e.g. ?page=3) when re-entering the SAME page
+    // so list pagination survives back-navigation and deep links.
+    const cur = location.hash || '';
+    const sameQuery = cur.indexOf('#' + pageId + '?') === 0 ? cur.substring(cur.indexOf('?')) : '';
+    hash = '#' + pageId + sameQuery;
+  }
   if (location.hash !== hash) {
     if (historyAction === 'push') history.pushState(null, '', hash);
     else if (historyAction === 'replace') history.replaceState(null, '', hash);

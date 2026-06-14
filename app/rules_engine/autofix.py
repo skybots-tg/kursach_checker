@@ -83,6 +83,7 @@ from app.rules_engine.autofix_whitespace import (
     normalize_source_line_spacing,
 )
 from app.rules_engine.autofix_page_setup import suppress_title_page_number
+from app.rules_engine.autofix_title_layout import fit_title_cover_to_page
 from app.rules_engine.checks_content import ALLOWED_CHARS_RE as _ALLOWED_CHARS_RE
 from app.rules_engine.autofix_para_classify import (
     collect_toc_heading_levels,
@@ -554,6 +555,9 @@ def apply_safe_autofixes(
         changed = True
 
     if suppress_title_page_number(doc, details):
+        changed = True
+
+    if fit_title_cover_to_page(doc, body_start, details):
         changed = True
 
     if cfg.fix_bibliography:

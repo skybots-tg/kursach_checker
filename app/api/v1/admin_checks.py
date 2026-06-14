@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.admin_deps import get_current_admin
@@ -11,6 +12,33 @@ from app.models import AdminUser, Check, CheckWorkerLog, File, Gost, TemplateVer
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+@router.get("/files/{file_id}/download")
+async def admin_download_file(
+    file_id: int,
+    current_admin: AdminUser = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> FileResponse:
+    """Download any check file from the admin panel.
+
+    The public ``/api/files/{id}/download`` endpoint authorises by the
+    file's owner (user token), so an admin token can never pass its
+    ownership check. The admin panel fetches files through this route
+    instead, gated only by admin auth.
+    """
+    _ = current_admin
+    file_obj = await db.get(File, file_id)
+    if not file_obj:
+        raise HTTPException(status_code=404, detail="Файл не найден")
+    path = Path(file_obj.storage_path)
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Файл отсутствует на диске")
+    return FileResponse(
+        path=path,
+        filename=file_obj.original_name,
+        media_type=file_obj.mime or "application/octet-stream",
+    )
 
 
 @router.get("")

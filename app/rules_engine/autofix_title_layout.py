@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 import re
 
+from docx.oxml.ns import qn
 from docx.shared import Emu, Pt
 
 logger = logging.getLogger(__name__)
@@ -229,6 +230,163 @@ def _usable_page_inner_pt(doc) -> float:
         - _length_like_to_pt(sec.top_margin)
         - _length_like_to_pt(sec.bottom_margin)
     )
+
+
+def _text_width_pt(doc) -> float:
+    sec = doc.sections[0]
+    return (
+        _length_like_to_pt(sec.page_width)
+        - _length_like_to_pt(sec.left_margin)
+        - _length_like_to_pt(sec.right_margin)
+    )
+
+
+def _para_has_page_break(p) -> bool:
+    pPr = p._element.find(qn("w:pPr"))
+    if pPr is not None and pPr.find(qn("w:pageBreakBefore")) is not None:
+        return True
+    for br in p._element.iter(qn("w:br")):
+        if br.get(qn("w:type")) == "page":
+            return True
+    return False
+
+
+def _cover_has_table(doc, fp_end: int) -> bool:
+    """True if a ``<w:tbl>`` appears before the last cover paragraph.
+
+    Table-based covers (info blocks in a borderless table) have their own
+    geometry that a paragraph-height estimate cannot model, so we leave
+    them untouched.
+    """
+    if fp_end <= 0:
+        return False
+    end_elem = doc.paragraphs[fp_end - 1]._element
+    for child in doc.element.body:
+        if child is end_elem:
+            return False
+        if child.tag == qn("w:tbl"):
+            return True
+    return False
+
+
+def _para_font_pt(p) -> float:
+    for r in p.runs:
+        if r.font.size:
+            return float(r.font.size.pt)
+    return 14.0
+
+
+def _para_line_mult(p) -> float:
+    ls = p.paragraph_format.line_spacing
+    return float(ls) if isinstance(ls, float) else 1.5
+
+
+def _para_height_pt(p, text_width_pt: float, *, empty_override: float | None = None) -> float:
+    """Rough rendered height of a paragraph in points.
+
+    Crucially counts EMPTY paragraphs (one blank line) — the original
+    ``_rough_title_content_pt`` skipped them, which is why title covers
+    stuffed with blank lines were never detected as overflowing.
+    """
+    pf = p.paragraph_format
+    h = _length_like_to_pt(pf.space_before) + _length_like_to_pt(pf.space_after)
+    fs = _para_font_pt(p)
+    mult = _para_line_mult(p)
+    text = p.text or ""
+    if not text.strip():
+        m = empty_override if empty_override is not None else mult
+        return h + fs * m * 1.15
+    lines = 0
+    for seg in text.split("\n"):
+        seg = seg.strip()
+        if not seg:
+            lines += 1
+            continue
+        chars_per_line = max(1, int(text_width_pt / (fs * 0.48)))
+        lines += max(1, -(-len(seg) // chars_per_line))
+    return h + lines * fs * mult * 1.15
+
+
+def fit_title_cover_to_page(doc, body_start: int, details: list[str]) -> bool:
+    """Compress the title cover so its last line (city/year) stays on page 1.
+
+    Many covers use a stack of empty 1.5-spaced paragraphs as vertical
+    spacing; the total exceeds one page and Word pushes «Город, 2026» onto
+    a second sheet. We measure the cover height (including blank lines and
+    text wrapping) and, only when it overflows, scale the empty-paragraph
+    spacing down proportionally so everything fits on a single page. Text
+    paragraphs and table-based covers are never modified.
+    """
+    if body_start < 4:
+        return False
+    paras = doc.paragraphs
+
+    # First-page region ends at the first hard page break inside the front
+    # matter (so multi-page front matter — задание/реферат — is not forced
+    # onto one sheet), otherwise at the body start.
+    fp_end = body_start
+    for i in range(1, body_start):
+        if _para_has_page_break(paras[i]):
+            fp_end = i
+            break
+    if fp_end < 4 or _cover_has_table(doc, fp_end):
+        return False
+
+    last_ne = -1
+    for i in range(fp_end):
+        if (paras[i].text or "").strip():
+            last_ne = i
+    if last_ne < 4:
+        return False
+
+    usable = _usable_page_inner_pt(doc)
+    tw = _text_width_pt(doc)
+    region = range(last_ne + 1)
+
+    est = sum(_para_height_pt(paras[i], tw) for i in region)
+    if est <= usable * 1.02:
+        return False  # cover already fits — leave the title exactly as is
+
+    text_pt = 0.0
+    empty_pt = 0.0
+    empties: list = []
+    for i in region:
+        p = paras[i]
+        if (p.text or "").strip():
+            text_pt += _para_height_pt(p, tw)
+        else:
+            empty_pt += _para_height_pt(p, tw)
+            empties.append(p)
+    if not empties or empty_pt <= 0:
+        return False
+
+    target = usable * 0.96
+    avail_empty = target - text_pt
+    k = max(0.0, avail_empty / empty_pt)
+    if k >= 0.999:
+        return False  # text alone already needs all the room; nothing to gain
+
+    changed = False
+    for p in empties:
+        pf = p.paragraph_format
+        if pf.space_before is not None and _length_like_to_pt(pf.space_before) != 0:
+            pf.space_before = Pt(0)
+            changed = True
+        if pf.space_after is not None and _length_like_to_pt(pf.space_after) != 0:
+            pf.space_after = Pt(0)
+            changed = True
+        cur_mult = _para_line_mult(p)
+        new_mult = round(max(0.6, cur_mult * k), 2)
+        if abs(cur_mult - new_mult) > 0.02:
+            pf.line_spacing = new_mult
+            changed = True
+
+    if changed:
+        details.append(
+            "Титульный лист: уплотнены пустые интервалы, чтобы город/год "
+            "не уходили на вторую страницу"
+        )
+    return changed
 
 
 def distribute_title_page_vertical_blocks(

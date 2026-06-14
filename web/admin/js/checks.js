@@ -14,7 +14,10 @@ async function loadChecks() {
       api('GET', '/admin/checks/stats/summary'),
     ]);
     _checksData = list;
-    _checksPage = 1;
+    // Restore the page number from the URL (#checks?page=N) so opening a
+    // check and closing its modal returns to the same page instead of 1.
+    const { args } = parseHash();
+    _checksPage = Math.max(1, parseInt(args.page, 10) || 1);
     renderChecks(stats);
   } catch (err) {
     page.innerHTML = `<div class="alert error">${escHtml(err.message)}</div>`;
@@ -81,7 +84,12 @@ function renderChecksTable() {
     : emptyHtml('Нет проверок', 'Проверки появятся после первого запуска');
 }
 
-function checksGoPage(p) { _checksPage = p; renderChecksTable(); }
+function checksGoPage(p) {
+  _checksPage = p;
+  const h = p > 1 ? ('#checks?page=' + p) : '#checks';
+  if (location.hash !== h) history.replaceState(null, '', h);
+  renderChecksTable();
+}
 
 function checksTable(list) {
   return `<div class="card" style="padding:0;overflow:hidden">
@@ -127,6 +135,7 @@ async function filterChecks() {
     ]);
     _checksData = list;
     _checksPage = 1;
+    if (location.hash !== '#checks') history.replaceState(null, '', '#checks');
     renderChecks(stats);
     if (status) setVal('checks-filter', status);
   } catch (err) {
@@ -186,7 +195,7 @@ async function viewCheck(id) {
 
     const fileRow = (label, f) => f
       ? `<div><strong>${label}:</strong> ${escHtml(f.name)} (${(f.size / 1024).toFixed(1)} KB)
-          <a href="/api/files/${f.id}/download" class="btn btn-sm btn-secondary" style="margin-left:8px">${iconSvg('download', 12)} Скачать</a></div>`
+          <button type="button" onclick="downloadCheckFile(${f.id}, '${encodeURIComponent(f.name).replace(/'/g, '%27')}')" class="btn btn-sm btn-secondary" style="margin-left:8px">${iconSvg('download', 12)} Скачать</button></div>`
       : `<div><strong>${label}:</strong> —</div>`;
 
     const reportSection = rs ? `
@@ -271,6 +280,29 @@ async function viewCheck(id) {
 
 registerEntityHandler('checks', (sub) => viewCheck(parseInt(sub)));
 
+async function downloadCheckFile(id, encName) {
+  const name = decodeURIComponent(encName || '');
+  try {
+    const res = await fetch(API + '/admin/checks/files/' + id + '/download', {
+      headers: { Authorization: 'Bearer ' + getToken() },
+    });
+    if (res.status === 401) { clearToken(); showLoginModal(); throw new Error('Требуется авторизация'); }
+    if (!res.ok) throw new Error((await res.text()) || res.statusText);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name || 'file';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  } catch (err) {
+    toast('Ошибка скачивания: ' + err.message, 'error');
+  }
+}
+
 window.checksGoPage = checksGoPage;
 window.filterChecks = filterChecks;
 window.viewCheck = viewCheck;
+window.downloadCheckFile = downloadCheckFile;

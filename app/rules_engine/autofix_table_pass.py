@@ -12,6 +12,7 @@ from app.rules_engine.autofix_helpers import (
     fix_font_color_runs,
     fix_list_indent,
     fix_markers_text,
+    fix_remove_bold,
     fix_remove_italic,
     fix_strip_markdown_artifacts,
     fix_table_cell_spacing,
@@ -71,6 +72,10 @@ def process_table_cells(
                 t_touched = True
         if cfg.remove_italic:
             if fix_remove_italic(t_para, t_label, details):
+                changed = True
+                t_touched = True
+        if cfg.remove_table_bold:
+            if fix_remove_bold(t_para, t_label, details):
                 changed = True
                 t_touched = True
         if cfg.remove_caption_trailing_dot:

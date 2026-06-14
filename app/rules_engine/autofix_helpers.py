@@ -247,6 +247,54 @@ def fix_remove_italic(paragraph, para_label: str, details: list[str]) -> bool:
         details.append(f"{para_label}: \u043a\u0443\u0440\u0441\u0438\u0432 \u0443\u0431\u0440\u0430\u043d")
     return changed
 
+def fix_remove_bold(paragraph, para_label: str, details: list[str]) -> bool:
+    """Force every text run in *paragraph* to non-bold.
+
+    Used for table cells per the customer rule «внутри таблицы текст не
+    жирный». We stamp an explicit ``<w:b w:val="0"/>`` / ``<w:bCs w:val="0"/>``
+    rather than removing the element so bold inherited from a table or
+    paragraph style is overridden too (a bare removal would leave it).
+    """
+    from docx.oxml import OxmlElement
+    p_elem = paragraph._element
+    changed = False
+
+    def _force_not_bold(rPr) -> bool:
+        ch = False
+        for tag in ("w:b", "w:bCs"):
+            el = rPr.find(qn(tag))
+            if el is None:
+                el = OxmlElement(tag)
+                el.set(qn("w:val"), "0")
+                rPr.append(el)
+                ch = True
+            elif (el.get(qn("w:val")) or "true") not in ("0", "false", "none"):
+                el.set(qn("w:val"), "0")
+                ch = True
+        return ch
+
+    pPr = p_elem.find(qn("w:pPr"))
+    if pPr is not None:
+        rPr_default = pPr.find(qn("w:rPr"))
+        if rPr_default is not None and _force_not_bold(rPr_default):
+            changed = True
+
+    for r_elem in p_elem.iter(qn("w:r")):
+        # Only touch runs that actually carry text.
+        if r_elem.find(qn("w:t")) is None:
+            continue
+        rPr = r_elem.find(qn("w:rPr"))
+        if rPr is None:
+            rPr = OxmlElement("w:rPr")
+            r_elem.insert(0, rPr)
+        if _force_not_bold(rPr):
+            changed = True
+
+    if changed:
+        details.append(f"{para_label}: жирный убран")
+    return changed
+
+
 def fix_list_indent(paragraph, para_label: str, details: list[str],
                     first_line_indent_mm: float = 12.5) -> bool:
     """Normalize list paragraph indents: set first_line_indent to the body

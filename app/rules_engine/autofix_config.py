@@ -19,6 +19,7 @@ class AutoFixConfig:
     target_font_color: str
     remove_italic: bool
     remove_underline: bool
+    remove_table_bold: bool
     normalize_list_indent: bool
     normalize_list_markers: bool
     list_marker_char: str
@@ -98,6 +99,7 @@ class AutoFixConfig:
             target_font_color=str(p.get("target_font_color", ad.get("target_font_color", "000000"))),
             remove_italic=_b("remove_italic"),
             remove_underline=_b("remove_underline"),
+            remove_table_bold=_b("remove_table_bold"),
             normalize_list_indent=_b("normalize_list_indent"),
             normalize_list_markers=_b("normalize_list_markers"),
             list_marker_char=str(p.get("list_marker_char", ad.get("list_marker_char", "\u2013"))),

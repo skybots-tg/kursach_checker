@@ -2,8 +2,8 @@
 
 Rules applied:
     * «Рисунок N — …» caption belongs **below** the figure and is centered.
-    * «Таблица N — …» caption belongs **above** the table, left-aligned,
-      without a red-line indent.
+    * «Таблица N — …» caption belongs **above** the table, justified
+      («по ширине»), without a red-line indent.
 
 If the caption already sits in the right place we only normalise the
 alignment/indent. If the caption is on the wrong side of its target
@@ -166,11 +166,17 @@ def _format_table_caption(para) -> bool:
     """
     from docx.oxml import OxmlElement
     changed = False
-    if safe_alignment(para) not in (WD_PARAGRAPH_ALIGNMENT.LEFT, None):
-        para.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    # Customer update: table caption must be justified («по ширине»), not
+    # left-aligned. A single-line caption renders identically either way;
+    # a wrapped caption stretches the first line to the page width.
+    if safe_alignment(para) != WD_PARAGRAPH_ALIGNMENT.JUSTIFY:
+        para.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
         changed = True
     pf = para.paragraph_format
-    if pf.first_line_indent is not None and int(pf.first_line_indent) != 0:
+    # Force the red-line/left indent to exactly 0. The previous version only
+    # touched explicit non-zero indents and left style-inherited ones in
+    # place, which kept the «лишний отступ» the customer flagged.
+    if pf.first_line_indent is None or int(pf.first_line_indent) != 0:
         pf.first_line_indent = Mm(0)
         changed = True
     if pf.left_indent is not None and int(pf.left_indent) != 0:
@@ -427,7 +433,7 @@ def fix_caption_positions(doc, details: list[str]) -> bool:
     if tbl_moved:
         details.append(f"Подписи: {tbl_moved} подпись(ей) «Таблица» перемещено над таблицу")
     if tbl_formatted:
-        details.append(f"Подписи: {tbl_formatted} подпись(ей) «Таблица» выровнено по левому краю")
+        details.append(f"Подписи: {tbl_formatted} подпись(ей) «Таблица» выровнено по ширине")
     return changed
 
 

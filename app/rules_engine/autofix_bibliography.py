@@ -114,6 +114,7 @@ _SUBSECTION_TITLE_RE = re.compile(
     r"|стат\w+\s+в\s+период\w+\s+издан\w+"
     r"|диссертац\w+(?:\s+и\s+автореферат\w+)?"
     r"|автореферат\w+"
+    r"|иностранн\w+\s+(?:источник\w+|литератур\w+|издани\w+)"
     r"|иные?\s+(?:источник\w+|документ\w+|материал\w+|публикац\w+)"
     r"|прочие?\s+(?:источник\w+|документ\w+|материал\w+)"
     r"|дополнительн\w+\s+(?:источник\w+|литератур\w+)"
@@ -144,6 +145,29 @@ def _is_subsection_heading(text: str) -> bool:
     if _NUMBERED_ENTRY_RE.match(text):
         return False
     return bool(_SUBSECTION_TITLE_RE.match(text.strip()))
+
+def _bib_mostly_numbered(paragraphs, start: int, end: int) -> bool:
+    """True if at least half of the real entries already carry a number.
+
+    When a student's bibliography has NO numbering (one reference per
+    paragraph, no «1. 2. 3.» prefixes), the entry builder must treat each
+    paragraph as a separate entry. Otherwise the «numbered head + plain
+    continuation» heuristic glues the whole list into a single entry and
+    only one number ends up in the output (the bug from check #2255).
+    """
+    total = 0
+    numbered = 0
+    for idx in range(start, end):
+        text = (paragraphs[idx].text or "").strip()
+        if len(text) < 5 or _is_subsection_heading(text):
+            continue
+        total += 1
+        if _NUMBERED_ENTRY_RE.match(text):
+            numbered += 1
+    if total == 0:
+        return False
+    return numbered / total >= 0.5
+
 
 _RU_ALPHABET = (
     "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
@@ -355,6 +379,7 @@ def _build_grouped_entries(
     (kept bold, no numbering).
     """
     sub_set = set(subsection_indices)
+    mostly_numbered = _bib_mostly_numbered(paragraphs, start, end)
     groups: list[dict] = [{"subsection_idx": None, "entries": []}]
     current = groups[0]
 
@@ -366,18 +391,23 @@ def _build_grouped_entries(
             current = {"subsection_idx": idx, "entries": []}
             groups.append(current)
             continue
-        if _NUMBERED_ENTRY_RE.match(text):
-            current["entries"].append({"idxs": [idx], "text": text})
+        if len(text) < 5:
+            continue
+        # In a numbered list, a paragraph without its own number is a
+        # wrapped continuation of the previous entry. In an un-numbered
+        # list every paragraph is a standalone reference.
+        is_continuation = (
+            mostly_numbered
+            and not _NUMBERED_ENTRY_RE.match(text)
+            and bool(current["entries"])
+        )
+        if is_continuation:
+            current["entries"][-1]["idxs"].append(idx)
+            current["entries"][-1]["text"] = (
+                current["entries"][-1]["text"] + " " + text
+            )
         else:
-            if len(text) < 5:
-                continue
-            if current["entries"]:
-                current["entries"][-1]["idxs"].append(idx)
-                current["entries"][-1]["text"] = (
-                    current["entries"][-1]["text"] + " " + text
-                )
-            else:
-                current["entries"].append({"idxs": [idx], "text": text})
+            current["entries"].append({"idxs": [idx], "text": text})
 
     # Drop the leading "no subsection" group if it contains no entries
     if not groups[0]["entries"] and len(groups) > 1:
@@ -441,19 +471,22 @@ def _fix_flat_alphabetical(
 ) -> bool:
     paragraphs = doc.paragraphs
 
+    mostly_numbered = _bib_mostly_numbered(paragraphs, start, end)
     entries: list[dict] = []
     for idx in range(start, end):
         text = (paragraphs[idx].text or "").strip()
-        if not text:
+        if not text or len(text) < 5:
             continue
-        if _NUMBERED_ENTRY_RE.match(text):
-            entries.append({"idxs": [idx], "text": text})
+        is_continuation = (
+            mostly_numbered
+            and not _NUMBERED_ENTRY_RE.match(text)
+            and bool(entries)
+        )
+        if is_continuation:
+            entries[-1]["idxs"].append(idx)
+            entries[-1]["text"] = entries[-1]["text"] + " " + text
         else:
-            if len(text) < 5:
-                continue
-            if entries:
-                entries[-1]["idxs"].append(idx)
-                entries[-1]["text"] = entries[-1]["text"] + " " + text
+            entries.append({"idxs": [idx], "text": text})
 
     # Fallback: when the bibliography is completely un-numbered (typical
     # student manuscript that just lists references one per paragraph
@@ -548,22 +581,23 @@ def _fix_flat_alphabetical(
 
     _, s2, e2 = rng2
 
+    re_mostly_numbered = _bib_mostly_numbered(refreshed, s2, e2)
     re_entries: list[dict] = []
     for idx in range(s2, e2):
         text = (refreshed[idx].text or "").strip()
-        if not text:
+        if not text or len(text) < 5:
             continue
         if _is_subsection_heading(text):
             continue
-        if _NUMBERED_ENTRY_RE.match(text):
-            re_entries.append({"head": idx, "text": text})
+        is_continuation = (
+            re_mostly_numbered
+            and not _NUMBERED_ENTRY_RE.match(text)
+            and bool(re_entries)
+        )
+        if is_continuation:
+            re_entries[-1]["text"] += " " + text
         else:
-            if len(text) < 5:
-                continue
-            if re_entries:
-                re_entries[-1]["text"] += " " + text
-            else:
-                re_entries.append({"head": idx, "text": text})
+            re_entries.append({"head": idx, "text": text})
 
     if len(re_entries) < 2:
         re_entries = []
