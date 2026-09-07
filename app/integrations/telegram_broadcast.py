@@ -13,6 +13,7 @@ from aiogram.types import (
     InputMediaDocument,
     InputMediaPhoto,
     InputMediaVideo,
+    ReplyKeyboardMarkup,
 )
 from sqlalchemy import select
 
@@ -63,13 +64,31 @@ def _make_input_media(media_type: str, file_input: FSInputFile, caption: str | N
     return InputMediaDocument(**kwargs)
 
 
+async def _safe_main_keyboard() -> ReplyKeyboardMarkup | None:
+    """Собрать нижнее меню для рассылки; при ошибке — просто не прикреплять."""
+    from app.integrations.telegram_bot import build_main_keyboard
+
+    try:
+        return await build_main_keyboard()
+    except Exception:
+        logger.exception("Failed to build main keyboard for broadcast")
+        return None
+
+
 async def _send_to_user(
     bot: Bot,
     chat_id: int,
     messages: list[dict],
     files: list[dict],
+    menu_kb: ReplyKeyboardMarkup | None = None,
 ) -> bool:
-    """Send a complete broadcast to one user. Returns True on success."""
+    """Send a complete broadcast to one user. Returns True on success.
+
+    *menu_kb* — нижнее меню бота. Reply-клавиатура в Telegram привязана к
+    сообщению и пропадает вместе с ним, поэтому рассылка — удобный момент
+    вернуть меню тем, кто его потерял. Прикрепляем его к сообщениям, у
+    которых нет собственных inline-кнопок (одно сообщение — один markup).
+    """
     try:
         keyboard = None
         text = ""
@@ -79,6 +98,8 @@ async def _send_to_user(
             text = msg.get("text") or ""
             parse_mode = msg.get("parse_mode") if text else None
             keyboard = _build_keyboard(msg.get("buttons_json"))
+
+        markup = keyboard or menu_kb
 
         valid_files = [
             f for f in files
@@ -97,7 +118,7 @@ async def _send_to_user(
             await bot.send_media_group(chat_id, media=media_items)
             if keyboard:
                 btn_text = "\u200B"
-                await bot.send_message(chat_id, btn_text, reply_markup=keyboard)
+                await bot.send_message(chat_id, btn_text, reply_markup=markup)
             return True
 
         if len(valid_files) == 1:
@@ -107,23 +128,23 @@ async def _send_to_user(
             cap = text or None
             pm = parse_mode if cap else None
             if mt == "photo":
-                await bot.send_photo(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=keyboard)
+                await bot.send_photo(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=markup)
             elif mt == "video":
-                await bot.send_video(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=keyboard)
+                await bot.send_video(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=markup)
             elif mt == "animation":
-                await bot.send_animation(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=keyboard)
+                await bot.send_animation(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=markup)
             elif mt == "audio":
-                await bot.send_audio(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=keyboard)
+                await bot.send_audio(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=markup)
             elif mt == "video_note":
                 await bot.send_video_note(chat_id, fi)
                 if text:
-                    await bot.send_message(chat_id, text, parse_mode=parse_mode, reply_markup=keyboard)
+                    await bot.send_message(chat_id, text, parse_mode=parse_mode, reply_markup=markup)
             else:
-                await bot.send_document(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=keyboard)
+                await bot.send_document(chat_id, fi, caption=cap, parse_mode=pm, reply_markup=markup)
             return True
 
         if text:
-            await bot.send_message(chat_id, text, parse_mode=parse_mode, reply_markup=keyboard)
+            await bot.send_message(chat_id, text, parse_mode=parse_mode, reply_markup=markup)
             return True
 
         return False
@@ -159,10 +180,12 @@ async def run_broadcast(
                 users = list(await db.scalars(select(User)))
             tg_ids = [u.telegram_id for u in users]
 
+        menu_kb = await _safe_main_keyboard()
+
         sent = 0
         failed = 0
         for tg_id in tg_ids:
-            ok = await _send_to_user(bot, tg_id, messages, files)
+            ok = await _send_to_user(bot, tg_id, messages, files, menu_kb)
             if ok:
                 sent += 1
             else:
@@ -199,10 +222,12 @@ async def test_send_broadcast(
         return {"sent": 0, "failed": 0}
     bot = make_bot()
     try:
+        menu_kb = await _safe_main_keyboard()
+
         sent = 0
         failed = 0
         for tg_id in telegram_ids:
-            ok = await _send_to_user(bot, tg_id, messages, files)
+            ok = await _send_to_user(bot, tg_id, messages, files, menu_kb)
             sent += 1 if ok else 0
             failed += 0 if ok else 1
             await asyncio.sleep(0.05)

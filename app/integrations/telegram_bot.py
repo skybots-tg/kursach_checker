@@ -294,18 +294,11 @@ async def _send_upload_prompt(bot: Bot, chat_id: int, tg_user_id: int) -> None:
                 credits_value = balance.credits_available
 
     text = await get_text("check.upload_prompt", credits=credits_value)
-    kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="🏠 Главное меню", callback_data="nav_home")],
-        ]
-    )
+    # Вместо inline-кнопки «Главное меню» отдаём место нижнему меню: оно
+    # ведёт в те же разделы и остаётся на экране после следующего перехода.
+    kb = await build_main_keyboard()
     sent = await bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=kb)
     _track(chat_id, sent.message_id)
-
-    # Якорь reply-клавиатуры временно отключён.
-    # anchor_id = await _send_kb_anchor(bot, chat_id)
-    # if anchor_id is not None:
-    #     _track(chat_id, anchor_id)
 
 
 async def _handle_root_item_tap(
@@ -326,10 +319,10 @@ async def _handle_root_item_tap(
             chat_id, _root_item_label(item), reply_markup=link_kb,
         )
         _track(chat_id, sent.message_id)
-        # Якорь reply-клавиатуры временно отключён.
-        # anchor_id = await _send_kb_anchor(bot, chat_id)
-        # if anchor_id is not None:
-        #     _track(chat_id, anchor_id)
+        # Единственное сообщение занято inline-ссылкой — держим меню якорем.
+        anchor_id = await _send_kb_anchor(bot, chat_id)
+        if anchor_id is not None:
+            _track(chat_id, anchor_id)
         return
     await _navigate_to_item(bot, chat_id, item.id, tg_user_id=tg_user_id)
 
@@ -370,28 +363,36 @@ async def _navigate_to_item(
     if item_extra_buttons:
         inline_keyboard.extend(await build_extra_buttons(item_extra_buttons))
 
-    inline_keyboard.append(_nav_row(parent_id, depth))
-    keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
+    # У пункта верхнего уровня строка навигации ведёт «домой», то есть
+    # дублирует нижнее меню. Если других inline-кнопок на экране нет, не
+    # отправляем её вовсе: освободившееся место занимает reply-клавиатура,
+    # и меню перестаёт пропадать на пунктах с одним сообщением.
+    keyboard: InlineKeyboardMarkup | None = None
+    if inline_keyboard or parent_id is not None:
+        inline_keyboard.append(_nav_row(parent_id, depth))
+        keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
 
     main_kb = await build_main_keyboard()
-    sent_ids, _kb_attached = await send_content_messages(
+    sent_ids, kb_attached = await send_content_messages(
         bot, chat_id, menu_item_id, reply_markup=keyboard,
         tg_user_id=tg_user_id, reply_keyboard=main_kb,
     )
 
     if not sent_ids:
         sent = await bot.send_message(
-            chat_id, f"📋 {item_title}", reply_markup=keyboard,
+            chat_id, f"📋 {item_title}", reply_markup=keyboard or main_kb,
         )
         sent_ids.append(sent.message_id)
+        kb_attached = keyboard is None
 
-    # Якорь reply-клавиатуры временно отключён. Если main_kb не была
-    # прицеплена ни к одному из контентных сообщений (одиночное сообщение
-    # с inline), reply-меню пропадёт до следующего /start.
-    # if not _kb_attached:
-    #     anchor_id = await _send_kb_anchor(bot, chat_id, reply_kb=main_kb)
-    #     if anchor_id is not None:
-    #         sent_ids.append(anchor_id)
+    # Reply-клавиатура «живёт» вместе со своим сообщением, а при переходе мы
+    # удаляем предыдущий экран. Если прицепить её было некуда (одно
+    # сообщение и содержательные inline-кнопки — например, кнопки подписки),
+    # страхуемся якорем, иначе нижнее меню исчезнет до следующего /start.
+    if not kb_attached:
+        anchor_id = await _send_kb_anchor(bot, chat_id, reply_kb=main_kb)
+        if anchor_id is not None:
+            sent_ids.append(anchor_id)
 
     _track(chat_id, *sent_ids)
 

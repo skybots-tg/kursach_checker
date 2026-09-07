@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 from typing import Awaitable
 
@@ -28,6 +29,8 @@ from app.models import CreditsBalance, User
 from app.services import subscribe_bonus
 from app.services.bot_texts import get_text
 from app.services.subscribe_bonus import SubscribeOutcome
+
+logger = logging.getLogger(__name__)
 
 
 # Коллбэк для трекинга bot-сообщений (чтобы их можно было удалить позже).
@@ -115,8 +118,18 @@ async def handle_subscribe_check(
             await db.commit()
 
     text, parse_mode, retry_kb = await _format_outcome(outcome, new_balance)
+    # Если перепроверять подписку не нужно (бонус начислен), сообщение
+    # свободно от inline-кнопок — вешаем на него нижнее меню, чтобы оно
+    # точно осталось на экране.
+    markup = retry_kb
+    if markup is None:
+        from app.integrations.telegram_bot import build_main_keyboard
+        try:
+            markup = await build_main_keyboard()
+        except Exception:
+            logger.exception("Failed to build main keyboard for subscribe reply")
     sent = await bot.send_message(
-        chat_id, text, parse_mode=parse_mode, reply_markup=retry_kb,
+        chat_id, text, parse_mode=parse_mode, reply_markup=markup,
     )
     await _track(track, chat_id, sent.message_id)
 

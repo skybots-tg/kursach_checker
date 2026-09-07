@@ -219,6 +219,10 @@ async def send_content_messages(
     и оно успешно отправилось. Иначе ``reply_keyboard_attached=False``,
     и вызывающий сам решает, нужно ли отправить отдельный «якорь» с reply-
     клавиатурой.
+
+    Если *reply_markup* не задан (экран без inline-кнопок), reply-клавиатура
+    уходит на ПОСЛЕДНЕЕ сообщение — так меню остаётся видимым даже когда
+    в пункте всего одно сообщение.
     """
     sent_ids: list[int] = []
     reply_keyboard_attached = False
@@ -235,20 +239,25 @@ async def send_content_messages(
             return sent_ids, reply_keyboard_attached
 
         # Reply-клавиатуру можно повесить только на сообщение БЕЗ inline.
-        # У нас inline всегда уходит на последнее, поэтому подходящих
-        # «носителей» хватит, только когда сообщений >= 2.
-        attach_reply_idx = (
-            0 if reply_keyboard is not None and len(messages) >= 2 else -1
-        )
+        # Если inline на экране нет вообще, носителем становится последнее
+        # сообщение. Иначе inline занимает последнее, и клавиатуре остаётся
+        # первое — а значит, нужно как минимум два сообщения.
+        if reply_keyboard is None:
+            attach_reply_idx = -1
+        elif reply_markup is None:
+            attach_reply_idx = len(messages) - 1
+        elif len(messages) >= 2:
+            attach_reply_idx = 0
+        else:
+            attach_reply_idx = -1
 
         for idx, msg in enumerate(messages):
             is_last = idx == len(messages) - 1
-            if is_last:
-                markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | None = (
-                    reply_markup
-                )
-            elif idx == attach_reply_idx:
+            markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | None
+            if idx == attach_reply_idx:
                 markup = reply_keyboard
+            elif is_last:
+                markup = reply_markup
             else:
                 markup = None
 
